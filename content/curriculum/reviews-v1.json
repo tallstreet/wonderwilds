@@ -1,0 +1,335 @@
+{
+  "schemaVersion": "1.0",
+  "reviews": [
+    {
+      "skillId": "M01",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M02",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M03",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M04",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M05",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M06",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M07",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M08",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M09",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M10",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M11",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M12",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M13",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M14",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M15",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M16",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M17",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "M18",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E01",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E02",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E03",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E04",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E05",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E06",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E07",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E08",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E09",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E10",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E11",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E12",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E13",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E14",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    },
+    {
+      "skillId": "E15",
+      "status": "pending",
+      "reviewer": null,
+      "reviewDate": null,
+      "prerequisitesApproved": false,
+      "alignmentApproved": false,
+      "itemsApproved": false,
+      "accessibilityApproved": false
+    }
+  ]
+}

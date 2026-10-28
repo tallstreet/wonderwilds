@@ -1,0 +1,1368 @@
+[
+  {
+    "name": "GameCommand valid",
+    "contract": "GameCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "cmd-1",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "attempt",
+        "encounterId": "enc-1",
+        "answer": {
+          "kind": "quantity",
+          "value": 4
+        }
+      }
+    }
+  },
+  {
+    "name": "GameCommand rejects unknown major",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "2.0",
+      "commandId": "cmd-1",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "attempt",
+        "encounterId": "enc-1",
+        "answer": {
+          "kind": "quantity",
+          "value": 4
+        }
+      }
+    }
+  },
+  {
+    "name": "GameCommand rejects extra fields",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "cmd-1",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "attempt",
+        "encounterId": "enc-1",
+        "answer": {
+          "kind": "quantity",
+          "value": 4
+        }
+      },
+      "unexpected": true
+    }
+  },
+  {
+    "name": "GameCommand rejects missing required field",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "commandId": "cmd-1",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "attempt",
+        "encounterId": "enc-1",
+        "answer": {
+          "kind": "quantity",
+          "value": 4
+        }
+      }
+    }
+  },
+  {
+    "name": "GameSnapshot valid",
+    "contract": "GameSnapshot",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "revision": 0,
+      "contentVersion": "foundation-1.0.0",
+      "rulesVersion": "1.0.0",
+      "storyFlags": [],
+      "ownedCreatures": [],
+      "inventory": [],
+      "pendingEncounters": [
+        {
+          "schemaVersion": "1.0",
+          "id": "enc-1",
+          "templateId": "missing_quantity",
+          "skillId": "M06",
+          "contentVersion": "foundation-1.0.0",
+          "parameters": {
+            "total": 7,
+            "given": 3
+          },
+          "permittedActions": [
+            "attempt",
+            "hint"
+          ],
+          "support": {
+            "hintCount": 0,
+            "workedExample": false,
+            "readAloud": false
+          }
+        }
+      ],
+      "learnerSummaries": []
+    }
+  },
+  {
+    "name": "GameSnapshot rejects unknown major",
+    "contract": "GameSnapshot",
+    "valid": false,
+    "value": {
+      "schemaVersion": "2.0",
+      "revision": 0,
+      "contentVersion": "foundation-1.0.0",
+      "rulesVersion": "1.0.0",
+      "storyFlags": [],
+      "ownedCreatures": [],
+      "inventory": [],
+      "pendingEncounters": [
+        {
+          "schemaVersion": "1.0",
+          "id": "enc-1",
+          "templateId": "missing_quantity",
+          "skillId": "M06",
+          "contentVersion": "foundation-1.0.0",
+          "parameters": {
+            "total": 7,
+            "given": 3
+          },
+          "permittedActions": [
+            "attempt",
+            "hint"
+          ],
+          "support": {
+            "hintCount": 0,
+            "workedExample": false,
+            "readAloud": false
+          }
+        }
+      ],
+      "learnerSummaries": []
+    }
+  },
+  {
+    "name": "GameSnapshot rejects extra fields",
+    "contract": "GameSnapshot",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "revision": 0,
+      "contentVersion": "foundation-1.0.0",
+      "rulesVersion": "1.0.0",
+      "storyFlags": [],
+      "ownedCreatures": [],
+      "inventory": [],
+      "pendingEncounters": [
+        {
+          "schemaVersion": "1.0",
+          "id": "enc-1",
+          "templateId": "missing_quantity",
+          "skillId": "M06",
+          "contentVersion": "foundation-1.0.0",
+          "parameters": {
+            "total": 7,
+            "given": 3
+          },
+          "permittedActions": [
+            "attempt",
+            "hint"
+          ],
+          "support": {
+            "hintCount": 0,
+            "workedExample": false,
+            "readAloud": false
+          }
+        }
+      ],
+      "learnerSummaries": [],
+      "unexpected": true
+    }
+  },
+  {
+    "name": "GameSnapshot rejects missing required field",
+    "contract": "GameSnapshot",
+    "valid": false,
+    "value": {
+      "revision": 0,
+      "contentVersion": "foundation-1.0.0",
+      "rulesVersion": "1.0.0",
+      "storyFlags": [],
+      "ownedCreatures": [],
+      "inventory": [],
+      "pendingEncounters": [
+        {
+          "schemaVersion": "1.0",
+          "id": "enc-1",
+          "templateId": "missing_quantity",
+          "skillId": "M06",
+          "contentVersion": "foundation-1.0.0",
+          "parameters": {
+            "total": 7,
+            "given": 3
+          },
+          "permittedActions": [
+            "attempt",
+            "hint"
+          ],
+          "support": {
+            "hintCount": 0,
+            "workedExample": false,
+            "readAloud": false
+          }
+        }
+      ],
+      "learnerSummaries": []
+    }
+  },
+  {
+    "name": "EncounterInstance valid",
+    "contract": "EncounterInstance",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "id": "enc-1",
+      "templateId": "missing_quantity",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "total": 7,
+        "given": 3
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      }
+    }
+  },
+  {
+    "name": "EncounterInstance rejects unknown major",
+    "contract": "EncounterInstance",
+    "valid": false,
+    "value": {
+      "schemaVersion": "2.0",
+      "id": "enc-1",
+      "templateId": "missing_quantity",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "total": 7,
+        "given": 3
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      }
+    }
+  },
+  {
+    "name": "EncounterInstance rejects extra fields",
+    "contract": "EncounterInstance",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "id": "enc-1",
+      "templateId": "missing_quantity",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "total": 7,
+        "given": 3
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      },
+      "unexpected": true
+    }
+  },
+  {
+    "name": "EncounterInstance rejects missing required field",
+    "contract": "EncounterInstance",
+    "valid": false,
+    "value": {
+      "id": "enc-1",
+      "templateId": "missing_quantity",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "total": 7,
+        "given": 3
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      }
+    }
+  },
+  {
+    "name": "LearningEvidence valid",
+    "contract": "LearningEvidence",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "eventId": "evt-1",
+      "encounterId": "enc-1",
+      "skillId": "M06",
+      "variantId": "seven-three",
+      "itemFamily": "missing_quantity",
+      "contextId": "meadow_bridge",
+      "representation": "countable_planks",
+      "result": "correct",
+      "eventKind": "answer_check",
+      "firstCheck": true,
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      },
+      "sessionId": "session-1",
+      "serverSequence": 1,
+      "provenance": "server_verified"
+    }
+  },
+  {
+    "name": "LearningEvidence rejects unknown major",
+    "contract": "LearningEvidence",
+    "valid": false,
+    "value": {
+      "schemaVersion": "2.0",
+      "eventId": "evt-1",
+      "encounterId": "enc-1",
+      "skillId": "M06",
+      "variantId": "seven-three",
+      "itemFamily": "missing_quantity",
+      "contextId": "meadow_bridge",
+      "representation": "countable_planks",
+      "result": "correct",
+      "eventKind": "answer_check",
+      "firstCheck": true,
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      },
+      "sessionId": "session-1",
+      "serverSequence": 1,
+      "provenance": "server_verified"
+    }
+  },
+  {
+    "name": "LearningEvidence rejects extra fields",
+    "contract": "LearningEvidence",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "eventId": "evt-1",
+      "encounterId": "enc-1",
+      "skillId": "M06",
+      "variantId": "seven-three",
+      "itemFamily": "missing_quantity",
+      "contextId": "meadow_bridge",
+      "representation": "countable_planks",
+      "result": "correct",
+      "eventKind": "answer_check",
+      "firstCheck": true,
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      },
+      "sessionId": "session-1",
+      "serverSequence": 1,
+      "provenance": "server_verified",
+      "unexpected": true
+    }
+  },
+  {
+    "name": "LearningEvidence rejects missing required field",
+    "contract": "LearningEvidence",
+    "valid": false,
+    "value": {
+      "eventId": "evt-1",
+      "encounterId": "enc-1",
+      "skillId": "M06",
+      "variantId": "seven-three",
+      "itemFamily": "missing_quantity",
+      "contextId": "meadow_bridge",
+      "representation": "countable_planks",
+      "result": "correct",
+      "eventKind": "answer_check",
+      "firstCheck": true,
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      },
+      "sessionId": "session-1",
+      "serverSequence": 1,
+      "provenance": "server_verified"
+    }
+  },
+  {
+    "name": "DomainEvent valid",
+    "contract": "DomainEvent",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "eventId": "evt-2",
+      "sequence": 2,
+      "commandId": "cmd-1",
+      "rulesVersion": "1.0.0",
+      "contentVersion": "foundation-1.0.0",
+      "outcome": {
+        "type": "story_flag_set",
+        "flag": "bridge_repaired"
+      }
+    }
+  },
+  {
+    "name": "DomainEvent rejects unknown major",
+    "contract": "DomainEvent",
+    "valid": false,
+    "value": {
+      "schemaVersion": "2.0",
+      "eventId": "evt-2",
+      "sequence": 2,
+      "commandId": "cmd-1",
+      "rulesVersion": "1.0.0",
+      "contentVersion": "foundation-1.0.0",
+      "outcome": {
+        "type": "story_flag_set",
+        "flag": "bridge_repaired"
+      }
+    }
+  },
+  {
+    "name": "DomainEvent rejects extra fields",
+    "contract": "DomainEvent",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "eventId": "evt-2",
+      "sequence": 2,
+      "commandId": "cmd-1",
+      "rulesVersion": "1.0.0",
+      "contentVersion": "foundation-1.0.0",
+      "outcome": {
+        "type": "story_flag_set",
+        "flag": "bridge_repaired"
+      },
+      "unexpected": true
+    }
+  },
+  {
+    "name": "DomainEvent rejects missing required field",
+    "contract": "DomainEvent",
+    "valid": false,
+    "value": {
+      "eventId": "evt-2",
+      "sequence": 2,
+      "commandId": "cmd-1",
+      "rulesVersion": "1.0.0",
+      "contentVersion": "foundation-1.0.0",
+      "outcome": {
+        "type": "story_flag_set",
+        "flag": "bridge_repaired"
+      }
+    }
+  },
+  {
+    "name": "ContentManifest valid",
+    "contract": "ContentManifest",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "packId": "foundation",
+      "contentVersion": "foundation-1.0.0",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "schemaRange": "1.x",
+      "assetIds": [
+        "meadow_map"
+      ],
+      "dependencies": [],
+      "educatorApproval": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewDate": null
+      },
+      "provenance": [
+        "Original synthetic fixture; no child data"
+      ]
+    }
+  },
+  {
+    "name": "ContentManifest rejects unknown major",
+    "contract": "ContentManifest",
+    "valid": false,
+    "value": {
+      "schemaVersion": "2.0",
+      "packId": "foundation",
+      "contentVersion": "foundation-1.0.0",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "schemaRange": "1.x",
+      "assetIds": [
+        "meadow_map"
+      ],
+      "dependencies": [],
+      "educatorApproval": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewDate": null
+      },
+      "provenance": [
+        "Original synthetic fixture; no child data"
+      ]
+    }
+  },
+  {
+    "name": "ContentManifest rejects extra fields",
+    "contract": "ContentManifest",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "packId": "foundation",
+      "contentVersion": "foundation-1.0.0",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "schemaRange": "1.x",
+      "assetIds": [
+        "meadow_map"
+      ],
+      "dependencies": [],
+      "educatorApproval": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewDate": null
+      },
+      "provenance": [
+        "Original synthetic fixture; no child data"
+      ],
+      "unexpected": true
+    }
+  },
+  {
+    "name": "ContentManifest rejects missing required field",
+    "contract": "ContentManifest",
+    "valid": false,
+    "value": {
+      "packId": "foundation",
+      "contentVersion": "foundation-1.0.0",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "schemaRange": "1.x",
+      "assetIds": [
+        "meadow_map"
+      ],
+      "dependencies": [],
+      "educatorApproval": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewDate": null
+      },
+      "provenance": [
+        "Original synthetic fixture; no child data"
+      ]
+    }
+  },
+  {
+    "name": "DirectorInput valid",
+    "contract": "DirectorInput",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "rulesVersion": "1.0.0",
+      "contentVersion": "foundation-1.0.0",
+      "policyVersion": "child-director-1",
+      "context": {
+        "regionId": "meadow",
+        "canonicalFacts": [
+          "pip_met",
+          "bridge_pending"
+        ],
+        "recentTemplateIds": [
+          "berry_sharing"
+        ],
+        "readingBand": "supported",
+        "skillStates": [
+          {
+            "skillId": "M06",
+            "status": "practising"
+          }
+        ]
+      },
+      "allowed": {
+        "beatIds": [
+          "help_pip_cross"
+        ],
+        "creatureIds": [
+          "pip"
+        ],
+        "skillId": "M06",
+        "templateIds": [
+          "missing_quantity"
+        ],
+        "parameterSets": [
+          {
+            "total": 7,
+            "given": 3
+          }
+        ],
+        "nextBeatIds": [
+          "picnic_invitation"
+        ],
+        "maxDialogueCharacters": 180
+      }
+    }
+  },
+  {
+    "name": "DirectorInput rejects unknown major",
+    "contract": "DirectorInput",
+    "valid": false,
+    "value": {
+      "schemaVersion": "2.0",
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "rulesVersion": "1.0.0",
+      "contentVersion": "foundation-1.0.0",
+      "policyVersion": "child-director-1",
+      "context": {
+        "regionId": "meadow",
+        "canonicalFacts": [
+          "pip_met",
+          "bridge_pending"
+        ],
+        "recentTemplateIds": [
+          "berry_sharing"
+        ],
+        "readingBand": "supported",
+        "skillStates": [
+          {
+            "skillId": "M06",
+            "status": "practising"
+          }
+        ]
+      },
+      "allowed": {
+        "beatIds": [
+          "help_pip_cross"
+        ],
+        "creatureIds": [
+          "pip"
+        ],
+        "skillId": "M06",
+        "templateIds": [
+          "missing_quantity"
+        ],
+        "parameterSets": [
+          {
+            "total": 7,
+            "given": 3
+          }
+        ],
+        "nextBeatIds": [
+          "picnic_invitation"
+        ],
+        "maxDialogueCharacters": 180
+      }
+    }
+  },
+  {
+    "name": "DirectorInput rejects extra fields",
+    "contract": "DirectorInput",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "rulesVersion": "1.0.0",
+      "contentVersion": "foundation-1.0.0",
+      "policyVersion": "child-director-1",
+      "context": {
+        "regionId": "meadow",
+        "canonicalFacts": [
+          "pip_met",
+          "bridge_pending"
+        ],
+        "recentTemplateIds": [
+          "berry_sharing"
+        ],
+        "readingBand": "supported",
+        "skillStates": [
+          {
+            "skillId": "M06",
+            "status": "practising"
+          }
+        ]
+      },
+      "allowed": {
+        "beatIds": [
+          "help_pip_cross"
+        ],
+        "creatureIds": [
+          "pip"
+        ],
+        "skillId": "M06",
+        "templateIds": [
+          "missing_quantity"
+        ],
+        "parameterSets": [
+          {
+            "total": 7,
+            "given": 3
+          }
+        ],
+        "nextBeatIds": [
+          "picnic_invitation"
+        ],
+        "maxDialogueCharacters": 180
+      },
+      "unexpected": true
+    }
+  },
+  {
+    "name": "DirectorInput rejects missing required field",
+    "contract": "DirectorInput",
+    "valid": false,
+    "value": {
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "rulesVersion": "1.0.0",
+      "contentVersion": "foundation-1.0.0",
+      "policyVersion": "child-director-1",
+      "context": {
+        "regionId": "meadow",
+        "canonicalFacts": [
+          "pip_met",
+          "bridge_pending"
+        ],
+        "recentTemplateIds": [
+          "berry_sharing"
+        ],
+        "readingBand": "supported",
+        "skillStates": [
+          {
+            "skillId": "M06",
+            "status": "practising"
+          }
+        ]
+      },
+      "allowed": {
+        "beatIds": [
+          "help_pip_cross"
+        ],
+        "creatureIds": [
+          "pip"
+        ],
+        "skillId": "M06",
+        "templateIds": [
+          "missing_quantity"
+        ],
+        "parameterSets": [
+          {
+            "total": 7,
+            "given": 3
+          }
+        ],
+        "nextBeatIds": [
+          "picnic_invitation"
+        ],
+        "maxDialogueCharacters": 180
+      }
+    }
+  },
+  {
+    "name": "DirectorProposal valid",
+    "contract": "DirectorProposal",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "contentVersion": "foundation-1.0.0",
+      "beatId": "help_pip_cross",
+      "creatureId": "pip",
+      "encounter": {
+        "templateId": "missing_quantity",
+        "skillId": "M06",
+        "parameters": {
+          "total": 7,
+          "given": 3
+        }
+      },
+      "dialogue": "Pip is ready to help repair the bridge. Let's find the missing planks!",
+      "suggestedNextBeatId": "picnic_invitation"
+    }
+  },
+  {
+    "name": "DirectorProposal rejects unknown major",
+    "contract": "DirectorProposal",
+    "valid": false,
+    "value": {
+      "schemaVersion": "2.0",
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "contentVersion": "foundation-1.0.0",
+      "beatId": "help_pip_cross",
+      "creatureId": "pip",
+      "encounter": {
+        "templateId": "missing_quantity",
+        "skillId": "M06",
+        "parameters": {
+          "total": 7,
+          "given": 3
+        }
+      },
+      "dialogue": "Pip is ready to help repair the bridge. Let's find the missing planks!",
+      "suggestedNextBeatId": "picnic_invitation"
+    }
+  },
+  {
+    "name": "DirectorProposal rejects extra fields",
+    "contract": "DirectorProposal",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "contentVersion": "foundation-1.0.0",
+      "beatId": "help_pip_cross",
+      "creatureId": "pip",
+      "encounter": {
+        "templateId": "missing_quantity",
+        "skillId": "M06",
+        "parameters": {
+          "total": 7,
+          "given": 3
+        }
+      },
+      "dialogue": "Pip is ready to help repair the bridge. Let's find the missing planks!",
+      "suggestedNextBeatId": "picnic_invitation",
+      "unexpected": true
+    }
+  },
+  {
+    "name": "DirectorProposal rejects missing required field",
+    "contract": "DirectorProposal",
+    "valid": false,
+    "value": {
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "contentVersion": "foundation-1.0.0",
+      "beatId": "help_pip_cross",
+      "creatureId": "pip",
+      "encounter": {
+        "templateId": "missing_quantity",
+        "skillId": "M06",
+        "parameters": {
+          "total": 7,
+          "given": 3
+        }
+      },
+      "dialogue": "Pip is ready to help repair the bridge. Let's find the missing planks!",
+      "suggestedNextBeatId": "picnic_invitation"
+    }
+  },
+  {
+    "name": "ApiError valid",
+    "contract": "ApiError",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "code": "REVISION_CONFLICT",
+      "correlationId": "corr-1"
+    }
+  },
+  {
+    "name": "ApiError rejects unknown major",
+    "contract": "ApiError",
+    "valid": false,
+    "value": {
+      "schemaVersion": "2.0",
+      "code": "REVISION_CONFLICT",
+      "correlationId": "corr-1"
+    }
+  },
+  {
+    "name": "ApiError rejects extra fields",
+    "contract": "ApiError",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "code": "REVISION_CONFLICT",
+      "correlationId": "corr-1",
+      "unexpected": true
+    }
+  },
+  {
+    "name": "ApiError rejects missing required field",
+    "contract": "ApiError",
+    "valid": false,
+    "value": {
+      "code": "REVISION_CONFLICT",
+      "correlationId": "corr-1"
+    }
+  },
+  {
+    "name": "SkillNode valid",
+    "contract": "SkillNode",
+    "valid": true,
+    "value": {
+      "id": "M06",
+      "subject": "maths",
+      "objective": "Compose a small whole",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M03"
+      ],
+      "allowedRepresentations": [
+        "countable_planks"
+      ],
+      "parameterBounds": {
+        "total": {
+          "min": 1,
+          "max": 10
+        }
+      },
+      "misconceptionCodes": [
+        "counts_given_only"
+      ],
+      "hintLadder": [
+        "Count the empty spaces."
+      ],
+      "evidencePolicyId": "independent-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": []
+    }
+  },
+  {
+    "name": "SkillNode rejects extra fields",
+    "contract": "SkillNode",
+    "valid": false,
+    "value": {
+      "id": "M06",
+      "subject": "maths",
+      "objective": "Compose a small whole",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M03"
+      ],
+      "allowedRepresentations": [
+        "countable_planks"
+      ],
+      "parameterBounds": {
+        "total": {
+          "min": 1,
+          "max": 10
+        }
+      },
+      "misconceptionCodes": [
+        "counts_given_only"
+      ],
+      "hintLadder": [
+        "Count the empty spaces."
+      ],
+      "evidencePolicyId": "independent-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [],
+      "unexpected": true
+    }
+  },
+  {
+    "name": "SkillNode rejects missing required field",
+    "contract": "SkillNode",
+    "valid": false,
+    "value": {
+      "subject": "maths",
+      "objective": "Compose a small whole",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M03"
+      ],
+      "allowedRepresentations": [
+        "countable_planks"
+      ],
+      "parameterBounds": {
+        "total": {
+          "min": 1,
+          "max": 10
+        }
+      },
+      "misconceptionCodes": [
+        "counts_given_only"
+      ],
+      "hintLadder": [
+        "Count the empty spaces."
+      ],
+      "evidencePolicyId": "independent-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": []
+    }
+  },
+  {
+    "name": "DirectorProposal rejects dialogue",
+    "contract": "DirectorProposal",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "contentVersion": "foundation-1.0.0",
+      "beatId": "help_pip_cross",
+      "creatureId": "pip",
+      "encounter": {
+        "templateId": "missing_quantity",
+        "skillId": "M06",
+        "parameters": {
+          "total": 7,
+          "given": 3
+        }
+      },
+      "dialogue": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "suggestedNextBeatId": "picnic_invitation"
+    }
+  },
+  {
+    "name": "DirectorProposal rejects xp",
+    "contract": "DirectorProposal",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "contentVersion": "foundation-1.0.0",
+      "beatId": "help_pip_cross",
+      "creatureId": "pip",
+      "encounter": {
+        "templateId": "missing_quantity",
+        "skillId": "M06",
+        "parameters": {
+          "total": 7,
+          "given": 3
+        }
+      },
+      "dialogue": "Pip is ready to help repair the bridge. Let's find the missing planks!",
+      "suggestedNextBeatId": "picnic_invitation",
+      "xp": 100
+    }
+  },
+  {
+    "name": "DirectorProposal rejects profileId",
+    "contract": "DirectorProposal",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "requestId": "req-demo-01",
+      "stateRevision": 42,
+      "contentVersion": "foundation-1.0.0",
+      "beatId": "help_pip_cross",
+      "creatureId": "pip",
+      "encounter": {
+        "templateId": "missing_quantity",
+        "skillId": "M06",
+        "parameters": {
+          "total": 7,
+          "given": 3
+        }
+      },
+      "dialogue": "Pip is ready to help repair the bridge. Let's find the missing planks!",
+      "suggestedNextBeatId": "picnic_invitation",
+      "profileId": "other-profile"
+    }
+  },
+  {
+    "name": "Encounter has no answers",
+    "contract": "EncounterInstance",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "id": "enc-1",
+      "templateId": "missing_quantity",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "total": 7,
+        "given": 3
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      },
+      "answers": [
+        4
+      ]
+    }
+  },
+  {
+    "name": "Revision nonnegative",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "cmd-1",
+      "expectedRevision": -1,
+      "payload": {
+        "type": "attempt",
+        "encounterId": "enc-1",
+        "answer": {
+          "kind": "quantity",
+          "value": 4
+        }
+      }
+    }
+  },
+  {
+    "name": "Equal sharing answer preserves repeated group counts",
+    "contract": "GameCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "cmd-share",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "attempt",
+        "encounterId": "enc-share",
+        "answer": {
+          "kind": "groups",
+          "groups": [
+            3,
+            3
+          ]
+        }
+      }
+    }
+  },
+  {
+    "name": "equal_sharing public parameters",
+    "contract": "EncounterInstance",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "id": "enc-1",
+      "templateId": "equal_sharing",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "total": 6,
+        "recipients": 2
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      }
+    }
+  },
+  {
+    "name": "pattern_sort public parameters",
+    "contract": "EncounterInstance",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "id": "enc-1",
+      "templateId": "pattern_sort",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "objects": [
+          {
+            "id": "a",
+            "label": "Leaf",
+            "attribute": "green"
+          }
+        ],
+        "unitLength": 1,
+        "prefixLength": 1,
+        "instructionId": "extend-garland"
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      }
+    }
+  },
+  {
+    "name": "spatial_measurement public parameters",
+    "contract": "EncounterInstance",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "id": "enc-1",
+      "templateId": "spatial_measurement",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "objects": [
+          {
+            "id": "rope-a",
+            "label": "Short rope",
+            "length": 3
+          }
+        ],
+        "instructionId": "choose-longer"
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      }
+    }
+  },
+  {
+    "name": "phonics_word_building public parameters",
+    "contract": "EncounterInstance",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "id": "enc-1",
+      "templateId": "phonics_word_building",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "tiles": [
+          "c",
+          "a",
+          "t"
+        ],
+        "promptId": "build-cat"
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      }
+    }
+  },
+  {
+    "name": "story_message public parameters",
+    "contract": "EncounterInstance",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "id": "enc-1",
+      "templateId": "story_message",
+      "skillId": "M06",
+      "contentVersion": "foundation-1.0.0",
+      "parameters": {
+        "cards": [
+          {
+            "id": "one",
+            "text": "Pip waves."
+          }
+        ],
+        "promptId": "order-story"
+      },
+      "permittedActions": [
+        "attempt",
+        "hint"
+      ],
+      "support": {
+        "hintCount": 0,
+        "workedExample": false,
+        "readAloud": false
+      }
+    }
+  },
+  {
+    "name": "Invalid review date rejected in both languages",
+    "contract": "ContentManifest",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "packId": "foundation",
+      "contentVersion": "foundation-1.0.0",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "schemaRange": "1.x",
+      "assetIds": [
+        "meadow_map"
+      ],
+      "dependencies": [],
+      "educatorApproval": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewDate": "2026-02-30"
+      },
+      "provenance": [
+        "Original synthetic fixture; no child data"
+      ]
+    }
+  },
+  {
+    "name": "GameCommand valid abandonment",
+    "contract": "GameCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "abandon-1",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "abandon",
+        "encounterId": "enc-1"
+      }
+    }
+  },
+  {
+    "name": "Abandonment rejects claimed correctness",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "abandon-1",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "abandon",
+        "encounterId": "enc-1",
+        "correct": true
+      }
+    }
+  }
+]

@@ -1,0 +1,5 @@
+target/
+contracts/node_modules/
+qa/e2e/node_modules/
+__pycache__/
+.local-demo/

@@ -1,0 +1,391 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "wonderwilds-story-1.0.0",
+  "reviewStatus": "pending",
+  "quests": [
+    {
+      "id": "befriend-pip",
+      "creatureId": "pip",
+      "requiresBeatIds": [
+        "meadow-finale"
+      ],
+      "title": "A helping moment with Pip",
+      "prompt": "Arrange the missing pieces in a little lantern.",
+      "skillId": "M06",
+      "templateId": "missing_quantity",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-pip",
+          "kind": "creature",
+          "value": "pip"
+        },
+        {
+          "id": "help-xp-pip",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-tansy",
+      "creatureId": "tansy",
+      "requiresBeatIds": [
+        "meadow-welcome"
+      ],
+      "title": "A helping moment with Tansy",
+      "prompt": "Arrange the numbered seed pots along a short path.",
+      "skillId": "M05",
+      "templateId": "pattern_sort",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-tansy",
+          "kind": "creature",
+          "value": "tansy"
+        },
+        {
+          "id": "help-xp-tansy",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-nib",
+      "creatureId": "nib",
+      "requiresBeatIds": [
+        "meadow-welcome"
+      ],
+      "title": "A helping moment with Nib",
+      "prompt": "Sort the picnic tools by the pictured rule.",
+      "skillId": "M14",
+      "templateId": "pattern_sort",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-nib",
+          "kind": "creature",
+          "value": "nib"
+        },
+        {
+          "id": "help-xp-nib",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-flutter",
+      "creatureId": "flutter",
+      "requiresBeatIds": [
+        "meadow-welcome"
+      ],
+      "title": "A helping moment with Flutter",
+      "prompt": "Complete a repeating row of leaf shapes.",
+      "skillId": "M09",
+      "templateId": "pattern_sort",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-flutter",
+          "kind": "creature",
+          "value": "flutter"
+        },
+        {
+          "id": "help-xp-flutter",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-cleo",
+      "creatureId": "cleo",
+      "requiresBeatIds": [
+        "orchard-welcome"
+      ],
+      "title": "A helping moment with Cleo",
+      "prompt": "Arrange the numbered seed pots along a short path.",
+      "skillId": "M05",
+      "templateId": "pattern_sort",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-cleo",
+          "kind": "creature",
+          "value": "cleo"
+        },
+        {
+          "id": "help-xp-cleo",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-bramble",
+      "creatureId": "bramble",
+      "requiresBeatIds": [
+        "orchard-welcome"
+      ],
+      "title": "A helping moment with Bramble",
+      "prompt": "Compare two ribbons from the same starting edge.",
+      "skillId": "M12",
+      "templateId": "spatial_measurement",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-bramble",
+          "kind": "creature",
+          "value": "bramble"
+        },
+        {
+          "id": "help-xp-bramble",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-patter",
+      "creatureId": "patter",
+      "requiresBeatIds": [
+        "orchard-welcome"
+      ],
+      "title": "A helping moment with Patter",
+      "prompt": "Sort the picnic tools by the pictured rule.",
+      "skillId": "M14",
+      "templateId": "pattern_sort",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-patter",
+          "kind": "creature",
+          "value": "patter"
+        },
+        {
+          "id": "help-xp-patter",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-twizzle",
+      "creatureId": "twizzle",
+      "requiresBeatIds": [
+        "orchard-welcome"
+      ],
+      "title": "A helping moment with Twizzle",
+      "prompt": "Complete a repeating row of leaf shapes.",
+      "skillId": "M09",
+      "templateId": "pattern_sort",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-twizzle",
+          "kind": "creature",
+          "value": "twizzle"
+        },
+        {
+          "id": "help-xp-twizzle",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-luna",
+      "creatureId": "luna",
+      "requiresBeatIds": [
+        "cove-welcome"
+      ],
+      "title": "A helping moment with Luna",
+      "prompt": "Arrange the missing pieces in a little lantern.",
+      "skillId": "M06",
+      "templateId": "missing_quantity",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-luna",
+          "kind": "creature",
+          "value": "luna"
+        },
+        {
+          "id": "help-xp-luna",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-pebble",
+      "creatureId": "pebble",
+      "requiresBeatIds": [
+        "cove-welcome"
+      ],
+      "title": "A helping moment with Pebble",
+      "prompt": "Sort the picnic tools by the pictured rule.",
+      "skillId": "M14",
+      "templateId": "pattern_sort",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-pebble",
+          "kind": "creature",
+          "value": "pebble"
+        },
+        {
+          "id": "help-xp-pebble",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-glimmer",
+      "creatureId": "glimmer",
+      "requiresBeatIds": [
+        "cove-welcome"
+      ],
+      "title": "A helping moment with Glimmer",
+      "prompt": "Arrange the missing pieces in a little lantern.",
+      "skillId": "M06",
+      "templateId": "missing_quantity",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-glimmer",
+          "kind": "creature",
+          "value": "glimmer"
+        },
+        {
+          "id": "help-xp-glimmer",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    },
+    {
+      "id": "befriend-sail",
+      "creatureId": "sail",
+      "requiresBeatIds": [
+        "cove-welcome"
+      ],
+      "title": "A helping moment with Sail",
+      "prompt": "Complete a repeating row of leaf shapes.",
+      "skillId": "M09",
+      "templateId": "pattern_sort",
+      "supportAvailable": true,
+      "supportedCompletionBefriends": true,
+      "grantKey": [
+        "profileId",
+        "rewardDefinitionId",
+        "questInstanceId"
+      ],
+      "questInstancePolicy": "one canonical friendship quest per creature per profile",
+      "rewards": [
+        {
+          "id": "friendship-sail",
+          "kind": "creature",
+          "value": "sail"
+        },
+        {
+          "id": "help-xp-sail",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "repeatRewards": []
+    }
+  ]
+}

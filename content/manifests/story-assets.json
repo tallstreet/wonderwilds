@@ -1,0 +1,224 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "wonderwilds-story-1.0.0",
+  "releaseReady": false,
+  "assets": [
+    {
+      "id": "map-meadow",
+      "path": "frontend/public/assets/clover-meadow-v2.png",
+      "sha256": "08df06b2c4eccefac19f1c7f252e76eae7f98f2a60c202e695b55bfb942bdd27",
+      "status": "present_provenance_review_pending",
+      "source": "Existing repository generated artwork; see frontend/docs/CONSISTENT_ART.md. Rights and provenance are not independently verified.",
+      "approved": false
+    },
+    {
+      "id": "map-orchard",
+      "path": "frontend/public/assets/peachy-orchard-v2.png",
+      "sha256": "e800c487229b2b20f4e82c520cce736a8f7de932e216f83dedc3dd380a711a17",
+      "status": "present_provenance_review_pending",
+      "source": "Existing repository generated artwork; see frontend/docs/CONSISTENT_ART.md. Rights and provenance are not independently verified.",
+      "approved": false
+    },
+    {
+      "id": "map-cove",
+      "path": "frontend/public/assets/starlight-cove-v2.png",
+      "sha256": "e3fbb7e23068764c27661ff0fd3345802d8dac50e13720d122cb68f5948801a5",
+      "status": "present_provenance_review_pending",
+      "source": "Existing repository generated artwork; see frontend/docs/CONSISTENT_ART.md. Rights and provenance are not independently verified.",
+      "approved": false
+    },
+    {
+      "id": "friend-pip",
+      "path": "frontend/public/assets/hero-atlas-v2.png",
+      "sha256": "7422b9f25bc4361c6d43818f240f3059bc7fb3f03e77328ee0be13ac95baacaf",
+      "atlasFrame": "pip",
+      "status": "present_provenance_review_pending",
+      "source": "Existing repository hero atlas frame pip; see frontend/src/sprites.ts.",
+      "approved": false
+    },
+    {
+      "id": "friend-pip-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-tansy",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-tansy-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-nib",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-nib-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-flutter",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-flutter-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-cleo",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-cleo-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-bramble",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-bramble-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-patter",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-patter-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-twizzle",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-twizzle-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-luna",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-luna-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-pebble",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-pebble-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-glimmer",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-glimmer-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-sail",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    },
+    {
+      "id": "friend-sail-glow",
+      "path": null,
+      "sha256": null,
+      "status": "missing",
+      "source": "Original authored character brief in content/creatures/friends.v1.json; art has not been produced.",
+      "approved": false
+    }
+  ]
+}

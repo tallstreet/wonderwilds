@@ -1,4 +1,4 @@
-import type { Progress, Encounter, Point, Actor } from './types.ts';
+import type { Progress, WorldEncounter, Point, Actor } from './types.ts';
 import { paintScenery } from './scenery.ts';
 import Phaser from 'phaser';
 import { maps, mapExit, exitPoint, type MapId } from './maps.ts';
@@ -19,15 +19,19 @@ import { preloadFacing, registerFacing, resolveFacing } from './facing.ts';
 export function createWorld(
   parent: string,
   getState: () => Progress,
-  onEncounter: (encounter: Encounter) => void,
+  onEncounter: (encounter: WorldEncounter) => void,
   onPortal: () => void,
   onPosition?: (point: Point) => void,
   onMapChange?: (region: MapId, position: Point) => void,
+  backend?: {
+    encounters(): WorldEncounter[];
+    companion(): { sprite: string; name: string } | undefined;
+  },
 ) {
   class Island extends Phaser.Scene {
     target: Point | null = null;
     route: Point[] = [];
-    pending: Encounter | 'portal' | null = null;
+    pending: WorldEncounter | 'portal' | null = null;
     reducedMotion = false;
     keys!: Record<
       'W' | 'A' | 'S' | 'D' | 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | 'SPACE',
@@ -36,7 +40,8 @@ export function createWorld(
     player!: Actor;
     friend: Actor | null = null;
     friendTrail: Point[] = [];
-    markers: (Point & { e: Encounter; cat: Phaser.GameObjects.Image })[] = [];
+    markers: (Point & { e: WorldEncounter; cat: Phaser.GameObjects.Image })[] = [];
+    friendLabel?: Phaser.GameObjects.Text;
     you!: Phaser.GameObjects.Text;
     prompt!: Phaser.GameObjects.Text;
     lastSave = 0;
@@ -79,7 +84,7 @@ export function createWorld(
       );
       this.game.events.on('refresh', () => this.paint());
       this.game.events.on('reset-position', () => this.player.setPosition(160, 490));
-      this.game.events.on('visit', (e: Encounter) => {
+      this.game.events.on('visit', (e: WorldEncounter) => {
         if (getState().region !== e.region) {
           onMapChange?.('meadow', { x: 160, y: 490 });
           this.paint();
@@ -126,16 +131,17 @@ export function createWorld(
             this.walkTo({ x: 1000, y: 375 }, 'portal');
           });
       this.markers = [];
-      encounters
+      ((backend?.encounters() ?? encounters) as WorldEncounter[])
         .filter((e) => e.region === r.id && r.id === 'meadow')
         .forEach((e, i) => {
           const complete = s.done.includes(e.id),
-            x = e.x + (i === 0 ? -105 : 50),
-            y = e.y + (i === 0 ? 45 : 65) + 38;
+            x = backend ? e.x : e.x + (i === 0 ? -105 : 50),
+            y = backend ? e.y : e.y + (i === 0 ? 45 : 65) + 38;
           this.add.ellipse(x, y, 39, 10, 0x354e44, 0.2).setDepth(y - 0.5);
-          const npcFacing = resolveFacing('pip', 0, 0, 'down');
+          const sprite = e.sprite ?? 'pip';
+          const npcFacing = resolveFacing(sprite, 0, 0, 'down');
           const cat = this.add
-            .image(x, y, 'hero-atlas', 'pip')
+            .image(x, y, 'hero-atlas', sprite)
             .setOrigin(npcFacing.originX, npcFacing.originY)
             .setDisplaySize(86 * npcFacing.scaleX, 96 * npcFacing.scaleY)
             .setDepth(y);
@@ -158,6 +164,7 @@ export function createWorld(
             .setInteractive({ useHandCursor: true });
           zone.on('pointerdown', () => this.walkTo({ x: x - 30, y: y + 25 }, e));
           this.markers.push({ e, x, y, cat });
+          if (backend) this.label(x, y + 12, e.character, 10);
           if (!complete && !this.reducedMotion)
             this.tweens.add({
               targets: [badge],
@@ -183,10 +190,13 @@ export function createWorld(
         .setOrigin(0.5)
         .setDepth(pos.y + 100);
       this.friend = null;
+      this.friendLabel = undefined;
       this.friendTrail = [];
-      if (s.done.length === 3) {
+      const companion = backend?.companion();
+      if (backend ? companion : s.done.length === 3) {
         const start = !this.blocked(pos.x - 40, pos.y) ? { x: pos.x - 40, y: pos.y } : pos;
-        this.friend = this.makeActor(start.x, start.y, 'pip', 78, 87);
+        this.friend = this.makeActor(start.x, start.y, companion?.sprite ?? 'pip', 78, 87);
+        if (companion) this.friendLabel = this.label(start.x, start.y - 90, companion.name, 10);
         this.friendTrail = findRoute(start, pos, fixed, s.region);
         this.friendTrail.push({ x: pos.x, y: pos.y });
       }
@@ -198,6 +208,7 @@ export function createWorld(
         '#6e5288',
       ).setDepth(2000);
       for (const side of ['west', 'east'] as const) {
+        if (backend) continue;
         const destination = maps[s.region as MapId][side];
         const point = exitPoint(s.region as MapId, side);
         this.label(
@@ -277,7 +288,7 @@ export function createWorld(
     blocked(x: number, y: number) {
       return isBlocked(x, y, getState().done.includes('meadow-bridge'), getState().region);
     }
-    walkTo(point: Point, pending: Encounter | 'portal' | null = null) {
+    walkTo(point: Point, pending: WorldEncounter | 'portal' | null = null) {
       if (document.querySelector('dialog[open]')) return;
       this.pending = pending;
       this.route = findRoute(
@@ -422,11 +433,12 @@ export function createWorld(
           this.blocked(x, y),
         );
         this.friend.setPosition(follow.x, follow.y);
+        this.friendLabel?.setPosition(follow.x, follow.y - 90).setDepth(follow.y + 100);
         this.poseActor(this.friend, follow.x - before.x, follow.y - before.y, follow.distance);
       }
       const exit = mapExit(getState().region, this.player);
       if (!exit) this.exitArmed = true;
-      if (exit && this.exitArmed && onMapChange) {
+      if (exit && this.exitArmed && onMapChange && !backend) {
         this.exitArmed = false;
         onMapChange(exit.region, exit.position);
         this.paint();

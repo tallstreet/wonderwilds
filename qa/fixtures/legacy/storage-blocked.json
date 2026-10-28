@@ -1,0 +1,6 @@
+{
+  "getItemThrows": "SecurityError",
+  "setItemThrows": "QuotaExceededError",
+  "expectedAvailable": false,
+  "expectedWriteSuccess": false
+}

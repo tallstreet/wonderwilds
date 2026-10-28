@@ -1,0 +1,44 @@
+[
+  {
+    "revision": 1,
+    "command_id": "command-0",
+    "rules_version": "domain-1.0.0",
+    "content_version": "wonderwilds-story-1.0.0",
+    "unix_millis": 1793145600000,
+    "recorded_random_choice": 73,
+    "sequence": 1,
+    "outcome": {
+      "type": "quest_started",
+      "quest_id": "meadow-welcome",
+      "encounter_id": "encounter-meadow-welcome"
+    }
+  },
+  {
+    "revision": 2,
+    "command_id": "command-1",
+    "rules_version": "domain-1.0.0",
+    "content_version": "wonderwilds-story-1.0.0",
+    "unix_millis": 1793145600000,
+    "recorded_random_choice": 73,
+    "sequence": 2,
+    "outcome": {
+      "type": "quest_completed",
+      "quest_id": "meadow-welcome",
+      "supported": true
+    }
+  },
+  {
+    "revision": 2,
+    "command_id": "command-1",
+    "rules_version": "domain-1.0.0",
+    "content_version": "wonderwilds-story-1.0.0",
+    "unix_millis": 1793145600000,
+    "recorded_random_choice": 73,
+    "sequence": 3,
+    "outcome": {
+      "type": "reward_granted",
+      "reward_id": "meadow-welcome-xp",
+      "quest_id": "meadow-welcome"
+    }
+  }
+]

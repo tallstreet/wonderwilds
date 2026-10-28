@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "region": "meadow",
+  "hero": "rose",
+  "companionName": "Pip",
+  "done": [],
+  "evidence": [],
+  "position": {
+    "x": 160,
+    "y": 490
+  }
+}

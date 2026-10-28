@@ -1,0 +1,1490 @@
+{
+  "schemaVersion": "1.0",
+  "skills": [
+    {
+      "skillId": "M01",
+      "contexts": [
+        {
+          "id": "m01-context-1",
+          "description": "Give each kitten a cup"
+        },
+        {
+          "id": "m01-context-2",
+          "description": "Set out one seed pot for each gardener"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m01-rung-1",
+          "parameters": {
+            "quantity": 1
+          },
+          "representation": "object_pairing",
+          "contextId": "m01-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m01-rung-2",
+          "parameters": {
+            "quantity": 3
+          },
+          "representation": "recipient_slots",
+          "contextId": "m01-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m01-rung-3",
+          "parameters": {
+            "quantity": 6
+          },
+          "representation": "recipient_slots",
+          "contextId": "m01-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Entry probe candidate; educator review pending.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M02",
+      "contexts": [
+        {
+          "id": "m02-context-1",
+          "description": "Spot a small firefly group"
+        },
+        {
+          "id": "m02-context-2",
+          "description": "Notice berries on a small plate"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m02-rung-1",
+          "parameters": {
+            "quantity": 1
+          },
+          "representation": "brief_dot_pattern",
+          "contextId": "m02-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m02-rung-2",
+          "parameters": {
+            "quantity": 2
+          },
+          "representation": "structured_object_pattern",
+          "contextId": "m02-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m02-rung-3",
+          "parameters": {
+            "quantity": 4
+          },
+          "representation": "structured_object_pattern",
+          "contextId": "m02-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Entry probe candidate; educator review pending.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M03",
+      "contexts": [
+        {
+          "id": "m03-context-1",
+          "description": "Pack a requested berry basket"
+        },
+        {
+          "id": "m03-context-2",
+          "description": "Count shells for a display"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m03-rung-1",
+          "parameters": {
+            "quantity": 1
+          },
+          "representation": "movable_objects",
+          "contextId": "m03-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m03-rung-2",
+          "parameters": {
+            "quantity": 10
+          },
+          "representation": "ten_frame",
+          "contextId": "m03-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m03-rung-3",
+          "parameters": {
+            "quantity": 20
+          },
+          "representation": "ten_frame",
+          "contextId": "m03-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M01. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M04",
+      "contexts": [
+        {
+          "id": "m04-context-1",
+          "description": "Choose sufficient picnic supplies"
+        },
+        {
+          "id": "m04-context-2",
+          "description": "Compare seedling trays"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m04-rung-1",
+          "parameters": {
+            "quantity": 1
+          },
+          "representation": "paired_collections",
+          "contextId": "m04-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m04-rung-2",
+          "parameters": {
+            "quantity": 5
+          },
+          "representation": "aligned_rows",
+          "contextId": "m04-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m04-rung-3",
+          "parameters": {
+            "quantity": 10
+          },
+          "representation": "aligned_rows",
+          "contextId": "m04-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M03. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M05",
+      "contexts": [
+        {
+          "id": "m05-context-1",
+          "description": "Wake consecutive flowers"
+        },
+        {
+          "id": "m05-context-2",
+          "description": "Restore numbered stepping stones"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m05-rung-1",
+          "parameters": {
+            "endpoint": 1
+          },
+          "representation": "number_path",
+          "contextId": "m05-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m05-rung-2",
+          "parameters": {
+            "endpoint": 10
+          },
+          "representation": "countable_flower_sequence",
+          "contextId": "m05-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m05-rung-3",
+          "parameters": {
+            "endpoint": 20
+          },
+          "representation": "countable_flower_sequence",
+          "contextId": "m05-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M03. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M06",
+      "contexts": [
+        {
+          "id": "m06-context-1",
+          "description": "Fit missing bridge planks"
+        },
+        {
+          "id": "m06-context-2",
+          "description": "Fill empty spaces on a seed tray"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m06-rung-1",
+          "parameters": {
+            "total": 2
+          },
+          "representation": "countable_planks",
+          "contextId": "m06-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m06-rung-2",
+          "parameters": {
+            "total": 6
+          },
+          "representation": "part_whole_objects",
+          "contextId": "m06-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m06-rung-3",
+          "parameters": {
+            "total": 10
+          },
+          "representation": "part_whole_objects",
+          "contextId": "m06-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M03. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M07",
+      "contexts": [
+        {
+          "id": "m07-context-1",
+          "description": "Adjust lantern fuel crystals"
+        },
+        {
+          "id": "m07-context-2",
+          "description": "Move berries into and out of a basket"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m07-rung-1",
+          "parameters": {
+            "total": 1
+          },
+          "representation": "movable_crystals",
+          "contextId": "m07-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m07-rung-2",
+          "parameters": {
+            "total": 5
+          },
+          "representation": "change_story_objects",
+          "contextId": "m07-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m07-rung-3",
+          "parameters": {
+            "total": 10
+          },
+          "representation": "change_story_objects",
+          "contextId": "m07-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M06. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M08",
+      "contexts": [
+        {
+          "id": "m08-context-1",
+          "description": "Distribute picnic berries"
+        },
+        {
+          "id": "m08-context-2",
+          "description": "Share seeds between garden beds"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m08-rung-1",
+          "parameters": {
+            "total": 2
+          },
+          "representation": "plates_and_objects",
+          "contextId": "m08-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m08-rung-2",
+          "parameters": {
+            "total": 7
+          },
+          "representation": "recipient_slots",
+          "contextId": "m08-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m08-rung-3",
+          "parameters": {
+            "total": 12
+          },
+          "representation": "recipient_slots",
+          "contextId": "m08-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M01, M03. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M09",
+      "contexts": [
+        {
+          "id": "m09-context-1",
+          "description": "Arrange a lantern garland"
+        },
+        {
+          "id": "m09-context-2",
+          "description": "Continue a seed border"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m09-rung-1",
+          "parameters": {
+            "repeats": 2
+          },
+          "representation": "object_pattern",
+          "contextId": "m09-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m09-rung-2",
+          "parameters": {
+            "repeats": 3
+          },
+          "representation": "shape_pattern",
+          "contextId": "m09-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m09-rung-3",
+          "parameters": {
+            "repeats": 4
+          },
+          "representation": "shape_pattern",
+          "contextId": "m09-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Entry probe candidate; educator review pending.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M10",
+      "contexts": [
+        {
+          "id": "m10-context-1",
+          "description": "Fit pieces into a habitat door"
+        },
+        {
+          "id": "m10-context-2",
+          "description": "Sort shape signs for a trail"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m10-rung-1",
+          "parameters": {
+            "choices": 2
+          },
+          "representation": "shape_tiles",
+          "contextId": "m10-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m10-rung-2",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "object_silhouettes",
+          "contextId": "m10-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m10-rung-3",
+          "parameters": {
+            "choices": 4
+          },
+          "representation": "object_silhouettes",
+          "contextId": "m10-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Entry probe candidate; educator review pending.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M11",
+      "contexts": [
+        {
+          "id": "m11-context-1",
+          "description": "Place supplies beside a tree"
+        },
+        {
+          "id": "m11-context-2",
+          "description": "Guide a lantern cart around a rock"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m11-rung-1",
+          "parameters": {
+            "steps": 1
+          },
+          "representation": "object_scene",
+          "contextId": "m11-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m11-rung-2",
+          "parameters": {
+            "steps": 2
+          },
+          "representation": "grid_path",
+          "contextId": "m11-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m11-rung-3",
+          "parameters": {
+            "steps": 3
+          },
+          "representation": "grid_path",
+          "contextId": "m11-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Entry probe candidate; educator review pending.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M12",
+      "contexts": [
+        {
+          "id": "m12-context-1",
+          "description": "Select a suitable rope"
+        },
+        {
+          "id": "m12-context-2",
+          "description": "Choose a container for watering"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m12-rung-1",
+          "parameters": {
+            "choices": 2
+          },
+          "representation": "aligned_objects",
+          "contextId": "m12-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m12-rung-2",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "balance_or_container",
+          "contextId": "m12-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m12-rung-3",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "aligned_objects",
+          "contextId": "m12-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Entry probe candidate; educator review pending.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M13",
+      "contexts": [
+        {
+          "id": "m13-context-1",
+          "description": "Prepare a festival timetable"
+        },
+        {
+          "id": "m13-context-2",
+          "description": "Plan a seed-watering day"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m13-rung-1",
+          "parameters": {
+            "events": 2
+          },
+          "representation": "event_cards",
+          "contextId": "m13-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m13-rung-2",
+          "parameters": {
+            "events": 3
+          },
+          "representation": "day_sequence",
+          "contextId": "m13-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m13-rung-3",
+          "parameters": {
+            "events": 4
+          },
+          "representation": "day_sequence",
+          "contextId": "m13-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Entry probe candidate; educator review pending.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M14",
+      "contexts": [
+        {
+          "id": "m14-context-1",
+          "description": "Organise shell discoveries"
+        },
+        {
+          "id": "m14-context-2",
+          "description": "Sort garden tool labels"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m14-rung-1",
+          "parameters": {
+            "categories": 2
+          },
+          "representation": "object_sort",
+          "contextId": "m14-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m14-rung-2",
+          "parameters": {
+            "categories": 3
+          },
+          "representation": "attribute_cards",
+          "contextId": "m14-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m14-rung-3",
+          "parameters": {
+            "categories": 3
+          },
+          "representation": "object_sort",
+          "contextId": "m14-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Entry probe candidate; educator review pending.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M15",
+      "contexts": [
+        {
+          "id": "m15-context-1",
+          "description": "Plan snacks from friends' choices"
+        },
+        {
+          "id": "m15-context-2",
+          "description": "Count colours chosen for lanterns"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m15-rung-1",
+          "parameters": {
+            "quantity": 1
+          },
+          "representation": "object_graph",
+          "contextId": "m15-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m15-rung-2",
+          "parameters": {
+            "quantity": 5
+          },
+          "representation": "picture_graph",
+          "contextId": "m15-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m15-rung-3",
+          "parameters": {
+            "quantity": 10
+          },
+          "representation": "picture_graph",
+          "contextId": "m15-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M03, M14. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M16",
+      "contexts": [
+        {
+          "id": "m16-context-1",
+          "description": "Bundle garden seeds"
+        },
+        {
+          "id": "m16-context-2",
+          "description": "Pack shell boxes of ten"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m16-rung-1",
+          "parameters": {
+            "total": 10
+          },
+          "representation": "bundled_seeds",
+          "contextId": "m16-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m16-rung-2",
+          "parameters": {
+            "total": 20
+          },
+          "representation": "tens_and_ones",
+          "contextId": "m16-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m16-rung-3",
+          "parameters": {
+            "total": 30
+          },
+          "representation": "tens_and_ones",
+          "contextId": "m16-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M03, M06. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M17",
+      "contexts": [
+        {
+          "id": "m17-context-1",
+          "description": "Lay orchard planting rows"
+        },
+        {
+          "id": "m17-context-2",
+          "description": "Arrange equal lantern clusters"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m17-rung-1",
+          "parameters": {
+            "groups": 2
+          },
+          "representation": "planting_rows",
+          "contextId": "m17-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m17-rung-2",
+          "parameters": {
+            "groups": 3
+          },
+          "representation": "grouped_objects",
+          "contextId": "m17-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m17-rung-3",
+          "parameters": {
+            "groups": 5
+          },
+          "representation": "grouped_objects",
+          "contextId": "m17-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M05, M08. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "M18",
+      "contexts": [
+        {
+          "id": "m18-context-1",
+          "description": "Share a circular picnic loaf"
+        },
+        {
+          "id": "m18-context-2",
+          "description": "Share a rectangular garden plot"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "m18-rung-1",
+          "parameters": {
+            "parts": 2
+          },
+          "representation": "partitioned_shape",
+          "contextId": "m18-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "m18-rung-2",
+          "parameters": {
+            "parts": 3
+          },
+          "representation": "folded_whole",
+          "contextId": "m18-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "m18-rung-3",
+          "parameters": {
+            "parts": 4
+          },
+          "representation": "folded_whole",
+          "contextId": "m18-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: M08, M10. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E01",
+      "contexts": [
+        {
+          "id": "e01-context-1",
+          "description": "Listen to Pip's route request"
+        },
+        {
+          "id": "e01-context-2",
+          "description": "Take turns passing festival tools"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e01-rung-1",
+          "parameters": {
+            "steps": 1
+          },
+          "representation": "spoken_direction_with_objects",
+          "contextId": "e01-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e01-rung-2",
+          "parameters": {
+            "steps": 2
+          },
+          "representation": "picture_turn_sequence",
+          "contextId": "e01-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e01-rung-3",
+          "parameters": {
+            "steps": 2
+          },
+          "representation": "spoken_direction_with_objects",
+          "contextId": "e01-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Entry probe candidate; educator review pending.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E02",
+      "contexts": [
+        {
+          "id": "e02-context-1",
+          "description": "Choose a tool from a spoken clue"
+        },
+        {
+          "id": "e02-context-2",
+          "description": "Match a garden action to a picture"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e02-rung-1",
+          "parameters": {
+            "choices": 2
+          },
+          "representation": "object_vocabulary",
+          "contextId": "e02-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e02-rung-2",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "action_pictures",
+          "contextId": "e02-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e02-rung-3",
+          "parameters": {
+            "choices": 4
+          },
+          "representation": "action_pictures",
+          "contextId": "e02-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E01. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E03",
+      "contexts": [
+        {
+          "id": "e03-context-1",
+          "description": "Echo a creature's rhythm"
+        },
+        {
+          "id": "e03-context-2",
+          "description": "Match a picnic rhyme pair"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e03-rung-1",
+          "parameters": {
+            "choices": 2
+          },
+          "representation": "reviewed_audio_choices",
+          "contextId": "e03-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e03-rung-2",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "rhythm_picture_cards",
+          "contextId": "e03-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e03-rung-3",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "reviewed_audio_choices",
+          "contextId": "e03-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E01. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E04",
+      "contexts": [
+        {
+          "id": "e04-context-1",
+          "description": "Sort deliveries by initial sound"
+        },
+        {
+          "id": "e04-context-2",
+          "description": "Move a token for each sound in a short word"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e04-rung-1",
+          "parameters": {
+            "phonemes": 2
+          },
+          "representation": "reviewed_audio_sort",
+          "contextId": "e04-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e04-rung-2",
+          "parameters": {
+            "phonemes": 3
+          },
+          "representation": "sound_tokens",
+          "contextId": "e04-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e04-rung-3",
+          "parameters": {
+            "phonemes": 3
+          },
+          "representation": "reviewed_audio_sort",
+          "contextId": "e04-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E01. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E05",
+      "contexts": [
+        {
+          "id": "e05-context-1",
+          "description": "Match a sound to a letter tile"
+        },
+        {
+          "id": "e05-context-2",
+          "description": "Choose the starting letter for a label"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e05-rung-1",
+          "parameters": {
+            "choices": 2
+          },
+          "representation": "letter_sound_tiles",
+          "contextId": "e05-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e05-rung-2",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "reviewed_sound_choices",
+          "contextId": "e05-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e05-rung-3",
+          "parameters": {
+            "choices": 4
+          },
+          "representation": "reviewed_sound_choices",
+          "contextId": "e05-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E04. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E06",
+      "contexts": [
+        {
+          "id": "e06-context-1",
+          "description": "Read decodable parcel labels"
+        },
+        {
+          "id": "e06-context-2",
+          "description": "Choose a short trail label"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e06-rung-1",
+          "parameters": {
+            "phonemes": 2
+          },
+          "representation": "decodable_word_tiles",
+          "contextId": "e06-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e06-rung-2",
+          "parameters": {
+            "phonemes": 3
+          },
+          "representation": "printed_label",
+          "contextId": "e06-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e06-rung-3",
+          "parameters": {
+            "phonemes": 3
+          },
+          "representation": "decodable_word_tiles",
+          "contextId": "e06-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E05. Rationale requires educator review before release.",
+      "assessmentLimits": "Reading narration or worked examples are support; no independent reading claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E07",
+      "contexts": [
+        {
+          "id": "e07-context-1",
+          "description": "Build a sign with letter tiles"
+        },
+        {
+          "id": "e07-context-2",
+          "description": "Label a garden pot"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e07-rung-1",
+          "parameters": {
+            "phonemes": 2
+          },
+          "representation": "letter_tiles",
+          "contextId": "e07-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e07-rung-2",
+          "parameters": {
+            "phonemes": 3
+          },
+          "representation": "sound_boxes",
+          "contextId": "e07-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e07-rung-3",
+          "parameters": {
+            "phonemes": 3
+          },
+          "representation": "letter_tiles",
+          "contextId": "e07-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E04, E05. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E08",
+      "contexts": [
+        {
+          "id": "e08-context-1",
+          "description": "Read recurring trail signs"
+        },
+        {
+          "id": "e08-context-2",
+          "description": "Find a taught word in a picnic note"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e08-rung-1",
+          "parameters": {
+            "choices": 2
+          },
+          "representation": "taught_word_cards",
+          "contextId": "e08-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e08-rung-2",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "printed_sign",
+          "contextId": "e08-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e08-rung-3",
+          "parameters": {
+            "choices": 4
+          },
+          "representation": "printed_sign",
+          "contextId": "e08-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E05. Rationale requires educator review before release.",
+      "assessmentLimits": "Reading narration or worked examples are support; no independent reading claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E09",
+      "contexts": [
+        {
+          "id": "e09-context-1",
+          "description": "Arrange a short message"
+        },
+        {
+          "id": "e09-context-2",
+          "description": "Track a garden invitation"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e09-rung-1",
+          "parameters": {
+            "words": 2
+          },
+          "representation": "sentence_strip",
+          "contextId": "e09-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e09-rung-2",
+          "parameters": {
+            "words": 3
+          },
+          "representation": "word_cards",
+          "contextId": "e09-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e09-rung-3",
+          "parameters": {
+            "words": 5
+          },
+          "representation": "word_cards",
+          "contextId": "e09-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E01. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E10",
+      "contexts": [
+        {
+          "id": "e10-context-1",
+          "description": "Follow a written delivery instruction"
+        },
+        {
+          "id": "e10-context-2",
+          "description": "Read a short planting instruction"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e10-rung-1",
+          "parameters": {
+            "words": 2
+          },
+          "representation": "controlled_sentence",
+          "contextId": "e10-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e10-rung-2",
+          "parameters": {
+            "words": 3
+          },
+          "representation": "instruction_cards",
+          "contextId": "e10-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e10-rung-3",
+          "parameters": {
+            "words": 5
+          },
+          "representation": "instruction_cards",
+          "contextId": "e10-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E06, E08, E09. Rationale requires educator review before release.",
+      "assessmentLimits": "Reading narration or worked examples are support; no independent reading claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E11",
+      "contexts": [
+        {
+          "id": "e11-context-1",
+          "description": "Restore a picture storybook"
+        },
+        {
+          "id": "e11-context-2",
+          "description": "Order a heard festival story"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e11-rung-1",
+          "parameters": {
+            "events": 2
+          },
+          "representation": "narrated_picture_sequence",
+          "contextId": "e11-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e11-rung-2",
+          "parameters": {
+            "events": 3
+          },
+          "representation": "character_cards",
+          "contextId": "e11-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e11-rung-3",
+          "parameters": {
+            "events": 4
+          },
+          "representation": "character_cards",
+          "contextId": "e11-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E01, E02. Rationale requires educator review before release.",
+      "assessmentLimits": "Only the authored task is observed; no full curriculum or transfer claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E12",
+      "contexts": [
+        {
+          "id": "e12-context-1",
+          "description": "Find which friend needs the red basket"
+        },
+        {
+          "id": "e12-context-2",
+          "description": "Read which seed tray needs water"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e12-rung-1",
+          "parameters": {
+            "words": 3
+          },
+          "representation": "controlled_written_text",
+          "contextId": "e12-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e12-rung-2",
+          "parameters": {
+            "words": 5
+          },
+          "representation": "written_choice",
+          "contextId": "e12-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e12-rung-3",
+          "parameters": {
+            "words": 8
+          },
+          "representation": "written_choice",
+          "contextId": "e12-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E10. Rationale requires educator review before release.",
+      "assessmentLimits": "Reading narration or worked examples are support; no independent reading claim.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E13",
+      "contexts": [
+        {
+          "id": "e13-context-1",
+          "description": "Make a thank-you card"
+        },
+        {
+          "id": "e13-context-2",
+          "description": "Write a short garden invitation"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e13-rung-1",
+          "parameters": {
+            "words": 2
+          },
+          "representation": "message_tiles",
+          "contextId": "e13-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e13-rung-2",
+          "parameters": {
+            "words": 4
+          },
+          "representation": "adult_reviewed_message",
+          "contextId": "e13-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e13-rung-3",
+          "parameters": {
+            "words": 6
+          },
+          "representation": "adult_reviewed_message",
+          "contextId": "e13-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E07, E09. Rationale requires educator review before release.",
+      "assessmentLimits": "Adult observation required; tile selection cannot certify this outcome.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E14",
+      "contexts": [
+        {
+          "id": "e14-context-1",
+          "description": "Choose a kind response and explain"
+        },
+        {
+          "id": "e14-context-2",
+          "description": "Discuss a festival helping choice"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e14-rung-1",
+          "parameters": {
+            "choices": 2
+          },
+          "representation": "picture_discussion",
+          "contextId": "e14-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e14-rung-2",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "adult_reviewed_response",
+          "contextId": "e14-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e14-rung-3",
+          "parameters": {
+            "choices": 3
+          },
+          "representation": "picture_discussion",
+          "contextId": "e14-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E11. Rationale requires educator review before release.",
+      "assessmentLimits": "Adult observation required; tile selection cannot certify this outcome.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    },
+    {
+      "skillId": "E15",
+      "contexts": [
+        {
+          "id": "e15-context-1",
+          "description": "Write an expedition postcard"
+        },
+        {
+          "id": "e15-context-2",
+          "description": "Describe a new garden discovery"
+        }
+      ],
+      "difficultyLadder": [
+        {
+          "id": "e15-rung-1",
+          "parameters": {
+            "words": 4
+          },
+          "representation": "sentence_tiles",
+          "contextId": "e15-context-1",
+          "supportAvailable": true
+        },
+        {
+          "id": "e15-rung-2",
+          "parameters": {
+            "words": 7
+          },
+          "representation": "adult_reviewed_postcard",
+          "contextId": "e15-context-2",
+          "supportAvailable": true
+        },
+        {
+          "id": "e15-rung-3",
+          "parameters": {
+            "words": 10
+          },
+          "representation": "adult_reviewed_postcard",
+          "contextId": "e15-context-2",
+          "supportAvailable": true
+        }
+      ],
+      "prerequisiteRationale": "Proposed prerequisite practice: E10, E13. Rationale requires educator review before release.",
+      "assessmentLimits": "Adult observation required; tile selection cannot certify this outcome.",
+      "variantStatus": "draft-parameters-not-calibrated-items"
+    }
+  ]
+}

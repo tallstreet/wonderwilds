@@ -1,0 +1,388 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "wonderwilds-story-1.0.0",
+  "reviewStatus": "pending",
+  "preservedAvatarIds": [
+    "rose",
+    "sky",
+    "gold",
+    "poppy",
+    "wren",
+    "clover",
+    "mochi"
+  ],
+  "creatures": [
+    {
+      "id": "pip",
+      "name": "Pip",
+      "regionId": "meadow",
+      "species": "kitten",
+      "silhouette": "tiny round ears and a short star-tipped cape",
+      "personality": "curious and patient",
+      "preferredHabitat": "bridge garden",
+      "habitatClue": "Find the tiny paw marks beside the repaired bridge.",
+      "assetId": "friend-pip",
+      "discovery": {
+        "eligibleAfterBeat": "meadow-welcome",
+        "guaranteedFirst": true,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-pip",
+      "assistance": {
+        "abilityId": "light",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "pip-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "meadow_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-pip-glow"
+      }
+    },
+    {
+      "id": "tansy",
+      "name": "Tansy",
+      "regionId": "meadow",
+      "species": "hedgehog",
+      "silhouette": "soft leaf-shaped quills",
+      "personality": "careful and welcoming",
+      "preferredHabitat": "flower beds",
+      "habitatClue": "Look for a little watering cup by the waking flowers.",
+      "assetId": "friend-tansy",
+      "discovery": {
+        "eligibleAfterBeat": "meadow-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-tansy",
+      "assistance": {
+        "abilityId": "garden",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "tansy-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "meadow_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-tansy-glow"
+      }
+    },
+    {
+      "id": "nib",
+      "name": "Nib",
+      "regionId": "meadow",
+      "species": "field mouse",
+      "silhouette": "large round ears and a seed satchel",
+      "personality": "thoughtful and playful",
+      "preferredHabitat": "picnic clearing",
+      "habitatClue": "Follow the neatly sorted picnic cups.",
+      "assetId": "friend-nib",
+      "discovery": {
+        "eligibleAfterBeat": "meadow-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-nib",
+      "assistance": {
+        "abilityId": "sort",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "nib-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "meadow_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-nib-glow"
+      }
+    },
+    {
+      "id": "flutter",
+      "name": "Flutter",
+      "regionId": "meadow",
+      "species": "moth",
+      "silhouette": "rounded petal wings",
+      "personality": "quiet and observant",
+      "preferredHabitat": "letter tree",
+      "habitatClue": "Look for a repeating trail of paper petals.",
+      "assetId": "friend-flutter",
+      "discovery": {
+        "eligibleAfterBeat": "meadow-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-flutter",
+      "assistance": {
+        "abilityId": "pattern",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "flutter-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "meadow_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-flutter-glow"
+      }
+    },
+    {
+      "id": "cleo",
+      "name": "Cleo",
+      "regionId": "orchard",
+      "species": "kitten",
+      "silhouette": "pointed ears and a broad rainbow cape",
+      "personality": "inventive and generous",
+      "preferredHabitat": "seed shed",
+      "habitatClue": "Find the seed baskets beside the festival path.",
+      "assetId": "friend-cleo",
+      "discovery": {
+        "eligibleAfterBeat": "orchard-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-cleo",
+      "assistance": {
+        "abilityId": "garden",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "cleo-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "orchard_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-cleo-glow"
+      }
+    },
+    {
+      "id": "bramble",
+      "name": "Bramble",
+      "regionId": "orchard",
+      "species": "bunny",
+      "silhouette": "one folded ear and a leaf scarf",
+      "personality": "steady and kind",
+      "preferredHabitat": "orchard rows",
+      "habitatClue": "Look for two ropes hanging from the same low branch.",
+      "assetId": "friend-bramble",
+      "discovery": {
+        "eligibleAfterBeat": "orchard-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-bramble",
+      "assistance": {
+        "abilityId": "measure",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "bramble-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "orchard_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-bramble-glow"
+      }
+    },
+    {
+      "id": "patter",
+      "name": "Patter",
+      "regionId": "orchard",
+      "species": "duckling",
+      "silhouette": "wide feet and a messenger bag",
+      "personality": "cheerful and persistent",
+      "preferredHabitat": "courier pond",
+      "habitatClue": "Follow the picture labels beside the little pond.",
+      "assetId": "friend-patter",
+      "discovery": {
+        "eligibleAfterBeat": "orchard-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-patter",
+      "assistance": {
+        "abilityId": "sort",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "patter-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "orchard_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-patter-glow"
+      }
+    },
+    {
+      "id": "twizzle",
+      "name": "Twizzle",
+      "regionId": "orchard",
+      "species": "squirrel",
+      "silhouette": "curling tail with a pale tip",
+      "personality": "imaginative and helpful",
+      "preferredHabitat": "garland tree",
+      "habitatClue": "Find the garland whose shapes repeat.",
+      "assetId": "friend-twizzle",
+      "discovery": {
+        "eligibleAfterBeat": "orchard-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-twizzle",
+      "assistance": {
+        "abilityId": "pattern",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "twizzle-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "orchard_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-twizzle-glow"
+      }
+    },
+    {
+      "id": "luna",
+      "name": "Luna",
+      "regionId": "cove",
+      "species": "sea kitten",
+      "silhouette": "curved ears and a wave-shaped cape",
+      "personality": "brave and gentle",
+      "preferredHabitat": "observatory steps",
+      "habitatClue": "Look for a soft blue glow beside the observatory.",
+      "assetId": "friend-luna",
+      "discovery": {
+        "eligibleAfterBeat": "cove-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-luna",
+      "assistance": {
+        "abilityId": "light",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "luna-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "cove_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-luna-glow"
+      }
+    },
+    {
+      "id": "pebble",
+      "name": "Pebble",
+      "regionId": "cove",
+      "species": "otter",
+      "silhouette": "round face and a smooth shell pouch",
+      "personality": "patient and practical",
+      "preferredHabitat": "shell beach",
+      "habitatClue": "Find three smooth stones beside a shell basket.",
+      "assetId": "friend-pebble",
+      "discovery": {
+        "eligibleAfterBeat": "cove-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-pebble",
+      "assistance": {
+        "abilityId": "sort",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "pebble-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "cove_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-pebble-glow"
+      }
+    },
+    {
+      "id": "glimmer",
+      "name": "Glimmer",
+      "regionId": "cove",
+      "species": "firefly",
+      "silhouette": "oval lantern body and small folded wings",
+      "personality": "friendly and reflective",
+      "preferredHabitat": "tide garden",
+      "habitatClue": "Follow the steady lights above the tide garden.",
+      "assetId": "friend-glimmer",
+      "discovery": {
+        "eligibleAfterBeat": "cove-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-glimmer",
+      "assistance": {
+        "abilityId": "light",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "glimmer-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "cove_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-glimmer-glow"
+      }
+    },
+    {
+      "id": "sail",
+      "name": "Sail",
+      "regionId": "cove",
+      "species": "puffin",
+      "silhouette": "short fan-shaped tail and broad beak",
+      "personality": "calm and encouraging",
+      "preferredHabitat": "harbour lookout",
+      "habitatClue": "Look for a striped flag above the sheltered harbour.",
+      "assetId": "friend-sail",
+      "discovery": {
+        "eligibleAfterBeat": "cove-welcome",
+        "guaranteedFirst": false,
+        "poolWeight": 1
+      },
+      "helpQuestId": "befriend-sail",
+      "assistance": {
+        "abilityId": "pattern",
+        "optionalOnly": true,
+        "marksSupport": true,
+        "alternative": "Use the same free helper tray from the activity controls."
+      },
+      "transformation": {
+        "id": "sail-glow",
+        "minimumFriendship": 3,
+        "requiredStoryFlag": "cove_light",
+        "reversible": true,
+        "cosmeticOnly": true,
+        "assetId": "friend-sail-glow"
+      }
+    }
+  ]
+}

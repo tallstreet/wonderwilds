@@ -1,0 +1,748 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "wonderwilds-story-1.0.0",
+  "islandId": "starwhisker-island",
+  "displayName": "Wonderwilds: Starwhisker Island",
+  "reviewStatus": "pending",
+  "activation": "disabled_until_integration_and_review",
+  "initialBeatId": "meadow-welcome",
+  "endingBeatId": "cove-finale",
+  "chapters": [
+    {
+      "id": "meadow",
+      "name": "Clover Meadow",
+      "entryBeatId": "meadow-welcome",
+      "finaleBeatId": "meadow-finale",
+      "beatIds": [
+        "meadow-welcome",
+        "meadow-bridge",
+        "meadow-picnic",
+        "meadow-garden",
+        "meadow-letter",
+        "meadow-finale"
+      ],
+      "lanternLightFlag": "meadow_light"
+    },
+    {
+      "id": "orchard",
+      "name": "Peachy Orchard",
+      "entryBeatId": "orchard-welcome",
+      "finaleBeatId": "orchard-finale",
+      "beatIds": [
+        "orchard-welcome",
+        "orchard-seeds",
+        "orchard-ropes",
+        "orchard-delivery",
+        "orchard-instructions",
+        "orchard-finale"
+      ],
+      "lanternLightFlag": "orchard_light"
+    },
+    {
+      "id": "cove",
+      "name": "Starlight Cove",
+      "entryBeatId": "cove-welcome",
+      "finaleBeatId": "cove-finale",
+      "beatIds": [
+        "cove-welcome",
+        "cove-observatory",
+        "cove-shells",
+        "cove-message",
+        "cove-storybook",
+        "cove-finale"
+      ],
+      "lanternLightFlag": "cove_light"
+    }
+  ],
+  "beats": [
+    {
+      "id": "meadow-welcome",
+      "chapterId": "meadow",
+      "title": "Meet Pip",
+      "requiresBeatIds": [],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "E01",
+      "templateId": "story_message",
+      "assetIds": [
+        "map-meadow"
+      ],
+      "dialogue": "Pip found a lantern with three empty windows. We can help our neighbours find its lights.",
+      "fallbackDialogue": "Pip found a lantern with three empty windows. We can help our neighbours find its lights.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "meadow_welcome_complete"
+      ],
+      "rewards": [
+        {
+          "id": "meadow-welcome-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "meadow-bridge",
+      "chapterId": "meadow",
+      "title": "Repair the bridge",
+      "requiresBeatIds": [
+        "meadow-welcome"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "M06",
+      "templateId": "missing_quantity",
+      "assetIds": [
+        "map-meadow"
+      ],
+      "dialogue": "Pip has a safe plan for the little bridge. Let us put the missing planks in place.",
+      "fallbackDialogue": "Pip has a safe plan for the little bridge. Let us put the missing planks in place.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "meadow_bridge_complete"
+      ],
+      "rewards": [
+        {
+          "id": "meadow-bridge-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "meadow-picnic",
+      "chapterId": "meadow",
+      "title": "Share the picnic",
+      "requiresBeatIds": [
+        "meadow-bridge"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "M08",
+      "templateId": "equal_sharing",
+      "assetIds": [
+        "map-meadow"
+      ],
+      "dialogue": "Everyone has a place at our picnic. Let us share the berries fairly.",
+      "fallbackDialogue": "Everyone has a place at our picnic. Let us share the berries fairly.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "meadow_picnic_complete"
+      ],
+      "rewards": [
+        {
+          "id": "meadow-picnic-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "meadow-garden",
+      "chapterId": "meadow",
+      "title": "Wake the garden",
+      "requiresBeatIds": [
+        "meadow-picnic"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "M05",
+      "templateId": "pattern_sort",
+      "assetIds": [
+        "map-meadow"
+      ],
+      "dialogue": "The sleepy flowers are ready to open. Help them follow their counting path.",
+      "fallbackDialogue": "The sleepy flowers are ready to open. Help them follow their counting path.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "meadow_garden_complete"
+      ],
+      "rewards": [
+        {
+          "id": "meadow-garden-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "meadow-letter",
+      "chapterId": "meadow",
+      "title": "Find the misplaced letter",
+      "requiresBeatIds": [
+        "meadow-garden"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "E05",
+      "templateId": "phonics_word_building",
+      "assetIds": [
+        "map-meadow"
+      ],
+      "dialogue": "A letter is waiting beside the garden. Match its taught sound to its label.",
+      "fallbackDialogue": "A letter is waiting beside the garden. Match its taught sound to its label.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "meadow_letter_complete"
+      ],
+      "rewards": [
+        {
+          "id": "meadow-letter-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "meadow-finale",
+      "chapterId": "meadow",
+      "title": "Carry the first light",
+      "requiresBeatIds": [
+        "meadow-letter"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "E11",
+      "templateId": "story_message",
+      "assetIds": [
+        "map-meadow"
+      ],
+      "dialogue": "Remember our helping journey, then carry the first light to the lantern.",
+      "fallbackDialogue": "Remember our helping journey, then carry the first light to the lantern.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "meadow_light"
+      ],
+      "rewards": [
+        {
+          "id": "meadow-finale-xp",
+          "kind": "explorer_xp",
+          "amount": 20
+        },
+        {
+          "id": "meadow-light",
+          "kind": "story_flag",
+          "value": "meadow_light"
+        },
+        {
+          "id": "unlock-journal",
+          "kind": "feature",
+          "value": "journal"
+        },
+        {
+          "id": "unlock-team-1",
+          "kind": "feature",
+          "value": "team_slot_1"
+        }
+      ],
+      "finaleSteps": [
+        "meadow-bridge",
+        "meadow-picnic",
+        "meadow-garden",
+        "meadow-letter"
+      ]
+    },
+    {
+      "id": "orchard-welcome",
+      "chapterId": "orchard",
+      "title": "Meet Cleo",
+      "requiresBeatIds": [
+        "meadow-finale"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "E01",
+      "templateId": "story_message",
+      "assetIds": [
+        "map-orchard"
+      ],
+      "dialogue": "Cleo welcomes us to the orchard. The festival supplies need a helping paw.",
+      "fallbackDialogue": "Cleo welcomes us to the orchard. The festival supplies need a helping paw.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "orchard_welcome_complete"
+      ],
+      "rewards": [
+        {
+          "id": "orchard-welcome-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "orchard-seeds",
+      "chapterId": "orchard",
+      "title": "Restore the seed route",
+      "requiresBeatIds": [
+        "orchard-welcome"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "M09",
+      "templateId": "pattern_sort",
+      "assetIds": [
+        "map-orchard"
+      ],
+      "dialogue": "The seed baskets have a repeating trail. Help Cleo finish the pattern.",
+      "fallbackDialogue": "The seed baskets have a repeating trail. Help Cleo finish the pattern.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "orchard_seeds_complete"
+      ],
+      "rewards": [
+        {
+          "id": "orchard-seeds-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "orchard-ropes",
+      "chapterId": "orchard",
+      "title": "Prepare the festival",
+      "requiresBeatIds": [
+        "orchard-seeds"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "M12",
+      "templateId": "spatial_measurement",
+      "assetIds": [
+        "map-orchard"
+      ],
+      "dialogue": "Two ropes can hold our festival sign. Compare them side by side.",
+      "fallbackDialogue": "Two ropes can hold our festival sign. Compare them side by side.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "orchard_ropes_complete"
+      ],
+      "rewards": [
+        {
+          "id": "orchard-ropes-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "orchard-delivery",
+      "chapterId": "orchard",
+      "title": "Read the courier label",
+      "requiresBeatIds": [
+        "orchard-ropes"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "E06",
+      "templateId": "phonics_word_building",
+      "assetIds": [
+        "map-orchard"
+      ],
+      "dialogue": "Patter has a parcel with a taught word. Use its sounds to find its place.",
+      "fallbackDialogue": "Patter has a parcel with a taught word. Use its sounds to find its place.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "orchard_delivery_complete"
+      ],
+      "rewards": [
+        {
+          "id": "orchard-delivery-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "orchard-instructions",
+      "chapterId": "orchard",
+      "title": "Follow the festival message",
+      "requiresBeatIds": [
+        "orchard-delivery"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "E10",
+      "templateId": "story_message",
+      "assetIds": [
+        "map-orchard"
+      ],
+      "dialogue": "Read the short festival message and choose the supplies our friend needs.",
+      "fallbackDialogue": "Read the short festival message and choose the supplies our friend needs.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "orchard_instructions_complete"
+      ],
+      "rewards": [
+        {
+          "id": "orchard-instructions-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "orchard-finale",
+      "chapterId": "orchard",
+      "title": "Carry the second light",
+      "requiresBeatIds": [
+        "orchard-instructions"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "M09",
+      "templateId": "pattern_sort",
+      "assetIds": [
+        "map-orchard"
+      ],
+      "dialogue": "Build a garland together and bring the second light to the lantern.",
+      "fallbackDialogue": "Build a garland together and bring the second light to the lantern.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "orchard_light"
+      ],
+      "rewards": [
+        {
+          "id": "orchard-finale-xp",
+          "kind": "explorer_xp",
+          "amount": 20
+        },
+        {
+          "id": "orchard-light",
+          "kind": "story_flag",
+          "value": "orchard_light"
+        },
+        {
+          "id": "unlock-gardening",
+          "kind": "feature",
+          "value": "gardening"
+        },
+        {
+          "id": "unlock-team-2",
+          "kind": "feature",
+          "value": "team_slot_2"
+        }
+      ],
+      "finaleSteps": [
+        "orchard-seeds",
+        "orchard-ropes",
+        "orchard-delivery",
+        "orchard-instructions"
+      ]
+    },
+    {
+      "id": "cove-welcome",
+      "chapterId": "cove",
+      "title": "Meet Luna",
+      "requiresBeatIds": [
+        "orchard-finale"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "E01",
+      "templateId": "story_message",
+      "assetIds": [
+        "map-cove"
+      ],
+      "dialogue": "Luna is watching the calm cove. The observatory needs a little care.",
+      "fallbackDialogue": "Luna is watching the calm cove. The observatory needs a little care.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "cove_welcome_complete"
+      ],
+      "rewards": [
+        {
+          "id": "cove-welcome-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "cove-observatory",
+      "chapterId": "cove",
+      "title": "Repair the observatory",
+      "requiresBeatIds": [
+        "cove-welcome"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "M11",
+      "templateId": "spatial_measurement",
+      "assetIds": [
+        "map-cove"
+      ],
+      "dialogue": "Use the picture guide to put the observatory tools in their places.",
+      "fallbackDialogue": "Use the picture guide to put the observatory tools in their places.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "cove_observatory_complete"
+      ],
+      "rewards": [
+        {
+          "id": "cove-observatory-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "cove-shells",
+      "chapterId": "cove",
+      "title": "Sort the shell discoveries",
+      "requiresBeatIds": [
+        "cove-observatory"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "M14",
+      "templateId": "pattern_sort",
+      "assetIds": [
+        "map-cove"
+      ],
+      "dialogue": "Pebble has found a basket of shells. Sort them using the picture rule.",
+      "fallbackDialogue": "Pebble has found a basket of shells. Sort them using the picture rule.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "cove_shells_complete"
+      ],
+      "rewards": [
+        {
+          "id": "cove-shells-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "cove-message",
+      "chapterId": "cove",
+      "title": "Follow the harbour message",
+      "requiresBeatIds": [
+        "cove-shells"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "E12",
+      "templateId": "story_message",
+      "assetIds": [
+        "map-cove"
+      ],
+      "dialogue": "Read a short message to find the friend waiting at the harbour.",
+      "fallbackDialogue": "Read a short message to find the friend waiting at the harbour.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "cove_message_complete"
+      ],
+      "rewards": [
+        {
+          "id": "cove-message-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "cove-storybook",
+      "chapterId": "cove",
+      "title": "Restore the journey story",
+      "requiresBeatIds": [
+        "cove-message"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "E11",
+      "templateId": "story_message",
+      "assetIds": [
+        "map-cove"
+      ],
+      "dialogue": "Put the pictures in order to retell a little garden story for our friends.",
+      "fallbackDialogue": "Put the pictures in order to retell a little garden story for our friends.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "cove_storybook_complete"
+      ],
+      "rewards": [
+        {
+          "id": "cove-storybook-xp",
+          "kind": "explorer_xp",
+          "amount": 5
+        }
+      ],
+      "finaleSteps": []
+    },
+    {
+      "id": "cove-finale",
+      "chapterId": "cove",
+      "title": "Light the Wonder Lantern",
+      "requiresBeatIds": [
+        "cove-storybook"
+      ],
+      "requiredCreatureIds": [],
+      "requiredMasteryIds": [],
+      "skillId": "M06",
+      "templateId": "missing_quantity",
+      "assetIds": [
+        "map-cove"
+      ],
+      "dialogue": "Together we can fit the final lantern pieces and welcome every friend.",
+      "fallbackDialogue": "Together we can fit the final lantern pieces and welcome every friend.",
+      "supportedCompletion": {
+        "allowed": true,
+        "route": "Offer concrete hints, then a worked example and a together action.",
+        "grantsSameStoryRewards": true,
+        "independentEvidence": false
+      },
+      "completionFlags": [
+        "cove_light"
+      ],
+      "rewards": [
+        {
+          "id": "cove-finale-xp",
+          "kind": "explorer_xp",
+          "amount": 20
+        },
+        {
+          "id": "cove-light",
+          "kind": "story_flag",
+          "value": "cove_light"
+        },
+        {
+          "id": "unlock-ending",
+          "kind": "feature",
+          "value": "ending"
+        },
+        {
+          "id": "unlock-remix",
+          "kind": "feature",
+          "value": "expedition_remix"
+        },
+        {
+          "id": "unlock-constellations",
+          "kind": "feature",
+          "value": "constellation_journal"
+        }
+      ],
+      "finaleSteps": [
+        "cove-observatory",
+        "cove-shells",
+        "cove-message",
+        "cove-storybook"
+      ]
+    }
+  ],
+  "ending": {
+    "requiredFlags": [
+      "meadow_light",
+      "orchard_light",
+      "cove_light"
+    ],
+    "dialogue": "The Wonder Lantern glows with three gentle lights. Our friends share the celebration. There are always more kind discoveries to make, whenever you choose to return.",
+    "postEndingOptions": [
+      "optional_practice",
+      "collection_discovery",
+      "expedition_remix"
+    ],
+    "mandatoryPractice": false
+  }
+}
