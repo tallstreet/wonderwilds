@@ -1,6 +1,8 @@
 # Wonderwilds implementation plan
 
-Version: 1.0 · Prepared: 28 October 2026 · Status: implementation-ready proposal, not completed implementation
+Version: 1.1 · Updated: 29 October 2026 · Status: broader architecture and release roadmap
+
+The [companion progression plan](COMPANION_PROGRESSION_PLAN.md) governs the next gameplay implementation sequence and supersedes earlier collection/progression sequencing here. Use [implementation status](IMPLEMENTATION_STATUS.md) for delivered work. Existing WW task IDs remain reference scopes, not a queue to rebuild completed foundations. Live AI and fine-tuning are deferred and do not block the authored companion expansion.
 
 ## 1. Outcome and non-negotiable decisions
 
@@ -16,22 +18,19 @@ Initial release: three authored regions, an ending, twelve collectible friends, 
 
 ## 2. Existing project: preserve and extend
 
-Inspected `/Users/gary/Documents/Development/mindmap2` on 28 October 2026. The workspace root is not a Git repository. No applicable AGENTS.md was found in the inspected project. Establish version control before implementation without overwriting existing files.
+The current repository is `/Users/gary/Documents/Development/wonderwilds`, under Git with npm lockfiles and a pinned Rust workspace. The Phaser guest adventure is preserved; the local server-backed world now connects six Meadow story beats and four friendships through the real API and PostgreSQL.
 
-| Existing material | Observed implementation | Plan |
+| Existing material | Current baseline | Next work |
 | --- | --- | --- |
-| `frontend/package.json` | Phaser 3, Vite, strict TypeScript; typecheck/lint/format/test/build scripts | Retain stack; standardise on npm and its lockfile after checking the competing pnpm lockfile |
-| `frontend/src/world.ts`, navigation/geometry/locomotion/facing modules | Movement, map interactions, collision and directional sprites | Preserve; extend via region data and server state adapter |
-| `frontend/src/content.ts` | Missing quantity, equal sharing, sequence activities; nine skill labels across three regions | Extract validated content packs; review year labels rather than assuming alignment |
-| `frontend/src/progress.ts` | Only Meadow encounters active; local save validation and practice evidence | Keep guest mode; add explicit migration and server persistence |
-| `frontend/src/types.ts` | Encounter union, attempt/support evidence, progress contract | Adapt through generated shared contracts without abrupt rewrite |
-| `frontend/src/main.ts` | HTML activity controls, journal and grown-up view | Retain accessible DOM controls; split by feature as needed |
-| `frontend/public/assets/` | Original generated maps, superhero kitty/bird/bunny roster, shared atlases | Keep art direction; verify provenance, licensing and atlas coverage |
-| `docs/IMPLEMENTATION_PLAN.md` | Earlier Starwhisker Island frontend milestone | Preserve as historical scope; this document governs Wonderwilds expansion |
-| `frontend/docs/CURRICULUM_SLICE.md` | Three fixed activities; explicitly not validated mastery | Import as legacy observations only |
-| Existing `*.test.ts` and review documents | Movement, answers, storage, assets and progression regression coverage | Baseline again in WW-01; this planning task did not run application tests |
+| `frontend/src/world.ts` and movement modules | Playable Meadow, server-driven world changes, one follower | Team followers and regional integration |
+| `frontend/src/backend-world.ts` and `backend-world-model.ts` | Server activities, journal, companion selection and summaries | Character progression, training and collection UI |
+| `backend/crates/domain/src/engine.rs` | Explorer XP, friendship, teams, discovery and cosmetic transformations | Individual XP, training grants and integration |
+| `backend/crates/api/src/game/` | Authenticated transactions, retries, encounter support and abandonment | Expanded commands/snapshots, training and regional eligibility |
+| `contracts/` | Schemas, generated Rust/TS and shared fixtures | Compatible extensions and migration fixtures |
+| `content/` | Three authored regions, twelve friends, curriculum/activity definitions | Training milestones, personal quests and remaining content reviews |
+| Guest save and existing art | Separate local progress and preserved hero IDs; friend art provisional | Preserve guest data and provide distinct friend art |
 
-Current story: bridge repair, berry picnic, flower garden, then Pip recruitment. Save key is `starwhisker.meadow.v1`; current records retain the last 200 completed practice sessions. No backend, accounts, live AI, or fine-tuning is connected according to code and README. The README describes optional external fonts and browser speech, which require privacy/accessibility review. Preserve Starwhisker Island as the first island within Wonderwilds to avoid discarding its identity.
+Regional travel, transformations in the browser, production account flows and guest import remain outstanding. The local developer session is not production identity integration. No live model is required for the current authored adventure. Preserve the original guest save key `starwhisker.meadow.v1` and existing hero IDs.
 
 ### Migration rules
 
@@ -62,9 +61,9 @@ Core loop: explore → discover a need → choose a friend/tool → manipulate m
 
 - Twelve initial original friends: four per region, with distinct silhouettes, personalities, preferred habitats and assistance abilities. Pip remains the first companion; existing roster appearances remain selectable avatars.
 - Befriend creatures by completing help quests and discovering habitat clues. No paid random drops, coercive streaks, real-time expiry, trading or multiplayer in the first release.
-- Maintain three independent progress axes: Explorer XP (story/discoveries), friendship (companion interactions), skill evidence (learning). Assistance never removes story rewards.
-- Example level thresholds, subject to playtest tuning: 0, 20, 50, 90, 140 XP. Award first-time quest XP once; repeat practice earns acknowledgement without infinite XP farming.
-- Companion transformations are reversible cosmetic/ability milestones from friendship and story flags. No creature becomes unhappy when the player leaves.
+- Maintain four independent progress axes: Explorer XP (story/discoveries), character XP (individual growth), friendship (companion interactions), and skill evidence (learning). Assistance never removes story rewards.
+- Example level thresholds, subject to playtest tuning: 0, 20, 50, 90, 140 XP. Award first-time story XP once. Character training awards XP once per authored milestone, with fresh practice variants and no repeated reward for an already granted milestone; see the companion plan.
+- Companion transformations remain reversible cosmetic milestones from friendship and story flags; preserve existing unlocks. New character-level rewards and optional exploration abilities follow the companion plan. No creature becomes unhappy when the player leaves.
 - Abilities reveal optional paths or offer manipulatives, such as lighting a clue or organising objects. They cannot bypass authority checks or count as independent learner answers.
 - Team selection creates gentle strategy: choose a light, garden or pattern helper. Every essential route has a free, accessible alternative; no rare creature blocks learning.
 - Journal includes silhouettes, habitat clues and guaranteed discovery paths. A configurable seeded encounter table limits repetition and guarantees access to missing friends after a bounded number of eligible expeditions.
@@ -148,16 +147,17 @@ Keep story gates and academic gates separate. Parents may choose maths, English 
 ```text
 Browser: existing Phaser world + HTML activities + generated TypeScript API client
     → HTTPS /api/v1
-Rust API (Axum/Tokio proposed) → Rust domain/assessment/mastery crates → PostgreSQL
+Rust API (Axum/Tokio) → Rust domain/assessment/mastery crates → PostgreSQL
     → Rust director worker → replaceable model provider
     → approved, versioned content packs / private object storage
 Offline tooling: synthetic dataset builders, educator review, evaluation, optional fine-tuning
 ```
 
-Suggested layout (new paths unless existing):
+Architecture map (existing core paths with optional future tooling):
 
 ```text
-backend/{Cargo.toml,crates/{domain,learning,content,api,director},migrations/}
+Cargo.toml                            # existing root workspace
+backend/{crates/{domain,learning,content,api,director},migrations/}
 contracts/{openapi.yaml,schemas/,fixtures/}
 content/{curriculum,activities,story,creatures,manifests}/
 frontend/src/{api,learning,ui}/          # add incrementally to current modules
@@ -167,7 +167,7 @@ qa/{e2e,fixtures,load}/
 docs/{adr,privacy,runbooks}/
 ```
 
-Choose exact Rust dependency versions in WW-02 and commit Cargo.lock. PostgreSQL handles transactions, unique grants and revision checks. Start with a modular monolith and a worker using a transactional outbox; avoid microservices and extra infrastructure without measured need.
+Retain the pinned Rust toolchain, dependency versions and committed Cargo.lock; update them only for a concrete requirement. PostgreSQL handles transactions, unique grants and revision checks. Start with a modular monolith and a worker using a transactional outbox; avoid microservices and extra infrastructure without measured need.
 
 ### Shared interfaces
 
@@ -317,11 +317,11 @@ If launching in the US, assess COPPA applicability and verified parental consent
 
 Deployment: static frontend through a CDN; containerised Rust API/worker; managed PostgreSQL; private content storage; separate development/staging/production accounts. Prefer Australian hosting for the initial audience, but verify every vendor/subprocessor and cross-border transfer rather than equating hosting region with compliance. Use expand/contract database migrations, compatibility-tested content activation, feature flags for AI and new regions, and rollback to a known application/content/model combination. Back up encrypted data and rehearse restoration. Proposed pilot targets: 99.5% availability, RPO 24 hours, RTO 4 hours; owners approve these before launch.
 
-## 9. Subagent execution protocol
+## 9. Reference work packages
 
-The following are independently assignable implementation tasks, not instructions to begin implementation during this planning request. Each task gets one owner, a branch/worktree after version control exists, named write scope and a concrete handoff. Dependencies below are hard integration dependencies; agents may prepare mock-based work against frozen contracts earlier but cannot declare completion before those dependencies pass.
+These original WW work packages retain scope, interfaces and acceptance requirements for the broader release. Consult implementation status before selecting work: many foundations are already implemented, with review and integration gates still open. The companion plan replaces their immediate gameplay execution order. These packages do not require parallel agents or new worktrees; use the existing checkout unless the user requests otherwise.
 
-Only the integration owner edits root manifests, shared contracts or shared entrypoints when concurrent tasks overlap. Feature owners expose functions/components in their own paths and submit explicit wiring instructions. Schema changes require an ADR and consumer fixture updates; never silently change another task's contract. Merge in the listed topological order, not completion-time order.
+Only the integration owner edits root manifests, shared contracts or shared entrypoints when concurrent tasks overlap. Feature owners expose functions/components in their own paths and submit explicit wiring instructions. Schema changes require an ADR and consumer fixture updates; never silently change another task's contract. Respect remaining dependencies and the companion plan delivery order.
 
 Every handoff includes changed files, contract versions, exact test commands/results, fixtures, migration/rollback notes, limitations and reviewer. “Done” means deliverables checked and acceptance evidence attached; placeholders and unrun tests do not count. Security findings require concrete boundary evidence, not speculative vulnerability labels.
 
@@ -330,7 +330,7 @@ Every handoff includes changed files, contract versions, exact test commands/res
 - **Depends:** none. **Scope:** `docs/adr/baseline.md`, baseline fixtures and repository setup; no gameplay redesign.
 - **Interfaces:** existing save v1, current module exports and scripts.
 - **Deliverables:** tracked baseline, asset/provenance inventory, captured save fixtures, dependency/lockfile decision, current regression results and known failures.
-- **Acceptance:** existing adventure and saves accounted for; no existing work lost; Rust backend absence recorded.
+- **Acceptance:** existing adventure and saves accounted for; no existing work lost; current guest/server boundaries recorded.
 - **Tests:** current frontend check command; desktop/tablet smoke; valid/corrupt/storage-blocked save fixtures. Record failures before changing code.
 
 ### WW-02 — Contracts and Rust workspace
@@ -471,7 +471,7 @@ Every handoff includes changed files, contract versions, exact test commands/res
 
 ### WW-19 — Integrated QA, security review and pilot
 
-- **Depends:** WW-12, WW-14, WW-17, WW-18. **Scope:** `qa/`, release evidence and research protocol; production feature changes go back to owners.
+- **Depends:** WW-12, WW-17, WW-18; WW-14 only for an AI-enabled release. **Scope:** `qa/`, release evidence and research protocol; production feature changes go back to owners.
 - **Interfaces:** complete browser/API flows, privacy data map, curriculum review ledger and release checklist.
 - **Deliverables:** cross-browser/accessibility matrix, bounded load tests, security findings with evidence, consented parent/child pilot and prioritised fixes.
 - **Acceptance:** no unresolved critical/high security findings; complete offline/authored path; educator approval of released material; child testing supports understandable navigation and activities. No automatic claim of learning efficacy.
@@ -485,38 +485,27 @@ Every handoff includes changed files, contract versions, exact test commands/res
 - **Acceptance:** no complete-coverage claim until audited ledger is complete; outcomes requiring adult observation explicitly separated; new bands validated beyond simply increasing quantities.
 - **Tests:** full pack validator, prerequisite/migration tests, unseen transfer tasks, representation coverage and educator/learner pilot for each band.
 
-## 10. Dependency waves, milestones and integration gates
+## 10. Current delivery order and integration gates
 
-A wave is an earliest start opportunity, not a promise that each task has equal duration. Tasks in the same wave can be assigned independently within their write scopes. Do not hold an otherwise-ready task for unrelated optional work.
+The original foundation-building waves are superseded by the implemented Rust/API/Meadow baseline. Do not restart WW-01–11 from scratch. Retain their outstanding acceptance requirements in the implementation status ledger.
 
-| Wave | Tasks ready after previous dependencies | Integration output |
+| Delivery | Work | Gate |
 | --- | --- | --- |
-| 0 | WW-01 | Verified prototype baseline |
-| 1 | WW-02 | Frozen contracts and buildable Rust workspace |
-| 2 | WW-03, WW-04, WW-08 | Curriculum/story packs and identity/storage primitives |
-| 3 | WW-05, WW-06 | Pure gameplay and assessment |
-| 4 | WW-07, WW-11 | Mastery/scheduler and activity renderers |
-| 5 | WW-09 | Authoritative Rust API |
-| 6 | WW-10, WW-13 | Browser migration and authored director |
-| 7 | WW-12, WW-14, WW-15, WW-17, WW-18 | Full authored game, live adapter, dataset, parent tools, staging |
-| 8 | WW-16, WW-19 | Fine-tuning evidence and integrated pilot, independently gated |
-| 9 | WW-20 | Audited breadth expansion |
+| Pip progression loop | Minimum companion plan phases 1–4 | Recruit, train, level up, see reward and reload without duplicate grants |
+| Complete Meadow progression | Finish phases 1–4 for four friends | Reachable milestones, collection UI, compatible saves and sustained-play storage strategy |
+| Team and friendship gameplay | Phase 5 | Two-slot team, optional roles, friendship and reversible appearances |
+| Full authored journey | Phase 6 and remaining WW-12 integration | Three regions, twelve friends and supported ending |
+| Public release readiness | Remaining WW-08–10, WW-17–19 requirements | Identity/lifecycle flows, reviewed content, accessibility, security and operational evidence |
+| Optional model experiments | WW-14–16, separately scheduled | Provider/privacy/budget decisions, fallback and evaluation evidence; never an authored-release dependency |
+| Curriculum expansion | WW-20 | Audited Foundation coverage before completeness claims; reviewed extension packs |
 
-| Milestone | Required work | Gate / evidence |
-| --- | --- | --- |
-| M0: Baseline and contracts | WW-01–02 | Existing prototype accounted for; schemas and fixtures pass both languages |
-| M1: Headless learning adventure | WW-03–09 | Rust completes a chapter; deterministic replay; no duplicate rewards; mastery simulations pass |
-| M2: Browser vertical slice | WW-10–11 plus Meadow integration of WW-12 | Old save imports; one maths and one English encounter work through Rust; supported completion and parent summary verified |
-| M3: Complete authored alpha | WW-12–13, WW-17–18 | All regions and ending playable with AI off; coverage limits displayed; restore drill passes |
-| M4: Generative beta | WW-14–15, WW-19 | Safety/fallback/evaluation gates pass; privacy review and consented pilot complete |
-| M5: Fine-tuning decision | WW-16 | Reproducible comparison; model promoted only if beneficial and safe; independent of authored release |
-| M6: Expanded curriculum release | WW-20 | Foundation coverage audit complete before full-coverage claims; each extension pack independently reviewed |
-
-Every merge gate: contract compatibility, relevant unit/integration tests, asset/content validation and migration fixtures. Release gate: Rust format/clippy/test, frontend typecheck/lint/format/test/build, browser journey tests, security/privacy findings disposition, signed content manifest, rollback rehearsal and named operational owner. Do not treat a successful build as proof of pedagogical or accessibility quality.
+Every implementation gate includes compatible contracts and saves, relevant unit/integration tests, asset/content validation and browser journeys. Public release additionally requires reviewed content, privacy/security findings disposition, rollback rehearsal and an operational owner. Passing a build does not establish educational or accessibility quality.
 
 ## 11. Validation commands and release evidence
 
-Existing frontend commands (run from `frontend/`): `npm ci`, then `npm run check`. Baseline installation may need permitted network access; do not silently change lockfiles. New backend commands after WW-02: `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace --locked`. Additional proposed scripts must actually be implemented by their owners: contract drift check (WW-02), content validation (WW-06/17), replay suite (WW-05), browser E2E (WW-19), and director evaluation (WW-15).
+Tooling portability: follow `AGENTS.md` for the actual host. On macOS, pass the installed Cargo/rustup homes to `scripts/check.sh`; `scripts/check-postgres.sh` currently requires the prepared Linux environment or a deliberate portability update.
+
+Current repository checks are `bash scripts/check.sh`; real PostgreSQL validation is `sh scripts/check-postgres.sh`. Contract drift is checked with `python3 scripts/generate-contracts.py --check`. Browser journeys use the isolated QA database and setup documented in the README. Run targeted companion tests as each phase lands, then the relevant full checks. Preserve locked dependencies unless a change requires updating them.
 
 Maintain release evidence keyed by app, schema, rules, content, mastery-policy and model versions. Include test counts/results, rejected-case examples, known limits, educator approvals, privacy review date and rollback target. Existing README test counts are historical descriptions and must not be carried forward as new verification.
 
@@ -524,9 +513,9 @@ Maintain release evidence keyed by app, schema, rules, content, mastery-policy a
 
 Proceed with the defaults in this plan while owners resolve these at their specified gates:
 
-- Product/education owner at M0: confirm first-release skill slice, audience and accessibility priorities.
-- Engineering owner at M0: establish Git, choose one JS package manager and pin Rust/tooling versions.
-- Education owner at M1: approve prerequisites, precise ACARA descriptor mappings and initial mastery thresholds.
+- Product/education owner before companion content activation: confirm the skill slice, milestone pacing and accessibility priorities.
+- Engineering owner before sustained training: define aggregate storage bounds, receipt retention and migration/rollback compatibility; retain existing Git, npm and pinned tooling.
+- Education owner before released content activation: approve prerequisites, precise ACARA descriptor mappings and initial mastery thresholds.
 - Privacy/legal owner before cloud pilot: launch countries, applicable obligations, consent approach, vendors and retention schedule.
 - Operations owner before live AI: model provider, hosting region, per-session cost ceiling and training budget.
 - Research owner before child sessions: parental consent/child assent, observation protocol, stopping conditions and data minimisation.
