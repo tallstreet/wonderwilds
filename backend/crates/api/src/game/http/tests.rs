@@ -397,3 +397,142 @@ async fn configured_but_unavailable_database_is_not_ready() {
         Err(Error::InvalidInput)
     ));
 }
+
+#[tokio::test]
+async fn abandonment_releases_pending_slot_without_rewards_and_is_idempotent() {
+    async fn submit(app: &Router, value: Value) -> (StatusCode, Value) {
+        send(
+            app.clone(),
+            "/api/v1/commands",
+            Some(value),
+            "test-parent-a",
+            "profile-a",
+            true,
+        )
+        .await
+    }
+    let (app, repo) = app();
+    let start = cmd(
+        "abandon-start",
+        0,
+        json!({"type":"start_encounter","beatId":"meadow-welcome"}),
+    );
+    let (status, started) = submit(&app, start).await;
+    assert_eq!(status, StatusCode::OK);
+    let encounter = started["pendingEncounters"][0]["id"].as_str().unwrap();
+    let abandon = cmd(
+        "abandon-command",
+        1,
+        json!({"type":"abandon","encounterId":encounter}),
+    );
+    // A foreign profile cannot close someone else's encounter.
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/commands",
+            Some(cmd(
+                "foreign-abandon",
+                0,
+                json!({"type":"abandon","encounterId":encounter})
+            )),
+            "test-parent-b",
+            "profile-b",
+            true
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    let (status, ended) = submit(&app, abandon.clone()).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(ended["revision"], 2);
+    assert_eq!(ended["pendingEncounters"], json!([]));
+    for field in ["storyFlags", "ownedCreatures", "inventory"] {
+        assert_eq!(ended[field], started[field]);
+    }
+    assert_eq!(ended["learnerSummaries"][0]["status"], "introduced");
+    assert_eq!(
+        submit(&app, abandon.clone()).await,
+        (StatusCode::OK, ended.clone())
+    );
+    {
+        let profiles = repo.profiles.lock().unwrap();
+        let aggregate = &profiles["profile-a"].1;
+        assert_eq!(aggregate.evidence.len(), 1);
+        assert_eq!(
+            aggregate.evidence[0].event_kind,
+            wire::LearningEvidenceEventKind::Abandonment
+        );
+        assert_eq!(
+            aggregate.evidence[0].result,
+            wire::LearningEvidenceResult::NotAssessed
+        );
+        assert!(!aggregate.evidence[0].first_check);
+        assert!(aggregate.domain.completed().is_empty());
+    }
+    assert_eq!(
+        send(
+            app.clone(),
+            &format!("/api/v1/encounters/{encounter}"),
+            None,
+            "test-parent-a",
+            "profile-a",
+            false
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    let attempt = cmd(
+        "answer-after-abandon",
+        2,
+        json!({"type":"attempt","encounterId":encounter,"answer":{"kind":"choices","choiceIds":["message-0"]}}),
+    );
+    assert_eq!(submit(&app, attempt).await.0, StatusCode::CONFLICT);
+    let restart = cmd(
+        "abandon-restart",
+        2,
+        json!({"type":"start_encounter","beatId":"meadow-welcome"}),
+    );
+    let (status, restarted) = submit(&app, restart).await;
+    assert_eq!(status, StatusCode::OK);
+    let next_encounter = restarted["pendingEncounters"][0]["id"].as_str().unwrap();
+    assert_ne!(next_encounter, encounter);
+    assert_eq!(restarted["revision"], 3);
+    // Retrying an old cancellation does not cancel the newly issued encounter.
+    assert_eq!(submit(&app, abandon).await, (StatusCode::OK, ended));
+    assert_eq!(
+        repo.profiles.lock().unwrap()["profile-a"]
+            .1
+            .public_encounter(next_encounter)
+            .unwrap()["id"],
+        next_encounter
+    );
+}
+
+#[test]
+fn saved_encounters_without_abandonment_field_remain_readable() {
+    let content = development_content().unwrap();
+    let mut aggregate = Aggregate::new(&content);
+    aggregate
+        .execute(
+            &cmd(
+                "legacy-start",
+                0,
+                json!({"type":"start_encounter","beatId":"meadow-welcome"}),
+            ),
+            &content,
+            1,
+            "session-a",
+        )
+        .unwrap();
+    let mut legacy = serde_json::to_value(&aggregate).unwrap();
+    for encounter in legacy["encounters"].as_object_mut().unwrap().values_mut() {
+        encounter.as_object_mut().unwrap().remove("abandoned");
+    }
+    let restored: Aggregate = serde_json::from_value(legacy).unwrap();
+    assert_eq!(
+        restored.snapshot(&content).unwrap(),
+        aggregate.snapshot(&content).unwrap()
+    );
+}

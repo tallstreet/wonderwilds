@@ -220,10 +220,44 @@ mod tests {
             .get(0);
         assert_eq!(count, 0);
         let snapshot = repo.execute(&identity, &start, 10).unwrap();
+        let old_eid = snapshot["pendingEncounters"][0]["id"].as_str().unwrap();
+        let abandon = command(
+            "db-abandon",
+            1,
+            json!({"type":"abandon","encounterId":old_eid}),
+        );
+        assert_eq!(
+            faulty.execute(&identity, &abandon, 10),
+            Err(Error::Unavailable)
+        );
+        assert_eq!(
+            repo.read(&identity)
+                .unwrap()
+                .public_encounter(old_eid)
+                .unwrap()["id"],
+            old_eid
+        );
+        let ended = repo.execute(&identity, &abandon, 10).unwrap();
+        assert_eq!(ended["pendingEncounters"], json!([]));
+        let restored = repo.read(&identity).unwrap();
+        assert_eq!(restored.evidence.len(), 1);
+        assert_eq!(
+            restored.evidence[0].event_kind,
+            wire::LearningEvidenceEventKind::Abandonment
+        );
+        assert_eq!(repo.execute(&identity, &abandon, 10).unwrap(), ended);
+        assert!(restored.domain.completed().is_empty());
+        let restart = command(
+            "db-restart",
+            2,
+            json!({"type":"start_encounter","beatId":"meadow-welcome"}),
+        );
+        let snapshot = repo.execute(&identity, &restart, 10).unwrap();
         let eid = snapshot["pendingEncounters"][0]["id"].as_str().unwrap();
+        assert_ne!(eid, old_eid);
         let answer = command(
             "db-answer",
-            1,
+            3,
             json!({"type":"attempt","encounterId":eid,"answer":{"kind":"choices","choiceIds":["message-0"]}}),
         );
         let r1 = repo.clone();
@@ -243,7 +277,7 @@ mod tests {
             )
             .unwrap()
             .get(0);
-        assert_eq!(evidence, 2);
+        assert_eq!(evidence, 3);
         let events: i64 = admin
             .query_one(
                 "SELECT count(*) FROM wonderwilds.game_events WHERE profile_id::text=$1",

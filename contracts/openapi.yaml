@@ -3,7 +3,7 @@
   "info": {
     "title": "Wonderwilds gameplay API",
     "version": "1.0.0",
-    "description": "Contract-first gameplay surface. Endpoints are not implemented by this specification. Parent lifecycle endpoints remain WW-08/09 integration work."
+    "description": "Authored development gameplay surface. Commands support explicit encounter abandonment with revision and idempotency checks. Parent lifecycle endpoints remain integration work."
   },
   "servers": [
     {

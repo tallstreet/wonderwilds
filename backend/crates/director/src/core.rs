@@ -172,6 +172,9 @@ fn eligible(frontier: &Frontier) -> Result<Vec<Candidate>, Rejection> {
             .iter()
             .find(|c| c.id == id)
             .ok_or(Rejection::InvalidEncounter)?;
+        if frontier.completed_beats.contains(candidate.beat) {
+            continue;
+        }
         let b = beat(&content, candidate.beat).ok_or(Rejection::Narrative)?;
         if b["chapterId"] != frontier.region
             || b["skillId"] != candidate.skill
@@ -479,6 +482,34 @@ mod tests {
                 choice
             );
             candidate.task.validate_skill(candidate.skill).unwrap();
+        }
+    }
+
+    #[test]
+    fn completed_beats_never_enter_director_inputs_or_fallbacks() {
+        let mut completed_only = frontier("meadow-welcome", 1);
+        completed_only
+            .completed_beats
+            .insert("meadow-welcome".into());
+        assert_eq!(
+            build_input(&completed_only),
+            Err(Rejection::NoPlayableCandidate)
+        );
+        assert_eq!(
+            choose(&completed_only, None),
+            Err(Rejection::NoPlayableCandidate)
+        );
+
+        let mut mixed = frontier("orchard-finale", 1);
+        assert!(mixed.completed_beats.contains("orchard-seeds"));
+        mixed.candidate_ids.insert(0, "seed-pattern".into());
+        let input = serde_json::to_value(build_input(&mixed).unwrap()).unwrap();
+        assert_eq!(input["allowed"]["beatIds"], json!(["orchard-finale"]));
+        for seed in 0..20 {
+            mixed.seed = seed;
+            let choice = choose(&mixed, None).unwrap();
+            assert_eq!(choice.proposal.beat_id, "orchard-finale");
+            assert_eq!(replay(&mixed, &choice.replay).unwrap(), choice);
         }
     }
 

@@ -41,6 +41,8 @@ pub struct SavedEncounter {
     support: wire::SupportState,
     checks: u64,
     completed: bool,
+    #[serde(default)]
+    abandoned: bool,
     session_id: String,
 }
 #[derive(Clone, Serialize, Deserialize)]
@@ -93,7 +95,11 @@ impl Aggregate {
     }
     pub fn snapshot(&self, content: &Content) -> Result<Value, Error> {
         let mut pending = Vec::new();
-        for encounter in self.encounters.values().filter(|e| !e.completed) {
+        for encounter in self
+            .encounters
+            .values()
+            .filter(|e| !e.completed && !e.abandoned)
+        {
             pending.push(self.public_encounter(&encounter.id)?);
         }
         use wonderwilds_learning::mastery::{self, Observation, Status};
@@ -137,7 +143,7 @@ impl Aggregate {
     }
     pub fn public_encounter(&self, id: &str) -> Result<Value, Error> {
         let saved = self.encounters.get(id).ok_or(Error::NotFound)?;
-        if saved.completed {
+        if saved.completed || saved.abandoned {
             return Err(Error::NotFound);
         }
         let (_, mut encounter) = authored_encounter(&saved.skill, saved.seed, &saved.id)
@@ -209,7 +215,11 @@ impl Aggregate {
         let domain_id = format!("api-{}", digest_id(id));
         match payload["type"].as_str().ok_or(Error::InvalidInput)? {
             "start_encounter" => {
-                if next.encounters.values().any(|e| !e.completed) {
+                if next
+                    .encounters
+                    .values()
+                    .any(|e| !e.completed && !e.abandoned)
+                {
                     return Err(Error::RevisionConflict);
                 }
                 let quest = payload["beatId"].as_str().ok_or(Error::InvalidInput)?;
@@ -253,23 +263,37 @@ impl Aggregate {
                         support: encounter.support,
                         checks: 0,
                         completed: false,
+                        abandoned: false,
                         session_id: session_id.into(),
                     },
                 );
             }
-            "attempt" | "hint" => {
+            "attempt" | "hint" | "abandon" => {
                 let encounter_id = payload["encounterId"].as_str().ok_or(Error::InvalidInput)?;
                 let mut saved = next
                     .encounters
                     .get(encounter_id)
                     .cloned()
                     .ok_or(Error::NotFound)?;
-                if saved.completed {
+                if saved.completed || saved.abandoned {
                     return Err(Error::RevisionConflict);
                 }
                 let (task, mut encounter) = authored_encounter(&saved.skill, saved.seed, &saved.id)
                     .map_err(|_| Error::Unavailable)?;
-                let (kind, result) = if payload["type"] == "hint" {
+                let (kind, result) = if payload["type"] == "abandon" {
+                    next.domain_apply(
+                        Action::AbandonQuest {
+                            quest_id: saved.quest.clone(),
+                            encounter_id: saved.id.clone(),
+                        },
+                        &domain_id,
+                        content,
+                        TrustedFacts::default(),
+                        now,
+                    )?;
+                    saved.abandoned = true;
+                    ("abandonment", "not_assessed")
+                } else if payload["type"] == "hint" {
                     let kind = match payload["supportKind"].as_str() {
                         Some("hint") => {
                             saved.support.hint_count = saved

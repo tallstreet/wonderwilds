@@ -398,6 +398,10 @@ pub enum Action {
         quest_id: String,
         encounter_id: String,
     },
+    AbandonQuest {
+        quest_id: String,
+        encounter_id: String,
+    },
     Travel {
         region_id: String,
     },
@@ -553,6 +557,10 @@ pub enum Outcome {
     QuestCompleted {
         quest_id: String,
         supported: bool,
+    },
+    QuestAbandoned {
+        quest_id: String,
+        encounter_id: String,
     },
     RewardGranted {
         reward_id: String,
@@ -748,6 +756,19 @@ pub fn apply(
                     points: 1,
                 });
             }
+        }
+        Action::AbandonQuest {
+            quest_id,
+            encounter_id,
+        } => {
+            if state.pending.get(quest_id) != Some(encounter_id) {
+                return Err(Rejection::UnverifiedEncounter);
+            }
+            next.pending.remove(quest_id);
+            outcomes.push(Outcome::QuestAbandoned {
+                quest_id: quest_id.clone(),
+                encounter_id: encounter_id.clone(),
+            });
         }
         Action::Travel { region_id } => {
             let chapter = content.chapters.get(region_id).ok_or(Rejection::NotFound)?;
@@ -1095,6 +1116,64 @@ mod tests {
         for id in ids {
             finish(state, id, c, supported, log);
         }
+    }
+    #[test]
+    fn abandonment_is_replayable_without_rewards_and_can_restart() {
+        let c = content();
+        let initial = State::new(&c);
+        let mut state = initial.clone();
+        let mut log = Vec::new();
+        let mut ctx = context();
+        ctx.facts
+            .issued_encounters
+            .insert("enc-1".into(), "meadow-welcome".into());
+        ctx.facts.reachable_quests.insert("meadow-welcome".into());
+        execute(
+            &mut state,
+            Action::BeginQuest {
+                quest_id: "meadow-welcome".into(),
+                encounter_id: "enc-1".into(),
+            },
+            &c,
+            ctx.clone(),
+            &mut log,
+        );
+        let abandon = command(
+            &state,
+            Action::AbandonQuest {
+                quest_id: "meadow-welcome".into(),
+                encounter_id: "enc-1".into(),
+            },
+        );
+        let applied = apply(&state, &abandon, &c, &context()).unwrap();
+        assert!(matches!(
+            &applied.events[0].outcome,
+            Outcome::QuestAbandoned { .. }
+        ));
+        assert!(applied.state.grants.is_empty());
+        assert!(applied.state.completed.is_empty());
+        assert_eq!(applied.state.xp, 0);
+        assert!(applied.state.pending.is_empty());
+        assert!(
+            apply(&applied.state, &abandon, &c, &context())
+                .unwrap()
+                .duplicate
+        );
+        execute(&mut state, abandon.action, &c, context(), &mut log);
+        ctx.facts
+            .issued_encounters
+            .insert("enc-2".into(), "meadow-welcome".into());
+        execute(
+            &mut state,
+            Action::BeginQuest {
+                quest_id: "meadow-welcome".into(),
+                encounter_id: "enc-2".into(),
+            },
+            &c,
+            ctx,
+            &mut log,
+        );
+        assert_eq!(replay(&initial, &c, &log).unwrap(), state);
     }
     #[test]
     fn golden_welcome_events_keep_rules_content_and_replay_compatible() {

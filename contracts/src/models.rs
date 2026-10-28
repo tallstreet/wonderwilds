@@ -47,6 +47,7 @@ pub enum CommandPayload {
     Variant2(CommandPayloadVariant2),
     Variant3(CommandPayloadVariant3),
     Variant4(CommandPayloadVariant4),
+    Variant5(CommandPayloadVariant5),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -389,6 +390,13 @@ pub struct CommandPayloadVariant4 {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant5 {
+    pub r#type: CommandPayloadVariant5Type,
+    pub encounter_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GameCommandSchemaVersion {
     #[serde(rename = "1.0")]
     V10,
@@ -705,6 +713,12 @@ pub enum CommandPayloadVariant3SupportKind {
 pub enum CommandPayloadVariant4Type {
     #[serde(rename = "select_companion")]
     SelectCompanion,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant5Type {
+    #[serde(rename = "abandon")]
+    Abandon,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

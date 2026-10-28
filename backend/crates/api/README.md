@@ -29,7 +29,9 @@ HTTPS Origin and `X-CSRF-Token`. `X-Wonderwilds-Profile` is a selector checked a
 the authenticated parent. Identity never comes from a game command body.
 
 Implemented JSON routes match `contracts/openapi.yaml`: game snapshot, commands,
-encounters, attempts and hints. Attempt/hint route IDs must match their command
+encounters, attempts and hints. The command route also accepts `abandon` with
+an encounter ID, recording unassessed abandonment and releasing its pending slot
+without rewards. Closed encounters cannot accept later answers. Attempt/hint route IDs must match their command
 payload. Errors use the versioned stable error code/correlation envelope. Body
 limit is 32 KiB, blocking operation concurrency is 16, SQL statements/locks have
 bounded timeouts, and a development aggregate accepts at most 2,000 distinct

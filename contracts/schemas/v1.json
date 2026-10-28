@@ -459,6 +459,25 @@
             "creatureId"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "abandon",
+              "type": "string"
+            },
+            "encounterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "type",
+            "encounterId"
+          ],
+          "additionalProperties": false
         }
       ]
     },

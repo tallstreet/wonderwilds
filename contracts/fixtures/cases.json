@@ -1335,5 +1335,34 @@
         "Original synthetic fixture; no child data"
       ]
     }
+  },
+  {
+    "name": "GameCommand valid abandonment",
+    "contract": "GameCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "abandon-1",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "abandon",
+        "encounterId": "enc-1"
+      }
+    }
+  },
+  {
+    "name": "Abandonment rejects claimed correctness",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "abandon-1",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "abandon",
+        "encounterId": "enc-1",
+        "correct": true
+      }
+    }
   }
 ]

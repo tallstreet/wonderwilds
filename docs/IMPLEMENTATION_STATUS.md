@@ -57,3 +57,12 @@ restricted authored Meadow development slice and fails closed without sessions.
 Human approvals, reviewed art and provider/operational decisions cannot be
 replaced by passing synthetic tests. New packs remain drafts and do not claim
 complete curriculum coverage or secure mastery from repeated fixed practice.
+
+## Independent review follow-up
+
+An independent code review identified two defects in the initial foundation.
+Encounter abandonment now has a real idempotent server command, persisted
+unassessed evidence and domain cancellation, so leaving a task does not block
+the next encounter. The authored director now excludes completed beats.
+See `adr/encounter-abandonment.md` for protocol compatibility, regression coverage
+and rollback limits. These fixes do not complete the outstanding release gates.
