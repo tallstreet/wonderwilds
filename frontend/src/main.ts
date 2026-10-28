@@ -5,6 +5,7 @@ import './style.css';
 import './redesign.css';
 import './fullscreen.css';
 import './exploration.css';
+import { mapImageUrl } from './mapImages.ts';
 import { createWorld } from './world.ts';
 import { heroes, heroPortrait } from './art.ts';
 import { propArt } from './sprites.ts';
@@ -90,7 +91,7 @@ function explore() {
               `${map.name} ${group}`.toLowerCase().includes(query),
           );
           return places.length
-            ? `<section class="place-group"><h3>${group}</h3><div class="place-grid">${places.map(([id, map]) => `<button class="place-card" data-place="${id}" ${id === state.region ? 'aria-current="location"' : ''}><span aria-hidden="true">${index === 0 ? '✿' : ['♣', '✿', '≈', '❄', '☀', '◇', '❧', '☁', '♧', '❀', '☾', '△'][index - 1]}</span><strong>${map.name}</strong><small>${id === state.region ? 'You are here' : 'Visit →'}</small></button>`).join('')}</div></section>`
+            ? `<section class="place-group"><h3>${group}</h3><div class="place-grid">${places.map(([id, map]) => `<button class="place-card" data-place="${id}" ${id === state.region ? 'aria-current="location"' : ''}><img src="${mapImageUrl(id)}" alt="" loading="lazy" decoding="async" width="224" height="138"/><strong>${map.name}</strong><small>${id === state.region ? 'You are here' : 'Visit →'}</small></button>`).join('')}</div></section>`
             : '';
         })
         .join('') || '<p>No places found. Try another name.</p>';

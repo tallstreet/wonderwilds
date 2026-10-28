@@ -217,7 +217,7 @@ biomes.forEach((biome, b) =>
       variant,
       west: '',
       east: '',
-      pathY: { west: 330 + (variant % 3) * 45, east: 330 + ((variant + 1) % 3) * 45 },
+      pathY: { west: 345, east: 345 },
     };
   }),
 );

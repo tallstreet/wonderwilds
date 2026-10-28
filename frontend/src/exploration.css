@@ -52,3 +52,12 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.place-card img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1120 / 690;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #dce8cc;
+}

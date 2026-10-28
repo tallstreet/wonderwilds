@@ -1,4 +1,3 @@
-import { mapObstacles } from './maps.ts';
 import type { Point } from './types.ts';
 import { BRIDGE, FOOTPRINT, bridgeContainsFeet } from './mapGeometry.ts';
 // Inputs are the ground midpoint between the actor's feet, never sprite centre.
@@ -8,10 +7,7 @@ export function riverCenter() {
 export function isBlocked(x: number, y: number, bridgeFixed: boolean, region = 'meadow') {
   if (x < 40 || x > 1080 || y < 90 || y > 615) return true;
   if (x > 98 && x < 282 && y > 55 && y < 230) return true;
-  if (region !== 'meadow')
-    return mapObstacles(region).some(
-      (o) => Math.hypot(x - o.x, y - o.y) < o.radius + FOOTPRINT.halfWidth,
-    );
+  if (region !== 'meadow') return false;
   if (
     Math.abs(x - riverCenter()) < 76 + FOOTPRINT.halfWidth &&
     !(bridgeFixed && bridgeContainsFeet(y))
