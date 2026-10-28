@@ -1,0 +1,54 @@
+#place-search {
+  width: 100%;
+  padding: 12px 16px;
+  margin: 10px 0 16px;
+  border: 2px solid #d8cce7;
+  border-radius: 14px;
+  font: inherit;
+}
+.place-group h3 {
+  margin: 20px 0 10px;
+  color: #6a4c86;
+}
+.place-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 10px;
+}
+.place-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  padding: 16px;
+  border: 2px solid #e6dded;
+  border-radius: 16px;
+  background: #fffaf0;
+  color: #58416d;
+  text-align: left;
+  cursor: pointer;
+}
+.place-card > span {
+  font-size: 28px;
+  color: #719d89;
+}
+.place-card small {
+  color: #786987;
+}
+.place-card:hover,
+.place-card:focus-visible {
+  border-color: #9972ba;
+  background: #f4eafa;
+}
+.place-card[aria-current] {
+  border-color: #719d89;
+  background: #edf5e7;
+}
+@media (max-width: 600px) {
+  #explore {
+    display: flex;
+  }
+  .place-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

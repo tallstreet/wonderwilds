@@ -1,5 +1,7 @@
 import type Phaser from 'phaser';
 import type { Progress } from './types.ts';
+import { maps, biomes, mapObstacles } from './maps.ts';
+import { paintLandscape } from './landscape.ts';
 import { BRIDGE } from './mapGeometry.ts';
 // The generated landscape and these props share one shaded 3D art direction.
 // Rewards remain data-driven: code counts planks/berries and switches garden state.
@@ -68,5 +70,9 @@ export function paintScenery(
 
 // Both new landscapes use the same full-bleed raster format as Clover Meadow.
 function paintExplorationMap(scene: Phaser.Scene, region: string) {
+  if (maps[region]?.biome !== undefined) {
+    paintLandscape(scene, maps[region], biomes[maps[region].biome!], mapObstacles(region));
+    return;
+  }
   scene.add.image(0, 0, `${region}-map`).setOrigin(0).setDisplaySize(1120, 690).setDepth(-10);
 }
