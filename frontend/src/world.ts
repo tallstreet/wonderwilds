@@ -2,7 +2,7 @@ import type { Progress, WorldEncounter, Point, Actor } from './types.ts';
 import { paintScenery } from './scenery.ts';
 import Phaser from 'phaser';
 import { maps, mapExit, exitPoint, type MapId } from './maps.ts';
-import { regions, encounters } from './content.ts';
+import { encounters } from './content.ts';
 import { HERO_ATLAS, PROP_ATLAS, heroFrames, propFrames, registerAtlas } from './sprites.ts';
 import { isBlocked, findRoute } from './navigation.ts';
 import { heroes } from './art.ts';
@@ -121,8 +121,7 @@ export function createWorld(
       this.target = null;
       this.route = [];
       this.pending = null;
-      const s = getState(),
-        r = regions.find((r) => r.id === s.region) ?? regions[0];
+      const s = getState();
       this.paintedRegion = s.region;
       const fixed = s.done.includes('meadow-bridge');
       paintScenery(this, s);
@@ -135,7 +134,7 @@ export function createWorld(
           });
       this.markers = [];
       ((backend?.encounters() ?? encounters) as WorldEncounter[])
-        .filter((e) => e.region === r.id && r.id === 'meadow')
+        .filter((e) => e.region === s.region && s.region === 'meadow')
         .forEach((e, i) => {
           const complete = s.done.includes(e.id),
             x = backend ? e.x : e.x + (i === 0 ? -105 : 50),
@@ -219,7 +218,6 @@ export function createWorld(
         '#6e5288',
       ).setDepth(2000);
       for (const side of ['west', 'east'] as const) {
-        if (backend) continue;
         const destination = maps[s.region as MapId][side];
         const point = exitPoint(s.region as MapId, side);
         this.label(
@@ -475,7 +473,7 @@ export function createWorld(
       }
       const exit = mapExit(getState().region, this.player);
       if (!exit) this.exitArmed = true;
-      if (exit && this.exitArmed && onMapChange && !backend) {
+      if (exit && this.exitArmed && onMapChange) {
         this.exitArmed = false;
         onMapChange(exit.region, exit.position);
         this.paint();

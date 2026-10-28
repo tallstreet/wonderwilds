@@ -16,3 +16,19 @@ Use case: stylized-concept. Asset: polished character illustration for a childre
 ## Verification
 
 Existing curriculum, deterministic checks, evidence, local saves, and collision geometry were preserved. Automated tests and production build pass. Desktop and phone browser visual checks accompany this refresh; child playtesting remains future work.
+
+## Exploration library imagery
+
+The 72 exploration destinations use individual WebP landscapes in
+`public/assets/places/explore-{biome}-{variant}.webp`. The three original island
+maps retain their existing artwork. New artwork uses the original Clover Meadow
+landscape as a visual reference: overhead views, saturated foliage, rounded
+storybook landmarks, soft dimensional shading, and clear central walking space.
+Each biome was generated as six coordinated scenes, then separated into assets.
+
+`src/mapImages.ts` is the shared image URL mapping for the Explore cards and
+Phaser backgrounds. Cards use native lazy loading; the world loads artwork only
+when a destination is visited. A failed image request leaves the procedural
+landscape playable and retries on a subsequent visit. Late image responses must
+not replace the current destination. Exploration exits use the central path;
+unmatched procedural circular blockers have been removed from these maps.

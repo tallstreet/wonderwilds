@@ -47,3 +47,28 @@ test('Tap routes reach every exit and all new-map paths stay walkable', () => {
     'meadow',
   );
 });
+
+test('The exploration library has 75 unique destinations in one walkable loop', () => {
+  assert.equal(Object.keys(maps).length, 75);
+  assert.equal(new Set(Object.values(maps).map((m) => m.name)).size, 75);
+  const visited = new Set<string>();
+  let region = 'meadow';
+  while (!visited.has(region)) {
+    visited.add(region);
+    if (maps[region].biome !== undefined) {
+      const start = { x: 160, y: 490 };
+      for (const side of ['west', 'east'] as const) {
+        const path = findRoute(start, exitPoint(region, side), false, region);
+        assert.ok(path.length > 0, `${region} ${side} is reachable from the travel spawn`);
+      }
+      assert.deepEqual(
+        restoreProgress(JSON.stringify({ ...freshState(), region, position: { x: 160, y: 490 } }))
+          .region,
+        region,
+      );
+    }
+    region = maps[region].east;
+  }
+  assert.equal(region, 'meadow');
+  assert.equal(visited.size, 75);
+});

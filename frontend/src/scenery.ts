@@ -1,5 +1,8 @@
 import type Phaser from 'phaser';
 import type { Progress } from './types.ts';
+import { maps, biomes } from './maps.ts';
+import { mapImageUrl, createImageRequests } from './mapImages.ts';
+import { paintLandscape } from './landscape.ts';
 import { BRIDGE } from './mapGeometry.ts';
 // The generated landscape and these props share one shaded 3D art direction.
 // Rewards remain data-driven: code counts planks/berries and switches garden state.
@@ -66,7 +69,53 @@ export function paintScenery(
   scene.label(1030, 418, 'Friendship arch', 13);
 }
 
-// Both new landscapes use the same full-bleed raster format as Clover Meadow.
+// Each scene has a single request cache; only visited destinations are downloaded.
+const requests = new WeakMap<Phaser.Scene, ReturnType<typeof createImageRequests>>();
 function paintExplorationMap(scene: Phaser.Scene, region: string) {
-  scene.add.image(0, 0, `${region}-map`).setOrigin(0).setDisplaySize(1120, 690).setDepth(-10);
+  const key = `${region}-map`;
+  const addBackground = () =>
+    scene.add.image(0, 0, key).setOrigin(0).setDisplaySize(1120, 690).setDepth(-10);
+  if (scene.textures.exists(key)) {
+    addBackground();
+    return;
+  }
+  const url = mapImageUrl(region);
+  if (!url || maps[region]?.biome === undefined) return;
+  const before = new Set(scene.children.list);
+  paintLandscape(scene, maps[region], biomes[maps[region].biome!], []);
+  const fallback = scene.children.list.filter((child) => !before.has(child));
+  // This sentinel is destroyed on travel. A late response may cache the texture,
+  // but must never paint over another destination or reset the moving player.
+  const sentinel = scene.add.zone(0, 0, 1, 1);
+  let request = requests.get(scene);
+  if (!request) {
+    request = createImageRequests(
+      (textureKey, imageUrl) =>
+        new Promise<void>((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => {
+            if (!scene.sys.isActive()) {
+              reject(new Error('Scene stopped'));
+              return;
+            }
+            if (!scene.textures.exists(textureKey)) scene.textures.addImage(textureKey, image);
+            resolve();
+          };
+          image.onerror = () => reject(new Error('Landscape unavailable'));
+          image.src = imageUrl;
+        }),
+    );
+    requests.set(scene, request);
+  }
+  void request(key, url)
+    .then(() => {
+      if (!sentinel.active) return;
+      fallback.forEach((child) => child.destroy());
+      addBackground();
+      sentinel.destroy();
+    })
+    .catch(() => {
+      // Keep the fully playable fallback; visiting again retries the artwork.
+      if (sentinel.active) sentinel.destroy();
+    });
 }

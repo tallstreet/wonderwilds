@@ -1,3 +1,4 @@
+import { isMapId } from './maps.ts';
 import type { CommandPayload, GameSnapshot } from '../../contracts/generated/contracts.ts';
 import type { Progress, WorldEncounter } from './types.ts';
 import { isRecord } from './types.ts';
@@ -68,6 +69,7 @@ export class BackendWorld {
       if (!isRecord(saved)) return;
       if (typeof saved.hero === 'string' && Object.hasOwn(heroes, saved.hero))
         state.hero = saved.hero;
+      if (isMapId(saved.region)) state.region = saved.region;
       const p = saved.position;
       if (
         isRecord(p) &&
@@ -75,7 +77,7 @@ export class BackendWorld {
         typeof p.y === 'number' &&
         Number.isFinite(p.x) &&
         Number.isFinite(p.y) &&
-        !isBlocked(p.x, p.y, questCompleted(this.snapshot, 'meadow-bridge'))
+        !isBlocked(p.x, p.y, questCompleted(this.snapshot, 'meadow-bridge'), state.region)
       )
         state.position = { x: p.x, y: p.y };
     } catch {
@@ -86,7 +88,7 @@ export class BackendWorld {
     try {
       localStorage.setItem(
         this.viewKey,
-        JSON.stringify({ hero: state.hero, position: state.position }),
+        JSON.stringify({ hero: state.hero, region: state.region, position: state.position }),
       );
     } catch {
       /* Cosmetic preference only. */

@@ -4,10 +4,12 @@ import type { Activity, Encounter } from './types.ts';
 import './style.css';
 import './redesign.css';
 import './fullscreen.css';
+import './exploration.css';
+import { mapImageUrl } from './mapImages.ts';
 import { createWorld } from './world.ts';
 import { heroes, heroPortrait } from './art.ts';
 import { propArt } from './sprites.ts';
-import { maps, type MapId } from './maps.ts';
+import { maps, biomes, isMapId, type MapId } from './maps.ts';
 import { answerFor, isCorrect } from './content.ts';
 import {
   activeEncounters,
@@ -50,7 +52,7 @@ function persist() {
 }
 $('#app').innerHTML =
   `<main class="game-shell"><div id="game" role="application" aria-label="Clover Meadow. Tap to walk or use arrow keys and WASD. Press Space near a friend. Open Missions to find an activity."></div>
-<header class="game-hud"><div class="location-badge"><img class="app-logo" src="/assets/starwhisker-logo-v1.png" width="64" height="64" alt=""/><div><small>STARWHISKER ISLAND</small><h1>Clover Meadow</h1></div></div><nav aria-label="Game tools"><div class="hud-stars" aria-label="Hero stars"><span>✦</span><strong id="star-count">0 / 3</strong></div><button class="hud-button" id="journal" aria-label="My journal" title="My journal">▧<span>Journal</span></button><button class="hud-button" id="grownup" aria-label="For grown-ups" title="For grown-ups">⚙<span>Grown-ups</span></button><button class="hud-button fullscreen-button" id="fullscreen" aria-label="Enter full screen" title="Enter full screen">⛶</button></nav></header>
+<header class="game-hud"><div class="location-badge"><img class="app-logo" src="/assets/starwhisker-logo-v1.png" width="64" height="64" alt=""/><div><small>STARWHISKER ISLAND</small><h1>Clover Meadow</h1></div></div><nav aria-label="Game tools"><div class="hud-stars" aria-label="Hero stars"><span>✦</span><strong id="star-count">0 / 3</strong></div><button class="hud-button" id="explore" aria-label="Explore 75 places">◎<span>Explore</span></button><button class="hud-button" id="journal" aria-label="My journal" title="My journal">▧<span>Journal</span></button><button class="hud-button" id="grownup" aria-label="For grown-ups" title="For grown-ups">⚙<span>Grown-ups</span></button><button class="hud-button fullscreen-button" id="fullscreen" aria-label="Enter full screen" title="Enter full screen">⛶</button></nav></header>
 <footer class="game-dock"><button class="mission-button" id="missions"><span class="mission-symbol">✦</span><span><small>YOUR ADVENTURE</small><strong id="mission-status">Three ways to be a hero</strong></span><span class="mission-open">Missions ↗</span></button><div class="game-guidance"><span>Tap to explore <b>·</b> Arrows to walk <b>·</b> Space to chat</span><small id="save-status" role="status"></small></div></footer></main><dialog id="dialog" aria-labelledby="dialog-title"></dialog><div id="toast" role="status"></div>`;
 const dialog = $<HTMLDialogElement>('#dialog');
 function render() {
@@ -72,6 +74,30 @@ function missions() {
   openDialog(
     `<div class="mission-modal-art" aria-hidden="true"><img src="/assets/hero-squad.png" alt=""/></div><span class="pill">YOUR FIRST ADVENTURE</span><h2 id="dialog-title">Heroes, assemble!</h2><p class="muted">Choose a mission and we’ll walk there together.</p><div class="progress-track"><span style="width:${(state.done.length / 3) * 100}%"></span></div><div class="modal-quests">${activeEncounters.map((e, i) => `<button class="quest ${state.done.includes(e.id) ? 'complete' : ''}" data-visit="${e.id}"><span class="quest-icon">${state.done.includes(e.id) ? '✓' : ['▥', '♥', '✿'][i]}</span><span><strong>${e.short}</strong><small>${state.done.includes(e.id) ? 'Play again' : e.type === 'pattern' && !state.done.includes('meadow-bridge') ? 'First, fix the bridge' : ['Build & count', 'Share & care', 'Notice & grow'][i]}</small></span><span class="quest-arrow">→</span></button>`).join('')}</div>${state.done.length === 3 ? '<button class="celebrate-link" id="celebrate">✦ Celebrate our friendship</button>' : ''}<p class="tiny-note">Every little try is a brave one.</p>`,
   );
+}
+function explore() {
+  openDialog(
+    `<span class="pill">A WORLD OF LITTLE ADVENTURES</span><h2 id="dialog-title">75 places to explore</h2><p class="muted">Choose somewhere to visit, or follow the paths to walk between places. Story missions await in Clover Meadow.</p><label for="place-search">Find a place</label><input id="place-search" type="search" placeholder="Search places or environments…"/><div id="place-library"></div>`,
+  );
+  const show = () => {
+    const query = $<HTMLInputElement>('#place-search').value.trim().toLowerCase();
+    const groups = ['Island favourites', ...biomes.map((b) => b.name)];
+    $('#place-library').innerHTML =
+      groups
+        .map((group, index) => {
+          const places = Object.entries(maps).filter(
+            ([, map]) =>
+              (index === 0 ? map.biome === undefined : map.biome === index - 1) &&
+              `${map.name} ${group}`.toLowerCase().includes(query),
+          );
+          return places.length
+            ? `<section class="place-group"><h3>${group}</h3><div class="place-grid">${places.map(([id, map]) => `<button class="place-card" data-place="${id}" ${id === state.region ? 'aria-current="location"' : ''}><img src="${mapImageUrl(id)}" alt="" loading="lazy" decoding="async" width="224" height="138"/><strong>${map.name}</strong><small>${id === state.region ? 'You are here' : 'Visit →'}</small></button>`).join('')}</div></section>`
+            : '';
+        })
+        .join('') || '<p>No places found. Try another name.</p>';
+  };
+  $('#place-search').addEventListener('input', show);
+  show();
 }
 async function toggleFullscreen() {
   try {
@@ -290,6 +316,16 @@ document.addEventListener('click', (event) => {
   if (!button) return;
   if (backend?.working) return;
   if (button.classList.contains('close')) return closeDialog();
+  if (button.id === 'explore') return explore();
+  if (isMapId(button.dataset.place)) {
+    state.region = button.dataset.place;
+    state.position = { x: 160, y: 490 };
+    closeDialog();
+    render();
+    game.events.emit('refresh');
+    toast(`Welcome to ${maps[state.region].name}!`);
+    return;
+  }
   if (button.dataset.visit) {
     const e = activeEncounters.find((e) => e.id === button.dataset.visit);
     if (!e) return;
