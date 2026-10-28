@@ -1,0 +1,83 @@
+import { defineConfig } from 'vite';
+import { readFileSync } from 'node:fs';
+import { request } from 'node:http';
+
+// Opt-in local operator bridge. Production builds have no bridge or credentials.
+export default defineConfig(({ command }) => {
+  const configPath = command === 'serve' ? process.env.WW_LOCAL_DEMO_CONFIG : undefined;
+  const demo = configPath ? JSON.parse(readFileSync(configPath, 'utf8')) : undefined;
+  const port = Number(process.env.WW_DEMO_PORT ?? 5173);
+  const apiPort = Number(process.env.WW_DEMO_API_PORT ?? 3001);
+  const host = `127.0.0.1:${port}`;
+  const origin = `http://${host}`;
+  return {
+    server: { fs: { deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/.local-demo/**'] } },
+    plugins: demo
+      ? [
+          {
+            name: 'local-synthetic-demo',
+            configureServer(server) {
+              server.middlewares.use((req, res, next) => {
+                const path = req.url ?? '';
+                if (!path.startsWith('/api/') && !path.startsWith('/__demo/')) return next();
+                const reject = (status: number) => {
+                  res.statusCode = status;
+                  res.end();
+                };
+                if (
+                  req.headers.host !== host ||
+                  (req.headers.origin && req.headers.origin !== origin) ||
+                  (req.headers['sec-fetch-site'] && req.headers['sec-fetch-site'] !== 'same-origin')
+                )
+                  return reject(403);
+                res.setHeader('Cache-Control', 'no-store');
+                if (path === '/__demo/bootstrap' && req.method === 'GET') {
+                  res.setHeader('Content-Type', 'application/json');
+                  return res.end(
+                    JSON.stringify({ profileId: demo.profileId, csrf: demo.browserToken }),
+                  );
+                }
+                if (!/^\/api\/v1\/(game|commands|encounters\/[a-zA-Z0-9-]+)$/.test(path))
+                  return reject(404);
+                if (req.method !== 'GET' && req.method !== 'POST') return reject(405);
+                if (
+                  req.method === 'POST' &&
+                  (req.headers.origin !== origin ||
+                    req.headers['x-csrf-token'] !== demo.browserToken)
+                )
+                  return reject(403);
+                if (req.headers['x-wonderwilds-profile'] !== demo.profileId) return reject(403);
+                const upstream = request(
+                  {
+                    hostname: '127.0.0.1',
+                    port: apiPort,
+                    path,
+                    method: req.method,
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Accept: 'application/json',
+                      Cookie: `wonderwilds_session=${demo.session}`,
+                      'X-CSRF-Token': demo.csrf,
+                      'X-Wonderwilds-Profile': demo.profileId,
+                      Origin: 'https://wonderwilds.local',
+                    },
+                  },
+                  (response) => {
+                    res.statusCode = response.statusCode ?? 502;
+                    res.setHeader('Content-Type', 'application/json');
+                    response.pipe(res);
+                  },
+                );
+                upstream.setTimeout(10000, () => upstream.destroy());
+                upstream.on('error', () => {
+                  if (!res.headersSent) res.statusCode = 503;
+                  res.end();
+                });
+                req.pipe(upstream);
+              });
+            },
+          },
+        ]
+      : [],
+  };
+});
