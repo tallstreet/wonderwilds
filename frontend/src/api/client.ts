@@ -48,7 +48,7 @@ export class GameClient {
   private commands = new Map<string, string>();
   constructor(
     private readonly csrf: () => string | undefined,
-    private readonly fetcher: typeof fetch = fetch,
+    private readonly fetcher: typeof fetch = (...args) => fetch(...args),
     private readonly base = '/api/v1',
   ) {
     if (

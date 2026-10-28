@@ -86,6 +86,8 @@ pub struct GameSnapshot {
     pub inventory: Vec<InventoryEntry>,
     pub pending_encounters: Vec<EncounterInstance>,
     pub learner_summaries: Vec<LearnerSummary>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub selected_companions: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

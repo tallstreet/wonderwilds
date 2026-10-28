@@ -10,14 +10,13 @@ export function authoredPresentation(encounter: EncounterInstance): ActivityPres
     'total' in parameters &&
     !('recipients' in parameters)
   ) {
-    const given = parameters.given ?? 0;
     return {
-      prompt: `The bridge needs ${parameters.total} planks. ${given} are ready. Add the missing planks.`,
+      prompt: 'Help Pip finish the bridge!',
     };
   }
   if (encounter.templateId === 'equal_sharing' && 'recipients' in parameters) {
     return {
-      prompt: `Share ${parameters.total} objects fairly between ${parameters.recipients} friends.`,
+      prompt: `Share ${parameters.total} berries. Give everyone the same!`,
     };
   }
   const promptId =
@@ -27,7 +26,21 @@ export function authoredPresentation(encounter: EncounterInstance): ActivityPres
         ? parameters.promptId
         : null;
   if (!promptId || !Object.hasOwn(prompts, promptId)) return null;
-  const prompt = prompts[promptId as keyof typeof prompts].instruction;
+  const shortPrompts: Record<string, string> = {
+    'count-next': 'Which number comes next?',
+    'pattern-next': 'What comes next?',
+    'sort-round': 'Find all the round things.',
+    'place-beside': 'Put it beside the tree.',
+    'longest-rope': 'Which rope is longest?',
+    'sound-s': 'Which letter makes /s/?',
+    'word-cat': 'Build the word for a pet that meows.',
+    'word-sun': 'Build the word for our bright daytime star.',
+    'word-map': 'Build the word for a drawing of places.',
+    'seed-order': 'Help Pip grow a seed. What happens first?',
+    'listen-direction': 'Put the cup beside the tree.',
+    'read-red-cup': 'Pip needs a red cup. Can you find it?',
+  };
+  const prompt = shortPrompts[promptId] ?? prompts[promptId as keyof typeof prompts].instruction;
   const choiceMode =
     promptId === 'sort-round'
       ? 'multiple'

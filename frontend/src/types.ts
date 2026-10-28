@@ -4,6 +4,14 @@ export interface Point {
   x: number;
   y: number;
 }
+/** A world interaction location; assessment parameters belong to the API. */
+export interface WorldEncounter extends Point {
+  id: string;
+  region: string;
+  short: string;
+  character: string;
+  sprite?: string;
+}
 export type Blocked = (x: number, y: number) => boolean;
 export type Rect = [number, number, number, number];
 export type Facing = 'down' | 'up' | 'left' | 'right';

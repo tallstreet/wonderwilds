@@ -137,7 +137,7 @@ impl Aggregate {
             };
             *value = json!({"skillId":skill_id,"status":status,"explanation":summary.explanation});
         }
-        let value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills.into_values().collect::<Vec<_>>()});
+        let value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills.into_values().collect::<Vec<_>>()});
         wire::validate("GameSnapshot", &value).map_err(|_| Error::Unavailable)?;
         Ok(value)
     }

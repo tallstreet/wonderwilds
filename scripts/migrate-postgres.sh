@@ -3,7 +3,7 @@
 set -eu
 umask 077
 task_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-task_bin=/workspace/setup-tools/postgres/usr/lib/postgresql/17/bin
+task_bin=${WONDERWILDS_PG_BIN:-/workspace/setup-tools/postgres/usr/lib/postgresql/17/bin}
 export LD_LIBRARY_PATH=/workspace/setup-tools/postgres/usr/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 if [ -n "${WONDERWILDS_DATABASE_URL:-}" ]; then
     task_database=$WONDERWILDS_DATABASE_URL

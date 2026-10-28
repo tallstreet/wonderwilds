@@ -1,67 +1,531 @@
 .ww-activity {
-  max-width: 52rem;
-  margin-inline: auto;
-  padding: 1rem;
-  color: #20312a;
-  background: #fffef5;
-  border: 2px solid #617764;
-  border-radius: 1rem;
+  --ww-purple: #8257ba;
+  --ww-ink: #594279;
+  max-width: 58rem;
+  margin: auto;
+  color: var(--ww-ink);
+  font-family: Nunito, 'Trebuchet MS', sans-serif;
+}
+.ww-activity * {
+  box-sizing: border-box;
+}
+.ww-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+.ww-activity-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 4px;
+}
+.ww-activity-header > .ww-art {
+  width: 76px;
+  height: 80px;
+  flex: none;
+}
+.ww-instruction {
+  font-size: clamp(19px, 3vw, 25px);
+  font-weight: 900;
+  line-height: 1.3;
+  margin: 0;
+  max-width: 440px;
+  text-wrap: balance;
+}
+.ww-gesture-help {
+  text-align: center;
+  font-size: 13px;
+  color: #87799b;
+  margin: 4px 0 16px;
+  font-weight: 700;
+}
+.ww-play-area {
+  border-radius: 26px;
+  padding: 18px;
+  background: linear-gradient(145deg, #eff6e9, #f9f5e7);
+  border: 2px solid #e2e9d7;
+  box-shadow: inset 0 2px 0 #fff;
 }
 .ww-activity button {
   min-width: 44px;
   min-height: 44px;
-  margin: 0.25rem;
-  padding: 0.6rem 0.9rem;
   font: inherit;
-  color: #20312a;
-  background: #f4f8ef;
-  border: 2px solid #526b54;
-  border-radius: 0.6rem;
+  font-weight: 800;
+  color: var(--ww-ink);
+  background: #fffdf5;
+  border: 2px solid #e2d6ee;
+  border-radius: 16px;
   cursor: pointer;
+  padding: 10px 15px;
+  box-shadow: 0 4px 0 #ded3e9;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
 }
-.ww-activity button:focus-visible,
-.ww-activity h2:focus {
-  outline: 3px solid #253fb4;
-  outline-offset: 3px;
+.ww-activity button:focus-visible {
+  outline: 3px solid #6949ae;
+  outline-offset: 4px;
 }
-.ww-activity button[aria-pressed='true'] {
-  border-width: 4px;
-  text-decoration: underline;
-  background: #e2efdc;
+.ww-activity button:active:not(:disabled) {
+  box-shadow: 0 1px 0 #ded3e9;
 }
 .ww-activity button:disabled {
+  opacity: 0.45;
   cursor: default;
-  opacity: 0.6;
 }
-.ww-activity fieldset {
-  margin-block: 0.75rem;
-  border: 2px solid #617764;
-  border-radius: 0.5rem;
+.ww-activity button[aria-pressed='true'] {
+  border-color: #a27bc8;
+  background: #eee3ff;
+  box-shadow:
+    0 0 0 3px #d8c3f2,
+    0 4px 0 #b89bd5;
 }
-.ww-activity-choices,
+.ww-art {
+  display: inline-block;
+  position: relative;
+  width: 72px;
+  height: 72px;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+.ww-art .sprite-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+}
+.ww-art .character-sprite {
+  background-image: url('/assets/hero-atlas-v2.png');
+}
+.ww-art .prop-art {
+  background-image: url('/assets/prop-atlas-v2.png');
+}
+.ww-art-plank {
+  width: 25px;
+  height: 86px;
+}
+.ww-picture {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 78px;
+  pointer-events: none;
+}
+.ww-picture svg {
+  display: block;
+  width: 100%;
+  height: 110px;
+  filter: drop-shadow(0 4px 1px #77523b13);
+}
+.ww-number,
+.ww-letter {
+  font-size: 48px;
+  line-height: 1.15;
+  color: #8761b7;
+  text-shadow: 0 2px 0 white;
+}
+.ww-count-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: 75px;
+  margin-top: 7px;
+}
+.ww-count-dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #a7c981;
+  box-shadow: inset 0 -2px 0 #7eaa6b;
+}
+.ww-fallback-picture {
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+.ww-goal {
+  font-weight: 900;
+  font-size: 16px;
+  text-align: center;
+  margin: 0 0 12px;
+}
+.ww-river {
+  border: 5px solid #c1daa0;
+  border-radius: 24px;
+  background: repeating-linear-gradient(
+    170deg,
+    #9edbe4 0 18px,
+    #b6e8eb 19px 22px,
+    #a5dce7 23px 40px
+  );
+  padding: 20px 12px;
+  min-height: 136px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ww-bridge-deck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  min-height: 95px;
+  min-width: 80%;
+  padding: 8px 0;
+  border-block: 7px solid #c39161;
+  box-shadow: 0 4px 0 #87674939;
+}
+.ww-bridge-spaces,
+.ww-added-planks {
+  display: contents;
+}
+.ww-bridge-spaces[hidden] {
+  display: none;
+}
+.ww-plank-space {
+  width: 25px;
+  height: 80px;
+  border: 2px dashed #fff9;
+  border-radius: 6px;
+}
+.ww-activity .ww-plank-piece {
+  min-width: 44px;
+  width: 44px;
+  height: 88px;
+  padding: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ww-fixed-plank {
+  opacity: 0.8;
+}
+.ww-supply {
+  min-height: 90px;
+  border: 2px dashed #d4c8ad;
+  border-radius: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px;
+  background: #fff8e7c9;
+}
+.ww-tray-label {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 900;
+  color: #98836b;
+  margin: 15px 0 8px;
+}
+.ww-small-count {
+  text-align: center;
+  font-size: 13px;
+  margin: 8px 0 0;
+  color: #82745c;
+  font-weight: 800;
+}
+.ww-small-tools {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.ww-small-tools button {
+  font-size: 24px;
+  padding: 2px 12px;
+}
+.ww-plates {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+.ww-friend-plate {
+  position: relative;
+  flex: 1 1 130px;
+  min-width: 120px;
+  max-width: 240px;
+  margin: 0;
+  padding: 5px 8px 12px;
+  border: 0;
+  text-align: center;
+}
+.ww-friend-name {
+  font-size: 14px;
+  font-weight: 900;
+  margin: auto;
+}
+.ww-friend-plate > .ww-art {
+  width: 75px;
+  height: 78px;
+  margin-bottom: -12px;
+}
+.ww-plate-objects {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  gap: 0;
+  min-height: 105px;
+  padding: 15px 8px;
+  background: #fffaf2;
+  border: 8px solid #e7c8bc;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 4px #f4e1d6,
+    0 5px 0 #b89e8b24;
+}
+.ww-friend-plate:nth-child(2n) .ww-plate-objects {
+  border-color: #bfcfdf;
+  box-shadow:
+    inset 0 0 0 4px #e0eaf4,
+    0 5px 0 #b89e8b24;
+}
+.ww-activity .ww-berry-piece {
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  border: 2px solid transparent;
+  padding: 2px;
+  box-shadow: none;
+  background: transparent;
+  border-radius: 14px;
+}
+.ww-berry-piece .ww-art {
+  width: 36px;
+  height: 36px;
+}
+.ww-friend-plate > button {
+  margin: 8px 4px 0;
+  padding: 0 10px;
+  font-size: 22px;
+}
+.ww-plate-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  font-weight: 900;
+  margin: 0 5px;
+}
+.ww-pattern-line {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.ww-shown-tile {
+  width: 78px;
+  border-radius: 18px;
+  background: #fffdf5;
+  border: 2px solid #e8dfc6;
+  padding: 6px;
+}
+.ww-shown-tile .ww-picture svg {
+  height: 66px;
+}
+.ww-answer-tray {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 22px;
+  background: #e9dfce70;
+  min-height: 100px;
+}
+.ww-pattern-line .ww-answer-tray {
+  padding: 0;
+  background: none;
+}
+.ww-activity .ww-answer-slot {
+  min-width: 85px;
+  width: 100px;
+  min-height: 98px;
+  border: 3px dashed #bfadca;
+  background: #fffdf599;
+  box-shadow: none;
+  font-size: 32px;
+  color: #b69cc7;
+  padding: 5px;
+}
+.ww-activity .ww-answer-slot.ww-filled {
+  border: 2px solid #b5c793;
+  background: #fffdf5;
+  box-shadow: 0 4px 0 #ccd8b6;
+}
+.ww-answer-slot .ww-picture svg {
+  height: 78px;
+}
+.ww-answer-slot .ww-number,
+.ww-answer-slot .ww-letter {
+  font-size: 38px;
+}
+.ww-activity-choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.ww-activity .ww-choice-card {
+  flex: 0 1 144px;
+  min-width: 90px;
+  padding: 10px;
+  background: linear-gradient(#fffef9, #fcf3de);
+  border-color: #e7d6b6;
+  box-shadow:
+    0 5px 0 #d4bfa0,
+    0 8px 12px #9c7f4420;
+}
+.ww-choice-card[aria-pressed='true']::after {
+  content: '✓';
+  display: block;
+  color: #658553;
+  font-size: 18px;
+}
+.ww-card-caption {
+  display: block;
+  font-size: 12px;
+  line-height: 1.3;
+  margin-top: 7px;
+}
+.ww-rope-picture {
+  align-items: flex-start;
+  padding: 10px 0;
+  gap: 12px;
+}
+.ww-rope {
+  display: block;
+  height: 15px;
+  min-width: 9px;
+  background: repeating-linear-gradient(60deg, #c99565 0 5px, #efd0a3 6px 10px);
+  border-radius: 10px;
+  box-shadow: 0 3px 0 #b0855e30;
+}
 .ww-activity-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
-}
-.ww-activity-objects {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.4rem;
-}
-.ww-activity-object {
-  display: inline-flex;
   justify-content: center;
-  align-items: center;
-  min-width: 1.4rem;
-  min-height: 1.4rem;
-  border: 1px solid currentColor;
-  border-radius: 0.3rem;
+  gap: 10px;
+  margin-top: 18px;
+}
+.ww-activity-actions button {
+  font-size: 14px;
+}
+.ww-activity-actions .ww-check {
+  order: 3;
+  flex-basis: 100%;
+  background: linear-gradient(135deg, #9970d1, #7952b2);
+  color: white;
+  border-color: #825abb;
+  box-shadow: 0 5px 0 #624192;
+  font-size: 19px;
+  min-height: 54px;
 }
 .ww-activity-status {
-  min-height: 2.5rem;
-  font-weight: 600;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 800;
+  margin: 14px 0 0;
+}
+.ww-activity-status:empty {
+  display: none;
+}
+.ww-movable {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ww-dragging {
+  opacity: 0.3 !important;
+}
+.ww-drop-hover {
+  outline: 4px solid #b49bd9 !important;
+  outline-offset: 3px;
+  background-color: #f1e9ff !important;
+}
+.ww-activity .ww-drag-ghost {
+  position: fixed !important;
+  z-index: 10000;
+  pointer-events: none !important;
+  transform: translate(-50%, -50%) rotate(-7deg);
+  opacity: 0.95;
+  box-shadow: 0 10px 20px #47325344 !important;
+  margin: 0;
+}
+#dialog:has(.ww-activity) {
+  max-width: 760px;
+  padding: 22px 28px;
+}
+#dialog:has(.ww-activity) > h2,
+#dialog:has(.ww-activity) > .pill {
+  display: none;
+}
+#dialog:has(.ww-activity) pre {
+  white-space: pre-wrap;
+}
+@media (max-width: 550px) {
+  #dialog:has(.ww-activity) {
+    padding: 18px 12px;
+  }
+  .ww-play-area {
+    padding: 12px 8px;
+  }
+  .ww-activity-header {
+    gap: 10px;
+    padding-right: 18px;
+  }
+  .ww-activity-header > .ww-art {
+    width: 55px;
+    height: 62px;
+  }
+  .ww-instruction {
+    font-size: 19px;
+  }
+  .ww-activity .ww-choice-card {
+    flex-basis: 110px;
+  }
+  .ww-activity .ww-answer-slot {
+    width: 80px;
+    min-width: 65px;
+  }
+  .ww-shown-tile {
+    width: 63px;
+  }
+  .ww-number {
+    font-size: 36px;
+  }
+  .ww-plates {
+    gap: 5px;
+  }
+  .ww-friend-plate {
+    min-width: 110px;
+    padding-inline: 3px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .ww-activity *,

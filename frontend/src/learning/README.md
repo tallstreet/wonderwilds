@@ -26,4 +26,20 @@ node src/learning/activity.browser.mjs
 
 Set `WW_ACTIVITY_TEST_URL` to another running Vite origin if needed. The browser suite serves an isolated document, imports the real components through Vite, and checks all six families, multiple sorting, actual keyboard edits, focus, answer payloads, support-before-audio, failed support, duplicate-request guards, literal malicious text, unknown prompts, display-only prefixes, permissions, destroyed pending callbacks and tablet-sized targets. It is outside the existing `src/*.test.ts` test glob. Playwright resolves from the locked `qa/e2e` package. `CHROMIUM_PATH` can override `/usr/bin/chromium`. Browser tooling is separate from application dependencies.
 
-These components are exported for integration and do not replace `main.ts` or enable unfinished maps. Current automated checks use Chromium, not a full assistive-technology audit. Human screen-reader, iPad Safari, educator language, reviewed audio and real API journey checks remain integration/release gates. The drawing/relative-position representation is currently a labelled choice, not a complete visual scene; no accessibility or educational efficacy claim follows from these tests.
+The opt-in local `demo.html` entrypoint mounts these components for the Meadow API slice. They do not replace `main.ts` or enable unfinished maps. Current automated checks use Chromium, not a full assistive-technology audit. Human screen-reader, iPad Safari, educator language, reviewed audio and real API journey checks remain integration/release gates. Relative-position choices now include simple authored diagrams; no accessibility or educational efficacy claim follows from these tests.
+
+## Visual play controls
+
+Activities now use the same local hero/prop atlases as the world: loose planks
+move onto a bridge, berries move between picnic plates, and number/letter/picture
+cards move into answer trays. Authored message and seed-story cards have local
+illustrations with short captions. Pointer gestures support mouse, pen and touch;
+tap/click and native keyboard buttons remain alternative controls. Ordered cards
+can be inserted, rearranged and returned. Invalid drops leave the answer alone.
+Dragging never submits an answer or grants rewards; Check still uses the existing
+server callback. Controls freeze during submissions, and destroy cancels gestures.
+
+`qa/e2e/visual-activities.mjs` tests real mouse and touch drag events, tap placement,
+plate transfers, card reordering, exact answer payloads and narrow-screen layout.
+Run it with the local Vite server and `CHROMIUM_PATH` as for the other browser tests.
+The component suite still covers all six families and support/lifecycle boundaries.

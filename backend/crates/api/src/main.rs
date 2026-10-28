@@ -8,9 +8,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::env::var("WONDERWILDS_ORIGIN").unwrap_or_else(|_| "https://wonderwilds.local".into());
     let state = AppState::development(connection, origin)
         .map_err(|_| "Invalid authored API development configuration")?;
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3001").await?;
+    let port: u16 = std::env::var("WONDERWILDS_PORT")
+        .unwrap_or_else(|_| "3001".into())
+        .parse()?;
+    let listener = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port)).await?;
     eprintln!(
-        "Wonderwilds authored development API listening on port 3001; parent identity provider remains unconfigured"
+        "Wonderwilds authored development API listening on port {port}; parent identity provider remains unconfigured"
     );
     axum::serve(listener, router(state))
         .with_graceful_shutdown(async {

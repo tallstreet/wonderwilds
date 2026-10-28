@@ -1,3 +1,4 @@
+import { connectBackend, completedWorldQuests, type BackendWorld } from './backend-world.ts';
 import type Phaser from 'phaser';
 import type { Activity, Encounter } from './types.ts';
 import './style.css';
@@ -33,9 +34,15 @@ try {
 let { state, available } = readProgress(storage);
 let game: Phaser.Game;
 let session: Activity | null = null;
+let backend: BackendWorld | undefined;
 let returnFocus: HTMLElement | null = null;
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
 function persist() {
+  if (backend) {
+    backend.saveView(state);
+    backend.updateHud();
+    return;
+  }
   available = writeProgress(state, storage);
   $('#save-status').textContent = available
     ? 'Progress saved on this device'
@@ -61,6 +68,7 @@ function render() {
   persist();
 }
 function missions() {
+  if (backend) return backend.missions();
   openDialog(
     `<div class="mission-modal-art" aria-hidden="true"><img src="/assets/hero-squad.png" alt=""/></div><span class="pill">YOUR FIRST ADVENTURE</span><h2 id="dialog-title">Heroes, assemble!</h2><p class="muted">Choose a mission and we’ll walk there together.</p><div class="progress-track"><span style="width:${(state.done.length / 3) * 100}%"></span></div><div class="modal-quests">${activeEncounters.map((e, i) => `<button class="quest ${state.done.includes(e.id) ? 'complete' : ''}" data-visit="${e.id}"><span class="quest-icon">${state.done.includes(e.id) ? '✓' : ['▥', '♥', '✿'][i]}</span><span><strong>${e.short}</strong><small>${state.done.includes(e.id) ? 'Play again' : e.type === 'pattern' && !state.done.includes('meadow-bridge') ? 'First, fix the bridge' : ['Build & count', 'Share & care', 'Notice & grow'][i]}</small></span><span class="quest-arrow">→</span></button>`).join('')}</div>${state.done.length === 3 ? '<button class="celebrate-link" id="celebrate">✦ Celebrate our friendship</button>' : ''}<p class="tiny-note">Every little try is a brave one.</p>`,
   );
@@ -101,6 +109,10 @@ function openDialog(html: string) {
   dialog.querySelector<HTMLElement>('button:not(.close),input')?.focus();
 }
 function closeDialog() {
+  if (backend?.ownsActivity) {
+    void backend.leave();
+    return;
+  }
   dialog.close();
   session = null;
   window.speechSynthesis?.cancel();
@@ -230,6 +242,7 @@ function celebration() {
   );
 }
 function journal() {
+  if (backend) return backend.journal(state);
   openDialog(
     `<span class="pill">OUR LITTLE MEMORIES</span><h2 id="dialog-title">My adventure journal</h2><p class="muted">Meet the Starwhisker team. Pick a hero for your next adventure.</p><div class="journal-hero">${heroPortrait(state.hero, 110)}<div><h3>${heroes[state.hero].name} the ${heroes[state.hero].species}</h3><p class="hero-description">${heroes[state.hero].description}</p></div></div><h3 class="hero-picker-heading">Choose your little hero</h3><div class="hero-choices">${Object.entries(
       heroes,
@@ -244,6 +257,7 @@ function journal() {
   );
 }
 function grownup() {
+  if (backend) return backend.grownup();
   openDialog(
     `<span class="pill">A WINDOW INTO THEIR LEARNING</span><h2 id="dialog-title">Little steps, real discoveries</h2><p class="muted">A Foundation-level curriculum sample. Progress stays in this browser; no account or backend is connected.</p><div class="learning-summary"><strong>${state.done.length}/3 <small>story activities</small></strong><strong>${state.evidence.length}<small>completed practice sessions</small></strong></div><div class="skill-list">${skillSummary(
       state,
@@ -274,6 +288,7 @@ document.addEventListener('click', (event) => {
   if (!(event.target instanceof Element)) return;
   const button = event.target.closest('button');
   if (!button) return;
+  if (backend?.working) return;
   if (button.classList.contains('close')) return closeDialog();
   if (button.dataset.visit) {
     const e = activeEncounters.find((e) => e.id === button.dataset.visit);
@@ -402,24 +417,82 @@ document.addEventListener('click', (event) => {
       break;
   }
 });
-render();
-game = createWorld(
-  'game',
-  () => state,
-  startActivity,
-  () =>
-    state.done.length === 3
-      ? celebration()
-      : toast('Three helping-paw stars will make a wonderful friendship!'),
-  (position) => {
-    state.position = position;
-    persist();
-  },
-  (region, position) => {
-    state.region = region;
-    state.position = position;
-    render();
-    toast(`Welcome to ${maps[region].name}! Follow the paths to explore.`);
-  },
-);
-window.addEventListener('pagehide', () => persist());
+async function boot() {
+  const tools = document.querySelectorAll<HTMLButtonElement>('.game-hud button, .game-dock button');
+  tools.forEach((button) => {
+    button.disabled = true;
+  });
+  const guestOnly = new URLSearchParams(location.search).get('guest') === '1';
+  if (import.meta.env.DEV && !guestOnly) {
+    $('#save-status').textContent = 'Connecting to your adventure…';
+    try {
+      backend = await connectBackend({
+        open: openDialog,
+        close: closeDialog,
+        toast,
+        visit: (quest) => game.events.emit('visit', quest),
+        apply: (snapshot) => {
+          state.done = completedWorldQuests(snapshot);
+          render();
+          game?.events.emit('refresh');
+        },
+      });
+    } catch {
+      $('#save-status').textContent = 'The local server is unavailable. Reload to reconnect.';
+      openDialog(
+        '<h2 id="dialog-title">Let’s reconnect your adventure</h2><p>The local server could not load your progress. Start the local demo, then reload this page.</p><button class="primary" id="reconnect-world">Reconnect</button>',
+      );
+      $('#reconnect-world').onclick = () => location.reload();
+      return;
+    }
+  }
+  if (backend) {
+    state = freshState();
+    state.done = completedWorldQuests(backend.snapshot);
+    backend.restoreView(state);
+  }
+  render();
+  game = createWorld(
+    'game',
+    () => state,
+    (quest) => {
+      if (backend) backend.encounter(quest);
+      else {
+        const encounter = activeEncounters.find((e) => e.id === quest.id);
+        if (encounter) startActivity(encounter);
+      }
+    },
+    () =>
+      backend
+        ? backend.missions()
+        : state.done.length === 3
+          ? celebration()
+          : toast('Three helping-paw stars will make a wonderful friendship!'),
+    (position) => {
+      state.position = position;
+      persist();
+    },
+    (region, position) => {
+      state.region = region;
+      state.position = position;
+      render();
+      toast(`Welcome to ${maps[region].name}! Follow the paths to explore.`);
+    },
+    backend
+      ? { encounters: () => backend!.markers, companion: () => backend!.companion() }
+      : undefined,
+  );
+  tools.forEach((button) => {
+    button.disabled = false;
+  });
+  if (backend)
+    toast(
+      backend.snapshot.pendingEncounters.length
+        ? 'Welcome back! Open Missions to continue your activity.'
+        : 'Find Pip, or open Missions to start your adventure.',
+    );
+}
+void boot();
+window.addEventListener('pagehide', () => {
+  if (game) persist();
+});

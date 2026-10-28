@@ -626,6 +626,16 @@
           },
           "maxItems": 200,
           "uniqueItems": true
+        },
+        "selectedCompanions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 3,
+          "uniqueItems": true
         }
       },
       "required": [

@@ -13,7 +13,11 @@ export const BRIDGE = Object.freeze({
 // tail, and animation lift never participate in collisions.
 export const FOOTPRINT = Object.freeze({ halfWidth: 12, halfHeight: 4 });
 export function bridgeContainsFeet(y: number) {
+  // Ground motion can leave an exact edge a few floating-point units away.
+  // This tolerance is far below a rendered pixel and does not admit a rail crossing.
+  const epsilon = 1e-7;
   return (
-    y - FOOTPRINT.halfHeight >= BRIDGE.deckTop && y + FOOTPRINT.halfHeight <= BRIDGE.deckBottom
+    y - FOOTPRINT.halfHeight >= BRIDGE.deckTop - epsilon &&
+    y + FOOTPRINT.halfHeight <= BRIDGE.deckBottom + epsilon
   );
 }

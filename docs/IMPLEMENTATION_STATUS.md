@@ -66,3 +66,38 @@ unassessed evidence and domain cancellation, so leaving a task does not block
 the next encounter. The authored director now excludes completed beats.
 See `adr/encounter-abandonment.md` for protocol compatibility, regression coverage
 and rollback limits. These fixes do not complete the outstanding release gates.
+
+## Local browser integration — 29 October 2026
+
+An opt-in `/demo.html` development screen now mounts the existing client and
+activity components against the real PostgreSQL API. It exposes the existing
+Meadow slice (six story beats, four friendships), server answer checks, recorded
+support, abandonment, companion selection, inventory and learner summaries.
+A separate synthetic database/session is provisioned by `scripts/local-demo.sh`;
+the normal API authentication path is unchanged. Guest world saves remain separate.
+This does not close the regional travel, world synchronization, account/import,
+parent lifecycle, director, transformation or content-review gates listed above.
+
+### In-world local integration
+
+The default local demo now uses the Phaser world. Ten labelled interaction
+points expose all six Meadow story beats and four friendships through walking,
+clicking, Space and Missions. Server completions drive bridge collision/scenery,
+picnic and garden changes. The journal and grown-up view use server snapshots;
+selectedCompanions is an optional snapshot field populated from the domain team,
+so followers restore after reload. Existing friend art is provisional.
+Closing an activity records abandonment; uncertain writes retain their exact
+command for retry, and pending encounters can resume after reload. Guest mode
+remains at `?guest=1` with its original storage untouched by backend play.
+Movement/camera/hero preferences are local; this does not assert server-verified
+world reachability or add regional travel, transformations or account workflows.
+
+### Visual activity interaction pass
+
+The mounted activity components now use draggable/tappable planks, berries,
+plates, number and letter tiles, and illustrated story/position cards. The UI
+reuses local game art, shortens instructions and preserves accessible control
+names and keyboard alternatives. Pointer dragging supports touch, return-to-tray
+and ordered-card rearrangement; correctness and rewards remain server-owned.
+This changes presentation, not assessment rules, and still requires educator
+and child usability review.

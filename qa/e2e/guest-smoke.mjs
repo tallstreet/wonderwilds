@@ -11,7 +11,9 @@ try {
     const page = await browser.newPage({ viewport: { width, height } });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    const response = await page.goto(process.env.WONDERWILDS_TEST_URL || 'http://127.0.0.1:5173/');
+    const guestUrl = new URL(process.env.WONDERWILDS_TEST_URL || 'http://127.0.0.1:5173/');
+    guestUrl.searchParams.set('guest', '1');
+    const response = await page.goto(guestUrl.href);
     assert.equal(response.status(), 200);
     await page.waitForSelector('#game canvas');
     await page.locator('#missions').click();

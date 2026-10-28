@@ -93,7 +93,10 @@ try {
   assert.equal(await page.locator('h2').evaluate((node) => node === document.activeElement), true);
   // Real Tab/Enter navigation exercises the same buttons exposed to touch.
   await page.keyboard.press('Tab');
-  assert.equal(await page.evaluate(() => document.activeElement.textContent), 'Add one object');
+  assert.equal(
+    await page.evaluate(() => document.activeElement.getAttribute('aria-label')),
+    'Place plank 1',
+  );
   await page.keyboard.press('Enter');
   await click('Add one object');
   await click('Remove one object');
@@ -122,7 +125,7 @@ try {
     prefixLength: 3,
     instructionId: 'extend',
   });
-  assert.match(await page.locator('section').innerText(), /Pattern so far: Leaf, Star, Leaf/);
+  assert.match(await page.locator('section').textContent(), /Pattern so far: Leaf, Star, Leaf/);
   await click('Choose: Star');
   await click('Check my answer');
   assert.deepEqual(await lastAnswer(), { kind: 'choices', choiceIds: ['star'] });
@@ -164,7 +167,7 @@ try {
     instructionId: 'pattern-next',
   });
   assert.equal(await page.getByRole('button', { name: 'Choose: Leaf', exact: true }).count(), 0);
-  assert.match(await page.locator('section').innerText(), /Pattern so far: Leaf/);
+  assert.match(await page.locator('section').textContent(), /Pattern so far: Leaf/);
   assert.equal(
     await page.evaluate(() =>
       window.presentationTest({
@@ -236,7 +239,10 @@ try {
     'E14',
   );
   assert.equal(await page.locator('img').count(), 0);
-  assert.match(await page.locator('section').innerText(), /does not certify writing or reasoning/);
+  assert.match(
+    await page.locator('section').textContent(),
+    /does not certify writing or reasoning/,
+  );
 
   await mount('missing_quantity', { total: 6, given: 2 });
   await page.evaluate(() => {
