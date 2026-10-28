@@ -18,3 +18,27 @@ twelve actual artwork URLs decode, regional filters, keyboard details and deskto
 tablet and phone layouts. This page is a field guide, not a recruitment action.
 `node companion-smoke.mjs` verifies journal memory/glow/reload controls with synthetic
 HTTP fixtures; Rust/PostgreSQL suites provide separate authority/persistence checks.
+
+
+Companion training against the real API and PostgreSQL:
+
+```sh
+node qa/e2e/run-training-qa.mjs
+```
+
+Run that command from the repository root in the prepared Linux workspace after
+installing the frontend and `qa/e2e` dependencies. It builds the API, creates a
+unique disposable synthetic database, applies migrations, issues a temporary
+operator session, and starts private API/Vite processes on ports 3002/5180. It
+removes the database and temporary session when finished. It does not use or
+modify `.local-demo/` data or session files. Set `CHROMIUM_PATH` if needed;
+`WW_QA_SKIP_BUILD=1` reuses an API binary you have already built.
+
+The journey recruits the four Meadow friends through real assessed HTTP commands,
+then exercises the world journal, keyboard companion/training controls, wrong
+answers, recorded support, reload/resume, abandonment, Pip's level-two reaction,
+persistent XP, exact request retries, repeated-practice reward prevention and a
+phone-sized training UI. Real educator, child usability and screen-reader reviews
+remain separate requirements. `training-browser.mjs` can also target an already
+prepared **fresh QA database** via `WW_DEMO_TEST_URL`; never point it at a database
+whose progress should be preserved.

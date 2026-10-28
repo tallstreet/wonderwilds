@@ -140,7 +140,41 @@ export class GameClient {
         items.length <= maximum &&
         items.every(valid) &&
         new Set(items.map(key)).size === items.length);
+    const boundedInteger = (item: unknown, maximum = 1_000_000_000, minimum = 0) =>
+      Number.isSafeInteger(item) && Number(item) >= minimum && Number(item) <= maximum;
+    const trainingOffer = (item: unknown) =>
+      isRecord(item) &&
+      id(item.trainingId) &&
+      boundedInteger(item.requiredLevel, 5, 1) &&
+      boundedInteger(item.xp) &&
+      id(item.reactionId);
     if (
+      (value.teamCapacity !== undefined && !boundedInteger(value.teamCapacity, 2)) ||
+      (value.explorerProgression !== undefined &&
+        (!isRecord(value.explorerProgression) ||
+          !boundedInteger(value.explorerProgression.xp) ||
+          !boundedInteger(value.explorerProgression.level, 100, 1))) ||
+      !optionalList(
+        value.characterProgression,
+        50,
+        (entry) =>
+          isRecord(entry) &&
+          id(entry.creatureId) &&
+          boundedInteger(entry.xp) &&
+          boundedInteger(entry.level, 5, 1) &&
+          (entry.nextLevelXp === undefined || boundedInteger(entry.nextLevelXp)) &&
+          (entry.reactionId === undefined || id(entry.reactionId)) &&
+          Array.isArray(entry.completedTrainingIds) &&
+          optionalList(entry.completedTrainingIds, 100, id, (item) => item as string) &&
+          Array.isArray(entry.availableTraining) &&
+          optionalList(
+            entry.availableTraining,
+            100,
+            trainingOffer,
+            (item) => (item as { trainingId: string }).trainingId,
+          ),
+        (entry) => (entry as { creatureId: string }).creatureId,
+      ) ||
       !optionalList(
         value.friendship,
         50,

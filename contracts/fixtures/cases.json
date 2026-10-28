@@ -1685,5 +1685,212 @@
         }
       ]
     }
+  },
+  {
+    "name": "Character progression with training",
+    "contract": "CharacterProgression",
+    "valid": true,
+    "value": {
+      "creatureId": "pip",
+      "xp": 10,
+      "level": 2,
+      "nextLevelXp": 30,
+      "reactionId": "pip-lantern-cheer",
+      "completedTrainingIds": [
+        "training-pip-1"
+      ],
+      "availableTraining": [
+        {
+          "trainingId": "training-pip-1",
+          "requiredLevel": 1,
+          "xp": 10,
+          "reactionId": "pip-lantern-cheer"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Character progression rejects xp",
+    "contract": "CharacterProgression",
+    "valid": false,
+    "value": {
+      "creatureId": "pip",
+      "xp": -1,
+      "level": 2,
+      "nextLevelXp": 30,
+      "reactionId": "pip-lantern-cheer",
+      "completedTrainingIds": [
+        "training-pip-1"
+      ],
+      "availableTraining": [
+        {
+          "trainingId": "training-pip-1",
+          "requiredLevel": 1,
+          "xp": 10,
+          "reactionId": "pip-lantern-cheer"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Character progression rejects level",
+    "contract": "CharacterProgression",
+    "valid": false,
+    "value": {
+      "creatureId": "pip",
+      "xp": 10,
+      "level": 6,
+      "nextLevelXp": 30,
+      "reactionId": "pip-lantern-cheer",
+      "completedTrainingIds": [
+        "training-pip-1"
+      ],
+      "availableTraining": [
+        {
+          "trainingId": "training-pip-1",
+          "requiredLevel": 1,
+          "xp": 10,
+          "reactionId": "pip-lantern-cheer"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Character progression rejects completedTrainingIds",
+    "contract": "CharacterProgression",
+    "valid": false,
+    "value": {
+      "creatureId": "pip",
+      "xp": 10,
+      "level": 2,
+      "nextLevelXp": 30,
+      "reactionId": "pip-lantern-cheer",
+      "completedTrainingIds": [
+        "training-pip-1",
+        "training-pip-1"
+      ],
+      "availableTraining": [
+        {
+          "trainingId": "training-pip-1",
+          "requiredLevel": 1,
+          "xp": 10,
+          "reactionId": "pip-lantern-cheer"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Character progression rejects availableTraining",
+    "contract": "CharacterProgression",
+    "valid": false,
+    "value": {
+      "creatureId": "pip",
+      "xp": 10,
+      "level": 2,
+      "nextLevelXp": 30,
+      "reactionId": "pip-lantern-cheer",
+      "completedTrainingIds": [
+        "training-pip-1"
+      ],
+      "availableTraining": [
+        {
+          "trainingId": "training-pip-1",
+          "requiredLevel": 1,
+          "xp": -10,
+          "reactionId": "pip-lantern-cheer"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Training binding",
+    "contract": "TrainingBinding",
+    "valid": true,
+    "value": {
+      "trainingId": "training-pip-1",
+      "creatureId": "pip",
+      "rulesVersion": "training-1"
+    }
+  },
+  {
+    "name": "Training cannot claim XP",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "train-1",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "start_encounter",
+        "beatId": "training-pip-1",
+        "xp": 100
+      }
+    }
+  },
+  {
+    "name": "Select team []",
+    "contract": "GameCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "team-1",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "select_team",
+        "creatureIds": []
+      }
+    }
+  },
+  {
+    "name": "Select team ['pip', 'tansy']",
+    "contract": "GameCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "team-1",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "select_team",
+        "creatureIds": [
+          "pip",
+          "tansy"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Select team ['pip', 'pip']",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "team-1",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "select_team",
+        "creatureIds": [
+          "pip",
+          "pip"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Select team ['pip', 'tansy', 'nib']",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "team-1",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "select_team",
+        "creatureIds": [
+          "pip",
+          "tansy",
+          "nib"
+        ]
+      }
+    }
   }
 ]

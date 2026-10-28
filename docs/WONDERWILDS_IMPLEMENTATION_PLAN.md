@@ -1,6 +1,6 @@
 # Wonderwilds implementation plan
 
-Version: 1.1 · Updated: 29 October 2026 · Status: broader architecture and release roadmap
+Version: 1.2 · Updated: 29 October 2026 · Status: broader architecture and release roadmap
 
 The [companion progression plan](COMPANION_PROGRESSION_PLAN.md) governs the next gameplay implementation sequence and supersedes earlier collection/progression sequencing here. Use [implementation status](IMPLEMENTATION_STATUS.md) for delivered work. Existing WW task IDs remain reference scopes, not a queue to rebuild completed foundations. Live AI and fine-tuning are deferred and do not block the authored companion expansion.
 
@@ -28,9 +28,10 @@ The current repository is `/Users/gary/Documents/Development/wonderwilds`, under
 | `backend/crates/api/src/game/` | Authenticated transactions, retries, encounter support and abandonment | Expanded commands/snapshots, training and regional eligibility |
 | `contracts/` | Schemas, generated Rust/TS and shared fixtures | Compatible extensions and migration fixtures |
 | `content/` | Three authored regions, twelve friends, curriculum/activity definitions | Training milestones, personal quests and remaining content reviews |
-| Guest save and existing art | Separate local progress and preserved hero IDs; friend art provisional | Preserve guest data and provide distinct friend art |
+| Guest save and existing art | Separate local progress, preserved hero IDs and distinct artwork for twelve friends | Preserve guest data; directional/transform art and human review |
+| Exploration library | 75 connected destinations; 72 new landscape images and lazy-loaded map previews | Authoritative regional eligibility, activities and discovery integration |
 
-Regional travel, transformations in the browser, production account flows and guest import remain outstanding. The local developer session is not production identity integration. No live model is required for the current authored adventure. Preserve the original guest save key `starwhisker.meadow.v1` and existing hero IDs.
+Server-authoritative regional travel, production account flows and guest import remain outstanding. Browser journal memory and reversible transformation controls are implemented; distinct transformation art and automatic shared-activity friendship remain outstanding. The local developer session is not production identity integration. No live model is required for the current authored adventure. Preserve the original guest save key `starwhisker.meadow.v1` and existing hero IDs.
 
 ### Migration rules
 

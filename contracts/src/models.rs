@@ -30,6 +30,8 @@ pub struct EncounterInstance {
     pub parameters: Parameters,
     pub permitted_actions: Vec<EncounterInstancePermittedActionsItem>,
     pub support: SupportState,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub training: Option<TrainingBinding>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -50,6 +52,7 @@ pub enum CommandPayload {
     Variant5(CommandPayloadVariant5),
     Variant6(CommandPayloadVariant6),
     Variant7(CommandPayloadVariant7),
+    Variant8(CommandPayloadVariant8),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -96,6 +99,12 @@ pub struct GameSnapshot {
     pub transformed_creatures: Option<Vec<String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub available_helping_moments: Option<Vec<HelpingMoment>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub character_progression: Option<Vec<CharacterProgression>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub explorer_progression: Option<ExplorerProgression>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub team_capacity: Option<u64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -283,6 +292,44 @@ pub struct HelpingMoment {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TrainingBinding {
+    pub training_id: String,
+    pub creature_id: String,
+    pub rules_version: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TrainingOffer {
+    pub training_id: String,
+    pub required_level: u64,
+    pub xp: u64,
+    pub reaction_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CharacterProgression {
+    pub creature_id: String,
+    pub xp: u64,
+    pub level: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub next_level_xp: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reaction_id: Option<String>,
+    pub completed_training_ids: Vec<String>,
+    pub available_training: Vec<TrainingOffer>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ExplorerProgression {
+    pub xp: u64,
+    pub level: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ParametersVariant1 {
     pub total: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -434,6 +481,13 @@ pub struct CommandPayloadVariant7 {
     pub r#type: CommandPayloadVariant7Type,
     pub creature_id: String,
     pub enabled: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant8 {
+    pub r#type: CommandPayloadVariant8Type,
+    pub creature_ids: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -771,6 +825,12 @@ pub enum CommandPayloadVariant6Type {
 pub enum CommandPayloadVariant7Type {
     #[serde(rename = "transform_companion")]
     TransformCompanion,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant8Type {
+    #[serde(rename = "select_team")]
+    SelectTeam,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

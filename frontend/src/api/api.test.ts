@@ -286,3 +286,57 @@ test('character state survives reload and malformed optional progression fails c
     );
   }
 });
+
+test('training projections validate bounds while older snapshots remain readable', async () => {
+  const progression = {
+    creatureId: 'pip',
+    xp: 10,
+    level: 2,
+    nextLevelXp: 30,
+    reactionId: 'pip-lantern-cheer',
+    completedTrainingIds: ['training-pip-1'],
+    availableTraining: [
+      { trainingId: 'training-pip-1', requiredLevel: 1, xp: 10, reactionId: 'pip-lantern-cheer' },
+    ],
+  };
+  const read = async (fields: object) => {
+    const client = new GameClient(
+      () => 'csrf',
+      async () => Response.json({ ...snapshot, ...fields }),
+    );
+    client.selectProfile('owned-profile');
+    return client.snapshot();
+  };
+  assert.deepEqual(
+    (
+      await read({
+        characterProgression: [progression],
+        explorerProgression: { xp: 20, level: 2 },
+        teamCapacity: 2,
+      })
+    ).characterProgression,
+    [progression],
+  );
+  for (const fields of [
+    { characterProgression: [{ ...progression, xp: -1 }] },
+    { characterProgression: [{ ...progression, level: 6 }] },
+    { characterProgression: [progression, progression] },
+    { characterProgression: [{ ...progression, completedTrainingIds: undefined }] },
+    {
+      characterProgression: [
+        { ...progression, completedTrainingIds: ['training-pip-1', 'training-pip-1'] },
+      ],
+    },
+    {
+      characterProgression: [
+        { ...progression, availableTraining: [{ trainingId: 'training-pip-1', xp: 10 }] },
+      ],
+    },
+    { explorerProgression: { xp: -1, level: 1 } },
+    { teamCapacity: 3 },
+  ])
+    await assert.rejects(
+      read(fields),
+      (error: unknown) => error instanceof ApiFailure && error.code === 'UNAVAILABLE',
+    );
+});

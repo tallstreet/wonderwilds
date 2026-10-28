@@ -1,8 +1,20 @@
 import unittest
-from validate import discover, load, validate, validate_development
+from validate import discover, load, validate, validate_development, validate_training
 
 
 class StoryTests(unittest.TestCase):
+    def test_training_policy_is_achievable_and_cannot_farm_or_penalize_support(self):
+        self.assertEqual(validate_training(), [])
+        for mutate in [
+            lambda p: p['characterProgression'].update(repeatMilestoneXp=10),
+            lambda p: p['characterProgression'].update(supportedCompletionMultiplier=0),
+            lambda p: p['characterProgression']['training'].pop(),
+            lambda p: p['characterProgression']['training'][0].update(skillId='invented'),
+        ]:
+            policy = load('content/story/progression.v1.json')
+            mutate(policy)
+            self.assertTrue(validate_training(policy))
+
     def test_authored_content(self):
         self.assertEqual(validate(), [])
 

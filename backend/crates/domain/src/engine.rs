@@ -144,6 +144,28 @@ impl Reward {
     }
 }
 
+/// Server-internal authored training policy. No client supplies XP or recipient.
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TrainingDefinition {
+    pub id: String,
+    pub creature_id: String,
+    pub skill_id: String,
+    pub template_id: String,
+    pub required_level: usize,
+    pub xp: u32,
+    pub reaction_id: String,
+}
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CharacterProgression {
+    rules_version: String,
+    levels: Vec<u32>,
+    supported_completion_multiplier: u32,
+    repeat_milestone_xp: u32,
+    training: Vec<TrainingDefinition>,
+}
+
 #[derive(Clone, Debug)]
 pub struct Content {
     version: String,
@@ -153,6 +175,7 @@ pub struct Content {
     creatures: BTreeMap<String, Creature>,
     levels: Vec<u32>,
     max_friendship: u32,
+    character_progression: CharacterProgression,
 }
 impl Content {
     /// Explicit development loader. Pending author/educator reviews cannot be
@@ -193,6 +216,7 @@ impl Content {
             content_version: String,
             explorer_levels: Vec<u32>,
             friendship: Friendship,
+            character_progression: CharacterProgression,
         }
         #[derive(Deserialize)]
         struct Friendship {
@@ -241,6 +265,7 @@ impl Content {
                 .collect(),
             levels: progression.explorer_levels,
             max_friendship: progression.friendship.maximum,
+            character_progression: progression.character_progression,
         };
         if [nc, nb, nh, nf].contains(&0)
             || (
@@ -256,6 +281,72 @@ impl Content {
             return Err(Rejection::InvalidContent(
                 "duplicate IDs or invalid levels".into(),
             ));
+        }
+        let policy = &content.character_progression;
+        if policy.rules_version != "character-training-1.0.0"
+            || policy.levels.len() != 5
+            || policy.levels.first() != Some(&0)
+            || policy.levels.windows(2).any(|x| x[0] >= x[1])
+            || policy.supported_completion_multiplier != 1
+            || policy.repeat_milestone_xp != 0
+        {
+            return Err(Rejection::InvalidContent(
+                "invalid character progression".into(),
+            ));
+        }
+        let mut training_ids = BTreeSet::new();
+        for t in &policy.training {
+            let mapping = match t.creature_id.as_str() {
+                "pip" => ("M06", "missing_quantity"),
+                "tansy" => ("M05", "pattern_sort"),
+                "nib" => ("M08", "equal_sharing"),
+                "flutter" => ("M09", "pattern_sort"),
+                _ => {
+                    return Err(Rejection::InvalidContent(
+                        "unsupported training creature".into(),
+                    ));
+                }
+            };
+            if (t.skill_id.as_str(), t.template_id.as_str()) != mapping
+                || !valid_id(&t.id)
+                || !training_ids.insert(&t.id)
+                || content.beats.contains_key(&t.id)
+                || content.help.contains_key(&t.id)
+                || !content.creatures.contains_key(&t.creature_id)
+                || t.required_level == 0
+                || t.required_level >= policy.levels.len()
+                || t.xp == 0
+                || !valid_id(&t.reaction_id)
+                || !valid_id(&t.skill_id)
+                || !valid_id(&t.template_id)
+            {
+                return Err(Rejection::InvalidContent(
+                    "invalid training definition".into(),
+                ));
+            }
+        }
+        for id in ["pip", "tansy", "nib", "flutter"] {
+            let mut xp = 0u32;
+            for level in 1..5 {
+                let milestones: Vec<_> = policy
+                    .training
+                    .iter()
+                    .filter(|t| t.creature_id == id && t.required_level == level)
+                    .collect();
+                if milestones.len() != 1 || xp < policy.levels[level - 1] {
+                    return Err(Rejection::InvalidContent(
+                        "unreachable character milestone".into(),
+                    ));
+                }
+                xp = xp
+                    .checked_add(milestones[0].xp)
+                    .ok_or(Rejection::Overflow)?;
+            }
+            if xp < policy.levels[4] {
+                return Err(Rejection::InvalidContent(
+                    "unreachable character level five".into(),
+                ));
+            }
         }
         let mut reward_ids = BTreeSet::new();
         for beat in content.beats.values() {
@@ -361,6 +452,21 @@ impl Content {
         }
         Ok(content)
     }
+    pub fn training(&self, id: &str) -> Option<&TrainingDefinition> {
+        self.character_progression
+            .training
+            .iter()
+            .find(|t| t.id == id)
+    }
+    pub fn training_definitions(&self) -> impl Iterator<Item = &TrainingDefinition> {
+        self.character_progression.training.iter()
+    }
+    pub fn training_rules_version(&self) -> &str {
+        &self.character_progression.rules_version
+    }
+    pub fn character_level_thresholds(&self) -> &[u32] {
+        &self.character_progression.levels
+    }
     pub fn version(&self) -> &str {
         &self.version
     }
@@ -371,12 +477,14 @@ impl Content {
             .get(quest_id)
             .map(|b| b.skill_id.as_str())
             .or_else(|| self.help.get(quest_id).map(|q| q.skill_id.as_str()))
+            .or_else(|| self.training(quest_id).map(|t| t.skill_id.as_str()))
     }
     pub fn quest_template_id(&self, quest_id: &str) -> Option<&str> {
         self.beats
             .get(quest_id)
             .map(|b| b.template_id.as_str())
             .or_else(|| self.help.get(quest_id).map(|q| q.template_id.as_str()))
+            .or_else(|| self.training(quest_id).map(|t| t.template_id.as_str()))
     }
 }
 
@@ -461,6 +569,10 @@ pub struct State {
     transformed: BTreeSet<String>,
     team: Vec<String>,
     xp: u32,
+    #[serde(default)]
+    character_xp: BTreeMap<String, u32>,
+    #[serde(default)]
+    training_grants: BTreeSet<String>,
     grants: BTreeSet<(String, String)>,
     discoveries: BTreeMap<String, String>,
     last_discovery: BTreeMap<String, String>,
@@ -489,11 +601,36 @@ impl State {
             transformed: BTreeSet::new(),
             team: Vec::new(),
             xp: 0,
+            character_xp: BTreeMap::new(),
+            training_grants: BTreeSet::new(),
             grants: BTreeSet::new(),
             discoveries: BTreeMap::new(),
             last_discovery: BTreeMap::new(),
             receipts: BTreeMap::new(),
         }
+    }
+    pub fn character_xp(&self, id: &str) -> u32 {
+        *self.character_xp.get(id).unwrap_or(&0)
+    }
+    pub fn character_level(&self, content: &Content, id: &str) -> usize {
+        content
+            .character_level_thresholds()
+            .iter()
+            .filter(|&&xp| self.character_xp(id) >= xp)
+            .count()
+    }
+    pub fn training_completed(&self, id: &str) -> bool {
+        self.training_grants.contains(id)
+    }
+    pub fn available_training<'a>(&self, content: &'a Content) -> Vec<&'a TrainingDefinition> {
+        content
+            .training_definitions()
+            .filter(|t| training_eligible(self, content, t).is_ok())
+            .collect()
+    }
+    pub fn team_capacity(&self) -> usize {
+        usize::from(self.features.contains("team_slot_1"))
+            + usize::from(self.features.contains("team_slot_2"))
     }
     pub fn revision(&self) -> u64 {
         self.revision
@@ -574,6 +711,13 @@ pub enum Outcome {
     QuestCompleted {
         quest_id: String,
         supported: bool,
+    },
+    TrainingCompleted {
+        training_id: String,
+        creature_id: String,
+        supported: bool,
+        xp_granted: u32,
+        level: usize,
     },
     QuestAbandoned {
         quest_id: String,
@@ -663,7 +807,23 @@ fn quest<'a>(
     let c = &content.creatures[&q.creature_id];
     Ok((&c.region_id, &q.requires_beat_ids, &q.rewards))
 }
+fn training_eligible(
+    state: &State,
+    content: &Content,
+    t: &TrainingDefinition,
+) -> Result<(), Rejection> {
+    if !state.creatures.contains(&t.creature_id)
+        || content.creatures[&t.creature_id].region_id != state.region
+        || state.character_level(content, &t.creature_id) < t.required_level
+    {
+        return Err(Rejection::Locked);
+    }
+    Ok(())
+}
 fn eligible(state: &State, content: &Content, id: &str) -> Result<(), Rejection> {
+    if let Some(t) = content.training(id) {
+        return training_eligible(state, content, t);
+    }
     let (region, requires, _) = quest(content, id)?;
     if region != state.region || requires.iter().any(|r| !state.completed.contains(r)) {
         return Err(Rejection::Locked);
@@ -727,6 +887,15 @@ pub fn apply(
             {
                 return Err(Rejection::UnverifiedEncounter);
             }
+            if let Some(t) = content.training(quest_id)
+                && state.pending.keys().any(|id| {
+                    content
+                        .training(id)
+                        .is_some_and(|other| other.creature_id == t.creature_id)
+                })
+            {
+                return Err(Rejection::Locked);
+            }
             next.pending.insert(quest_id.clone(), encounter_id.clone());
             outcomes.push(Outcome::QuestStarted {
                 quest_id: quest_id.clone(),
@@ -750,28 +919,52 @@ pub fn apply(
                 .get(encounter_id)
                 .filter(|v| v.quest_id == *quest_id)
                 .ok_or(Rejection::UnverifiedEncounter)?;
-            next.completed.insert(quest_id.clone());
-            next.pending.remove(quest_id);
-            outcomes.push(Outcome::QuestCompleted {
-                quest_id: quest_id.clone(),
-                supported: verified.supported,
-            });
-            let (_, _, rewards) = quest(content, quest_id)?;
-            for r in rewards {
-                reward(&mut next, quest_id, r, &mut outcomes)?;
-            }
-            if let Some(b) = content.beats.get(quest_id) {
-                next.flags.extend(b.completion_flags.clone());
-            }
-            if let Some(q) = content.help.get(quest_id) {
-                next.friendship.insert(q.creature_id.clone(), 1);
-                next.helping_moments
-                    .insert((q.creature_id.clone(), quest_id.clone()));
-                next.discoveries.retain(|_, v| v != &q.creature_id);
-                outcomes.push(Outcome::FriendshipIncreased {
-                    creature_id: q.creature_id.clone(),
-                    points: 1,
+            if let Some(t) = content.training(quest_id) {
+                next.pending.remove(quest_id);
+                let amount = if next.training_grants.insert(t.id.clone()) {
+                    t.xp
+                } else {
+                    0
+                };
+                let xp = next.character_xp.entry(t.creature_id.clone()).or_default();
+                *xp = xp.checked_add(amount).ok_or(Rejection::Overflow)?;
+                if amount > 0 {
+                    outcomes.push(Outcome::RewardGranted {
+                        reward_id: format!("character-xp:{}", t.id),
+                        quest_id: t.id.clone(),
+                    });
+                }
+                outcomes.push(Outcome::TrainingCompleted {
+                    training_id: t.id.clone(),
+                    creature_id: t.creature_id.clone(),
+                    supported: verified.supported,
+                    xp_granted: amount,
+                    level: next.character_level(content, &t.creature_id),
                 });
+            } else {
+                next.completed.insert(quest_id.clone());
+                next.pending.remove(quest_id);
+                outcomes.push(Outcome::QuestCompleted {
+                    quest_id: quest_id.clone(),
+                    supported: verified.supported,
+                });
+                let (_, _, rewards) = quest(content, quest_id)?;
+                for r in rewards {
+                    reward(&mut next, quest_id, r, &mut outcomes)?;
+                }
+                if let Some(b) = content.beats.get(quest_id) {
+                    next.flags.extend(b.completion_flags.clone());
+                }
+                if let Some(q) = content.help.get(quest_id) {
+                    next.friendship.insert(q.creature_id.clone(), 1);
+                    next.helping_moments
+                        .insert((q.creature_id.clone(), quest_id.clone()));
+                    next.discoveries.retain(|_, v| v != &q.creature_id);
+                    outcomes.push(Outcome::FriendshipIncreased {
+                        creature_id: q.creature_id.clone(),
+                        points: 1,
+                    });
+                }
             }
         }
         Action::AbandonQuest {
@@ -1134,6 +1327,170 @@ mod tests {
             finish(state, id, c, supported, log);
         }
     }
+    #[test]
+    fn malformed_training_policies_are_rejected_before_play() {
+        let cases = [
+            ("/characterProgression/levels/1", serde_json::json!(0)),
+            ("/characterProgression/training/0/xp", serde_json::json!(1)),
+            (
+                "/characterProgression/training/0/creatureId",
+                serde_json::json!("unknown"),
+            ),
+            (
+                "/characterProgression/training/0/skillId",
+                serde_json::json!("M03"),
+            ),
+            (
+                "/characterProgression/training/0/reactionId",
+                serde_json::json!(""),
+            ),
+            (
+                "/characterProgression/training/0/requiredLevel",
+                serde_json::json!(4),
+            ),
+            (
+                "/characterProgression/supportedCompletionMultiplier",
+                serde_json::json!(0),
+            ),
+            (
+                "/characterProgression/repeatMilestoneXp",
+                serde_json::json!(10),
+            ),
+            (
+                "/characterProgression/rulesVersion",
+                serde_json::json!("unknown"),
+            ),
+        ];
+        for (pointer, replacement) in cases {
+            let mut policy: serde_json::Value = serde_json::from_str(PROGRESSION).unwrap();
+            *policy.pointer_mut(pointer).unwrap() = replacement;
+            assert!(
+                matches!(
+                    Content::development(STORY, HELP, FRIENDS, &policy.to_string()),
+                    Err(Rejection::InvalidContent(_))
+                ),
+                "{pointer}"
+            );
+        }
+    }
+
+    #[test]
+    fn training_is_bound_supported_idempotent_and_replayable() {
+        let c = content();
+        let mut initial = State::new(&c);
+        initial.creatures.insert("pip".into());
+        initial.creatures.insert("tansy".into());
+        let mut state = initial.clone();
+        let mut log = Vec::new();
+        finish(&mut state, "training-pip-1", &c, true, &mut log);
+        assert_eq!(state.character_xp("pip"), 10);
+        assert_eq!(state.character_level(&c, "pip"), 2);
+        assert_eq!(state.character_xp("tansy"), 0);
+        assert_eq!(state.xp(), 0);
+        assert_eq!(state.friendship("pip"), 0);
+        assert!(state.completed().is_empty());
+        let receipt = log.last().unwrap();
+        let duplicate = apply(&state, &receipt.command, &c, &receipt.context).unwrap();
+        assert!(duplicate.duplicate);
+        assert_eq!(duplicate.state, state);
+        finish(&mut state, "training-pip-1", &c, false, &mut log);
+        assert_eq!(state.character_xp("pip"), 10);
+        assert!(
+            log.last()
+                .unwrap()
+                .events
+                .iter()
+                .all(|e| !matches!(e.outcome, Outcome::RewardGranted { .. }))
+        );
+        assert_eq!(replay(&initial, &c, &log).unwrap(), state);
+        let reloaded: State =
+            serde_json::from_value(serde_json::to_value(&state).unwrap()).unwrap();
+        assert_eq!(reloaded, state);
+        for n in 2..=4 {
+            finish(&mut state, &format!("training-pip-{n}"), &c, true, &mut log);
+        }
+        assert_eq!(state.character_level(&c, "pip"), 5);
+        assert_eq!(state.character_xp("pip"), 40);
+    }
+
+    #[test]
+    fn training_rejects_locked_unowned_and_cross_bound_completions() {
+        let c = content();
+        let mut state = State::new(&c);
+        state.creatures.insert("pip".into());
+        let mut ctx = context();
+        for id in ["training-tansy-1", "training-pip-2"] {
+            ctx.facts
+                .issued_encounters
+                .insert("encounter".into(), id.into());
+            ctx.facts.reachable_quests.insert(id.into());
+            let cmd = command(
+                &state,
+                Action::BeginQuest {
+                    quest_id: id.into(),
+                    encounter_id: "encounter".into(),
+                },
+            );
+            assert_eq!(apply(&state, &cmd, &c, &ctx), Err(Rejection::Locked));
+        }
+        ctx.facts
+            .issued_encounters
+            .insert("encounter".into(), "training-pip-1".into());
+        ctx.facts.reachable_quests.insert("training-pip-1".into());
+        let cmd = command(
+            &state,
+            Action::BeginQuest {
+                quest_id: "training-pip-1".into(),
+                encounter_id: "encounter".into(),
+            },
+        );
+        state = apply(&state, &cmd, &c, &ctx).unwrap().state;
+        ctx.facts.completed_encounters.insert(
+            "encounter".into(),
+            VerifiedCompletion {
+                quest_id: "training-tansy-1".into(),
+                supported: false,
+            },
+        );
+        let cmd = command(
+            &state,
+            Action::CompleteQuest {
+                quest_id: "training-pip-1".into(),
+                encounter_id: "encounter".into(),
+            },
+        );
+        assert_eq!(
+            apply(&state, &cmd, &c, &ctx),
+            Err(Rejection::UnverifiedEncounter)
+        );
+        let cmd = command(
+            &state,
+            Action::AbandonQuest {
+                quest_id: "training-pip-1".into(),
+                encounter_id: "encounter".into(),
+            },
+        );
+        state = apply(&state, &cmd, &c, &ctx).unwrap().state;
+        assert_eq!(state.character_xp("pip"), 0);
+    }
+
+    #[test]
+    fn old_state_loads_without_speculative_character_xp() {
+        let c = content();
+        let mut old = State::new(&c);
+        old.creatures.insert("pip".into());
+        old.friendship.insert("pip".into(), 3);
+        old.transformed.insert("pip".into());
+        let mut value = serde_json::to_value(&old).unwrap();
+        value.as_object_mut().unwrap().remove("character_xp");
+        value.as_object_mut().unwrap().remove("training_grants");
+        let loaded: State = serde_json::from_value(value).unwrap();
+        assert_eq!(loaded.character_xp("pip"), 0);
+        assert_eq!(loaded.character_level(&c, "pip"), 1);
+        assert_eq!(loaded.friendship("pip"), 3);
+        assert_eq!(loaded.transformed(), old.transformed());
+    }
+
     #[test]
     fn abandonment_is_replayable_without_rewards_and_can_restart() {
         let c = content();

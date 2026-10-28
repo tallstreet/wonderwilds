@@ -197,7 +197,8 @@
               }
             }
           }
-        }
+        },
+        "description": " Authored training uses start_encounter with a server-offered training ID as beatId. The server binds the owned recipient, milestone and rules version. Attempts and abandonment use the issued encounter ID. Supported completion awards the same configured character XP, once per milestone; replay is practice without duplicate XP."
       }
     },
     "/api/v1/encounters/{id}": {
@@ -549,6 +550,18 @@
       },
       "SkillNode": {
         "$ref": "./schemas/v1.json#/$defs/SkillNode"
+      },
+      "TrainingBinding": {
+        "$ref": "./schemas/v1.json#/$defs/TrainingBinding"
+      },
+      "TrainingOffer": {
+        "$ref": "./schemas/v1.json#/$defs/TrainingOffer"
+      },
+      "CharacterProgression": {
+        "$ref": "./schemas/v1.json#/$defs/CharacterProgression"
+      },
+      "ExplorerProgression": {
+        "$ref": "./schemas/v1.json#/$defs/ExplorerProgression"
       }
     },
     "securitySchemes": {

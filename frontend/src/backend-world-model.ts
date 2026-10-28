@@ -67,3 +67,13 @@ export function questReady(snapshot: GameSnapshot, id: string): boolean {
 export function completedWorldQuests(snapshot: GameSnapshot): string[] {
   return worldQuests.filter((q) => questCompleted(snapshot, q.id)).map((q) => q.id);
 }
+
+export const trainingClearing: WorldEncounter = {
+  id: 'meadow-training-clearing',
+  short: 'Train together',
+  character: 'Training clearing',
+  sprite: 'pip',
+  region: 'meadow',
+  x: 850,
+  y: 520,
+};

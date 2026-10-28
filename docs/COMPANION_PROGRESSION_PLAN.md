@@ -1,6 +1,6 @@
 # Wonderwilds companion progression implementation plan
 
-Updated: 29 October 2026. Status: planned; gameplay implementation has not started for this expansion.
+Updated: 29 October 2026. Status: first Meadow training delivery implemented and verified; richer milestones and regional integration remain planned. Test evidence is recorded in IMPLEMENTATION_STATUS.md.
 
 ## Purpose and scope
 
@@ -12,13 +12,35 @@ This is the active gameplay implementation sequence. It supersedes the earlier f
 
 | System | Current implementation | Work remaining |
 | --- | --- | --- |
-| Collection | Twelve authored friends, four per region; four Meadow friendship quests connected | Full journal, distinct art, discovery integration and remaining regions |
-| Explorer progression | Rust XP and level thresholds at 0, 20, 50, 90 and 140 | API projection and visible progress |
-| Friendship | Per-character points, distinct helping moments, maximum six | API and world interaction wiring |
-| Transformations | Reversible cosmetic changes, requiring friendship and a regional story flag | API, presentation and character art |
-| Teams | Two story-unlocked slots in the domain | API team selection and multiple followers; current UI selects one |
+| Collection | Twelve authored and illustrated friends, character field guide and four Meadow friendship quests connected | Progression presentation, discovery integration and remaining regions |
+| Explorer progression | Rust XP and level thresholds at 0, 20, 50, 90 and 140; snapshot/journal projection | Pacing and child usability review |
+| Friendship | Per-character points, distinct helping moments, maximum six; journal/API memory actions connected | Verified shared-activity participation and optional world roles |
+| Transformations | Reversible cosmetic changes, requiring friendship and a regional story flag; journal/API controls connected | Distinct transformation artwork and human review |
+| Teams | Two story-unlocked domain slots, typed team command, journal selection/removal and two world followers | Full two-slot regional browser journey; optional roles |
 | Discovery | Domain selection and persistent offers | Connect offers, habitat clues and world eligibility |
-| Character progression | No individual character XP or training flow | New domain rules, content, persistence, API and UI |
+| Character progression | Separate XP, sixteen Meadow training milestones, snapshot/journal controls and level-up reaction; real API/browser reload journey verified | Personal quests, roles, distinct higher-level rewards and pacing review |
+
+The exploration library now contains 75 connected destinations with individual
+landscape images for the 72 new locations. This is a browser exploration surface;
+server regional eligibility, authored Orchard/Cove stories, recruitment and the
+ending still require phase 6. Single front-pose friend artwork is available;
+directional animation and separate transformation art remain outstanding.
+
+### First delivery boundary
+
+The first training implementation uses five character levels at 0, 10, 20, 30 and
+40 XP, independently of Explorer XP. Four first-time training milestones per
+Meadow friend each award 10 XP; replay is practice without additional XP. Rewards
+currently provide a generic celebration using existing portraits, rather than the
+proposed level-three role, level-four personal quest or level-five special art.
+Those richer rewards remain planned below. Existing transformations retain their
+original conditions. Pending training binds its recipient and a server policy
+fingerprint; changed policy rejects assessment while abandonment stays available.
+
+The local development API continues to use Meadow menu eligibility. The clearing
+is an accessible world entry point, not a claim of server-verified coordinates.
+The second team slot keeps its existing Orchard story prerequisite; its API and
+rendering support do not unlock Orchard travel or grant the slot early.
 
 Primary integration files: `backend/crates/domain/src/engine.rs`, `backend/crates/api/src/game/mod.rs`, `backend/crates/api/src/game/repository.rs`, `contracts/schemas/v1.json`, `content/creatures/friends.v1.json`, `content/story/progression.v1.json`, `frontend/src/backend-world.ts`, `frontend/src/backend-world-model.ts` and `frontend/src/world.ts`.
 
@@ -77,6 +99,10 @@ Training is a separate encounter flow from one-time story quests. Each server-is
 Provide fresh task variants for authored training milestones. Replaying a rewarded milestone remains available without further XP; new milestones unlock through character and story progress. Do not award XP for time elapsed, button presses or repeatedly reopening a task. Practice evidence remains labelled appropriately and does not manufacture novel-transfer evidence.
 
 Before extending this into sustained play, address the API's current 2,000-command cap and growing aggregate histories. Define bounded storage, snapshot/replay checkpoints and receipt retention without breaking duplicate prevention or pending retries. Do not simply remove the cap or delete receipts. Test a long-running profile beyond the old cap, plus retries across any compaction boundary.
+
+The concrete [long-play storage design](LONG_PLAY_STORAGE_PLAN.md) defines this
+remaining engineering gate. The first training delivery retains the existing cap;
+its tests must not be presented as evidence of sustained-play storage readiness.
 
 Acceptance: training raises a character to level two, displays its reward, survives reload, resumes an interrupted encounter, and cannot be farmed through duplicate requests or recipient swapping.
 

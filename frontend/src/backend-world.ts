@@ -7,6 +7,8 @@ import { mountActivity } from './learning/activity.ts';
 import { authoredPresentation } from './learning/presentation.ts';
 import { heroes, heroPortrait } from './art.ts';
 import { companionDetails } from './companions.ts';
+import { trainingDetails, trainingLevelUp } from './companion-training.ts';
+import './companion-training.css';
 import './companions.css';
 import { characterPortrait } from './character-art.ts';
 import './character-art.css';
@@ -20,6 +22,7 @@ import {
   questCompleted,
   questReady,
   worldQuests,
+  trainingClearing,
 } from './backend-world-model.ts';
 
 const escape = (text: string) =>
@@ -55,13 +58,16 @@ export class BackendWorld {
     return this.busy;
   }
   get markers() {
-    return worldQuests;
+    return [...worldQuests, trainingClearing];
+  }
+  companions() {
+    return (this.snapshot.selectedCompanions ?? [])
+      .filter((id) => this.snapshot.ownedCreatures.includes(id))
+      .slice(0, this.snapshot.teamCapacity ?? 1)
+      .map((id) => ({ sprite: friendSprites[id] ?? 'pip', name: friendName(id) }));
   }
   companion() {
-    const id = this.snapshot.selectedCompanions?.find((id) =>
-      this.snapshot.ownedCreatures.includes(id),
-    );
-    return id ? { sprite: friendSprites[id] ?? 'pip', name: friendName(id) } : undefined;
+    return this.companions()[0];
   }
   restoreView(state: Progress) {
     try {
@@ -221,6 +227,10 @@ export class BackendWorld {
   }
   encounter(quest: WorldEncounter) {
     if (this.busy) return;
+    if (quest.id === trainingClearing.id) {
+      this.training();
+      return;
+    }
     if (this.snapshot.pendingEncounters.length) {
       this.mount();
       return;
@@ -242,6 +252,41 @@ export class BackendWorld {
       .then(() => this.mount())
       .catch(() => {});
   }
+  private startTraining(trainingId: string) {
+    if (this.busy || this.pending) return;
+    if (this.snapshot.pendingEncounters.length) {
+      this.mount();
+      return;
+    }
+    this.open(
+      '<span class="pill">TRAIN TOGETHER</span><h2 id="dialog-title">Getting ready for training</h2>',
+    );
+    this.activityOpen = true;
+    void this.send({ type: 'start_encounter', beatId: trainingId })
+      .then(() => this.mount())
+      .catch(() => {
+        this.activityOpen = false;
+      });
+  }
+  private bindTrainingActions() {
+    document.querySelectorAll<HTMLButtonElement>('[data-server-training]').forEach((button) => {
+      button.onclick = () => this.startTraining(button.dataset.serverTraining!);
+    });
+  }
+  training() {
+    if (this.busy || this.activityOpen) return;
+    if (this.snapshot.pendingEncounters.length) {
+      this.mount();
+      return;
+    }
+    const friends = meadowFriends.filter((q) =>
+      this.snapshot.ownedCreatures.includes(q.creatureId),
+    );
+    this.open(
+      `<span class="pill">MEADOW TRAINING CLEARING</span><h2 id="dialog-title">Grow together</h2><p>Choose a friend for a little practice. You can ask for help at every step.</p><div class="journal-entries">${friends.map((q) => `<div class="journal-entry earned">${characterPortrait(q.creatureId, 110)}<strong>${escape(friendName(q.creatureId))}</strong>${trainingDetails(q.creatureId, this.snapshot)}</div>`).join('') || '<p>Befriend a Meadow character to start training together.</p>'}</div>`,
+    );
+    this.bindTrainingActions();
+  }
   private mount() {
     this.disposeActivity();
     const encounter = this.snapshot.pendingEncounters[0];
@@ -249,7 +294,7 @@ export class BackendWorld {
     const presentation = authoredPresentation(encounter);
     this.activityOpen = true;
     this.open(
-      '<span class="pill">YOUR MEADOW ADVENTURE</span><h2 id="dialog-title">A little help, a big difference</h2><div id="server-activity"></div>',
+      `<span class="pill">${encounter.training ? 'TRAIN TOGETHER' : 'YOUR MEADOW ADVENTURE'}</span><h2 id="dialog-title"${encounter.training ? ' class="training-heading"' : ''}>${encounter.training ? `Training with ${escape(friendName(encounter.training.creatureId))}` : 'A little help, a big difference'}</h2><div id="server-activity"></div>`,
     );
     if (!presentation) {
       document.querySelector('#server-activity')!.textContent =
@@ -261,11 +306,16 @@ export class BackendWorld {
       encounter,
       {
         onAttempt: async (answer) => {
+          const before = this.snapshot;
           await this.send({ type: 'attempt', encounterId: encounter.id, answer });
           if (!this.snapshot.pendingEncounters.some((e) => e.id === encounter.id)) {
             this.disposeActivity();
+            const levelUp = encounter.training
+              ? trainingLevelUp(before, this.snapshot, encounter.training.creatureId)
+              : undefined;
+            const friend = encounter.training?.creatureId;
             this.open(
-              `<div class="success"><span class="pill">YOU HELPED!</span><h2 id="dialog-title">A brighter Meadow</h2><p>Your adventure and learning progress are saved. Head back outside to see what changed!</p>${heroPortrait('pip', 110)}<button class="primary" id="server-return">Back to exploring →</button></div>`,
+              `<div class="success ${levelUp ? 'training-celebration' : ''}"><span class="pill">${levelUp ? 'LEVEL UP!' : encounter.training ? 'TRAINING COMPLETE!' : 'YOU HELPED!'}</span><h2 id="dialog-title">${levelUp ? `${escape(friendName(levelUp.creatureId))} reached level ${levelUp.level}!` : encounter.training ? 'Growing together' : 'A brighter Meadow'}</h2><p>${levelUp ? 'A happy wiggle for a new adventure milestone! Your character progress is saved.' : encounter.training ? 'Your practice and character progress are saved. Help is always welcome.' : 'Your adventure and learning progress are saved. Head back outside to see what changed!'}</p>${friend ? characterPortrait(friend, 110) : heroPortrait('pip', 110)}<button class="primary" id="server-return">Back to exploring →</button></div>`,
             );
             document.querySelector<HTMLButtonElement>('#server-return')!.onclick = () =>
               this.hooks.close();
@@ -298,8 +348,12 @@ export class BackendWorld {
       })
       .join('');
     this.open(
-      `<span class="pill">CLOVER MEADOW</span><h2 id="dialog-title">Our next adventure</h2><p>Choose a story moment or a friend. We’ll walk there together.</p>${this.snapshot.pendingEncounters.length ? '<button class="primary" id="server-resume">Continue your activity</button>' : ''}<div class="modal-quests">${rows}</div><button class="text-button" id="server-refresh">Refresh server progress</button><p class="tiny-note">This local playtest uses draft activities. More islands are still being connected.</p>`,
+      `<span class="pill">CLOVER MEADOW</span><h2 id="dialog-title">Our next adventure</h2><p>Choose a story moment or a friend. We’ll walk there together.</p>${this.snapshot.pendingEncounters.length ? '<button class="primary" id="server-resume">Continue your activity</button>' : ''}<button class="secondary" id="server-training-clearing">Visit the training clearing</button><div class="modal-quests">${rows}</div><button class="text-button" id="server-refresh">Refresh server progress</button><p class="tiny-note">This local playtest uses draft activities. More islands are still being connected.</p>`,
     );
+    document.querySelector('#server-training-clearing')?.addEventListener('click', () => {
+      this.hooks.close();
+      this.hooks.visit(trainingClearing);
+    });
     document.querySelector('#server-resume')?.addEventListener('click', () => this.mount());
     document.querySelector('#server-refresh')?.addEventListener('click', () => {
       void this.refresh().catch((e) => this.fail(e));
@@ -323,7 +377,7 @@ export class BackendWorld {
       .map((q) => {
         const owned = this.snapshot.ownedCreatures.includes(q.creatureId),
           selected = this.snapshot.selectedCompanions?.includes(q.creatureId);
-        return `<div class="journal-entry ${owned ? 'earned' : ''}">${characterPortrait(q.creatureId, 110)}<strong>${friendName(q.creatureId)}</strong><small>${owned ? (selected ? 'Walking with you' : 'Your friend') : 'A friendship waiting to grow'}</small>${owned ? `<button class="secondary" data-server-companion="${q.creatureId}" ${selected ? 'disabled' : ''}>${selected ? 'Your companion' : `Walk with ${friendName(q.creatureId)}`}</button>` : ''}${companionDetails(q.creatureId, owned, this.snapshot)}</div>`;
+        return `<div class="journal-entry ${owned ? 'earned' : ''}">${characterPortrait(q.creatureId, 110)}<strong>${friendName(q.creatureId)}</strong><small>${owned ? (selected ? 'Walking with you' : 'Your friend') : 'A friendship waiting to grow'}</small>${owned ? `<button class="secondary" data-server-companion="${q.creatureId}" ${!selected && (this.snapshot.selectedCompanions?.length ?? 0) >= (this.snapshot.teamCapacity ?? 1) ? 'disabled' : ''} aria-pressed="${Boolean(selected)}">${selected ? `Rest ${friendName(q.creatureId)}` : `Walk with ${friendName(q.creatureId)}`}</button>` : ''}${trainingDetails(q.creatureId, this.snapshot)}${companionDetails(q.creatureId, owned, this.snapshot)}</div>`;
       })
       .join('');
     this.open(
@@ -337,16 +391,23 @@ export class BackendWorld {
         )
         .join(
           '',
-        )}</div><h3>Your Meadow friends</h3><p><a href="/characters.html">Meet all twelve Wonderwilds friends</a></p><div class="journal-entries">${cards}</div><h3>Collected treasures</h3><p>${this.snapshot.inventory.map((i) => `${escape(i.itemId)} × ${i.quantity}`).join(' · ') || 'Help your neighbours to collect rewards.'}</p><p class="tiny-note">Friend artwork is provisional in this local playtest. Your selected companion is saved on the server.</p>`,
+        )}</div>${this.snapshot.explorerProgression ? `<p class="explorer-level">Explorer level ${this.snapshot.explorerProgression.level} · ${this.snapshot.explorerProgression.xp} adventure XP</p>` : ''}<h3>Your Meadow friends</h3><p>Team: ${this.snapshot.selectedCompanions?.length ?? 0} / ${this.snapshot.teamCapacity ?? 1} companions. Let a friend rest to make room.</p><p><a href="/characters.html">Meet all twelve Wonderwilds friends</a></p><div class="journal-entries">${cards}</div><h3>Collected treasures</h3><p>${this.snapshot.inventory.map((i) => `${escape(i.itemId)} × ${i.quantity}`).join(' · ') || 'Help your neighbours to collect rewards.'}</p><p class="tiny-note">Your companion, character progress and shared memories are saved on the server.</p>`,
     );
     this.bindFriendshipActions(state);
+    this.bindTrainingActions();
     document.querySelectorAll<HTMLButtonElement>('[data-server-companion]').forEach((button) => {
       button.onclick = () => {
         if (this.busy) return;
-        void this.send({ type: 'select_companion', creatureId: button.dataset.serverCompanion! })
+        const id = button.dataset.serverCompanion!;
+        const team = this.snapshot.selectedCompanions ?? [];
+        const creatureIds = team.includes(id)
+          ? team.filter((member) => member !== id)
+          : [...team, id];
+        void this.send({ type: 'select_team', creatureIds })
           .then(() => {
             this.journal(state);
-            this.hooks.toast('Your friend is ready to walk with you!');
+            document.querySelector<HTMLButtonElement>(`[data-server-companion="${id}"]`)?.focus();
+            this.hooks.toast('Your walking team is saved.');
           })
           .catch(() => {});
       };

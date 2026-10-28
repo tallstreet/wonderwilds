@@ -71,3 +71,30 @@ Nine tests passed, including 832 deterministic disabled-provider scenarios and
 24 complete 18-beat authored journeys with timeout fallback/replay. These are
 headless director tests, not browser playthroughs or proof of API transactions,
 release approval, learning gains, or human accessibility validation.
+
+## Character training development slice
+
+`progression.v1.json` now contains the separate `character-training-1.0.0`
+policy: levels at 0/10/20/30/40 character XP and four one-time training grants
+for each Meadow friend. Supported completion grants the same ten XP. Replaying
+an earned milestone remains practice and grants zero additional character XP.
+Explorer XP, story flags, friendship, transformations and learning evidence do not
+change merely because a character levels up. The normal verified encounter
+start/completion/abandonment protocol binds the recipient; changing the team
+cannot redirect the grant. Wrong answers and abandonment award no XP.
+
+The new optional persisted state fields default to zero XP and no training grants
+when loading pre-training saves; existing ownership, friendship and transformations
+are retained. Historical quests never manufacture character XP. Pending training
+encounters pin the character-training rules version. Rolling back to a pre-training
+binary after new training events have been persisted is unsupported: retain a
+pre-upgrade backup or use a compatible reader, rather than silently dropping
+training state or receipts.
+
+The sixteen authored milestones provide reachable level-five XP paths without
+repeating a rewarded task. Their reaction IDs are presentation references, not
+claims of new sprite sheets. The initial UI celebration reuses existing art;
+character-specific exploration roles, personal quests, distinct higher-level
+rewards and new transformation artwork remain subsequent implementation work.
+The updated manifest hash covers the intentional progression policy addition;
+content and educator approval remain pending and release activation stays disabled.

@@ -78,6 +78,10 @@ mod tests {
                     "DirectorProposal" => round_trip!(DirectorProposal),
                     "SkillNode" => round_trip!(SkillNode),
                     "ApiError" => round_trip!(ApiError),
+                    "TrainingBinding" => round_trip!(TrainingBinding),
+                    "TrainingOffer" => round_trip!(TrainingOffer),
+                    "CharacterProgression" => round_trip!(CharacterProgression),
+                    "ExplorerProgression" => round_trip!(ExplorerProgression),
                     _ => panic!("Missing round trip for {name}"),
                 }
             }
