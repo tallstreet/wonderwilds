@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { readFileSync } from 'node:fs';
 import { request } from 'node:http';
+import { fileURLToPath } from 'node:url';
 
 // Opt-in local operator bridge. Production builds have no bridge or credentials.
 export default defineConfig(({ command }) => {
@@ -11,6 +12,14 @@ export default defineConfig(({ command }) => {
   const host = `127.0.0.1:${port}`;
   const origin = `http://${host}`;
   return {
+    build: {
+      rollupOptions: {
+        input: {
+          adventure: fileURLToPath(new URL('./index.html', import.meta.url)),
+          characters: fileURLToPath(new URL('./characters.html', import.meta.url)),
+        },
+      },
+    },
     server: { fs: { deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/.local-demo/**'] } },
     plugins: demo
       ? [

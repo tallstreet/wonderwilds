@@ -244,7 +244,7 @@ function celebration() {
 function journal() {
   if (backend) return backend.journal(state);
   openDialog(
-    `<span class="pill">OUR LITTLE MEMORIES</span><h2 id="dialog-title">My adventure journal</h2><p class="muted">Meet the Starwhisker team. Pick a hero for your next adventure.</p><div class="journal-hero">${heroPortrait(state.hero, 110)}<div><h3>${heroes[state.hero].name} the ${heroes[state.hero].species}</h3><p class="hero-description">${heroes[state.hero].description}</p></div></div><h3 class="hero-picker-heading">Choose your little hero</h3><div class="hero-choices">${Object.entries(
+    `<span class="pill">OUR LITTLE MEMORIES</span><h2 id="dialog-title">My adventure journal</h2><p class="muted">Meet the Starwhisker team. Pick a hero for your next adventure.</p><p><a href="/characters.html">Meet all twelve Wonderwilds friends</a></p><div class="journal-hero">${heroPortrait(state.hero, 110)}<div><h3>${heroes[state.hero].name} the ${heroes[state.hero].species}</h3><p class="hero-description">${heroes[state.hero].description}</p></div></div><h3 class="hero-picker-heading">Choose your little hero</h3><div class="hero-choices">${Object.entries(
       heroes,
     )
       .map(

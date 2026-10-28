@@ -478,6 +478,54 @@
             "encounterId"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "help_friend",
+              "type": "string"
+            },
+            "creatureId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "completedQuestId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "type",
+            "creatureId",
+            "completedQuestId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "transform_companion",
+              "type": "string"
+            },
+            "creatureId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "creatureId",
+            "enabled"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -635,6 +683,32 @@
             "maxLength": 120
           },
           "maxItems": 3,
+          "uniqueItems": true
+        },
+        "friendship": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FriendshipEntry"
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "transformedCreatures": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "availableHelpingMoments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HelpingMoment"
+          },
+          "maxItems": 200,
           "uniqueItems": true
         }
       },
@@ -1492,6 +1566,46 @@
         "contentVersion",
         "reviewStatus",
         "alignmentRefs"
+      ],
+      "additionalProperties": false
+    },
+    "FriendshipEntry": {
+      "type": "object",
+      "properties": {
+        "creatureId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "points": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        }
+      },
+      "required": [
+        "creatureId",
+        "points"
+      ],
+      "additionalProperties": false
+    },
+    "HelpingMoment": {
+      "type": "object",
+      "properties": {
+        "creatureId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "completedQuestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "creatureId",
+        "completedQuestId"
       ],
       "additionalProperties": false
     }

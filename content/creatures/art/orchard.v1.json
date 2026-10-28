@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "regionId": "orchard",
+  "path": "frontend/public/assets/characters/orchard.png",
+  "source": "Generated with OpenAI image_gen tool, referenced existing hero-atlas-v2.png for dimensional 3D game style; original creatures authored for Wonderwilds.",
+  "generatedDate": "2026-10-29",
+  "reviewStatus": "pending",
+  "approved": false,
+  "sha256": "7265618e3996d359919a036bf2acf98bf98f958fd1eb5a07d1d1dcb66dbfc748",
+  "width": 1254,
+  "height": 1254,
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "characterIds": [
+      "cleo",
+      "bramble",
+      "patter",
+      "twizzle"
+    ]
+  },
+  "prompt": "Premium dimensional 3D animated family game companion atlas; tactile fluffy fur/feathers, huge glossy eyes, saturated coral/violet/turquoise accents and warm upper-left light. Exactly 2x2 equal cells, full body front facing with generous transparent gutters, no text/scenery/ground shadows. Cleo cream-apricot kitten rainbow cape mint outfit seed basket; Bramble oatmeal bunny one folded ear leaf scarf violet vest; Patter yellow duckling orange webbed feet green messenger satchel and parcel; Twizzle cinnamon squirrel curling pale cream tail tip turquoise neckerchief shape garland. Original character identities from friends.v1.json.",
+  "referencePaths": [
+    "frontend/public/assets/hero-atlas-v2.png"
+  ],
+  "generationOutputPath": "/workspace/generated_images/exec-8663643c-8857-4eb2-a821-31fa8da29988.png",
+  "limitations": [
+    "Single front-facing pose per character, not directional walk animation.",
+    "Art remains pending human/provenance review.",
+    "Transparent source retained unchanged; consumers frame equal cells."
+  ],
+  "spacingCorrection": "Imagegen edit with prior generated sheet reference preserved designs while shrinking all silhouettes within their627x627 cells; true alpha, no pixel processing or cropping.",
+  "alphaThreshold128BoundsByCell": {
+    "cleo": [
+      137,
+      113,
+      536,
+      547
+    ],
+    "bramble": [
+      160,
+      101,
+      480,
+      547
+    ],
+    "patter": [
+      172,
+      96,
+      528,
+      511
+    ],
+    "twizzle": [
+      105,
+      95,
+      482,
+      518
+    ]
+  }
+}

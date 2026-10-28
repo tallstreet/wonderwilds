@@ -102,6 +102,35 @@ and ordered-card rearrangement; correctness and rewards remain server-owned.
 This changes presentation, not assessment rules, and still requires educator
 and child usability review.
 
+### Character progression integration — 29 October 2026
+
+The local server journal now shows twelve authored character profiles (four Meadow friends presented), motivations and dialogue selected from confirmed friendship/story state. Server commands record distinct completed helping memories and toggle reversible cosmetic transformations; snapshots include friendship, transformation IDs and available memories. Rewards and learning evidence remain separate. The journal preserves expanded profiles and keyboard focus after saving. Glow uses accessible text/styling while distinct transformation artwork is pending.
+
+Workspace checks, 62 shared contract fixtures, disposable PostgreSQL checks and desktop/tablet synthetic-API browser flows passed. See `CHARACTER_DEVELOPMENT_REVIEW.md` and `adr/character-progression.md`. Human content/art/accessibility review and regional integration remain pending.
+
+### Character artwork library — 29 October 2026
+
+Five subagents produced actual generated artwork for all twelve original friends,
+a filterable `/characters.html` field guide, journal portraits and world rendering.
+Three transparent regional sheets preserve each friend's species and visual
+identity; inspected frame boundaries prevent wings/capes being clipped. Meadow
+friend NPCs and followers now use their own art rather than borrowed hero frames.
+All twelve profiles expose personality, motivation, habitat and voice guidance.
+Browsing the field guide changes no story, collection or learning state.
+
+Generation prompts/hashes and a separate development inventory are in
+`content/creatures/art/`. Single front poses are available; directional animation,
+separate glow artwork, human rights/content review and release pack activation
+remain pending. The historical frozen story asset manifest is not rewritten.
+
+Library validation passed: `bash scripts/check.sh`, dedicated twelve-character
+PNG/hash/shared-frame regression, and Chromium checks at desktop/tablet/phone
+sizes covering all artworks, regional filters, keyboard profile expansion and no
+horizontal overflow. Existing desktop/tablet guest and synthetic-API companion
+flows also passed after world artwork integration. The library preview is saved
+as `docs/character-library-preview.png`. These checks do not replace human art or
+child usability review.
+
 ## Companion progression planning update — 29 October 2026
 
 The companion progression plan now defines the next gameplay work: per-character levels, training, collection presentation, teams, friendship/transformations and regional discovery. Existing domain systems are reused; individual character XP and training remain unimplemented. The frontend-first plan was replaced with a planning index, and obsolete foundation sequencing was removed from the broader roadmap. This documentation update adds no gameplay features or new application test results.

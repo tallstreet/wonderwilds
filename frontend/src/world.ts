@@ -16,6 +16,7 @@ import {
   walkFrameOrigin,
 } from './locomotion.ts';
 import { preloadFacing, registerFacing, resolveFacing } from './facing.ts';
+import { availableCharacter, preloadCharacters, registerCharacters } from './character-sprites.ts';
 export function createWorld(
   parent: string,
   getState: () => Progress,
@@ -62,11 +63,13 @@ export function createWorld(
       this.load.image('prop-atlas', PROP_ATLAS);
       preloadWalkCycle(this);
       preloadFacing(this);
+      preloadCharacters(this);
     }
     create() {
       this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       registerWalkCycle(this);
       registerFacing(this);
+      registerCharacters(this);
       registerAtlas(this.textures.get('hero-atlas'), heroFrames);
       registerAtlas(this.textures.get('prop-atlas'), propFrames);
       const keyboard = this.input.keyboard;
@@ -139,9 +142,17 @@ export function createWorld(
             y = backend ? e.y : e.y + (i === 0 ? 45 : 65) + 38;
           this.add.ellipse(x, y, 39, 10, 0x354e44, 0.2).setDepth(y - 0.5);
           const sprite = e.sprite ?? 'pip';
-          const npcFacing = resolveFacing(sprite, 0, 0, 'down');
+          const character = availableCharacter(sprite, this.textures);
+          const npcFacing = character
+            ? { originX: 0.5, originY: 0.96, scaleX: 1, scaleY: 1 }
+            : resolveFacing(heroFrames.includes(sprite) ? sprite : 'pip', 0, 0, 'down');
           const cat = this.add
-            .image(x, y, 'hero-atlas', sprite)
+            .image(
+              x,
+              y,
+              character?.texture ?? 'hero-atlas',
+              character?.frame ?? (heroFrames.includes(sprite) ? sprite : 'pip'),
+            )
             .setOrigin(npcFacing.originX, npcFacing.originY)
             .setDisplaySize(86 * npcFacing.scaleX, 96 * npcFacing.scaleY)
             .setDepth(y);
@@ -324,8 +335,14 @@ export function createWorld(
     }
     makeActor(x: number, y: number, heroId: string, width: number, height: number): Actor {
       const ground = this.add.container(x, y).setDepth(y) as Actor;
+      const character = availableCharacter(heroId, this.textures);
       ground.art = this.add
-        .image(0, 0, 'hero-atlas', heroId)
+        .image(
+          0,
+          0,
+          character?.texture ?? 'hero-atlas',
+          character?.frame ?? (heroFrames.includes(heroId) ? heroId : 'pip'),
+        )
         .setOrigin(0.5, 0.96)
         .setDisplaySize(width, height);
       ground.add(ground.art);
@@ -342,10 +359,28 @@ export function createWorld(
       return ground;
     }
     poseActor(actor: Actor, dx: number, dy: number, distance: number) {
+      const character = availableCharacter(actor.heroId, this.textures);
       const moving = distance > 0.01,
-        species = heroes[actor.heroId]?.species || 'kitten';
+        species = character?.species ?? heroes[actor.heroId]?.species ?? 'kitten';
       actor.phase = moving ? advanceGaitPhase(actor.phase, distance, species) : 0;
-      const facing = resolveFacing(actor.heroId, dx, dy, actor.facing);
+      // These library sheets supply front poses; do not borrow another hero's side/back art.
+      const facing = character
+        ? {
+            texture: character.texture,
+            frame: character.frame,
+            flipX: false,
+            facing: 'down' as const,
+            originX: 0.5,
+            originY: 0.96,
+            scaleX: 1,
+            scaleY: 1,
+          }
+        : resolveFacing(
+            heroFrames.includes(actor.heroId) ? actor.heroId : 'pip',
+            dx,
+            dy,
+            actor.facing,
+          );
       actor.facing = facing.facing;
       const texture =
         this.textures.exists(facing.texture) && this.textures.get(facing.texture).has(facing.frame)
@@ -355,10 +390,12 @@ export function createWorld(
         .setTexture(texture, facing.frame)
         .setFlipX(facing.flipX)
         .setOrigin(facing.originX ?? 0.5, facing.originY ?? 0.96);
-      const spriteWalk = applyWalkCycle(actor.art, actor.heroId, actor.phase, moving, {
-        reducedMotion: this.reducedMotion,
-        facing: actor.facing,
-      });
+      const spriteWalk =
+        !character &&
+        applyWalkCycle(actor.art, actor.heroId, actor.phase, moving, {
+          reducedMotion: this.reducedMotion,
+          facing: actor.facing,
+        });
       if (spriteWalk) {
         const origin = walkFrameOrigin(actor.phase);
         actor.art.setOrigin(origin.x, origin.y);

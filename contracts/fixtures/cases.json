@@ -1364,5 +1364,326 @@
         "correct": true
       }
     }
+  },
+  {
+    "name": "help_friend valid",
+    "contract": "GameCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "character-1",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "help_friend",
+        "creatureId": "pip",
+        "completedQuestId": "meadow-bridge"
+      }
+    }
+  },
+  {
+    "name": "help_friend rejects client friendship grant",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "character-1",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "help_friend",
+        "creatureId": "pip",
+        "completedQuestId": "meadow-bridge",
+        "points": 6
+      }
+    }
+  },
+  {
+    "name": "transform_companion valid",
+    "contract": "GameCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "character-1",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "transform_companion",
+        "creatureId": "pip",
+        "enabled": true
+      }
+    }
+  },
+  {
+    "name": "transform_companion rejects client friendship grant",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "character-1",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "transform_companion",
+        "creatureId": "pip",
+        "enabled": true,
+        "points": 6
+      }
+    }
+  },
+  {
+    "name": "Character snapshot valid",
+    "contract": "GameSnapshot",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "revision": 0,
+      "contentVersion": "foundation-1.0.0",
+      "rulesVersion": "1.0.0",
+      "storyFlags": [],
+      "ownedCreatures": [],
+      "inventory": [],
+      "pendingEncounters": [
+        {
+          "schemaVersion": "1.0",
+          "id": "enc-1",
+          "templateId": "missing_quantity",
+          "skillId": "M06",
+          "contentVersion": "foundation-1.0.0",
+          "parameters": {
+            "total": 7,
+            "given": 3
+          },
+          "permittedActions": [
+            "attempt",
+            "hint"
+          ],
+          "support": {
+            "hintCount": 0,
+            "workedExample": false,
+            "readAloud": false
+          }
+        }
+      ],
+      "learnerSummaries": [],
+      "friendship": [
+        {
+          "creatureId": "pip",
+          "points": 3
+        }
+      ],
+      "transformedCreatures": [
+        "pip-glow"
+      ],
+      "availableHelpingMoments": [
+        {
+          "creatureId": "pip",
+          "completedQuestId": "meadow-bridge"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Character snapshot rejects negative friendship",
+    "contract": "GameSnapshot",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "revision": 0,
+      "contentVersion": "foundation-1.0.0",
+      "rulesVersion": "1.0.0",
+      "storyFlags": [],
+      "ownedCreatures": [],
+      "inventory": [],
+      "pendingEncounters": [
+        {
+          "schemaVersion": "1.0",
+          "id": "enc-1",
+          "templateId": "missing_quantity",
+          "skillId": "M06",
+          "contentVersion": "foundation-1.0.0",
+          "parameters": {
+            "total": 7,
+            "given": 3
+          },
+          "permittedActions": [
+            "attempt",
+            "hint"
+          ],
+          "support": {
+            "hintCount": 0,
+            "workedExample": false,
+            "readAloud": false
+          }
+        }
+      ],
+      "learnerSummaries": [],
+      "friendship": [
+        {
+          "creatureId": "pip",
+          "points": -1
+        }
+      ],
+      "transformedCreatures": [
+        "pip-glow"
+      ],
+      "availableHelpingMoments": [
+        {
+          "creatureId": "pip",
+          "completedQuestId": "meadow-bridge"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Character snapshot rejects excess friendship",
+    "contract": "GameSnapshot",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "revision": 0,
+      "contentVersion": "foundation-1.0.0",
+      "rulesVersion": "1.0.0",
+      "storyFlags": [],
+      "ownedCreatures": [],
+      "inventory": [],
+      "pendingEncounters": [
+        {
+          "schemaVersion": "1.0",
+          "id": "enc-1",
+          "templateId": "missing_quantity",
+          "skillId": "M06",
+          "contentVersion": "foundation-1.0.0",
+          "parameters": {
+            "total": 7,
+            "given": 3
+          },
+          "permittedActions": [
+            "attempt",
+            "hint"
+          ],
+          "support": {
+            "hintCount": 0,
+            "workedExample": false,
+            "readAloud": false
+          }
+        }
+      ],
+      "learnerSummaries": [],
+      "friendship": [
+        {
+          "creatureId": "pip",
+          "points": 7
+        }
+      ],
+      "transformedCreatures": [
+        "pip-glow"
+      ],
+      "availableHelpingMoments": [
+        {
+          "creatureId": "pip",
+          "completedQuestId": "meadow-bridge"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Character snapshot rejects invalid transformation type",
+    "contract": "GameSnapshot",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "revision": 0,
+      "contentVersion": "foundation-1.0.0",
+      "rulesVersion": "1.0.0",
+      "storyFlags": [],
+      "ownedCreatures": [],
+      "inventory": [],
+      "pendingEncounters": [
+        {
+          "schemaVersion": "1.0",
+          "id": "enc-1",
+          "templateId": "missing_quantity",
+          "skillId": "M06",
+          "contentVersion": "foundation-1.0.0",
+          "parameters": {
+            "total": 7,
+            "given": 3
+          },
+          "permittedActions": [
+            "attempt",
+            "hint"
+          ],
+          "support": {
+            "hintCount": 0,
+            "workedExample": false,
+            "readAloud": false
+          }
+        }
+      ],
+      "learnerSummaries": [],
+      "friendship": [
+        {
+          "creatureId": "pip",
+          "points": 3
+        }
+      ],
+      "transformedCreatures": [
+        true
+      ],
+      "availableHelpingMoments": [
+        {
+          "creatureId": "pip",
+          "completedQuestId": "meadow-bridge"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Character snapshot rejects incomplete memory",
+    "contract": "GameSnapshot",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "revision": 0,
+      "contentVersion": "foundation-1.0.0",
+      "rulesVersion": "1.0.0",
+      "storyFlags": [],
+      "ownedCreatures": [],
+      "inventory": [],
+      "pendingEncounters": [
+        {
+          "schemaVersion": "1.0",
+          "id": "enc-1",
+          "templateId": "missing_quantity",
+          "skillId": "M06",
+          "contentVersion": "foundation-1.0.0",
+          "parameters": {
+            "total": 7,
+            "given": 3
+          },
+          "permittedActions": [
+            "attempt",
+            "hint"
+          ],
+          "support": {
+            "hintCount": 0,
+            "workedExample": false,
+            "readAloud": false
+          }
+        }
+      ],
+      "learnerSummaries": [],
+      "friendship": [
+        {
+          "creatureId": "pip",
+          "points": 3
+        }
+      ],
+      "transformedCreatures": [
+        "pip-glow"
+      ],
+      "availableHelpingMoments": [
+        {
+          "creatureId": "pip"
+        }
+      ]
+    }
   }
 ]

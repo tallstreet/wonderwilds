@@ -127,6 +127,40 @@ export class GameClient {
       !Array.isArray(value.learnerSummaries)
     )
       throw new ApiFailure('UNAVAILABLE', 503);
+    const id = (item: unknown): item is string =>
+      typeof item === 'string' && item.length > 0 && item.length <= 120;
+    const optionalList = (
+      items: unknown,
+      maximum: number,
+      valid: (item: unknown) => boolean,
+      key: (item: unknown) => string,
+    ) =>
+      items === undefined ||
+      (Array.isArray(items) &&
+        items.length <= maximum &&
+        items.every(valid) &&
+        new Set(items.map(key)).size === items.length);
+    if (
+      !optionalList(
+        value.friendship,
+        50,
+        (entry) =>
+          isRecord(entry) &&
+          id(entry.creatureId) &&
+          Number.isInteger(entry.points) &&
+          Number(entry.points) >= 0 &&
+          Number(entry.points) <= 6,
+        (entry) => (entry as { creatureId: string }).creatureId,
+      ) ||
+      !optionalList(value.transformedCreatures, 50, id, (entry) => entry as string) ||
+      !optionalList(
+        value.availableHelpingMoments,
+        200,
+        (entry) => isRecord(entry) && id(entry.creatureId) && id(entry.completedQuestId),
+        (entry) => JSON.stringify(entry),
+      )
+    )
+      throw new ApiFailure('UNAVAILABLE', 503);
     return value as unknown as GameSnapshot;
   }
   private async request(path: string, body?: string): Promise<unknown> {

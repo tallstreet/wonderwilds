@@ -1,0 +1,9 @@
+.friend-portrait {
+  display: inline-block;
+  width: min(100%, var(--portrait-size, 160px));
+  aspect-ratio: 1;
+  flex: none;
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  vertical-align: middle;
+}

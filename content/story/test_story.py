@@ -1,10 +1,37 @@
 import unittest
-from validate import discover, load, validate
+from validate import discover, load, validate, validate_development
 
 
 class StoryTests(unittest.TestCase):
     def test_authored_content(self):
         self.assertEqual(validate(), [])
+
+    def test_character_development_matches_roster(self):
+        self.assertEqual(validate_development(), [])
+
+    def test_missing_character_and_duplicate_moments_rejected(self):
+        data = load('content/creatures/development.v1.json')
+        data['characters'].pop()
+        self.assertIn('development roster mismatch', validate_development(data))
+        data = load('content/creatures/development.v1.json')
+        data['characters'][1]['friendshipMoments'][0]['id'] = data['characters'][0]['friendshipMoments'][0]['id']
+        self.assertIn('invalid or duplicate character moment ID', validate_development(data))
+
+    def test_character_moments_cannot_grant_rewards(self):
+        data = load('content/creatures/development.v1.json')
+        data['characters'][0]['friendshipMoments'][0]['rewards'] = ['free-xp']
+        self.assertIn('narrative moment contains gameplay fields', validate_development(data))
+
+    def test_character_reflection_requires_story_and_friendship(self):
+        for mutation, error in [
+            ({'minimumFriendship': True}, 'invalid friendship threshold'),
+            ({'minimumFriendship': 99}, 'invalid friendship threshold'),
+            ({'requiredStoryFlags': ['invented']}, 'unknown character story gate'),
+            ({'requiredStoryFlags': []}, 'reflection must follow regional finale')
+        ]:
+            data = load('content/creatures/development.v1.json')
+            data['characters'][0]['friendshipMoments'][-1].update(mutation)
+            self.assertIn(error, validate_development(data))
 
     def test_cycles_and_dangling_dependencies_rejected(self):
         for dependency in ['cove-finale', 'invented-beat']:
