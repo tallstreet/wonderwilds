@@ -1,0 +1,24 @@
+# Directional hero artwork
+
+Generated with the built-in imagegen tool, using `hero-atlas-v2.png` as the inspected identity reference and transparent_background=true. Original generated files are retained in the tool output directory. Runtime assets are `frontend/public/assets/hero-side-atlas-v3.png` and `hero-back-atlas-v3.png`, both 1774×887 RGBA. Generated on 2026-10-28.
+
+## Integration
+
+Call preloadFacing in Scene.preload, registerFacing in Scene.create, and resolveFacing with actual world displacement and the previous heading. Idle retains its heading. Horizontal/vertical transitions have a small diagonal dead band. Only left-facing side art is mirrored. Use returned originX/originY and multiply display dimensions by scaleX/scaleY; these compensate for per-character feet position and visible height. Walking-frame atlases must supply their own geometry when overriding these static poses.
+
+The sheets were visually inspected. They are not exact grids: Rosie side boots extend below the nominal first row; rear Wren's wing extends beyond the first column; rear bunny ears start above the nominal second row. facing.js contains individual source rectangles and planted-foot coordinates. PNG pixels have not been edited. Visible-height correction uses the original front sprite as reference. The feet coordinates are visual measurements, not a claim of subpixel registration. Generated poses differ slightly in proportions; verify direction changes at gameplay size when changing character scale.
+
+These are idle directional poses, not multi-frame walk cycles. They work with the separate species gait and grounded movement system. Facing away now shows backs/capes and no eyes. The source has light fringe pixels around fur inherited from image generation; no new outlines or recoloring were applied.
+
+## Exact side prompt
+
+Use case: identity-preserve. Create a RIGHT SIDE VIEW directional sprite atlas for exactly the eight original superhero pets in the attached reference. Keep every character's identity, colours, fur/feathers, costume, proportions and premium shaded 3D style unchanged. All eight characters face RIGHT, strict or near-strict side profile, not front view. Standing idle, feet grounded, arms/wings relaxed close to body, tails visible behind. Camera slightly elevated like a top-down adventure game. Full bodies visible, no shadows beneath feet. TRUE TRANSPARENT background.
+Exact layout: FOUR equal columns and TWO equal rows, landscape 2048x1024. One character centered in each equal square cell. Each body contained in middle 74% width, height at most 86% cell, feet aligned at 92% of each cell height. Transparent space separating all cells; NO labels, NO text, NO grid lines, NO scenery, NO platforms.
+Same order as reference: TOP ROW Rosie pink kitten purple suit coral cape; Skye aqua kitten blue suit peach cape; Sunny golden kitten turquoise suit lavender cape; Poppy orange bird turquoise vest coral cape. BOTTOM ROW Wren blue bird purple vest golden cape; Clover lavender bunny mint suit coral cape; Mochi cream bunny rosy suit purple cape; Pip peach kitten purple suit turquoise cape. Gold star badges may be partly visible from side. All look and face RIGHT. Rabbit ears remain tall and fully inside their cells; no cropped tails or beaks. Preserve cheerful character appeal. No invented new accessories.
+
+## Exact rear prompt
+
+Use case: identity-preserve. Create a REAR VIEW directional sprite atlas for exactly the eight original superhero pets in the attached reference. Keep every character's identity, colours, fur/feathers, costume, proportions and premium shaded 3D style unchanged. All eight characters face AWAY from viewer toward TOP of screen. We see backs of heads, backs/capes and tails; NO faces or eyes visible. Standing idle, feet grounded, arms/wings relaxed close to body. Camera slightly elevated like a top-down adventure game. Full bodies visible, no shadows beneath feet. TRUE TRANSPARENT background.
+Exact layout: FOUR equal columns and TWO equal rows, landscape 2048x1024. One character centered in each equal square cell. Each body contained in middle 74% width, height at most 86% cell, feet aligned at 92% of each cell height. Transparent space separating all cells; NO labels, NO text, NO grid lines, NO scenery, NO platforms.
+Same order as reference: TOP ROW Rosie pink kitten purple suit coral cape; Skye aqua kitten blue suit peach cape; Sunny golden kitten turquoise suit lavender cape; Poppy orange bird turquoise vest coral cape. BOTTOM ROW Wren blue bird purple vest golden cape; Clover lavender bunny mint suit coral cape; Mochi cream bunny rosy suit purple cape; Pip peach kitten purple suit turquoise cape. All characters face AWAY. Show cape colours and furry tails clearly, no chest badges on backs. Rabbit ears remain tall and fully inside their cells; no cropped tails. No invented new accessories.
+

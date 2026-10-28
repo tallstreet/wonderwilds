@@ -1,0 +1,701 @@
+/* Immersive play surface. HTML overlays stay independent from the Phaser camera. */
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  background: #8fd6a1;
+}
+body {
+  overscroll-behavior: none;
+}
+.game-shell {
+  position: fixed;
+  inset: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  height: 100dvh;
+  isolation: isolate;
+}
+.game-shell #game {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  overflow: hidden;
+  touch-action: none;
+  background: #8fd6a1;
+}
+.game-shell #game canvas {
+  display: block;
+}
+.game-hud {
+  position: absolute;
+  inset: max(18px, env(safe-area-inset-top)) 22px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  pointer-events: none;
+}
+.game-hud nav {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  pointer-events: auto;
+}
+.location-badge {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: #fff9f3f2;
+  padding: 11px 18px 11px 11px;
+  border: 3px solid #fff;
+  border-radius: 22px;
+  box-shadow:
+    0 4px 0 #56866a26,
+    0 10px 25px #2f5c5420;
+  backdrop-filter: blur(10px);
+}
+.location-badge .brand-mark {
+  width: 43px;
+  height: 43px;
+  font-size: 32px;
+}
+.location-badge small {
+  font-size: 8px;
+  letter-spacing: 1.8px;
+  font-weight: 900;
+  color: #ac80bd;
+}
+.location-badge h1 {
+  font-size: 21px;
+  letter-spacing: -0.6px;
+  line-height: 1.15;
+  margin: 4px 0 0;
+  color: #64408a;
+  text-shadow: none;
+}
+.hud-button {
+  height: 59px;
+  min-width: 59px;
+  border: 3px solid #fff;
+  border-radius: 18px;
+  background: #fff9f4f5;
+  color: #8861b3;
+  box-shadow:
+    0 4px 0 #60867430,
+    0 8px 20px #45685615;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 25px;
+  padding: 5px 13px;
+  backdrop-filter: blur(10px);
+}
+.hud-button span {
+  font-size: 8px;
+  font-weight: 900;
+}
+.hud-button:hover {
+  transform: translateY(-2px);
+}
+.hud-stars {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff2c9;
+  border: 3px solid #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 0 #60867430;
+  min-height: 59px;
+}
+.hud-stars > span {
+  font-size: 27px;
+  color: #e7ac32;
+}
+.hud-stars strong {
+  font-size: 17px;
+  color: #886132;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.fullscreen-button {
+  font-size: 31px;
+  padding: 5px 10px;
+  min-width: 51px;
+}
+.game-dock {
+  position: absolute;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  left: 22px;
+  right: 22px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 15px;
+  pointer-events: none;
+}
+.mission-button {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: linear-gradient(130deg, #9461d4, #7041af);
+  border: 3px solid #e7d5ff;
+  border-radius: 21px;
+  padding: 12px 16px;
+  color: #fff;
+  box-shadow:
+    0 5px 0 #5b398b80,
+    0 12px 26px #3c49552b;
+}
+.mission-symbol {
+  font-size: 33px;
+  color: #ffdd76;
+  text-shadow: 0 2px #9b6a30;
+}
+.mission-button small {
+  display: block;
+  font-size: 7px;
+  letter-spacing: 1.7px;
+  font-weight: 900;
+  color: #e2caff;
+  margin-bottom: 4px;
+}
+.mission-button strong {
+  font-size: 13px;
+  font-weight: 900;
+}
+.mission-open {
+  margin-left: 20px;
+  font-size: 11px;
+  font-weight: 900;
+  background: #ffffff1c;
+  padding: 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.game-guidance {
+  background: #fffaf3eb;
+  border: 2px solid #fff;
+  padding: 10px 15px;
+  border-radius: 15px;
+  text-align: right;
+  box-shadow: 0 3px 0 #56866a25;
+  backdrop-filter: blur(8px);
+}
+.game-guidance > span {
+  font-size: 10px;
+  color: #7d648d;
+  font-weight: 800;
+}
+.game-guidance b {
+  padding: 0 6px;
+  color: #baa6c9;
+}
+.game-guidance small {
+  display: block;
+  font-size: 8px;
+  color: #8d9a7c;
+  margin-top: 4px;
+}
+.mission-modal-art {
+  height: 150px;
+  margin: -32px -32px 22px;
+  background: radial-gradient(ellipse at bottom, #c58be9, #8552c5);
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+}
+.mission-modal-art img {
+  height: 200px;
+  width: 100%;
+  object-fit: contain;
+  object-position: 50% 10%;
+  margin-top: 0;
+}
+.modal-quests {
+  display: grid;
+  gap: 10px;
+}
+.modal-quests .quest {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 13px;
+  min-height: 75px;
+  margin: 0;
+}
+.modal-quests .quest-icon {
+  width: 44px;
+  height: 44px;
+}
+.modal-quests .quest strong {
+  font-size: 14px;
+}
+.modal-quests .quest small {
+  font-size: 11px;
+}
+.modal-quests .quest-arrow {
+  display: block;
+}
+.modal-quests .quest.complete {
+  background: #eefbf1;
+}
+.mission-modal-art ~ h2 {
+  font-size: 29px;
+}
+.mission-modal-art ~ .progress-track {
+  margin: 17px 0;
+}
+.game-shell ~ dialog {
+  z-index: 20;
+}
+.game-shell ~ #toast {
+  bottom: 110px;
+  z-index: 30;
+}
+@media (max-width: 700px) {
+  .game-hud {
+    inset: max(12px, env(safe-area-inset-top)) 12px auto;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .location-badge {
+    padding: 8px 12px 8px 8px;
+    border-radius: 17px;
+    gap: 7px;
+  }
+  .location-badge .brand-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 11px;
+    font-size: 25px;
+  }
+  .location-badge h1 {
+    font-size: 17px;
+    margin-top: 3px;
+  }
+  .location-badge small {
+    font-size: 6px;
+    letter-spacing: 1.1px;
+  }
+  .game-hud nav {
+    gap: 6px;
+  }
+  .hud-button {
+    height: 46px;
+    min-width: 44px;
+    border-radius: 14px;
+    padding: 5px 9px;
+    font-size: 22px;
+  }
+  .hud-button span {
+    display: none;
+  }
+  .hud-stars {
+    padding: 7px 10px;
+    min-height: 46px;
+    border-radius: 14px;
+    gap: 6px;
+  }
+  .hud-stars > span {
+    font-size: 21px;
+  }
+  .hud-stars strong {
+    font-size: 13px;
+  }
+  .fullscreen-button {
+    font-size: 26px;
+    min-width: 42px;
+  }
+  .game-dock {
+    left: 12px;
+    right: 12px;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mission-button {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 18px;
+    gap: 9px;
+  }
+  .mission-symbol {
+    font-size: 27px;
+  }
+  .mission-button strong {
+    font-size: 12px;
+  }
+  .mission-open {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 9px;
+  }
+  .game-guidance {
+    padding: 5px 10px;
+    box-shadow: none;
+    border-width: 1px;
+    border-radius: 10px;
+  }
+  .game-guidance > span {
+    font-size: 8px;
+  }
+  .game-guidance small {
+    font-size: 7px;
+    margin-top: 2px;
+  }
+  .mission-modal-art {
+    margin: -25px -17px 18px;
+    height: 130px;
+  }
+  .mission-modal-art img {
+    height: 170px;
+  }
+  .modal-quests .quest strong {
+    font-size: 13px;
+  }
+  .modal-quests .quest small {
+    font-size: 10px;
+  }
+}
+@media (max-width: 430px) {
+  .game-hud {
+    gap: 8px;
+  }
+  .game-hud nav {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .location-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .game-hud nav .hud-stars {
+    margin-top: 61px;
+    margin-right: auto;
+  }
+  .hud-button {
+    margin-top: 0;
+  }
+  .game-hud nav {
+    align-items: flex-start;
+  }
+  .location-badge h1 {
+    font-size: 15px;
+  }
+  .location-badge small {
+    font-size: 5px;
+  }
+  .location-badge {
+    max-width: 195px;
+  }
+  .fullscreen-button {
+    display: none;
+  }
+  .hud-button {
+    height: 43px;
+    min-width: 43px;
+    padding: 4px 8px;
+  }
+  .game-guidance > span {
+    font-size: 0;
+  }
+  .game-guidance > span:after {
+    content: 'Tap to explore · Tap a friend to play';
+    font-size: 9px;
+  }
+  .game-guidance b {
+    display: none;
+  }
+  .game-guidance small {
+    font-size: 7px;
+  }
+}
+@media (max-height: 500px) and (min-width: 600px) {
+  .game-hud {
+    top: 9px;
+  }
+  .location-badge {
+    padding: 7px 11px;
+  }
+  .location-badge .brand-mark {
+    width: 31px;
+    height: 31px;
+    font-size: 24px;
+  }
+  .location-badge h1 {
+    font-size: 17px;
+  }
+  .hud-button,
+  .hud-stars {
+    height: 46px;
+    min-height: 46px;
+  }
+  .game-dock {
+    bottom: 10px;
+  }
+  .mission-button {
+    padding: 7px 12px;
+  }
+  .game-guidance {
+    padding: 7px 10px;
+  }
+}
+/* Hero roster: the same scalable character art is used here and in Phaser. */
+.hero-description {
+  font-size: 13px;
+  color: #987fa9;
+  line-height: 1.6;
+  margin: 0;
+}
+.hero-picker-heading {
+  font-size: 16px;
+  color: #8257a2;
+  margin: 20px 0 12px;
+}
+.hero-choices {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 23px;
+}
+.hero-choices .hero-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 5px;
+  border: 2px solid #e6d6f4;
+  border-bottom-width: 4px;
+  background: #fff;
+  border-radius: 17px;
+  color: #7d559f;
+}
+.hero-choice svg {
+  width: 76px;
+  height: 83px;
+  pointer-events: none;
+}
+.hero-choice strong {
+  font-size: 13px;
+}
+.hero-choice small {
+  font-size: 10px;
+  color: #ac90bd;
+  text-transform: capitalize;
+}
+.hero-choices .hero-choice.selected {
+  background: #ece0fc;
+  border-color: #ac7bd9;
+  color: #713bac;
+}
+.hero-choice.selected small {
+  color: #9268b1;
+}
+.hero-choice:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: #f5eaff;
+}
+.journal-hero > svg {
+  flex-shrink: 0;
+  width: 110px;
+  height: 120px;
+}
+.journal-hero h3 {
+  text-transform: capitalize;
+}
+.hero-choices .hero-choice:focus-visible {
+  outline: 3px solid #925ace;
+  outline-offset: 3px;
+}
+@media (max-width: 540px) {
+  .hero-choices {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .hero-choices .hero-choice {
+    padding: 8px 3px;
+  }
+  .hero-choice svg {
+    width: 65px;
+    height: 72px;
+  }
+  .journal-hero > svg {
+    width: 90px;
+    height: 100px;
+  }
+  .hero-description {
+    font-size: 11px;
+  }
+  .hero-choice strong {
+    font-size: 12px;
+  }
+}
+/* One generated art set across the world, journal, celebration and manipulatives. */
+.sprite-art {
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--sprite-size);
+  height: var(--sprite-size);
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  pointer-events: none;
+}
+.character-sprite {
+  background-image: url('/assets/hero-atlas-v2.png');
+  filter: drop-shadow(0 3px 2px #714b8520);
+}
+.prop-art {
+  background-image: url('/assets/prop-atlas-v2.png');
+}
+.hero-choice .character-sprite {
+  width: 82px;
+  height: 82px;
+}
+.journal-hero > .character-sprite {
+  width: 110px;
+  height: 110px;
+}
+.activity-title > .character-sprite {
+  width: 87px;
+  height: 87px;
+}
+.friendship-art > .character-sprite {
+  width: 135px;
+  height: 135px;
+}
+.hero-choices .hero-choice {
+  gap: 7px;
+}
+.plank {
+  position: relative;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none;
+  height: 90px;
+  overflow: visible;
+}
+.plank .prop-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.plank b {
+  z-index: 1;
+  color: #784e27;
+  font-size: 16px;
+  text-shadow: 0 1px #fff4d5;
+}
+.plank.added b {
+  color: #6e4092;
+}
+.plank.added .prop-art {
+  filter: hue-rotate(12deg) saturate(1.12);
+}
+.plank.empty {
+  border: 2px dashed #67afc6 !important;
+  border-radius: 6px;
+  background: #67c8da55 !important;
+  height: 82px;
+}
+.extra-planks .prop-art {
+  width: 15px;
+  height: 50px;
+  margin: 0 5px;
+}
+.berry-basket > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.plate > span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1px;
+}
+.petals {
+  gap: 1px;
+  min-height: 78px;
+}
+.petals .prop-art {
+  width: 28px;
+  height: 28px;
+}
+.success > .character-sprite {
+  margin: 8px;
+}
+.success > div > .character-sprite {
+  vertical-align: middle;
+}
+@media (max-width: 540px) {
+  .hero-choice .character-sprite {
+    width: 66px;
+    height: 66px;
+  }
+  .journal-hero > .character-sprite {
+    width: 86px;
+    height: 86px;
+  }
+  .activity-title > .character-sprite {
+    width: 61px;
+    height: 61px;
+  }
+  .friendship-art > .character-sprite {
+    width: 110px;
+    height: 110px;
+  }
+  .plank {
+    height: 70px;
+  }
+  .plank.empty {
+    height: 65px;
+  }
+  .plank b {
+    font-size: 11px;
+  }
+  .petals .prop-art {
+    width: 20px;
+    height: 20px;
+  }
+  .plate .prop-art {
+    width: 27px;
+    height: 27px;
+  }
+}
+/* Character emblem shares the map's shaded art, without the old tilted tile. */
+.location-badge .app-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 2px #76439024);
+}
+@media (max-width: 700px) {
+  .location-badge .app-logo {
+    width: 48px;
+    height: 48px;
+  }
+}
+@media (max-height: 500px) and (min-width: 600px) {
+  .location-badge .app-logo {
+    width: 44px;
+    height: 44px;
+  }
+}

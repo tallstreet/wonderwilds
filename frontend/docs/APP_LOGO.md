@@ -1,0 +1,7 @@
+# Character app logo
+
+Generated with the built-in imagegen tool on 2026-10-28 using `public/assets/hero-atlas-v2.png` as the character identity/style reference. Saved with original transparency as `public/assets/starwhisker-logo-v1.png`. Used in the map HUD, browser favicon, and touch icon. The adjacent HTML game name remains accessible; the HUD image is decorative to avoid repeating it.
+
+## Final prompt
+
+Use case: logo-brand. Create a polished square app logo emblem for Starwhisker Island children's maths adventure. Reference image is character identity and rendering style reference, not an edit target. Use ONLY Rosie, the pink kitten at upper left: identical pink and white soft fur, teal eyes, purple hero outfit, coral cape, golden star. Close-up happy face and upper chest filling a compact rounded lavender medallion with a thick glossy warm golden rim and one small gold sparkle. Ears may gently overlap medallion rim. Same high quality softly shaded 3D animated toy-like character rendering as reference, bright pink lavender turquoise gold palette. Strong readable silhouette at 56px and tiny browser icon sizes. One character only, no words, no letters, no extra symbols, no landscape, no cast shadow outside badge. Centered composition nearly fills square with 5 percent safe padding. Truly transparent background outside emblem. This is an original game character; preserve reference identity.
