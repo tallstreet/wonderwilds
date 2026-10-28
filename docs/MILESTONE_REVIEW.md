@@ -1,6 +1,6 @@
 # First milestone review
 
-Plan: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+Historical acceptance review of the original Starwhisker Island guest milestone. The earlier plan is superseded; see [current planning navigation](IMPLEMENTATION_PLAN.md).
 
 ## Acceptance checklist
 

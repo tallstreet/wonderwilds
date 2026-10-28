@@ -5,6 +5,8 @@ workspace adds versioned contracts, pure gameplay and assessment, an experimenta
 mastery policy, an authored director, and a PostgreSQL-backed development API.
 The expansion is **not a completed release**. See
 [implementation status](docs/IMPLEMENTATION_STATUS.md) for integration and review gates.
+The next gameplay work follows the [companion progression plan](docs/COMPANION_PROGRESSION_PLAN.md);
+[planning navigation](docs/IMPLEMENTATION_PLAN.md) links the broader roadmap and earlier milestone evidence.
 
 Use this existing isolated checkout; do not create a worktree unless requested.
 Node 24 is available in the prepared environment. Rust is pinned by

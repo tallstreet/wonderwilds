@@ -1,6 +1,6 @@
 # Wonderwilds implementation evidence
 
-28 October 2026. Governing plan: `WONDERWILDS_IMPLEMENTATION_PLAN.md` v1.0.
+Foundation evidence recorded 28 October 2026; integration updates dated below. Broader roadmap: [Wonderwilds implementation plan](WONDERWILDS_IMPLEMENTATION_PLAN.md) v1.1. Active gameplay sequence: [Companion progression plan](COMPANION_PROGRESSION_PLAN.md).
 Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
@@ -101,3 +101,7 @@ names and keyboard alternatives. Pointer dragging supports touch, return-to-tray
 and ordered-card rearrangement; correctness and rewards remain server-owned.
 This changes presentation, not assessment rules, and still requires educator
 and child usability review.
+
+## Companion progression planning update — 29 October 2026
+
+The companion progression plan now defines the next gameplay work: per-character levels, training, collection presentation, teams, friendship/transformations and regional discovery. Existing domain systems are reused; individual character XP and training remain unimplemented. The frontend-first plan was replaced with a planning index, and obsolete foundation sequencing was removed from the broader roadmap. This documentation update adds no gameplay features or new application test results.
