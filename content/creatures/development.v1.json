@@ -1,0 +1,369 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "wonderwilds-story-1.0.0",
+  "reviewStatus": "pending",
+  "activation": "disabled_until_integration_and_review",
+  "purpose": "Additive authored narrative sidecar; dialogue eligibility reads authoritative friendship and story flags and grants no rewards or learning evidence.",
+  "characters": [
+    {
+      "creatureId": "pip",
+      "motivation": "Help neighbours find their way.",
+      "growthOpportunity": "Pip rushes to offer directions before looking closely.",
+      "voice": "Short curious questions and patient counting.",
+      "friendshipMoments": [
+        {
+          "id": "pip-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "Shall we look together?"
+        },
+        {
+          "id": "pip-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "Helping together gives us time to look closely."
+        },
+        {
+          "id": "pip-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "meadow_light"
+          ],
+          "dialogue": "I can pause and look before offering directions."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "tansy",
+      "motivation": "Grow a garden with room for every visitor.",
+      "growthOpportunity": "Tansy worries that a small flower bed cannot welcome everyone.",
+      "voice": "Gentle invitations using garden images.",
+      "friendshipMoments": [
+        {
+          "id": "tansy-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "There can be room beside a little flower."
+        },
+        {
+          "id": "tansy-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "A tiny cup can help a tiny seed. Shall we try?"
+        },
+        {
+          "id": "tansy-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "meadow_light"
+          ],
+          "dialogue": "I want our garden to welcome different flowers and friends."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "nib",
+      "motivation": "Make a picnic where everyone feels included.",
+      "growthOpportunity": "Nib packs so carefully that asking others what they need slips their mind.",
+      "voice": "Thoughtful questions about sharing and choices.",
+      "friendshipMoments": [
+        {
+          "id": "nib-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "Would you like to choose a cup?"
+        },
+        {
+          "id": "nib-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "Seeds are my favourite picnic treat. What would you bring?"
+        },
+        {
+          "id": "nib-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "meadow_light"
+          ],
+          "dialogue": "A good picnic begins with asking our friends."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "flutter",
+      "motivation": "Send a welcome letter to a new neighbour.",
+      "growthOpportunity": "Flutter has plenty to say but prefers a quiet way to share it.",
+      "voice": "Brief observations and picture-based invitations.",
+      "friendshipMoments": [
+        {
+          "id": "flutter-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "A picture can say hello too."
+        },
+        {
+          "id": "flutter-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "Could we choose a picture for my letter together?"
+        },
+        {
+          "id": "flutter-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "meadow_light"
+          ],
+          "dialogue": "A quiet hello can welcome a friend too."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "cleo",
+      "motivation": "Build a seed cart for the festival.",
+      "growthOpportunity": "Cleo starts many inventions and needs help choosing one small step.",
+      "voice": "Playful ideas followed by one clear action.",
+      "friendshipMoments": [
+        {
+          "id": "cleo-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "What could we make with some baskets?"
+        },
+        {
+          "id": "cleo-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "Let us choose one small step for my cart."
+        },
+        {
+          "id": "cleo-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "orchard_light"
+          ],
+          "dialogue": "Helping together reminds me to take one small step."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "bramble",
+      "motivation": "Make a festival path that every friend can use.",
+      "growthOpportunity": "Bramble prefers familiar routes and is unsure about a new path.",
+      "voice": "Steady practical suggestions with time to choose.",
+      "friendshipMoments": [
+        {
+          "id": "bramble-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "We can try one step first."
+        },
+        {
+          "id": "bramble-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "Could we check a new path side by side?"
+        },
+        {
+          "id": "bramble-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "orchard_light"
+          ],
+          "dialogue": "A new path feels friendlier when we check it together."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "patter",
+      "motivation": "Deliver a parcel to the right festival stall.",
+      "growthOpportunity": "Patter hurries past labels when excited.",
+      "voice": "Cheerful short phrases and picture clues.",
+      "friendshipMoments": [
+        {
+          "id": "patter-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "A parcel! Let us look for its picture."
+        },
+        {
+          "id": "patter-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "When I feel excited, I can stop and check a sign."
+        },
+        {
+          "id": "patter-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "orchard_light"
+          ],
+          "dialogue": "Stopping to look can help a delivery find its way."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "twizzle",
+      "motivation": "Create a garland with ideas from every neighbour.",
+      "growthOpportunity": "Twizzle loves a pattern and forgets to leave space for another idea.",
+      "voice": "Imaginative questions about shapes and possibilities.",
+      "friendshipMoments": [
+        {
+          "id": "twizzle-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "Which shape would you add?"
+        },
+        {
+          "id": "twizzle-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "I would like to make space for your idea too."
+        },
+        {
+          "id": "twizzle-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "orchard_light"
+          ],
+          "dialogue": "A garland can tell more than one friend’s story."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "luna",
+      "motivation": "Help friends enjoy the observatory at dusk.",
+      "growthOpportunity": "Luna thinks being brave means doing everything alone.",
+      "voice": "Warm encouragement with permission to ask for help.",
+      "friendshipMoments": [
+        {
+          "id": "luna-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "Would you come up the steps with me?"
+        },
+        {
+          "id": "luna-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "I can ask for a helping paw with my lantern."
+        },
+        {
+          "id": "luna-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "cove_light"
+          ],
+          "dialogue": "Being brave can mean asking a friend to join you."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "pebble",
+      "motivation": "Arrange a shell collection visitors can explore.",
+      "growthOpportunity": "Pebble wants every shell in exactly the right place before inviting anyone.",
+      "voice": "Calm concrete descriptions of textures and groups.",
+      "friendshipMoments": [
+        {
+          "id": "pebble-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "Where could a smooth shell go?"
+        },
+        {
+          "id": "pebble-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "We can invite friends while we are still arranging."
+        },
+        {
+          "id": "pebble-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "cove_light"
+          ],
+          "dialogue": "A collection can keep changing as friends explore it."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "glimmer",
+      "motivation": "Light a gentle trail to the lantern celebration.",
+      "growthOpportunity": "Glimmer wonders whether a small light is useful beside larger lanterns.",
+      "voice": "Quiet noticing and simple light imagery.",
+      "friendshipMoments": [
+        {
+          "id": "glimmer-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "Can you see my little light?"
+        },
+        {
+          "id": "glimmer-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "One small light can show one stepping stone."
+        },
+        {
+          "id": "glimmer-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "cove_light"
+          ],
+          "dialogue": "Small lights can make a welcoming trail together."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    },
+    {
+      "creatureId": "sail",
+      "motivation": "Share a harbour story at the celebration.",
+      "growthOpportunity": "Sail remembers many details and finds choosing a beginning difficult.",
+      "voice": "Calm storytelling with clear first and next cues.",
+      "friendshipMoments": [
+        {
+          "id": "sail-welcome",
+          "minimumFriendship": 1,
+          "requiredStoryFlags": [],
+          "dialogue": "Which part shall we tell first?"
+        },
+        {
+          "id": "sail-shared-moment",
+          "minimumFriendship": 2,
+          "requiredStoryFlags": [],
+          "dialogue": "A picture can help me choose a beginning."
+        },
+        {
+          "id": "sail-reflection",
+          "minimumFriendship": 3,
+          "requiredStoryFlags": [
+            "cove_light"
+          ],
+          "dialogue": "Choosing a beginning can help friends follow a story."
+        }
+      ],
+      "returnGreeting": "Welcome back! Shall we explore together?",
+      "supportedCompletionDialogue": "We helped together. Thank you for joining me."
+    }
+  ]
+}

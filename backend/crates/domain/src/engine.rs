@@ -523,6 +523,23 @@ impl State {
     pub fn friendship(&self, creature: &str) -> u32 {
         *self.friendship.get(creature).unwrap_or(&0)
     }
+    /// Server-derived distinct completed story moments eligible for friendship.
+    pub fn available_helping_moments(&self, content: &Content) -> Vec<(String, String)> {
+        content
+            .creatures
+            .values()
+            .filter(|c| self.creatures.contains(&c.id) && c.region_id == self.region)
+            .flat_map(|c| {
+                content.beats.values().filter_map(move |b| {
+                    let moment = (c.id.clone(), b.id.clone());
+                    (b.chapter_id == c.region_id
+                        && self.completed.contains(&b.id)
+                        && !self.helping_moments.contains(&moment))
+                    .then_some(moment)
+                })
+            })
+            .collect()
+    }
     pub fn inventory(&self) -> &BTreeMap<String, u32> {
         &self.inventory
     }
@@ -1423,6 +1440,55 @@ mod tests {
         assert_eq!(a.flags(), b.flags());
         assert_eq!(a.completed(), b.completed());
         assert_eq!(a.grants, b.grants);
+    }
+    #[test]
+    fn every_friend_can_reach_and_reverse_transformation_on_supported_story() {
+        let c = content();
+        let initial = State::new(&c);
+        let mut s = initial.clone();
+        let mut log = Vec::new();
+        let mut transformed = 0;
+        for region in ["meadow", "orchard", "cove"] {
+            chapter(&mut s, region, &c, true, &mut log);
+            for friend in c.creatures.values().filter(|f| f.region_id == region) {
+                finish(&mut s, &friend.help_quest_id, &c, true, &mut log);
+                let xp = s.xp();
+                for beat in c.beats.values().filter(|b| b.chapter_id == region) {
+                    if s.friendship(&friend.id) >= friend.transformation.minimum_friendship {
+                        break;
+                    }
+                    execute(
+                        &mut s,
+                        Action::HelpFriend {
+                            creature_id: friend.id.clone(),
+                            completed_quest_id: beat.id.clone(),
+                        },
+                        &c,
+                        context(),
+                        &mut log,
+                    );
+                }
+                assert!(s.friendship(&friend.id) >= friend.transformation.minimum_friendship);
+                for enabled in [true, false] {
+                    execute(
+                        &mut s,
+                        Action::Transform {
+                            creature_id: friend.id.clone(),
+                            enabled,
+                        },
+                        &c,
+                        context(),
+                        &mut log,
+                    );
+                    assert_eq!(s.transformed().contains(&friend.transformation.id), enabled);
+                }
+                assert_eq!(s.xp(), xp, "friendship/cosmetics must not farm explorer XP");
+                transformed += 1;
+            }
+        }
+        assert_eq!(transformed, 12);
+        assert_eq!(s.creatures().len(), 12);
+        assert_eq!(replay(&initial, &c, &log).unwrap(), s);
     }
     #[test]
     fn collection_friendship_cosmetics_and_team_have_independent_gates() {

@@ -5,6 +5,10 @@ import { GameClient, ApiFailure, type PreparedCommand } from './api/client.ts';
 import { mountActivity } from './learning/activity.ts';
 import { authoredPresentation } from './learning/presentation.ts';
 import { heroes, heroPortrait } from './art.ts';
+import { companionDetails } from './companions.ts';
+import './companions.css';
+import { characterPortrait } from './character-art.ts';
+import './character-art.css';
 import { isBlocked } from './navigation.ts';
 import {
   completedWorldQuests,
@@ -317,7 +321,7 @@ export class BackendWorld {
       .map((q) => {
         const owned = this.snapshot.ownedCreatures.includes(q.creatureId),
           selected = this.snapshot.selectedCompanions?.includes(q.creatureId);
-        return `<div class="journal-entry">${heroPortrait(friendSprites[q.creatureId], 65)}<strong>${friendName(q.creatureId)}</strong><small>${owned ? (selected ? 'Walking with you' : 'Your friend') : 'A friendship waiting to grow'}</small>${owned ? `<button class="secondary" data-server-companion="${q.creatureId}" ${selected ? 'disabled' : ''}>${selected ? 'Your companion' : `Walk with ${friendName(q.creatureId)}`}</button>` : ''}</div>`;
+        return `<div class="journal-entry ${owned ? 'earned' : ''}">${characterPortrait(q.creatureId, 110)}<strong>${friendName(q.creatureId)}</strong><small>${owned ? (selected ? 'Walking with you' : 'Your friend') : 'A friendship waiting to grow'}</small>${owned ? `<button class="secondary" data-server-companion="${q.creatureId}" ${selected ? 'disabled' : ''}>${selected ? 'Your companion' : `Walk with ${friendName(q.creatureId)}`}</button>` : ''}${companionDetails(q.creatureId, owned, this.snapshot)}</div>`;
       })
       .join('');
     this.open(
@@ -331,8 +335,9 @@ export class BackendWorld {
         )
         .join(
           '',
-        )}</div><h3>Your Meadow friends</h3><div class="journal-entries">${cards}</div><h3>Collected treasures</h3><p>${this.snapshot.inventory.map((i) => `${escape(i.itemId)} × ${i.quantity}`).join(' · ') || 'Help your neighbours to collect rewards.'}</p><p class="tiny-note">Friend artwork is provisional in this local playtest. Your selected companion is saved on the server.</p>`,
+        )}</div><h3>Your Meadow friends</h3><p><a href="/characters.html">Meet all twelve Wonderwilds friends</a></p><div class="journal-entries">${cards}</div><h3>Collected treasures</h3><p>${this.snapshot.inventory.map((i) => `${escape(i.itemId)} × ${i.quantity}`).join(' · ') || 'Help your neighbours to collect rewards.'}</p><p class="tiny-note">Friend artwork is provisional in this local playtest. Your selected companion is saved on the server.</p>`,
     );
+    this.bindFriendshipActions(state);
     document.querySelectorAll<HTMLButtonElement>('[data-server-companion]').forEach((button) => {
       button.onclick = () => {
         if (this.busy) return;
@@ -345,10 +350,69 @@ export class BackendWorld {
       };
     });
   }
+  private refreshFriendshipJournal(state: Progress, source: HTMLButtonElement) {
+    const expanded = new Set(
+      Array.from(document.querySelectorAll<HTMLDetailsElement>('.companion-details[open]')).map(
+        (details) => details.querySelector('summary')?.textContent,
+      ),
+    );
+    const sourceSummary = source.closest('details')?.querySelector('summary')?.textContent;
+    this.journal(state);
+    let fallback: HTMLElement | undefined;
+    document.querySelectorAll<HTMLDetailsElement>('.companion-details').forEach((details) => {
+      const summary = details.querySelector('summary');
+      details.open = expanded.has(summary?.textContent);
+      if (summary && summary.textContent === sourceSummary) fallback = summary;
+    });
+    const action = Array.from(
+      document.querySelectorAll<HTMLButtonElement>(
+        '[data-server-help-friend], [data-server-transform]',
+      ),
+    ).find((button) =>
+      source.dataset.serverTransform
+        ? button.dataset.serverTransform === source.dataset.serverTransform
+        : button.dataset.serverHelpFriend === source.dataset.serverHelpFriend &&
+          button.dataset.completedQuest === source.dataset.completedQuest,
+    );
+    // A remembered moment disappears after acknowledgement; its summary remains a stable target.
+    (action ?? fallback)?.focus();
+  }
+  private bindFriendshipActions(state: Progress) {
+    document.querySelectorAll<HTMLButtonElement>('[data-server-help-friend]').forEach((button) => {
+      button.onclick = () => {
+        if (this.busy) return;
+        void this.send({
+          type: 'help_friend',
+          creatureId: button.dataset.serverHelpFriend!,
+          completedQuestId: button.dataset.completedQuest!,
+        })
+          .then(() => {
+            this.refreshFriendshipJournal(state, button);
+            this.hooks.toast('A shared memory, saved together!');
+          })
+          .catch(() => {});
+      };
+    });
+    document.querySelectorAll<HTMLButtonElement>('[data-server-transform]').forEach((button) => {
+      button.onclick = () => {
+        if (this.busy) return;
+        void this.send({
+          type: 'transform_companion',
+          creatureId: button.dataset.serverTransform!,
+          enabled: button.dataset.transformEnabled === 'true',
+        })
+          .then(() => {
+            this.refreshFriendshipJournal(state, button);
+            this.hooks.toast('Your friend’s glow is saved.');
+          })
+          .catch(() => {});
+      };
+    });
+  }
   grownup() {
     if (this.activityOpen || this.busy) return;
     this.open(
-      `<span class="pill">A WINDOW INTO THEIR LEARNING</span><h2 id="dialog-title">Little steps, saved discoveries</h2><p>Answers, support, story rewards and friendships are saved by the local server. Movement and hero appearance stay on this device. Guest adventure saves are separate.</p><div class="skill-list">${this.snapshot.learnerSummaries.map((s) => `<div><strong>${escape(s.skillId)} · ${escape(s.status)}</strong><p>${escape(s.explanation)}</p></div>`).join('') || '<p>Try a story activity to begin your learning record.</p>'}</div><p>These experimental observations are not a validated mastery judgement. Help is recorded as support; repeating fixed tasks does not establish transfer. Hints currently repeat the instruction; narrated and worked examples are still pending.</p><details><summary>Server progress and playtest scope</summary><pre id="server-snapshot"></pre><p>Meadow story and friendships are connected. Regional travel, transformations, director integration, accounts and save import remain pending.</p></details><button class="secondary" id="server-download">Download progress snapshot</button><button class="text-button" id="server-refresh">Refresh server progress</button>`,
+      `<span class="pill">A WINDOW INTO THEIR LEARNING</span><h2 id="dialog-title">Little steps, saved discoveries</h2><p>Answers, support, story rewards and friendships are saved by the local server. Movement and hero appearance stay on this device. Guest adventure saves are separate.</p><div class="skill-list">${this.snapshot.learnerSummaries.map((s) => `<div><strong>${escape(s.skillId)} · ${escape(s.status)}</strong><p>${escape(s.explanation)}</p></div>`).join('') || '<p>Try a story activity to begin your learning record.</p>'}</div><p>These experimental observations are not a validated mastery judgement. Help is recorded as support; repeating fixed tasks does not establish transfer. Hints currently repeat the instruction; narrated and worked examples are still pending.</p><details><summary>Server progress and playtest scope</summary><pre id="server-snapshot"></pre><p>Meadow story and friendships are connected. Regional travel, director integration, accounts and save import remain pending. Friendship memories and reversible glow use server progress in this local preview.</p></details><button class="secondary" id="server-download">Download progress snapshot</button><button class="text-button" id="server-refresh">Refresh server progress</button>`,
     );
     document.querySelector('#server-snapshot')!.textContent = JSON.stringify(
       this.snapshot,

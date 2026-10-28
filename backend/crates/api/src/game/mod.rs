@@ -12,6 +12,8 @@ use wonderwilds_learning::assessment::{
     wire::{assess_wire, authored_encounter},
 };
 
+#[cfg(test)]
+mod companion_tests;
 pub mod http;
 pub mod repository;
 
@@ -137,7 +139,7 @@ impl Aggregate {
             };
             *value = json!({"skillId":skill_id,"status":status,"explanation":summary.explanation});
         }
-        let value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills.into_values().collect::<Vec<_>>()});
+        let value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"friendship":self.domain.creatures().iter().map(|id|json!({"creatureId":id,"points":self.domain.friendship(id)})).collect::<Vec<_>>(),"transformedCreatures":self.domain.transformed(),"availableHelpingMoments":self.domain.available_helping_moments(content).iter().map(|(creature,quest)|json!({"creatureId":creature,"completedQuestId":quest})).collect::<Vec<_>>(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills.into_values().collect::<Vec<_>>()});
         wire::validate("GameSnapshot", &value).map_err(|_| Error::Unavailable)?;
         Ok(value)
     }
@@ -379,6 +381,39 @@ impl Aggregate {
                 next.domain_apply(
                     Action::SelectTeam {
                         creature_ids: vec![creature.into()],
+                    },
+                    &domain_id,
+                    content,
+                    TrustedFacts::default(),
+                    now,
+                )?;
+            }
+            "help_friend" => {
+                next.domain_apply(
+                    Action::HelpFriend {
+                        creature_id: payload["creatureId"]
+                            .as_str()
+                            .ok_or(Error::InvalidInput)?
+                            .into(),
+                        completed_quest_id: payload["completedQuestId"]
+                            .as_str()
+                            .ok_or(Error::InvalidInput)?
+                            .into(),
+                    },
+                    &domain_id,
+                    content,
+                    TrustedFacts::default(),
+                    now,
+                )?;
+            }
+            "transform_companion" => {
+                next.domain_apply(
+                    Action::Transform {
+                        creature_id: payload["creatureId"]
+                            .as_str()
+                            .ok_or(Error::InvalidInput)?
+                            .into(),
+                        enabled: payload["enabled"].as_bool().ok_or(Error::InvalidInput)?,
                     },
                     &domain_id,
                     content,

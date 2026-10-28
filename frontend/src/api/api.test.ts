@@ -248,3 +248,41 @@ test('failed or mismatched acknowledgement never creates a receipt or erases sou
   assert.equal(outcome.persisted, false);
   assert.equal(outcome.receipt.receiptId, 'recoverable');
 });
+
+test('character state survives reload and malformed optional progression fails closed', async () => {
+  const character = {
+    friendship: [{ creatureId: 'pip', points: 3 }],
+    transformedCreatures: ['pip-glow'],
+    availableHelpingMoments: [{ creatureId: 'pip', completedQuestId: 'meadow-bridge' }],
+  };
+  const read = async (fields: object) => {
+    const client = new GameClient(
+      () => 'csrf',
+      async () => Response.json({ ...snapshot, ...fields }),
+    );
+    client.selectProfile('owned-profile');
+    return client.snapshot();
+  };
+  assert.deepEqual((await read(character)).friendship, character.friendship);
+  assert.equal((await read({})).friendship, undefined);
+  for (const fields of [
+    { friendship: [{ creatureId: 'pip', points: -1 }] },
+    { friendship: [{ creatureId: 'pip', points: 7 }] },
+    { friendship: [{ creatureId: 'pip', points: 2.5 }] },
+    {
+      friendship: [
+        { creatureId: 'pip', points: 1 },
+        { creatureId: 'pip', points: 2 },
+      ],
+    },
+    { transformedCreatures: [true] },
+    { transformedCreatures: ['pip-glow', 'pip-glow'] },
+    { availableHelpingMoments: [{ creatureId: 'pip' }] },
+    { availableHelpingMoments: null },
+  ]) {
+    await assert.rejects(
+      read(fields),
+      (error: unknown) => error instanceof ApiFailure && error.code === 'UNAVAILABLE',
+    );
+  }
+});

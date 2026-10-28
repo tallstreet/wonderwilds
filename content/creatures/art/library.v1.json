@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "1.0",
+  "createdDate": "2026-10-29",
+  "reviewStatus": "pending",
+  "purpose": "Development character artwork inventory, separate from frozen release story pack. Front poses only; no transformation or directional animation claim.",
+  "sheets": [
+    {
+      "regionId": "meadow",
+      "path": "frontend/public/assets/characters/meadow.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "5a8fd696ca30284465a25bbf2a5475d2d6a172b2ddfa9593b430b6e9fd76a38c",
+      "provenancePath": "content/creatures/art/meadow.v1.json",
+      "characters": [
+        {
+          "creatureId": "pip",
+          "cell": 0,
+          "frame": [
+            0,
+            0,
+            627,
+            627
+          ]
+        },
+        {
+          "creatureId": "tansy",
+          "cell": 1,
+          "frame": [
+            627,
+            0,
+            627,
+            627
+          ]
+        },
+        {
+          "creatureId": "nib",
+          "cell": 2,
+          "frame": [
+            0,
+            627,
+            627,
+            627
+          ]
+        },
+        {
+          "creatureId": "flutter",
+          "cell": 3,
+          "frame": [
+            627,
+            627,
+            627,
+            627
+          ]
+        }
+      ]
+    },
+    {
+      "regionId": "orchard",
+      "path": "frontend/public/assets/characters/orchard.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7265618e3996d359919a036bf2acf98bf98f958fd1eb5a07d1d1dcb66dbfc748",
+      "provenancePath": "content/creatures/art/orchard.v1.json",
+      "characters": [
+        {
+          "creatureId": "cleo",
+          "cell": 0,
+          "frame": [
+            0,
+            0,
+            627,
+            627
+          ]
+        },
+        {
+          "creatureId": "bramble",
+          "cell": 1,
+          "frame": [
+            627,
+            0,
+            627,
+            627
+          ]
+        },
+        {
+          "creatureId": "patter",
+          "cell": 2,
+          "frame": [
+            0,
+            627,
+            627,
+            627
+          ]
+        },
+        {
+          "creatureId": "twizzle",
+          "cell": 3,
+          "frame": [
+            627,
+            627,
+            627,
+            627
+          ]
+        }
+      ]
+    },
+    {
+      "regionId": "cove",
+      "path": "frontend/public/assets/characters/cove.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "1d192a6f6f9db7a6b862a6ef9d849630975e8b223f2f6bce22988f9640bfda34",
+      "provenancePath": "content/creatures/art/cove.v1.json",
+      "characters": [
+        {
+          "creatureId": "luna",
+          "cell": 0,
+          "frame": [
+            0,
+            0,
+            660,
+            627
+          ]
+        },
+        {
+          "creatureId": "pebble",
+          "cell": 1,
+          "frame": [
+            660,
+            0,
+            594,
+            627
+          ]
+        },
+        {
+          "creatureId": "glimmer",
+          "cell": 2,
+          "frame": [
+            0,
+            627,
+            660,
+            627
+          ]
+        },
+        {
+          "creatureId": "sail",
+          "cell": 3,
+          "frame": [
+            660,
+            627,
+            594,
+            627
+          ]
+        }
+      ]
+    }
+  ]
+}

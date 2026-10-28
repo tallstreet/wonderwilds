@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "regionId": "meadow",
+  "assetPath": "frontend/public/assets/characters/meadow.png",
+  "width": 1254,
+  "height": 1254,
+  "format": "PNG",
+  "colorMode": "RGBA",
+  "transparentBackground": true,
+  "layout": {
+    "columns": 2,
+    "rows": 2,
+    "cellWidth": 627,
+    "cellHeight": 627,
+    "order": [
+      "pip",
+      "tansy",
+      "nib",
+      "flutter"
+    ]
+  },
+  "sha256": "5a8fd696ca30284465a25bbf2a5475d2d6a172b2ddfa9593b430b6e9fd76a38c",
+  "provenance": {
+    "method": "Generated with built-in image_gen imagegen tool",
+    "generatedDate": "2026-10-29",
+    "sourceFile": "/workspace/generated_images/exec-ecb578e8-ad73-421e-ba24-c988042c7a11.png",
+    "referencePaths": [
+      "frontend/public/assets/hero-atlas-v2.png"
+    ],
+    "prompt": "Generate a NEW production CHARACTER SPRITE ATLAS matching the attached reference's EXACT premium dimensional preschool 3D superhero-pet rendering style: tactile fluffy fur, feathers, soft glossy materials, huge shiny expressive eyes, warm upper-left lighting, saturated violet/coral/turquoise accents. All creatures original. TRUE TRANSPARENT BACKGROUND, square canvas, TWO equal columns and TWO equal rows, FOUR equal square cells, no borders, text, labels, letters, backdrop, ground or external shadows. Each cell one FULL BODY character centered within middle 76% of width and 85% height with generous transparent gutters. All feet near 88% cell height. Same friendly front/three-quarter slight high-angle stance and big-head small-body proportions as reference. TOP LEFT: Pip, same identity as reference bottom-right peach-and-cream fluffy kitten, VIOLET superhero suit, TURQUOISE short cape, huge TEAL eyes, golden star chest emblem, rounded paws, tiny roundish kitten ears. TOP RIGHT: Tansy, original careful welcoming little HEDGEHOG, soft overlapping sage-green leaf-shaped quills with peach tips, cream fluffy face and belly, warm amber eyes, tiny mint apron, holding one small pastel watering cup. BOTTOM LEFT: Nib, original thoughtful playful FIELD MOUSE, taupe and cream fluffy fur, VERY LARGE ROUND pink-lined ears, large amber eyes, lavender scarf, seed satchel diagonally across body, delicate curved mouse tail wholly inside cell, holding one seed. BOTTOM RIGHT: Flutter, original quiet observant MOTH, cream fuzzy body, four rounded lilac and blush petal-shaped wings, small rounded antennae, huge violet eyes, holding tiny folded paper letter. Anatomically distinct hedgehog/mouse/moth, no kitten ears on non-kittens. Beautiful detailed but readable production game sprites consistent with reference. No watercolor, no flat illustration, no ink outlines.",
+    "reviewStatus": "pending",
+    "notes": "Original generated character designs; visual implementation preview only. Existing Pip color/costume identity retained. No independent rights, educator, or child-recognition approval claimed. Original generated file retained unchanged. Sheet copied byte-for-byte; frames consumed at runtime without raster editing."
+  }
+}

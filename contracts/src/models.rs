@@ -48,6 +48,8 @@ pub enum CommandPayload {
     Variant3(CommandPayloadVariant3),
     Variant4(CommandPayloadVariant4),
     Variant5(CommandPayloadVariant5),
+    Variant6(CommandPayloadVariant6),
+    Variant7(CommandPayloadVariant7),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -88,6 +90,12 @@ pub struct GameSnapshot {
     pub learner_summaries: Vec<LearnerSummary>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub selected_companions: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub friendship: Option<Vec<FriendshipEntry>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transformed_creatures: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub available_helping_moments: Option<Vec<HelpingMoment>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -261,6 +269,20 @@ pub struct SkillNode {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct FriendshipEntry {
+    pub creature_id: String,
+    pub points: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct HelpingMoment {
+    pub creature_id: String,
+    pub completed_quest_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ParametersVariant1 {
     pub total: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -396,6 +418,22 @@ pub struct CommandPayloadVariant4 {
 pub struct CommandPayloadVariant5 {
     pub r#type: CommandPayloadVariant5Type,
     pub encounter_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant6 {
+    pub r#type: CommandPayloadVariant6Type,
+    pub creature_id: String,
+    pub completed_quest_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant7 {
+    pub r#type: CommandPayloadVariant7Type,
+    pub creature_id: String,
+    pub enabled: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -721,6 +759,18 @@ pub enum CommandPayloadVariant4Type {
 pub enum CommandPayloadVariant5Type {
     #[serde(rename = "abandon")]
     Abandon,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant6Type {
+    #[serde(rename = "help_friend")]
+    HelpFriend,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant7Type {
+    #[serde(rename = "transform_companion")]
+    TransformCompanion,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

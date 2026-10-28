@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "sheetId": "cove",
+  "path": "frontend/public/assets/characters/cove.png",
+  "width": 1254,
+  "height": 1254,
+  "columns": 2,
+  "rows": 2,
+  "cellWidth": 627,
+  "cellHeight": 627,
+  "characters": [
+    {
+      "id": "luna",
+      "column": 0,
+      "row": 0
+    },
+    {
+      "id": "pebble",
+      "column": 1,
+      "row": 0
+    },
+    {
+      "id": "glimmer",
+      "column": 0,
+      "row": 1
+    },
+    {
+      "id": "sail",
+      "column": 1,
+      "row": 1
+    }
+  ],
+  "sha256": "1d192a6f6f9db7a6b862a6ef9d849630975e8b223f2f6bce22988f9640bfda34",
+  "createdDate": "2026-10-29",
+  "generator": "OpenAI image_gen.imagegen",
+  "sourceImage": "/workspace/generated_images/exec-325c1696-3654-4eea-b09f-2f05bfc83410.png",
+  "referencePaths": [
+    "frontend/public/assets/hero-atlas-v2.png"
+  ],
+  "transparentBackgroundRequested": true,
+  "reviewStatus": "generated_pending_human_review",
+  "notes": [
+    "Original character briefs from friends.v1.json and development.v1.json.",
+    "Generated PNG copied intact; no crop, recolor or other pixel editing.",
+    "Reference used for dimensional game-art style consistency. Rights/provenance review remains pending.",
+    "Front-view artwork only; no directional animation or separate glow transformation sprites."
+  ],
+  "prompt": "Create a NEW original companion character sprite atlas matching reference image's EXACT premium dimensional 3D animated preschool adventure game rendering: dimensional soft fluffy fur/feathers, enormous glossy expressive eyes, rounded toy-like materials and fabric, saturated violet/coral/turquoise accents, warm upper-left studio sunshine, subtle self shading, clean transparent alpha edges. NOT flat drawing, not watercolor, not painterly or outlined 2D. TRUE TRANSPARENT square background. Exactly FOUR full body original characters in regular TWO columns TWO rows, equal square cells, no lines/labels/text/platforms/background/ground shadows. Each sprite entirely within middle 76% of cell width and 86% cell height, feet at 90% cell height; generous transparent gutters, no touching borders or other characters. Same apparent scale and head/body proportions as reference. Face viewer friendly neutral ready-for-adventure pose slight high-angle, both feet visible, arms/wings slightly out. TOP LEFT Luna: fluffy pale aqua-and-cream sea kitten, curved kitten ears, huge teal eyes, royal-blue superhero outfit, short blue wave-shaped cape, small crescent brooch, gentle encouraging smile. TOP RIGHT Pebble: fluffy warm cocoa-and-cream OTTER with round face and small round ears, huge amber glossy eyes, long otter tail curled beside feet, turquoise adventure vest, smooth scallop-shell pouch on violet strap, patient smile. Clearly otter, no cat ears. BOTTOM LEFT Glimmer: cute FIREFLY with mint-teal head/thorax and huge warm amber glossy eyes, short curved antennae, small folded translucent mint wings, oval pale-yellow glowing lantern abdomen, tiny insect feet, tiny violet neck scarf; clearly insect, not cat, soft glow contained entirely inside cell. BOTTOM RIGHT Sail: adorable PUFFIN with dimensional soft navy feathers, cream round face/belly, short fan-shaped tail, broad orange-and-yellow puffin beak, orange feet, royal-blue adventure vest and turquoise neckerchief, enormous glossy teal eyes, calm encouraging smile. All original, one coherent premium 3D family-game art direction as reference. The reference is only a style guide, do not copy its characters or layout; use the requested 2x2 layout."
+}

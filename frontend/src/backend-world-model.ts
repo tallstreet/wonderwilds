@@ -7,12 +7,12 @@ export const meadowBeats = story.beats.filter((b) => b.chapterId === 'meadow');
 export const meadowFriends = friendships.quests.filter((q) =>
   ['pip', 'tansy', 'nib', 'flutter'].includes(q.creatureId),
 );
-// Provisional existing art is labelled by friend name until the authored art pack lands.
+// Companion IDs resolve to their own artwork, independently of playable hero IDs.
 export const friendSprites: Record<string, string> = {
   pip: 'pip',
-  tansy: 'gold',
-  nib: 'clover',
-  flutter: 'poppy',
+  tansy: 'tansy',
+  nib: 'nib',
+  flutter: 'flutter',
 };
 export const friendName = (id: string) => id.charAt(0).toUpperCase() + id.slice(1);
 const positions: Record<string, [number, number]> = {

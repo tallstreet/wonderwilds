@@ -29,6 +29,54 @@ def discover(seed, region, owned, pending=None, last=None):
     return seed, candidates[seed % len(candidates)]
 
 
+def validate_development(development=None, friends=None, adventure=None):
+    """Check narrative sidecar without granting gameplay rewards or evidence."""
+    development = development if development is not None else load('content/creatures/development.v1.json')
+    friends = friends if friends is not None else load('content/creatures/friends.v1.json')
+    adventure = adventure if adventure is not None else load('content/story/adventure.v1.json')
+    errors = []
+    def require(condition, message):
+        if not condition:
+            errors.append(message)
+    require(development.get('schemaVersion') == '1.0', 'unsupported development schema')
+    require(development.get('contentVersion') == VERSION, 'development content version mismatch')
+    require(development.get('reviewStatus') == 'pending', 'development approval requires external review')
+    require(development.get('activation') == 'disabled_until_integration_and_review', 'unreviewed development activated')
+    characters = development.get('characters', [])
+    roster = {c['id']: c for c in friends['creatures']}
+    ids = [c.get('creatureId') for c in characters]
+    require(len(ids) == len(set(ids)) and set(ids) == set(roster), 'development roster mismatch')
+    flags = {flag for beat in adventure['beats'] for flag in beat['completionFlags']}
+    maximum = load('content/story/progression.v1.json')['friendship']['maximum']
+    moment_ids = []
+    for character in characters:
+        for field in ['motivation', 'growthOpportunity', 'voice', 'returnGreeting', 'supportedCompletionDialogue']:
+            value = character.get(field)
+            require(isinstance(value, str) and bool(value.strip()), 'missing character ' + field)
+        moments = character.get('friendshipMoments', [])
+        require(len(moments) == 3, 'expected three friendship moments')
+        thresholds = []
+        for moment in moments:
+            moment_ids.append(moment.get('id'))
+            threshold = moment.get('minimumFriendship')
+            require(type(threshold) is int and 1 <= threshold <= maximum, 'invalid friendship threshold')
+            thresholds.append(threshold)
+            gates = moment.get('requiredStoryFlags', [])
+            require(isinstance(gates, list) and all(flag in flags for flag in gates), 'unknown character story gate')
+            dialogue = moment.get('dialogue')
+            require(isinstance(dialogue, str) and bool(dialogue.strip()), 'missing character dialogue')
+            require(set(moment) == {'id', 'minimumFriendship', 'requiredStoryFlags', 'dialogue'}, 'narrative moment contains gameplay fields')
+        require(thresholds == [1, 2, 3], 'friendship moments must follow distinct helping milestones')
+        creature = roster.get(character.get('creatureId'))
+        if creature and moments:
+            require(moments[-1].get('requiredStoryFlags') == [creature['transformation']['requiredStoryFlag']], 'reflection must follow regional finale')
+    require(all(isinstance(i, str) and bool(i) for i in moment_ids) and len(moment_ids) == len(set(moment_ids)), 'invalid or duplicate character moment ID')
+    for field in ['motivation', 'growthOpportunity', 'voice']:
+        values = [c.get(field) for c in characters]
+        require(len(values) == len(set(values)), 'character ' + field + ' must be individual')
+    return errors
+
+
 def validate(adventure=None, friends=None, assets=None):
     adventure = adventure or load('content/story/adventure.v1.json')
     friends = friends or load('content/creatures/friends.v1.json')
@@ -115,6 +163,7 @@ def validate(adventure=None, friends=None, assets=None):
     require(progression['xpPolicy']['repeatQuestXp'] == 0, 'repeated XP farming')
     require(progression['xpPolicy']['supportedCompletionMultiplier'] == 1, 'support penalises story rewards')
     require(progression['friendship']['inactivityLoss'] == 0, 'inactivity penalty forbidden')
+    errors.extend(validate_development(friends=friends, adventure=adventure))
     return errors
 
 
