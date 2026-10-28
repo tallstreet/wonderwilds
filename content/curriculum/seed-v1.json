@@ -1,0 +1,1286 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "foundation-draft-1.0.0",
+  "nodes": [
+    {
+      "id": "M01",
+      "subject": "maths",
+      "objective": "Match one object to each recipient",
+      "band": "foundation-candidate",
+      "prerequisites": [],
+      "allowedRepresentations": [
+        "object_pairing",
+        "recipient_slots"
+      ],
+      "parameterBounds": {
+        "quantity": {
+          "min": 1,
+          "max": 6
+        }
+      },
+      "misconceptionCodes": [
+        "skipped_recipient"
+      ],
+      "hintLadder": [
+        "Touch each recipient once.",
+        "Place one object beside each recipient.",
+        "Pair the objects and recipients together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M02",
+      "subject": "maths",
+      "objective": "Recognise tiny quantities without counting",
+      "band": "foundation-candidate",
+      "prerequisites": [],
+      "allowedRepresentations": [
+        "brief_dot_pattern",
+        "structured_object_pattern"
+      ],
+      "parameterBounds": {
+        "quantity": {
+          "min": 1,
+          "max": 4
+        }
+      },
+      "misconceptionCodes": [
+        "counts_after_preview"
+      ],
+      "hintLadder": [
+        "Look at the whole small group.",
+        "Look for a pair and one more.",
+        "Show the group again with a matching pattern."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M03",
+      "subject": "maths",
+      "objective": "Count collections and connect totals to numerals",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M01"
+      ],
+      "allowedRepresentations": [
+        "movable_objects",
+        "ten_frame"
+      ],
+      "parameterBounds": {
+        "quantity": {
+          "min": 1,
+          "max": 20
+        }
+      },
+      "misconceptionCodes": [
+        "double_counted_object"
+      ],
+      "hintLadder": [
+        "Move each counted object aside.",
+        "Say one number for each object.",
+        "Count together and repeat the last number as the total."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M04",
+      "subject": "maths",
+      "objective": "Compare and order collections",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M03"
+      ],
+      "allowedRepresentations": [
+        "paired_collections",
+        "aligned_rows"
+      ],
+      "parameterBounds": {
+        "quantity": {
+          "min": 1,
+          "max": 10
+        }
+      },
+      "misconceptionCodes": [
+        "longer_row_means_more"
+      ],
+      "hintLadder": [
+        "Match one object from each group.",
+        "Look for objects left without a partner.",
+        "Line up both groups and compare together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M05",
+      "subject": "maths",
+      "objective": "Move forward and backward through a counting sequence",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M03"
+      ],
+      "allowedRepresentations": [
+        "number_path",
+        "countable_flower_sequence"
+      ],
+      "parameterBounds": {
+        "endpoint": {
+          "min": 1,
+          "max": 20
+        }
+      },
+      "misconceptionCodes": [
+        "restarts_instead_of_continues"
+      ],
+      "hintLadder": [
+        "Find the number just before the gap.",
+        "Move one step in the shown direction.",
+        "Walk the number path together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M06",
+      "subject": "maths",
+      "objective": "Compose and partition a small whole",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M03"
+      ],
+      "allowedRepresentations": [
+        "countable_planks",
+        "part_whole_objects"
+      ],
+      "parameterBounds": {
+        "total": {
+          "min": 2,
+          "max": 10
+        }
+      },
+      "misconceptionCodes": [
+        "counts_given_as_missing"
+      ],
+      "hintLadder": [
+        "Count the spaces still empty.",
+        "Keep the ready objects and add one at a time.",
+        "Fill every space together, then count the added objects."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M07",
+      "subject": "maths",
+      "objective": "Model joining and taking away with objects",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M06"
+      ],
+      "allowedRepresentations": [
+        "movable_crystals",
+        "change_story_objects"
+      ],
+      "parameterBounds": {
+        "total": {
+          "min": 1,
+          "max": 10
+        }
+      },
+      "misconceptionCodes": [
+        "confuses_join_and_remove"
+      ],
+      "hintLadder": [
+        "Act out the change with objects.",
+        "Check whether objects arrive or leave.",
+        "Move each object together and count what remains."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M08",
+      "subject": "maths",
+      "objective": "Share a small collection fairly",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M01",
+        "M03"
+      ],
+      "allowedRepresentations": [
+        "plates_and_objects",
+        "recipient_slots"
+      ],
+      "parameterBounds": {
+        "total": {
+          "min": 2,
+          "max": 12
+        }
+      },
+      "misconceptionCodes": [
+        "equal_total_unequal_groups"
+      ],
+      "hintLadder": [
+        "Give one object to each recipient in turn.",
+        "Compare how many each recipient has.",
+        "Share the objects one round at a time together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M09",
+      "subject": "maths",
+      "objective": "Identify extend and create repeating patterns",
+      "band": "foundation-candidate",
+      "prerequisites": [],
+      "allowedRepresentations": [
+        "object_pattern",
+        "shape_pattern"
+      ],
+      "parameterBounds": {
+        "repeats": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      "misconceptionCodes": [
+        "copies_last_item_only"
+      ],
+      "hintLadder": [
+        "Find the smallest part that repeats.",
+        "Say the repeating part while pointing.",
+        "Build one repeat together and use it to continue."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M10",
+      "subject": "maths",
+      "objective": "Sort and describe familiar shapes",
+      "band": "foundation-candidate",
+      "prerequisites": [],
+      "allowedRepresentations": [
+        "shape_tiles",
+        "object_silhouettes"
+      ],
+      "parameterBounds": {
+        "choices": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      "misconceptionCodes": [
+        "orientation_changes_shape"
+      ],
+      "hintLadder": [
+        "Turn a shape and look again.",
+        "Compare its sides and corners.",
+        "Match the shapes together even when they turn."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M11",
+      "subject": "maths",
+      "objective": "Use position and movement language",
+      "band": "foundation-candidate",
+      "prerequisites": [],
+      "allowedRepresentations": [
+        "object_scene",
+        "grid_path"
+      ],
+      "parameterBounds": {
+        "steps": {
+          "min": 1,
+          "max": 3
+        }
+      },
+      "misconceptionCodes": [
+        "confuses_relative_position"
+      ],
+      "hintLadder": [
+        "Look at the named object first.",
+        "Point to the requested place before moving.",
+        "Follow one direction at a time together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M12",
+      "subject": "maths",
+      "objective": "Compare length mass and capacity directly",
+      "band": "foundation-candidate",
+      "prerequisites": [],
+      "allowedRepresentations": [
+        "aligned_objects",
+        "balance_or_container"
+      ],
+      "parameterBounds": {
+        "choices": {
+          "min": 2,
+          "max": 3
+        }
+      },
+      "misconceptionCodes": [
+        "appearance_without_direct_comparison"
+      ],
+      "hintLadder": [
+        "Put the objects where you can compare them.",
+        "Match the starting ends or use the comparison tool.",
+        "Compare together without relying on colour or decoration."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M13",
+      "subject": "maths",
+      "objective": "Order familiar events and connect them to daily time",
+      "band": "foundation-candidate",
+      "prerequisites": [],
+      "allowedRepresentations": [
+        "event_cards",
+        "day_sequence"
+      ],
+      "parameterBounds": {
+        "events": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      "misconceptionCodes": [
+        "orders_by_picture_position"
+      ],
+      "hintLadder": [
+        "Think about what needs to happen first.",
+        "Look for what must happen before the next event.",
+        "Tell the sequence together from beginning to end."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M14",
+      "subject": "maths",
+      "objective": "Sort collections by a stated attribute",
+      "band": "foundation-candidate",
+      "prerequisites": [],
+      "allowedRepresentations": [
+        "object_sort",
+        "attribute_cards"
+      ],
+      "parameterBounds": {
+        "categories": {
+          "min": 2,
+          "max": 3
+        }
+      },
+      "misconceptionCodes": [
+        "changes_sorting_rule"
+      ],
+      "hintLadder": [
+        "Say the sorting rule again.",
+        "Check one object against that same rule.",
+        "Sort together and explain where each object belongs."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M15",
+      "subject": "maths",
+      "objective": "Gather and interpret simple category counts",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "M03",
+        "M14"
+      ],
+      "allowedRepresentations": [
+        "object_graph",
+        "picture_graph"
+      ],
+      "parameterBounds": {
+        "quantity": {
+          "min": 1,
+          "max": 10
+        }
+      },
+      "misconceptionCodes": [
+        "confuses_category_with_total"
+      ],
+      "hintLadder": [
+        "Find the category named in the question.",
+        "Count one picture for each choice in that category.",
+        "Build the category rows together and compare them."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M16",
+      "subject": "maths",
+      "objective": "Group tens and ones",
+      "band": "year-1-extension",
+      "prerequisites": [
+        "M03",
+        "M06"
+      ],
+      "allowedRepresentations": [
+        "bundled_seeds",
+        "tens_and_ones"
+      ],
+      "parameterBounds": {
+        "total": {
+          "min": 10,
+          "max": 30
+        }
+      },
+      "misconceptionCodes": [
+        "counts_bundle_as_one_object"
+      ],
+      "hintLadder": [
+        "Open a bundle to check how many it holds.",
+        "Keep groups of ten separate from loose ones.",
+        "Build the number with tens and ones together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M17",
+      "subject": "maths",
+      "objective": "Use equal groups and skip-counting",
+      "band": "extension",
+      "prerequisites": [
+        "M05",
+        "M08"
+      ],
+      "allowedRepresentations": [
+        "planting_rows",
+        "grouped_objects"
+      ],
+      "parameterBounds": {
+        "groups": {
+          "min": 2,
+          "max": 5
+        }
+      },
+      "misconceptionCodes": [
+        "unequal_groups_skip_counted"
+      ],
+      "hintLadder": [
+        "Check every group has the same amount.",
+        "Touch one whole group for each count.",
+        "Build equal groups and count their totals together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "M18",
+      "subject": "maths",
+      "objective": "Partition familiar wholes equally",
+      "band": "extension",
+      "prerequisites": [
+        "M08",
+        "M10"
+      ],
+      "allowedRepresentations": [
+        "partitioned_shape",
+        "folded_whole"
+      ],
+      "parameterBounds": {
+        "parts": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      "misconceptionCodes": [
+        "same_number_unequal_parts"
+      ],
+      "hintLadder": [
+        "Look at the size of every part.",
+        "Compare parts by matching or folding.",
+        "Partition a whole into equal parts together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/mathematics",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E01",
+      "subject": "english",
+      "objective": "Follow short spoken directions and take turns",
+      "band": "foundation-candidate",
+      "prerequisites": [],
+      "allowedRepresentations": [
+        "spoken_direction_with_objects",
+        "picture_turn_sequence"
+      ],
+      "parameterBounds": {
+        "steps": {
+          "min": 1,
+          "max": 2
+        }
+      },
+      "misconceptionCodes": [
+        "acts_before_whole_direction"
+      ],
+      "hintLadder": [
+        "Listen to the whole short direction.",
+        "Point to the first action before starting.",
+        "Do one action at a time together; no microphone is needed."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E02",
+      "subject": "english",
+      "objective": "Connect useful vocabulary with objects and actions",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E01"
+      ],
+      "allowedRepresentations": [
+        "object_vocabulary",
+        "action_pictures"
+      ],
+      "parameterBounds": {
+        "choices": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      "misconceptionCodes": [
+        "matches_salient_unrelated_picture"
+      ],
+      "hintLadder": [
+        "Look at each object or action.",
+        "Use the clue in the short sentence.",
+        "Show the meaning with the objects together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E03",
+      "subject": "english",
+      "objective": "Notice rhymes and syllables",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E01"
+      ],
+      "allowedRepresentations": [
+        "reviewed_audio_choices",
+        "rhythm_picture_cards"
+      ],
+      "parameterBounds": {
+        "choices": {
+          "min": 2,
+          "max": 3
+        }
+      },
+      "misconceptionCodes": [
+        "matches_initial_sound_not_rhyme"
+      ],
+      "hintLadder": [
+        "Listen to the ending of each word.",
+        "Say the words slowly or tap their parts.",
+        "Listen to the pair together and compare their endings."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E04",
+      "subject": "english",
+      "objective": "Identify and manipulate sounds in spoken words",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E01"
+      ],
+      "allowedRepresentations": [
+        "reviewed_audio_sort",
+        "sound_tokens"
+      ],
+      "parameterBounds": {
+        "phonemes": {
+          "min": 2,
+          "max": 3
+        }
+      },
+      "misconceptionCodes": [
+        "uses_letter_name_for_sound"
+      ],
+      "hintLadder": [
+        "Listen to the spoken word again.",
+        "Stretch the first sound without adding another syllable.",
+        "Move a token for each sound together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E05",
+      "subject": "english",
+      "objective": "Connect taught letters with their sounds",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E04"
+      ],
+      "allowedRepresentations": [
+        "letter_sound_tiles",
+        "reviewed_sound_choices"
+      ],
+      "parameterBounds": {
+        "choices": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      "misconceptionCodes": [
+        "guesses_from_letter_name"
+      ],
+      "hintLadder": [
+        "Listen to the target sound.",
+        "Compare only letters already taught.",
+        "Match the sound and letter together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E06",
+      "subject": "english",
+      "objective": "Blend taught sounds to decode regular words",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E05"
+      ],
+      "allowedRepresentations": [
+        "decodable_word_tiles",
+        "printed_label"
+      ],
+      "parameterBounds": {
+        "phonemes": {
+          "min": 2,
+          "max": 3
+        }
+      },
+      "misconceptionCodes": [
+        "guesses_from_picture"
+      ],
+      "hintLadder": [
+        "Point to each taught letter.",
+        "Blend the sounds without guessing from the picture.",
+        "Blend the whole word together; record this as reading support."
+      ],
+      "evidencePolicyId": "reading-independent-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E07",
+      "subject": "english",
+      "objective": "Segment and encode regular words with taught letters",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E04",
+        "E05"
+      ],
+      "allowedRepresentations": [
+        "letter_tiles",
+        "sound_boxes"
+      ],
+      "parameterBounds": {
+        "phonemes": {
+          "min": 2,
+          "max": 3
+        }
+      },
+      "misconceptionCodes": [
+        "omits_middle_sound"
+      ],
+      "hintLadder": [
+        "Say the short word slowly.",
+        "Move one token for each sound.",
+        "Choose a taught letter for each sound together."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E08",
+      "subject": "english",
+      "objective": "Recognise explicitly taught common word forms",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E05"
+      ],
+      "allowedRepresentations": [
+        "taught_word_cards",
+        "printed_sign"
+      ],
+      "parameterBounds": {
+        "choices": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      "misconceptionCodes": [
+        "guesses_from_initial_letter"
+      ],
+      "hintLadder": [
+        "Look at the whole taught word.",
+        "Compare the parts you know and the part to remember.",
+        "Read the taught word together; record reading support."
+      ],
+      "evidencePolicyId": "reading-independent-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E09",
+      "subject": "english",
+      "objective": "Track print and sentence boundaries",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E01"
+      ],
+      "allowedRepresentations": [
+        "sentence_strip",
+        "word_cards"
+      ],
+      "parameterBounds": {
+        "words": {
+          "min": 2,
+          "max": 5
+        }
+      },
+      "misconceptionCodes": [
+        "confuses_letter_word_sentence"
+      ],
+      "hintLadder": [
+        "Find where the sentence starts.",
+        "Point once to each word from left to right.",
+        "Track the sentence together and notice its end mark."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E10",
+      "subject": "english",
+      "objective": "Read a controlled short sentence",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E06",
+        "E08",
+        "E09"
+      ],
+      "allowedRepresentations": [
+        "controlled_sentence",
+        "instruction_cards"
+      ],
+      "parameterBounds": {
+        "words": {
+          "min": 2,
+          "max": 5
+        }
+      },
+      "misconceptionCodes": [
+        "acts_from_picture_without_reading"
+      ],
+      "hintLadder": [
+        "Track the words in order.",
+        "Blend taught words and check the whole instruction.",
+        "Read together; the result is supported reading, not independent reading."
+      ],
+      "evidencePolicyId": "reading-independent-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E11",
+      "subject": "english",
+      "objective": "Recall characters and sequence events in a heard story",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E01",
+        "E02"
+      ],
+      "allowedRepresentations": [
+        "narrated_picture_sequence",
+        "character_cards"
+      ],
+      "parameterBounds": {
+        "events": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      "misconceptionCodes": [
+        "orders_by_art_not_story"
+      ],
+      "hintLadder": [
+        "Listen to the short story again.",
+        "Find the character and the first event.",
+        "Retell the events together using pictures."
+      ],
+      "evidencePolicyId": "observed-checks-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E12",
+      "subject": "english",
+      "objective": "Retrieve meaning from a short independently read text",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E10"
+      ],
+      "allowedRepresentations": [
+        "controlled_written_text",
+        "written_choice"
+      ],
+      "parameterBounds": {
+        "words": {
+          "min": 3,
+          "max": 8
+        }
+      },
+      "misconceptionCodes": [
+        "uses_unstated_picture_clue"
+      ],
+      "hintLadder": [
+        "Read the short text again.",
+        "Find the words that tell you the answer.",
+        "Read together if needed; record supported comprehension separately."
+      ],
+      "evidencePolicyId": "reading-independent-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E13",
+      "subject": "english",
+      "objective": "Compose a short meaningful message with scaffolds",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E07",
+        "E09"
+      ],
+      "allowedRepresentations": [
+        "message_tiles",
+        "adult_reviewed_message"
+      ],
+      "parameterBounds": {
+        "words": {
+          "min": 2,
+          "max": 6
+        }
+      },
+      "misconceptionCodes": [
+        "tile_selection_treated_as_composition"
+      ],
+      "hintLadder": [
+        "Choose who the message is for.",
+        "Choose what you want to tell them.",
+        "Compose together; an adult reviews meaning, not an automatic mastery score."
+      ],
+      "evidencePolicyId": "adult-reviewed-only-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E14",
+      "subject": "english",
+      "objective": "Discuss a character's choice and give a reason",
+      "band": "foundation-candidate",
+      "prerequisites": [
+        "E11"
+      ],
+      "allowedRepresentations": [
+        "picture_discussion",
+        "adult_reviewed_response"
+      ],
+      "parameterBounds": {
+        "choices": {
+          "min": 2,
+          "max": 3
+        }
+      },
+      "misconceptionCodes": [
+        "single_choice_treated_as_reasoning"
+      ],
+      "hintLadder": [
+        "Look at what happened to the character.",
+        "Think of a reason for the choice.",
+        "Discuss together; an adult listens without automatic certification."
+      ],
+      "evidencePolicyId": "adult-reviewed-only-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    },
+    {
+      "id": "E15",
+      "subject": "english",
+      "objective": "Extend spelling patterns and sentence detail",
+      "band": "extension",
+      "prerequisites": [
+        "E10",
+        "E13"
+      ],
+      "allowedRepresentations": [
+        "sentence_tiles",
+        "adult_reviewed_postcard"
+      ],
+      "parameterBounds": {
+        "words": {
+          "min": 4,
+          "max": 10
+        }
+      },
+      "misconceptionCodes": [
+        "longer_sentence_treated_as_quality"
+      ],
+      "hintLadder": [
+        "Choose one detail that helps your reader.",
+        "Check taught spelling patterns and sentence boundaries.",
+        "Review the message with an adult; no automatic writing certification."
+      ],
+      "evidencePolicyId": "adult-reviewed-only-v1",
+      "contentVersion": "foundation-draft-1.0.0",
+      "reviewStatus": "pending",
+      "alignmentRefs": [
+        {
+          "sourceUrl": "https://www.australiancurriculum.edu.au/curriculum-information/understand-this-learning-area/english",
+          "curriculumVersion": "Australian Curriculum Version 9",
+          "descriptorCode": null,
+          "reviewer": null,
+          "reviewDate": null
+        }
+      ]
+    }
+  ]
+}

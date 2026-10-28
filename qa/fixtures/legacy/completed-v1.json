@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "region": "meadow",
+  "hero": "clover",
+  "companionName": "Sparkle",
+  "done": ["meadow-bridge", "meadow-picnic", "meadow-garden"],
+  "evidence": [
+    {
+      "encounterId": "meadow-bridge",
+      "skillId": "missing-10",
+      "variant": "meadow-v1",
+      "representation": "countable-planks",
+      "attempts": 2,
+      "hints": 0,
+      "assisted": false,
+      "supported": false,
+      "completedAt": "2026-10-28T00:00:00.000Z"
+    },
+    {
+      "encounterId": "meadow-picnic",
+      "skillId": "share-6",
+      "variant": "meadow-v1",
+      "representation": "equal-plates",
+      "attempts": 2,
+      "hints": 1,
+      "assisted": false,
+      "supported": true,
+      "completedAt": "2026-10-28T00:00:00.000Z"
+    },
+    {
+      "encounterId": "meadow-garden",
+      "skillId": "count-1",
+      "variant": "meadow-v1",
+      "representation": "flower-sequence",
+      "attempts": 2,
+      "hints": 3,
+      "assisted": true,
+      "supported": true,
+      "completedAt": "2026-10-28T00:00:00.000Z"
+    }
+  ],
+  "position": {
+    "x": 160,
+    "y": 490
+  }
+}

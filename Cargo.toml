@@ -1,0 +1,24 @@
+[workspace]
+resolver = "2"
+members = ["contracts", "backend/crates/domain", "backend/crates/learning", "backend/crates/content", "backend/crates/api", "backend/crates/director"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+license = "UNLICENSED"
+
+[workspace.dependencies]
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.145"
+jsonschema = { version = "=0.33.0", default-features = false }
+wonderwilds-contracts = { path = "contracts" }
+wonderwilds-domain = { path = "backend/crates/domain" }
+wonderwilds-learning = { path = "backend/crates/learning" }
+wonderwilds-content = { path = "backend/crates/content" }
+
+axum = { version = "=0.8.6", features = ["json"] }
+tokio = { version = "=1.48.0", features = ["macros", "rt-multi-thread", "net", "signal"] }
+postgres = { version = "=0.19.12", features = ["with-serde_json-1"] }
+sha2 = "=0.10.9"
+tower = { version = "=0.5.2", features = ["util"] }

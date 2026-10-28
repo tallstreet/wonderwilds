@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "wonderwilds-story-1.0.0",
+  "explorerLevels": [
+    0,
+    20,
+    50,
+    90,
+    140
+  ],
+  "xpPolicy": {
+    "grantKey": [
+      "profileId",
+      "rewardDefinitionId",
+      "questInstanceId"
+    ],
+    "repeatQuestXp": 0,
+    "supportedCompletionMultiplier": 1,
+    "skillEvidenceIndependent": true
+  },
+  "friendship": {
+    "maximum": 6,
+    "firstHelpQuestPoints": 1,
+    "repeatSameQuestPoints": 0,
+    "distinctHelpingMomentPoints": 1,
+    "inactivityLoss": 0,
+    "transformationThreshold": 3
+  },
+  "discovery": {
+    "algorithm": "seeded-missing-cycle-v1",
+    "seedEncoding": "unsigned-32-bit",
+    "seedStep": "LCG: (1664525 * seed + 1013904223) modulo 2^32",
+    "eligibleExpeditionBoundPerFriend": 4,
+    "policy": "Pip is first in Meadow. Thereafter select a missing eligible friend using seeded choice; help-quest completion befriends them. Declined help remains offered without rerolling. Once all four are befriended, seeded optional revisits exclude the last friend when alternatives exist.",
+    "essentialRouteRequiresDiscovery": false
+  }
+}

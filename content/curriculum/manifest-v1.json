@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0",
+  "packId": "foundation-curriculum-draft",
+  "contentVersion": "foundation-draft-1.0.0",
+  "sha256": "fca6387db1924d9ff26810bf3ebd0c73ad386cc1e7243b1b2d5c437b577c01c6",
+  "schemaRange": "1.x",
+  "assetIds": [],
+  "dependencies": [],
+  "educatorApproval": {
+    "status": "pending",
+    "reviewer": null,
+    "reviewDate": null
+  },
+  "provenance": [
+    "Original node objectives adapted from the project implementation plan; original contexts, hints and draft bounds authored for Wonderwilds. Source pages are alignment references only; no proprietary questions copied."
+  ]
+}

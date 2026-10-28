@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "packId": "foundation-curriculum-draft",
+  "contentVersion": "foundation-draft-1.0.0",
+  "releaseEnabled": false,
+  "educatorApproval": "pending",
+  "provenance": "Original node objectives adapted from the project implementation plan; original contexts, hints and draft bounds authored for Wonderwilds. Source pages are alignment references only; no proprietary questions copied.",
+  "files": {
+    "seed-v1.json": "4dda52beb6e0804882d0c19961c3814752e31d0599a5e6cb155b6d636f00c262",
+    "authoring-v1.json": "dc483e9355d0f7e1653dbd753adf3361711627f61cfe82b8e979e0bd24d3b2e2",
+    "reviews-v1.json": "753d46b211dab1a0b2445bb01aac499b535ee658f9def6ea5d657d17fb3ace6b",
+    "evidence-policies-v1.json": "f1c9cb2f11f32d63c38f754fb21b71660b0de4d6d3a17104405fb10bb19741bd",
+    "coverage.csv": "66debd6d6b8f872a291975eccd3fb7c8263ae0567f668d08bca14b80ee653bc3"
+  }
+}

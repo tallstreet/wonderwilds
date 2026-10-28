@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "policyVersion": "draft-1",
+  "calibrationStatus": "pending-educator-review",
+  "policies": [
+    {
+      "id": "observed-checks-v1",
+      "automaticCertification": false,
+      "qualifyingSupport": "none",
+      "eligibleEvent": "first_answer_check",
+      "requiresServerIssuedEvidence": true,
+      "minimumUniqueVariants": 3,
+      "minimumContexts": 2,
+      "minimumSessions": 2,
+      "minimumEligibleChecks": 8,
+      "minimumCorrectChecks": 7,
+      "latestConsecutiveCorrect": 3,
+      "requiresNovelTransfer": true,
+      "repeatedFamilyParametersQualifyOnce": true,
+      "representationMinimum": 2,
+      "representationExceptionsRequireReview": true,
+      "excluded": [
+        "legacy_browser_import",
+        "abandoned",
+        "hint",
+        "worked_example",
+        "duplicate_item"
+      ]
+    },
+    {
+      "id": "reading-independent-v1",
+      "extends": "observed-checks-v1",
+      "automaticCertification": false,
+      "nonQualifyingSupport": [
+        "assessment_read_aloud",
+        "word_audio",
+        "hint",
+        "worked_example"
+      ],
+      "listeningAndReadingEvidenceSeparate": true
+    },
+    {
+      "id": "adult-reviewed-only-v1",
+      "automaticCertification": false,
+      "requiresAdultReview": true,
+      "eligibleEvent": null,
+      "reason": "Oral reasoning, composition and writing are not certified by choosing tiles. No microphone is required."
+    }
+  ]
+}

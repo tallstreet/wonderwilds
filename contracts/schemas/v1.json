@@ -1,0 +1,1470 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wonderwilds.invalid/contracts/v1",
+  "$defs": {
+    "Parameters": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "given": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "total"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "recipients": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            }
+          },
+          "required": [
+            "total",
+            "recipients"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "attribute": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "attribute"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 30
+            },
+            "unitLength": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "prefixLength": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "instructionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "objects",
+            "instructionId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "length": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "id",
+                  "label"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 30
+            },
+            "instructionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "objects",
+            "instructionId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "tiles": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10
+              },
+              "minItems": 1,
+              "maxItems": 30
+            },
+            "promptId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "tiles",
+            "promptId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "cards": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 30
+            },
+            "promptId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "cards",
+            "promptId"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "SupportState": {
+      "type": "object",
+      "properties": {
+        "hintCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "workedExample": {
+          "type": "boolean"
+        },
+        "readAloud": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "hintCount",
+        "workedExample",
+        "readAloud"
+      ],
+      "additionalProperties": false
+    },
+    "EncounterInstance": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "missing_quantity",
+            "equal_sharing",
+            "pattern_sort",
+            "spatial_measurement",
+            "phonics_word_building",
+            "story_message"
+          ]
+        },
+        "skillId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "parameters": {
+          "$ref": "#/$defs/Parameters"
+        },
+        "permittedActions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "attempt",
+              "hint",
+              "worked_example",
+              "abandon"
+            ]
+          },
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "support": {
+          "$ref": "#/$defs/SupportState"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "id",
+        "templateId",
+        "skillId",
+        "contentVersion",
+        "parameters",
+        "permittedActions",
+        "support"
+      ],
+      "additionalProperties": false
+    },
+    "Answer": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "quantity",
+              "type": "string"
+            },
+            "value": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "groups",
+              "type": "string"
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "maxItems": 20
+            }
+          },
+          "required": [
+            "kind",
+            "groups"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "choices",
+              "type": "string"
+            },
+            "choiceIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "kind",
+            "choiceIds"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "CommandPayload": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "start_encounter",
+              "type": "string"
+            },
+            "beatId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "type",
+            "beatId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "attempt",
+              "type": "string"
+            },
+            "encounterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "answer": {
+              "$ref": "#/$defs/Answer"
+            }
+          },
+          "required": [
+            "type",
+            "encounterId",
+            "answer"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "hint",
+              "type": "string"
+            },
+            "encounterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "supportKind": {
+              "type": "string",
+              "enum": [
+                "hint",
+                "worked_example",
+                "read_aloud"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "encounterId",
+            "supportKind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "select_companion",
+              "type": "string"
+            },
+            "creatureId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "type",
+            "creatureId"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "GameCommand": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "commandId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "payload": {
+          "$ref": "#/$defs/CommandPayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "commandId",
+        "expectedRevision",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "InventoryEntry": {
+      "type": "object",
+      "properties": {
+        "itemId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "itemId",
+        "quantity"
+      ],
+      "additionalProperties": false
+    },
+    "LearnerSummary": {
+      "type": "object",
+      "properties": {
+        "skillId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "unseen",
+            "introduced",
+            "practising",
+            "secure",
+            "review_needed"
+          ]
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      },
+      "required": [
+        "skillId",
+        "status",
+        "explanation"
+      ],
+      "additionalProperties": false
+    },
+    "GameSnapshot": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "rulesVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "storyFlags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 200,
+          "uniqueItems": true
+        },
+        "ownedCreatures": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "inventory": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InventoryEntry"
+          },
+          "maxItems": 200,
+          "uniqueItems": true
+        },
+        "pendingEncounters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EncounterInstance"
+          },
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "learnerSummaries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LearnerSummary"
+          },
+          "maxItems": 200,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "revision",
+        "contentVersion",
+        "rulesVersion",
+        "storyFlags",
+        "ownedCreatures",
+        "inventory",
+        "pendingEncounters",
+        "learnerSummaries"
+      ],
+      "additionalProperties": false
+    },
+    "LearningEvidence": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "eventId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "encounterId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "skillId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "variantId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "itemFamily": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "representation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "correct",
+            "incorrect",
+            "not_assessed"
+          ]
+        },
+        "eventKind": {
+          "type": "string",
+          "enum": [
+            "answer_check",
+            "hint",
+            "worked_example",
+            "abandonment",
+            "completion"
+          ]
+        },
+        "firstCheck": {
+          "type": "boolean"
+        },
+        "support": {
+          "$ref": "#/$defs/SupportState"
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "serverSequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "provenance": {
+          "type": "string",
+          "enum": [
+            "server_verified",
+            "legacy_unverified"
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "eventId",
+        "encounterId",
+        "skillId",
+        "variantId",
+        "itemFamily",
+        "contextId",
+        "representation",
+        "result",
+        "eventKind",
+        "firstCheck",
+        "support",
+        "sessionId",
+        "serverSequence",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
+    "EventOutcome": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "story_flag_set",
+              "type": "string"
+            },
+            "flag": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "type",
+            "flag"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "reward_granted",
+              "type": "string"
+            },
+            "rewardDefinitionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "questInstanceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          },
+          "required": [
+            "type",
+            "rewardDefinitionId",
+            "questInstanceId",
+            "quantity"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "creature_befriended",
+              "type": "string"
+            },
+            "creatureId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "type",
+            "creatureId"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "DomainEvent": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "eventId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "commandId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "rulesVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "outcome": {
+          "$ref": "#/$defs/EventOutcome"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "eventId",
+        "sequence",
+        "commandId",
+        "rulesVersion",
+        "contentVersion",
+        "outcome"
+      ],
+      "additionalProperties": false
+    },
+    "EducatorApproval": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ]
+        },
+        "reviewer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "reviewDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        }
+      },
+      "required": [
+        "status",
+        "reviewer",
+        "reviewDate"
+      ],
+      "additionalProperties": false
+    },
+    "ContentManifest": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "packId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "schemaRange": {
+          "type": "string",
+          "enum": [
+            "1.x"
+          ]
+        },
+        "assetIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 1000,
+          "uniqueItems": true
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 30,
+          "uniqueItems": true
+        },
+        "educatorApproval": {
+          "$ref": "#/$defs/EducatorApproval"
+        },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "packId",
+        "contentVersion",
+        "sha256",
+        "schemaRange",
+        "assetIds",
+        "dependencies",
+        "educatorApproval",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
+    "SkillState": {
+      "type": "object",
+      "properties": {
+        "skillId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "unseen",
+            "introduced",
+            "practising",
+            "secure",
+            "review_needed"
+          ]
+        }
+      },
+      "required": [
+        "skillId",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "DirectorContext": {
+      "type": "object",
+      "properties": {
+        "regionId": {
+          "type": "string",
+          "enum": [
+            "meadow",
+            "orchard",
+            "cove"
+          ]
+        },
+        "canonicalFacts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 40,
+          "uniqueItems": true
+        },
+        "recentTemplateIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 10
+        },
+        "readingBand": {
+          "type": "string",
+          "enum": [
+            "supported",
+            "emerging",
+            "independent"
+          ]
+        },
+        "skillStates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkillState"
+          },
+          "maxItems": 40,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "regionId",
+        "canonicalFacts",
+        "recentTemplateIds",
+        "readingBand",
+        "skillStates"
+      ],
+      "additionalProperties": false
+    },
+    "DirectorAllowed": {
+      "type": "object",
+      "properties": {
+        "beatIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "creatureIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 12,
+          "uniqueItems": true
+        },
+        "skillId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "templateIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "missing_quantity",
+              "equal_sharing",
+              "pattern_sort",
+              "spatial_measurement",
+              "phonics_word_building",
+              "story_message"
+            ]
+          },
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "parameterSets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Parameters"
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "nextBeatIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "maxDialogueCharacters": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 180
+        }
+      },
+      "required": [
+        "beatIds",
+        "creatureIds",
+        "skillId",
+        "templateIds",
+        "parameterSets",
+        "nextBeatIds",
+        "maxDialogueCharacters"
+      ],
+      "additionalProperties": false
+    },
+    "DirectorInput": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "stateRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "rulesVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "policyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "context": {
+          "$ref": "#/$defs/DirectorContext"
+        },
+        "allowed": {
+          "$ref": "#/$defs/DirectorAllowed"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "stateRevision",
+        "rulesVersion",
+        "contentVersion",
+        "policyVersion",
+        "context",
+        "allowed"
+      ],
+      "additionalProperties": false
+    },
+    "ProposedEncounter": {
+      "type": "object",
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "missing_quantity",
+            "equal_sharing",
+            "pattern_sort",
+            "spatial_measurement",
+            "phonics_word_building",
+            "story_message"
+          ]
+        },
+        "skillId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "parameters": {
+          "$ref": "#/$defs/Parameters"
+        }
+      },
+      "required": [
+        "templateId",
+        "skillId",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    "DirectorProposal": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "stateRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "beatId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "creatureId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "encounter": {
+          "$ref": "#/$defs/ProposedEncounter"
+        },
+        "dialogue": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "suggestedNextBeatId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "stateRevision",
+        "contentVersion",
+        "beatId",
+        "creatureId",
+        "encounter",
+        "dialogue",
+        "suggestedNextBeatId"
+      ],
+      "additionalProperties": false
+    },
+    "ApiError": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "INVALID_INPUT",
+            "UNAUTHENTICATED",
+            "FORBIDDEN",
+            "NOT_FOUND",
+            "REVISION_CONFLICT",
+            "RATE_LIMITED",
+            "UNAVAILABLE"
+          ]
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "code",
+        "correlationId"
+      ],
+      "additionalProperties": false
+    },
+    "AlignmentRef": {
+      "type": "object",
+      "properties": {
+        "sourceUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "curriculumVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "descriptorCode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "reviewer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "reviewDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        }
+      },
+      "required": [
+        "sourceUrl",
+        "curriculumVersion",
+        "descriptorCode",
+        "reviewer",
+        "reviewDate"
+      ],
+      "additionalProperties": false
+    },
+    "ParameterBound": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "additionalProperties": false
+    },
+    "SkillNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "subject": {
+          "type": "string",
+          "enum": [
+            "maths",
+            "english"
+          ]
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "band": {
+          "type": "string",
+          "enum": [
+            "foundation-candidate",
+            "year-1-extension",
+            "extension"
+          ]
+        },
+        "prerequisites": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "allowedRepresentations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "parameterBounds": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/ParameterBound"
+          },
+          "maxProperties": 20
+        },
+        "misconceptionCodes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "hintLadder": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "evidencePolicyId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "reviewStatus": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved"
+          ]
+        },
+        "alignmentRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AlignmentRef"
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "subject",
+        "objective",
+        "band",
+        "prerequisites",
+        "allowedRepresentations",
+        "parameterBounds",
+        "misconceptionCodes",
+        "hintLadder",
+        "evidencePolicyId",
+        "contentVersion",
+        "reviewStatus",
+        "alignmentRefs"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

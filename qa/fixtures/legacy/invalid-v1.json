@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "region": "unknown",
+  "hero": "__proto__",
+  "done": ["unknown", "meadow-bridge", "meadow-bridge"],
+  "evidence": [
+    {
+      "encounterId": "meadow-bridge",
+      "skillId": "missing-10",
+      "variant": "meadow-v1",
+      "representation": "countable-planks",
+      "attempts": 2,
+      "hints": 1,
+      "assisted": false,
+      "supported": false,
+      "completedAt": "2026-10-28T00:00:00.000Z"
+    }
+  ],
+  "position": {
+    "x": 150,
+    "y": 150
+  }
+}

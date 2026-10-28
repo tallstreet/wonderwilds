@@ -1,0 +1,7 @@
+{
+  "name": "wonderwilds-browser-checks",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node guest-smoke.mjs" },
+  "devDependencies": { "playwright": "1.58.2" }
+}

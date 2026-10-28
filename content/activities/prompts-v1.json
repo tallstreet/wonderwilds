@@ -1,0 +1,14 @@
+{
+  "count-next": {"instruction":"Count forward through the shown numbers. Choose the number that comes next."},
+  "pattern-next": {"instruction":"Look at the repeating objects. Choose the object that comes next."},
+  "sort-round": {"instruction":"Choose every round object. You can choose more than one."},
+  "place-beside": {"instruction":"Choose the position that means beside the tree."},
+  "longest-rope": {"instruction":"Compare the rope lengths. Choose the longest rope."},
+  "sound-s": {"instruction":"Listen to the /s/ sound. Choose the letter that represents /s/."},
+  "word-cat": {"instruction":"Use the letter tiles to build the label for a small pet that meows."},
+  "word-sun": {"instruction":"Use the letter tiles to build the label for the bright object in the daytime sky."},
+  "word-map": {"instruction":"Use the letter tiles to build the label for a drawing that shows places and paths."},
+  "seed-order": {"instruction":"Put the story cards in order: first, next, then last."},
+  "listen-direction": {"instruction":"Ask a helper or narration to say: put the cup beside the tree. Choose the matching direction."},
+  "read-red-cup": {"instruction":"Read the message: Pip needs a red cup. Choose the matching message."}
+}

@@ -1,0 +1,4 @@
+target/
+contracts/node_modules/
+qa/e2e/node_modules/
+__pycache__/

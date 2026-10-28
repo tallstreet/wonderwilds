@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "packId": "wonderwilds-story",
+  "contentVersion": "wonderwilds-story-1.0.0",
+  "sha256": "a0bf753a06d0380a9947f1087c830549bf433dc57d36c594212efa4a8c325b17",
+  "schemaRange": "1.x",
+  "assetIds": [
+    "map-meadow",
+    "map-orchard",
+    "map-cove",
+    "friend-pip",
+    "friend-pip-glow",
+    "friend-tansy",
+    "friend-tansy-glow",
+    "friend-nib",
+    "friend-nib-glow",
+    "friend-flutter",
+    "friend-flutter-glow",
+    "friend-cleo",
+    "friend-cleo-glow",
+    "friend-bramble",
+    "friend-bramble-glow",
+    "friend-patter",
+    "friend-patter-glow",
+    "friend-twizzle",
+    "friend-twizzle-glow",
+    "friend-luna",
+    "friend-luna-glow",
+    "friend-pebble",
+    "friend-pebble-glow",
+    "friend-glimmer",
+    "friend-glimmer-glow",
+    "friend-sail",
+    "friend-sail-glow"
+  ],
+  "dependencies": [],
+  "educatorApproval": {
+    "status": "pending",
+    "reviewer": null,
+    "reviewDate": null
+  },
+  "provenance": [
+    "Original story and creature descriptions authored for this implementation; not human-reviewed.",
+    "Existing map and Pip atlas paths are repository assets, pending independent rights/provenance verification.",
+    "Hash covers paths in README order, each UTF-8 path + NUL + exact file bytes."
+  ]
+}

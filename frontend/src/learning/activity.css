@@ -1,0 +1,74 @@
+.ww-activity {
+  max-width: 52rem;
+  margin-inline: auto;
+  padding: 1rem;
+  color: #20312a;
+  background: #fffef5;
+  border: 2px solid #617764;
+  border-radius: 1rem;
+}
+.ww-activity button {
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0.25rem;
+  padding: 0.6rem 0.9rem;
+  font: inherit;
+  color: #20312a;
+  background: #f4f8ef;
+  border: 2px solid #526b54;
+  border-radius: 0.6rem;
+  cursor: pointer;
+}
+.ww-activity button:focus-visible,
+.ww-activity h2:focus {
+  outline: 3px solid #253fb4;
+  outline-offset: 3px;
+}
+.ww-activity button[aria-pressed='true'] {
+  border-width: 4px;
+  text-decoration: underline;
+  background: #e2efdc;
+}
+.ww-activity button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.ww-activity fieldset {
+  margin-block: 0.75rem;
+  border: 2px solid #617764;
+  border-radius: 0.5rem;
+}
+.ww-activity-choices,
+.ww-activity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.ww-activity-objects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+.ww-activity-object {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 1.4rem;
+  min-height: 1.4rem;
+  border: 1px solid currentColor;
+  border-radius: 0.3rem;
+}
+.ww-activity-status {
+  min-height: 2.5rem;
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ww-activity *,
+  .ww-activity *::before,
+  .ww-activity *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

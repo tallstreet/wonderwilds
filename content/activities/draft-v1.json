@@ -1,0 +1,309 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "foundation-draft-1",
+  "reviewStatus": "pending",
+  "releaseEnabled": false,
+  "provenance": "Original synthetic adult-authored development fixtures; no production child data.",
+  "activities": [
+    {
+      "id": "bridge-planks",
+      "family": "quantity",
+      "skillId": "M06",
+      "representation": "countable_planks",
+      "contexts": [
+        "meadow_bridge",
+        "orchard_seed_rack"
+      ],
+      "variants": [
+        {
+          "total": 6,
+          "given": 2,
+          "solution": 4
+        },
+        {
+          "total": 7,
+          "given": 3,
+          "solution": 4
+        },
+        {
+          "total": 10,
+          "given": 6,
+          "solution": 4
+        }
+      ],
+      "hints": [
+        "Count the planks already here.",
+        "Match one plank to each empty space.",
+        "Count together to fill every space."
+      ],
+      "reviewStatus": "pending",
+      "releaseEnabled": false,
+      "assessmentLimit": "Fixed authored tasks are practice evidence; educator review and transfer calibration remain pending."
+    },
+    {
+      "id": "picnic-sharing",
+      "family": "sharing",
+      "skillId": "M08",
+      "representation": "group_buttons",
+      "contexts": [
+        "meadow_picnic",
+        "cove_shells"
+      ],
+      "variants": [
+        {
+          "total": 6,
+          "recipients": 2,
+          "solution": [
+            3,
+            3
+          ]
+        },
+        {
+          "total": 9,
+          "recipients": 3,
+          "solution": [
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "total": 12,
+          "recipients": 4,
+          "solution": [
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      ],
+      "hints": [
+        "Give one object to each friend.",
+        "Keep taking turns around the group.",
+        "Count each group together and compare."
+      ],
+      "reviewStatus": "pending",
+      "releaseEnabled": false,
+      "assessmentLimit": "Fixed authored tasks are practice evidence; educator review and transfer calibration remain pending."
+    },
+    {
+      "id": "lantern-pattern",
+      "family": "pattern_sort",
+      "skillId": "M09",
+      "representation": "labelled_objects",
+      "contexts": [
+        "meadow_garland",
+        "orchard_festival"
+      ],
+      "variants": [
+        {
+          "unit": [
+            "leaf",
+            "star"
+          ],
+          "prefixLength": 4,
+          "solution": "leaf"
+        },
+        {
+          "unit": [
+            "round",
+            "square"
+          ],
+          "prefixLength": 5,
+          "solution": "square"
+        },
+        {
+          "unit": [
+            "cup",
+            "flower",
+            "shell"
+          ],
+          "prefixLength": 6,
+          "solution": "cup"
+        }
+      ],
+      "hints": [
+        "Name the objects in order.",
+        "Find the small group that repeats.",
+        "Say the repeating group together."
+      ],
+      "reviewStatus": "pending",
+      "releaseEnabled": false,
+      "assessmentLimit": "Fixed authored tasks are practice evidence; educator review and transfer calibration remain pending."
+    },
+    {
+      "id": "supply-position",
+      "family": "spatial_measurement",
+      "skillId": "M11",
+      "representation": "labelled_scene",
+      "contexts": [
+        "orchard_supplies",
+        "cove_supplies"
+      ],
+      "variants": [
+        {
+          "relation": "above",
+          "choices": [
+            "above",
+            "below",
+            "inside"
+          ],
+          "solution": "above"
+        },
+        {
+          "relation": "beside",
+          "choices": [
+            "above",
+            "beside",
+            "inside"
+          ],
+          "solution": "beside"
+        },
+        {
+          "relation": "inside",
+          "choices": [
+            "above",
+            "below",
+            "inside"
+          ],
+          "solution": "inside"
+        }
+      ],
+      "hints": [
+        "Find the tree in the labelled scene.",
+        "Look at the position named in the instruction.",
+        "Place the object together, then describe where it is."
+      ],
+      "reviewStatus": "pending",
+      "releaseEnabled": false,
+      "assessmentLimit": "Fixed authored tasks are practice evidence; educator review and transfer calibration remain pending."
+    },
+    {
+      "id": "parcel-words",
+      "family": "phonics_word",
+      "skillId": "E06",
+      "representation": "letter_tiles",
+      "contexts": [
+        "orchard_parcels",
+        "cove_signs"
+      ],
+      "variants": [
+        {
+          "tiles": [
+            "c",
+            "a",
+            "t"
+          ],
+          "accepted": [
+            "cat"
+          ],
+          "solution": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "tiles": [
+            "s",
+            "u",
+            "n"
+          ],
+          "accepted": [
+            "sun"
+          ],
+          "solution": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "tiles": [
+            "m",
+            "a",
+            "p"
+          ],
+          "accepted": [
+            "map"
+          ],
+          "solution": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "hints": [
+        "Look at each taught letter.",
+        "Blend the sounds from left to right.",
+        "Blend the word together with a helper."
+      ],
+      "reviewStatus": "pending",
+      "releaseEnabled": false,
+      "assessmentLimit": "Fixed authored tasks are practice evidence; educator review and transfer calibration remain pending. Assessment read-aloud is supported reading evidence."
+    },
+    {
+      "id": "seed-story",
+      "family": "story_message",
+      "skillId": "E11",
+      "representation": "labelled_story_cards",
+      "contexts": [
+        "meadow_seed_story",
+        "orchard_seed_story"
+      ],
+      "variants": [
+        {
+          "events": [
+            "find_seed",
+            "plant_seed",
+            "water_seed"
+          ],
+          "solution": [
+            "find_seed",
+            "plant_seed",
+            "water_seed"
+          ]
+        },
+        {
+          "events": [
+            "find_cup",
+            "fill_cup",
+            "share_water"
+          ],
+          "solution": [
+            "find_cup",
+            "fill_cup",
+            "share_water"
+          ]
+        },
+        {
+          "events": [
+            "find_letter",
+            "read_label",
+            "deliver_letter"
+          ],
+          "solution": [
+            "find_letter",
+            "read_label",
+            "deliver_letter"
+          ]
+        }
+      ],
+      "hints": [
+        "Remember what happened first.",
+        "Which event made the next event possible?",
+        "Retell the events together."
+      ],
+      "reviewStatus": "pending",
+      "releaseEnabled": false,
+      "assessmentLimit": "Fixed authored tasks are practice evidence; educator review and transfer calibration remain pending."
+    }
+  ],
+  "adultReviewedOnlySkillIds": [
+    "E13",
+    "E14",
+    "E15"
+  ]
+}
