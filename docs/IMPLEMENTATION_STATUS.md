@@ -254,3 +254,8 @@ and no content approval or release activation changed.
 `bash scripts/check.sh` now passes locally in full, including story validation,
 all thirteen story tests and all four legacy fixture tests. The existing Phaser
 bundle-size warning remains; hosted results are tracked on PR #7.
+
+Hosted CI also exposed an undeclared `rg` dependency in the database runner's
+migration-drift log assertion, after both database tests had passed. That literal
+log check now uses portable `grep -Fq`; the complete disposable database check
+passes locally with the corrected assertion.

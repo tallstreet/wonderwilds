@@ -31,7 +31,7 @@ if "$task_root/scripts/migrate-postgres.sh" >"$task_drift_log" 2>&1; then
     echo 'Migration history drift was incorrectly accepted' >&2
     exit 1
 fi
-if ! rg -q 'Migration hash drift: 0001_parent_profiles.sql' "$task_drift_log"; then
+if ! grep -Fq 'Migration hash drift: 0001_parent_profiles.sql' "$task_drift_log"; then
     cat "$task_drift_log" >&2
     rm -f "$task_drift_log"
     exit 1
