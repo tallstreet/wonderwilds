@@ -1,9 +1,10 @@
-import { ApiFailure, GameClient, type PreparedCommand } from './api/client.ts';
+import { ApiFailure, GameClient } from './api/client.ts';
+import { CommandSession } from './api/command-session.ts';
 import type { CommandPayload, GameSnapshot } from '../../contracts/generated/contracts.ts';
 import { mountActivity } from './learning/activity.ts';
 import { authoredPresentation } from './learning/presentation.ts';
 import story from '../../content/story/adventure.v1.json';
-import friendships from '../../content/story/help-quests.v1.json';
+import { meadowFriends } from './backend-world-model.ts';
 import './demo.css';
 
 const root = document.querySelector<HTMLElement>('#demo')!;
@@ -36,13 +37,12 @@ let csrf: string | undefined;
 const client = new GameClient(() => csrf);
 let snapshot: GameSnapshot;
 let activity: ReturnType<typeof mountActivity> | undefined;
-let pending: { key: string; command: PreparedCommand } | undefined;
-let busy = false;
+let commands: CommandSession | undefined;
 function button(label: string, action: () => Promise<void>, disabled = false) {
   const node = element('button', label);
   node.disabled = disabled;
   node.onclick = () => {
-    if (!busy) void action().catch(showError);
+    if (commands && !commands.busy) void action().catch(showError);
   };
   return node;
 }
@@ -55,41 +55,22 @@ function showError(error: unknown) {
         : 'The backend could not finish that action. Retry the same action, or refresh progress to reconnect.';
 }
 async function send(payload: CommandPayload) {
-  const key = JSON.stringify(payload);
-  if (pending && pending.key !== key) throw new Error('Retry or refresh the pending action first');
-  pending ??= {
-    key,
-    command: client.prepare({
-      schemaVersion: '1.0',
-      commandId: crypto.randomUUID(),
-      expectedRevision: snapshot.revision,
-      payload,
-    }),
-  };
-  busy = true;
+  if (!commands) throw new Error('Adventure is still connecting');
   try {
-    snapshot = await client.send(pending.command);
-    pending = undefined;
+    snapshot = await commands.send(payload);
   } catch (error) {
-    if (error instanceof ApiFailure && !['UNAVAILABLE', 'RATE_LIMITED'].includes(error.code))
-      pending = undefined;
     showError(error);
     throw error;
-  } finally {
-    busy = false;
   }
 }
 async function refresh() {
-  if (busy) return;
-  busy = true;
-  try {
-    snapshot = await client.snapshot();
-    pending = undefined;
-    render();
-    status.textContent = `Connected · saved in PostgreSQL · revision ${snapshot.revision}`;
-  } finally {
-    busy = false;
-  }
+  if (!commands || commands.busy) return;
+  snapshot = await commands.refresh();
+  render();
+  connected();
+}
+function connected() {
+  status.textContent = `Connected · saved in PostgreSQL · revision ${snapshot.revision}`;
 }
 toolbar.append(button('Refresh progress', refresh));
 const completed = (id: string) => {
@@ -174,9 +155,7 @@ function render() {
     }
     content.append(grid, element('h2', 'Make friends'));
     const friends = element('div', '', 'demo-grid');
-    for (const quest of friendships.quests.filter((q) =>
-      ['pip', 'tansy', 'nib', 'flutter'].includes(q.creatureId),
-    )) {
+    for (const quest of meadowFriends) {
       const owned = snapshot.ownedCreatures.includes(quest.creatureId);
       const ready = quest.requiresBeatIds.every(completed);
       const card = element('article', '', 'demo-card');
@@ -260,7 +239,10 @@ async function start() {
   const session = (await response.json()) as { profileId: string; csrf: string };
   csrf = session.csrf;
   client.selectProfile(session.profileId);
-  await refresh();
+  snapshot = await client.snapshot();
+  commands = new CommandSession(client, snapshot);
+  render();
+  connected();
 }
 void start().catch(() => {
   status.textContent =

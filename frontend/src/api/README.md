@@ -8,13 +8,27 @@ Prepare a `GameCommand` once, then reuse that prepared value after uncertain tra
 
 There is currently **no backend import endpoint**. `importLegacy` therefore accepts an explicit transport rather than inventing an API route. Do not enable the migration UI until the server validates ownership, deduplicates `(profile, source digest)`, commits cosmetics/story import atomically and returns the defined receipt. It must retain original IDs/version and never accept browser evidence as verified mastery. A receipt is saved only after server acknowledgement of the exact profile/digest/provenance. On local receipt-write failure, the returned server receipt enables recovery; retry must use server idempotency. Original saves are never erased. Existing corrupt receipts block further import pending recovery.
 
+`CommandSession` owns the shared command lifecycle for the world and diagnostic
+screen. Its explicit idle/sending/awaiting-retry/refreshing states guard concurrent
+writes; uncertain failures retain the original prepared command. A failed refresh
+keeps that command available, while a successful explicit refresh adopts the
+server snapshot. It has no DOM or local-storage dependency. Create one session per
+selected profile and discard it with that profile's rendered state.
+
+World journal, missions and training markup and container-scoped event bindings
+live in `backend-world-views.ts`; `BackendWorld` owns the activity lifecycle and
+command effects. Expanded companion details and focus restore by creature ID,
+independently of display wording. `world-placements.ts` checks authored encounter
+coverage, maps and coordinate bounds; route tests cover approachable placements.
+These browser positions do not establish server eligibility.
+
 Run from `frontend/`:
 
 ```sh
-node --import tsx src/api/api.test.ts
+npm test
 npm run typecheck
 npm run lint
 npm run format:check
 ```
 
-These nine tests exercise same-origin API paths, exact-byte retries and caller mutation, conflicts, cross-profile late responses during fetch and body parsing, corrupt/blocked storage, acknowledged imports and receipt recovery. They use an explicit fake transport for migration; they are not evidence of a functioning server import or cloud account flow. No package or legacy storage-format changes are required to remove this module.
+The API and command-session tests exercise same-origin API paths, exact-byte retries and caller mutation, conflicts, cross-profile late responses during fetch and body parsing, corrupt/blocked storage, acknowledged imports and receipt recovery, concurrent command guards and explicit refresh reconciliation. They use an explicit fake transport for migration; they are not evidence of a functioning server import or cloud account flow. No package or legacy storage-format changes are required to remove this module.

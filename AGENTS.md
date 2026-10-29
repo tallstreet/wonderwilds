@@ -44,12 +44,11 @@
   binary directory. `/?guest=1` selects the original guest adventure.
 - `.local-demo/` contains persistent synthetic data and session secrets. Keep it
   ignored, preserve its data, and never expose the demo bridge through a tunnel.
-- Several scripts assume the prepared Linux `/workspace` environment. Inspect
-  them before running locally. In particular, `scripts/check.sh` defaults Cargo
-  and rustup homes to `/workspace`; on macOS pass the actual local homes, e.g.
-  `CARGO_HOME="$HOME/.cargo" RUSTUP_HOME="$HOME/.rustup" bash scripts/check.sh`
-  for a standard installation. `scripts/check-postgres.sh` hardcodes Linux paths
-  and requires that prepared environment or a deliberate portability change.
+- Legacy development setup scripts assume the prepared Linux `/workspace`
+  environment; inspect them before running locally. `scripts/check.sh` uses
+  standard user Cargo/rustup homes unless overridden. Database and training QA
+  create fresh temporary PostgreSQL clusters; set `WONDERWILDS_PG_BIN` when
+  automatic binary discovery does not find your installation.
 
 ## Implementation boundaries
 
@@ -100,22 +99,21 @@ python3 -m unittest discover -s content/curriculum -p 'test_*.py'
 node content/curriculum/check-schema.mjs
 python3 content/story/validate.py
 python3 -m unittest discover -s content/story -p 'test_*.py'
-(cd frontend && npm run check && node --import tsx src/api/api.test.ts)
+(cd frontend && npm run check)
 node --import ./frontend/node_modules/tsx/dist/loader.mjs qa/fixtures/legacy/baseline.test.ts
 ```
 
 - Frontend `npm run check` includes strict typechecking, Oxlint, Oxfmt checking,
-  top-level unit tests, and the production build. The nested API tests require the
-  separate command above. Follow existing formatting rather than mass-formatting
-  unrelated files.
+  recursively discovered unit/API tests, and the production build. Follow existing
+  formatting rather than mass-formatting unrelated files.
 - For browser changes, start Vite, then run `(cd qa/e2e && npm test)` and, for
   activity controls, `node frontend/src/learning/activity.browser.mjs`.
   Set `CHROMIUM_PATH` when Chromium is not at `/usr/bin/chromium`.
 - For backend-world changes, follow the root README's fresh QA database and
   separate-port setup for `qa/e2e/backend-demo.mjs`; do not run it on demo progress.
 - Persistence changes need the real database checks in
-  `sh scripts/check-postgres.sh` in its supported environment. The ordinary Rust
-  suite deliberately ignores two database integration tests and is insufficient
+  `sh scripts/check-postgres.sh` against its fresh temporary PostgreSQL cluster.
+  The ordinary Rust suite deliberately ignores two database integration tests and is insufficient
   to establish database correctness alone.
 - Add regression coverage for changed logic or bugs using the existing test
   structure. Documentation-only edits do not require the application suite.

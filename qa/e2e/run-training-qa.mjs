@@ -1,4 +1,4 @@
-// Prepared Linux workspace runner: always uses a newly-created disposable synthetic database.
+// Portable runner: always uses a newly-created disposable synthetic cluster.
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { randomBytes, createHash } from 'node:crypto';
@@ -9,19 +9,21 @@ import { once } from 'node:events';
 import { createServer } from 'node:net';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const pgBin = process.env.WONDERWILDS_PG_BIN || '/workspace/setup-tools/postgres/usr/lib/postgresql/17/bin';
-const env = {
-  ...process.env,
-  CARGO_HOME: process.env.CARGO_HOME || '/workspace/.cargo',
-  RUSTUP_HOME: process.env.RUSTUP_HOME || '/workspace/.rustup',
-  LD_LIBRARY_PATH: `/workspace/setup-tools/postgres/usr/lib/x86_64-linux-gnu${process.env.LD_LIBRARY_PATH ? `:${process.env.LD_LIBRARY_PATH}` : ''}`,
-};
-const cargo = join(env.CARGO_HOME, 'bin/cargo');
-const db = `ww_training_${Date.now()}_${process.pid}`;
-const database = `host=/workspace/setup-tools/pgsocket port=55432 user=agent dbname=${db}`;
+// The parent wrapper owns a new cluster and stops it on success, failure or signals.
+if (!process.argv.includes('--qa-child')) {
+  const result = spawnSync('python3', ['scripts/with-qa-postgres.py', process.execPath, fileURLToPath(import.meta.url), '--qa-child'], { cwd: root, stdio: 'inherit', env: process.env });
+  if (result.error) throw result.error;
+  process.exit(result.status ?? 1);
+}
+const pgBin = process.env.WONDERWILDS_PG_BIN;
+const env = { ...process.env };
+const cargo = 'cargo';
+const database = process.env.WW_QA_DATABASE_URL;
+if (!env.WW_QA_CLUSTER_DIR || database !== `host=${env.WW_QA_CLUSTER_DIR}/socket port=55432 user=ww_qa_admin dbname=ww_qa`) {
+  throw new Error('Training QA requires its generated disposable cluster');
+}
 const temp = await mkdtemp(join(tmpdir(), 'wonderwilds-training-'));
 const children = [];
-let databaseCreated = false;
 const run = (bin, args, options = {}) => {
   const result = spawnSync(bin, args, { cwd: root, env, stdio: ['pipe', 'inherit', 'inherit'], ...options });
   if (result.error) throw result.error;
@@ -42,9 +44,6 @@ const waitReady = async (url, child) => {
 };
 try {
   await Promise.all([available(3002), available(5180)]);
-  run('sh', ['scripts/start-postgres.sh']);
-  run(join(pgBin, 'createdb'), ['-h', '/workspace/setup-tools/pgsocket', '-p', '55432', db]);
-  databaseCreated = true;
   run('sh', ['scripts/migrate-postgres.sh'], { env: { ...env, WONDERWILDS_DATABASE_URL: database } });
   const session = randomBytes(32).toString('hex'), csrf = randomBytes(32).toString('hex');
   const profileId = '10000000-0000-0000-0000-000000000002', parentId = '10000000-0000-0000-0000-000000000001';
@@ -61,7 +60,7 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
   await writeFile(configPath, JSON.stringify({ session, csrf, profileId, browserToken: randomBytes(32).toString('hex') }), { mode: 0o600 });
   if (process.env.WW_QA_SKIP_BUILD !== '1') run(cargo, ['build', '-p', 'wonderwilds-api', '--locked']);
   const api = spawn(join(root, 'target/debug/wonderwilds-api'), [], {
-    cwd: root, env: { ...env, WONDERWILDS_DATABASE_URL: database.replace('user=agent', 'user=ww_demo_runtime'), WONDERWILDS_ORIGIN: 'https://wonderwilds.local', WONDERWILDS_PORT: '3002' }, stdio: 'inherit',
+    cwd: root, env: { ...env, WONDERWILDS_DATABASE_URL: database.replace('user=ww_qa_admin', 'user=ww_demo_runtime'), WONDERWILDS_ORIGIN: 'https://wonderwilds.local', WONDERWILDS_PORT: '3002' }, stdio: 'inherit',
   });
   children.push(api);
   await waitReady('http://127.0.0.1:3002/readyz', api);
@@ -84,6 +83,5 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
     await stopped;
     clearTimeout(timer);
   }
-  if (databaseCreated) run(join(pgBin, 'dropdb'), ['-h', '/workspace/setup-tools/pgsocket', '-p', '55432', db]);
   await rm(temp, { recursive: true, force: true });
 }

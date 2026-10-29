@@ -43,9 +43,11 @@ activity components (see below); account/import integration remains pending.
 From the root, `bash scripts/check.sh` runs Rust format/Clippy/tests, shared
 schema and generated-code checks, content validators, frontend checks/build,
 client tests and legacy fixtures. `sh scripts/check-postgres.sh` separately runs
-real migration, RLS, ownership, deletion, race and rollback tests in a disposable
-database. Its two database tests are deliberately ignored in the default Rust
-suite and explicitly executed by this helper. With Vite running, run:
+real migration, RLS, ownership, deletion, race and rollback tests in a fresh
+temporary PostgreSQL cluster. It discovers local PostgreSQL tools or accepts
+`WONDERWILDS_PG_BIN`, and removes its cluster after the run. Its two database tests
+are deliberately ignored in the default Rust suite and explicitly executed by
+this helper. With Vite running, run:
 
 ```sh
 (cd qa/e2e && npm test)
@@ -118,7 +120,7 @@ config, and set `CHROMIUM_PATH` to an installed Chromium executable. It verifies
 incorrect/correct answers, support persistence, abandonment, four friendships,
 companion selection, reloads, mobile layout, and local access boundaries.
 
-For the actual world training journey in the prepared Linux environment, run
+For the actual world training journey with local PostgreSQL installed, run
 `node qa/e2e/run-training-qa.mjs`. It creates and removes its own synthetic QA
 database and temporary session, using ports 3002/5180 without changing demo
 progress. See [browser checks](qa/e2e/README.md) and [CI scope](docs/CI.md).

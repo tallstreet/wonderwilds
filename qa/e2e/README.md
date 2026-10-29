@@ -26,13 +26,15 @@ Companion training against the real API and PostgreSQL:
 node qa/e2e/run-training-qa.mjs
 ```
 
-Run that command from the repository root in the prepared Linux workspace after
-installing the frontend and `qa/e2e` dependencies. It builds the API, creates a
-unique disposable synthetic database, applies migrations, issues a temporary
+Run that command from the repository root on macOS or Linux after installing
+PostgreSQL 17, the pinned Rust toolchain, Node 24, and the frontend and `qa/e2e`
+dependencies. `WONDERWILDS_PG_BIN` can select the PostgreSQL bin directory. It builds
+the API, creates a fresh disposable private-socket cluster, applies migrations, issues a temporary
 operator session, and starts private API/Vite processes on ports 3002/5180. It
-removes the database and temporary session when finished. It does not use or
+stops and removes the cluster and temporary session when finished. It does not use or
 modify `.local-demo/` data or session files. Set `CHROMIUM_PATH` if needed;
-`WW_QA_SKIP_BUILD=1` reuses an API binary you have already built.
+`WW_QA_SKIP_BUILD=1` reuses an API binary you have already built. Do not set the
+internal wrapper variable `WW_QA_DATABASE_URL`; see [CI scope](../../docs/CI.md).
 
 The journey recruits the four Meadow friends through real assessed HTTP commands,
 then exercises the world journal, keyboard companion/training controls, wrong

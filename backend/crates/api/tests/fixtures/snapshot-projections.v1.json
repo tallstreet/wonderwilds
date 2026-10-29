@@ -1,0 +1,265 @@
+[
+  {
+    "availableHelpingMoments": [],
+    "characterProgression": [],
+    "contentVersion": "wonderwilds-story-1.0.0",
+    "explorerProgression": {
+      "level": 1,
+      "xp": 0
+    },
+    "friendship": [],
+    "inventory": [],
+    "learnerSummaries": [],
+    "ownedCreatures": [],
+    "pendingEncounters": [],
+    "revision": 0,
+    "rulesVersion": "domain-1.0.0",
+    "schemaVersion": "1.0",
+    "selectedCompanions": [],
+    "storyFlags": [],
+    "teamCapacity": 0,
+    "transformedCreatures": []
+  },
+  {
+    "availableHelpingMoments": [
+      {
+        "completedQuestId": "meadow-bridge",
+        "creatureId": "flutter"
+      },
+      {
+        "completedQuestId": "meadow-finale",
+        "creatureId": "flutter"
+      },
+      {
+        "completedQuestId": "meadow-garden",
+        "creatureId": "flutter"
+      },
+      {
+        "completedQuestId": "meadow-letter",
+        "creatureId": "flutter"
+      },
+      {
+        "completedQuestId": "meadow-picnic",
+        "creatureId": "flutter"
+      },
+      {
+        "completedQuestId": "meadow-welcome",
+        "creatureId": "flutter"
+      },
+      {
+        "completedQuestId": "meadow-bridge",
+        "creatureId": "nib"
+      },
+      {
+        "completedQuestId": "meadow-finale",
+        "creatureId": "nib"
+      },
+      {
+        "completedQuestId": "meadow-garden",
+        "creatureId": "nib"
+      },
+      {
+        "completedQuestId": "meadow-letter",
+        "creatureId": "nib"
+      },
+      {
+        "completedQuestId": "meadow-picnic",
+        "creatureId": "nib"
+      },
+      {
+        "completedQuestId": "meadow-welcome",
+        "creatureId": "nib"
+      },
+      {
+        "completedQuestId": "meadow-bridge",
+        "creatureId": "pip"
+      },
+      {
+        "completedQuestId": "meadow-finale",
+        "creatureId": "pip"
+      },
+      {
+        "completedQuestId": "meadow-garden",
+        "creatureId": "pip"
+      },
+      {
+        "completedQuestId": "meadow-letter",
+        "creatureId": "pip"
+      },
+      {
+        "completedQuestId": "meadow-picnic",
+        "creatureId": "pip"
+      },
+      {
+        "completedQuestId": "meadow-welcome",
+        "creatureId": "pip"
+      },
+      {
+        "completedQuestId": "meadow-bridge",
+        "creatureId": "tansy"
+      },
+      {
+        "completedQuestId": "meadow-finale",
+        "creatureId": "tansy"
+      },
+      {
+        "completedQuestId": "meadow-garden",
+        "creatureId": "tansy"
+      },
+      {
+        "completedQuestId": "meadow-letter",
+        "creatureId": "tansy"
+      },
+      {
+        "completedQuestId": "meadow-picnic",
+        "creatureId": "tansy"
+      },
+      {
+        "completedQuestId": "meadow-welcome",
+        "creatureId": "tansy"
+      }
+    ],
+    "characterProgression": [
+      {
+        "availableTraining": [
+          {
+            "reactionId": "wing-cheer",
+            "requiredLevel": 1,
+            "trainingId": "training-flutter-1",
+            "xp": 10
+          }
+        ],
+        "completedTrainingIds": [],
+        "creatureId": "flutter",
+        "level": 1,
+        "nextLevelXp": 10,
+        "xp": 0
+      },
+      {
+        "availableTraining": [
+          {
+            "reactionId": "berry-cheer",
+            "requiredLevel": 1,
+            "trainingId": "training-nib-1",
+            "xp": 10
+          }
+        ],
+        "completedTrainingIds": [],
+        "creatureId": "nib",
+        "level": 1,
+        "nextLevelXp": 10,
+        "xp": 0
+      },
+      {
+        "availableTraining": [
+          {
+            "reactionId": "lantern-cheer",
+            "requiredLevel": 1,
+            "trainingId": "training-pip-1",
+            "xp": 10
+          }
+        ],
+        "completedTrainingIds": [],
+        "creatureId": "pip",
+        "level": 1,
+        "nextLevelXp": 10,
+        "xp": 0
+      },
+      {
+        "availableTraining": [
+          {
+            "reactionId": "flower-cheer",
+            "requiredLevel": 1,
+            "trainingId": "training-tansy-1",
+            "xp": 10
+          }
+        ],
+        "completedTrainingIds": [],
+        "creatureId": "tansy",
+        "level": 1,
+        "nextLevelXp": 10,
+        "xp": 0
+      }
+    ],
+    "contentVersion": "wonderwilds-story-1.0.0",
+    "explorerProgression": {
+      "level": 3,
+      "xp": 65
+    },
+    "friendship": [
+      {
+        "creatureId": "flutter",
+        "points": 1
+      },
+      {
+        "creatureId": "nib",
+        "points": 1
+      },
+      {
+        "creatureId": "pip",
+        "points": 1
+      },
+      {
+        "creatureId": "tansy",
+        "points": 1
+      }
+    ],
+    "inventory": [],
+    "learnerSummaries": [
+      {
+        "explanation": "Introduced; no qualifying independent answer checks yet.",
+        "skillId": "M06",
+        "status": "introduced"
+      }
+    ],
+    "ownedCreatures": [
+      "flutter",
+      "nib",
+      "pip",
+      "tansy"
+    ],
+    "pendingEncounters": [
+      {
+        "contentVersion": "foundation-draft-1",
+        "id": "enc-2c4c694dbf03adb702c84ab4a8387ab41e3e18cf",
+        "parameters": {
+          "given": 0,
+          "total": 4
+        },
+        "permittedActions": [
+          "attempt",
+          "hint",
+          "worked_example",
+          "abandon"
+        ],
+        "schemaVersion": "1.0",
+        "skillId": "M06",
+        "support": {
+          "hintCount": 0,
+          "readAloud": false,
+          "workedExample": true
+        },
+        "templateId": "missing_quantity",
+        "training": {
+          "creatureId": "pip",
+          "rulesVersion": "character-training-1.0.0",
+          "trainingId": "training-pip-1"
+        }
+      }
+    ],
+    "revision": 2,
+    "rulesVersion": "domain-1.0.0",
+    "schemaVersion": "1.0",
+    "selectedCompanions": [],
+    "storyFlags": [
+      "meadow_bridge_complete",
+      "meadow_garden_complete",
+      "meadow_letter_complete",
+      "meadow_light",
+      "meadow_picnic_complete",
+      "meadow_welcome_complete"
+    ],
+    "teamCapacity": 1,
+    "transformedCreatures": []
+  }
+]
