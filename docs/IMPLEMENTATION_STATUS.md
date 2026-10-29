@@ -239,3 +239,18 @@ HEAD exactly. The story unit suite's authored-content check and the legacy
 artwork-baseline check fail for that same existing mismatch. Historical manifests
 were not rewritten. Guest-save compatibility tests pass. The existing large
 Phaser bundle warning remains.
+
+### CI artwork integrity follow-up — 29 October 2026
+
+The failing hosted content check was traced to ImgBot commit `cd852f7`, which
+recompressed the ten original PNGs without updating their byte inventories.
+Comparing decoded RGBA dimensions and pixels against the original baseline
+confirmed all ten images are unchanged visually. The legacy inventory now records
+the optimization commit and retains the original baseline reference; its byte
+counts/hashes and the four story asset hashes have been intentionally updated.
+The dependent story pack hash was regenerated. Integrity checks remain strict,
+and no content approval or release activation changed.
+
+`bash scripts/check.sh` now passes locally in full, including story validation,
+all thirteen story tests and all four legacy fixture tests. The existing Phaser
+bundle-size warning remains; hosted results are tracked on PR #7.

@@ -98,3 +98,10 @@ character-specific exploration roles, personal quests, distinct higher-level
 rewards and new transformation artwork remain subsequent implementation work.
 The updated manifest hash covers the intentional progression policy addition;
 content and educator approval remain pending and release activation stays disabled.
+
+Artwork integrity update (29 October 2026): the four existing asset hashes and
+the dependent pack hash now reflect the PNG recompression merged from ImgBot
+(`cd852f7`). Decoded RGBA pixels and dimensions match the original inventory
+baseline exactly. This is an intentional encoding-only inventory update; artwork,
+story definitions, pending review states and disabled release activation are
+unchanged.

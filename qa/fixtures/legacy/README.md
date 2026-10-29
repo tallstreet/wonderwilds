@@ -25,3 +25,10 @@ node --import ./frontend/node_modules/tsx/dist/loader.mjs qa/fixtures/legacy/bas
 Migration must retain the original downloadable bytes and a one-time receipt.
 The baseline restore helper sanitizes invalid data into memory; it does not itself
 provide the new migration recovery/export UX.
+
+Artwork inventory update (29 October 2026): `baselineCommit` now identifies the
+ImgBot optimization commit `cd852f7`; `originalBaselineCommit` retains the original
+capture reference. All ten optimized PNGs were decoded to RGBA and compared with
+the original commit: dimensions and every pixel are identical. Only encoded byte
+counts and SHA-256 values changed. The save fixtures still describe the original
+save-v1 contract. Exact-byte integrity checks remain enabled.
