@@ -329,6 +329,91 @@ pub struct ExplorerProgression {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum StoryAction {
+    Variant1(StoryActionVariant1),
+    Variant2(StoryActionVariant2),
+    Variant3(StoryActionVariant3),
+    Variant4(StoryActionVariant4),
+    Variant5(StoryActionVariant5),
+    Variant6(StoryActionVariant6),
+    Variant7(StoryActionVariant7),
+    Variant8(StoryActionVariant8),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPreferences {
+    pub language: StoryPreferencesLanguage,
+    pub interests: Vec<StoryPreferencesInterestsItem>,
+    pub avoid: Vec<StoryPreferencesAvoidItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryContext {
+    pub trigger: String,
+    pub player: StoryPreferences,
+    pub location_id: String,
+    pub inventory: Vec<StoryContextInventoryItem>,
+    pub memory: StoryContextMemory,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryNarrative {
+    pub premise: String,
+    pub participant_ids: Vec<String>,
+    pub payoff: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPlanInput {
+    pub mode: StoryPlanInputMode,
+    pub context: StoryContext,
+    pub area: StoryPlanInputArea,
+    pub opportunities: Vec<StoryPlanInputOpportunitiesItem>,
+    pub capabilities: Vec<StoryPlanInputCapabilitiesItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryMissionPlan {
+    pub opportunity_id: String,
+    pub goal: String,
+    pub narrative: StoryNarrative,
+    pub milestones: Vec<StoryMissionPlanMilestonesItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StorySceneInput {
+    pub mode: StorySceneInputMode,
+    pub context: StoryContext,
+    pub here: StorySceneInputHere,
+    pub mission: Option<StorySceneInputMission>,
+    pub available_actions: Vec<StorySceneInputAvailableActionsItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryScene {
+    pub scene_id: String,
+    pub presentation: Vec<StoryScenePresentationItem>,
+    pub choices: Vec<StorySceneChoicesItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPayload {
+    pub protocol: StoryPayloadProtocol,
+    pub state_revision: u64,
+    pub input: StoryPayloadInput,
+    pub content_version: StoryPayloadContentVersion,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ParametersVariant1 {
     pub total: u64,
@@ -735,6 +820,211 @@ pub enum SkillNodeReviewStatus {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant1 {
+    pub r#type: StoryActionVariant1Type,
+    pub source_id: String,
+    pub item_id: String,
+    pub quantity: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant2 {
+    pub r#type: StoryActionVariant2Type,
+    pub destination_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant3 {
+    pub r#type: StoryActionVariant3Type,
+    pub character_id: String,
+    pub recipe_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant4 {
+    pub r#type: StoryActionVariant4Type,
+    pub object_id: String,
+    pub recipe_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant5 {
+    pub r#type: StoryActionVariant5Type,
+    pub character_id: String,
+    pub destination_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant6 {
+    pub r#type: StoryActionVariant6Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant7 {
+    pub r#type: StoryActionVariant7Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant8 {
+    pub r#type: StoryActionVariant8Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryPreferencesLanguage {
+    #[serde(rename = "short_simple")]
+    ShortSimple,
+    #[serde(rename = "simple")]
+    Simple,
+    #[serde(rename = "standard")]
+    Standard,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryPreferencesInterestsItem {
+    #[serde(rename = "helping_friends")]
+    HelpingFriends,
+    #[serde(rename = "exploring")]
+    Exploring,
+    #[serde(rename = "building")]
+    Building,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryPreferencesAvoidItem {
+    #[serde(rename = "spooky_scenes")]
+    SpookyScenes,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryContextInventoryItem {
+    pub item_id: String,
+    pub quantity: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryContextMemory {
+    pub facts: Vec<String>,
+    pub recent_events: Vec<String>,
+    pub recent_missions: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryPlanInputMode {
+    #[serde(rename = "plan_mission")]
+    PlanMission,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPlanInputArea {
+    pub locations: Vec<StoryPlanInputAreaLocationsItem>,
+    pub routes: Vec<StoryPlanInputAreaRoutesItem>,
+    pub characters: Vec<StoryPlanInputAreaCharactersItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPlanInputOpportunitiesItem {
+    pub id: String,
+    pub description: String,
+    pub outcome_id: String,
+    pub outcome: String,
+    pub conditions: Vec<StoryPlanInputOpportunitiesItemConditionsItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPlanInputCapabilitiesItem {
+    pub action: StoryAction,
+    pub at: String,
+    pub requires: Vec<String>,
+    pub effects: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryMissionPlanMilestonesItem {
+    pub label: String,
+    pub condition_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StorySceneInputMode {
+    #[serde(rename = "continue_story")]
+    ContinueStory,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StorySceneInputHere {
+    pub description: String,
+    pub characters: Vec<StorySceneInputHereCharactersItem>,
+    pub objects: Vec<StorySceneInputHereObjectsItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StorySceneInputMission {
+    pub goal: String,
+    pub narrative: StoryNarrative,
+    pub completed: Vec<String>,
+    pub current: Option<String>,
+    pub remaining: Vec<String>,
+    pub status: StorySceneInputMissionStatus,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StorySceneInputAvailableActionsItem {
+    pub id: String,
+    pub description: String,
+    pub action: StoryAction,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum StoryScenePresentationItem {
+    Variant1(StoryScenePresentationItemVariant1),
+    Variant2(StoryScenePresentationItemVariant2),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StorySceneChoicesItem {
+    pub label: String,
+    pub action_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryPayloadProtocol {
+    #[serde(rename = "story-proposal-1")]
+    StoryProposal1,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum StoryPayloadInput {
+    Variant1(StoryPlanInput),
+    Variant2(StorySceneInput),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryPayloadContentVersion {
+    #[serde(rename = "pip-bridge-1")]
+    PipBridge1,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ParametersVariant3ObjectsItem {
     pub id: String,
     pub label: String,
@@ -849,4 +1139,137 @@ pub enum EventOutcomeVariant2Type {
 pub enum EventOutcomeVariant3Type {
     #[serde(rename = "creature_befriended")]
     CreatureBefriended,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant1Type {
+    #[serde(rename = "collect")]
+    Collect,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant2Type {
+    #[serde(rename = "travel")]
+    Travel,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant3Type {
+    #[serde(rename = "exchange")]
+    Exchange,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant4Type {
+    #[serde(rename = "assemble")]
+    Assemble,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant5Type {
+    #[serde(rename = "accompany")]
+    Accompany,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant6Type {
+    #[serde(rename = "accept_mission")]
+    AcceptMission,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant7Type {
+    #[serde(rename = "cancel_mission")]
+    CancelMission,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant8Type {
+    #[serde(rename = "dismiss")]
+    Dismiss,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPlanInputAreaLocationsItem {
+    pub id: String,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPlanInputAreaRoutesItem {
+    pub from: String,
+    pub to: String,
+    pub requirement: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPlanInputAreaCharactersItem {
+    pub id: String,
+    pub location_id: String,
+    pub description: String,
+    pub relationship: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryPlanInputOpportunitiesItemConditionsItem {
+    pub id: String,
+    pub meaning: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StorySceneInputHereCharactersItem {
+    pub id: String,
+    pub description: String,
+    pub relationship: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StorySceneInputHereObjectsItem {
+    pub id: String,
+    pub state: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StorySceneInputMissionStatus {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "abandoned")]
+    Abandoned,
+    #[serde(rename = "completed")]
+    Completed,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryScenePresentationItemVariant1 {
+    pub r#type: StoryScenePresentationItemVariant1Type,
+    pub entry_id: String,
+    pub speaker_id: String,
+    pub text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryScenePresentationItemVariant2 {
+    pub r#type: StoryScenePresentationItemVariant2Type,
+    pub entry_id: String,
+    pub text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryScenePresentationItemVariant1Type {
+    #[serde(rename = "dialogue")]
+    Dialogue,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryScenePresentationItemVariant2Type {
+    #[serde(rename = "narration")]
+    Narration,
 }

@@ -562,6 +562,21 @@
       },
       "ExplorerProgression": {
         "$ref": "./schemas/v1.json#/$defs/ExplorerProgression"
+      },
+      "StoryPlanInput": {
+        "$ref": "./schemas/v1.json#/$defs/StoryPlanInput"
+      },
+      "StorySceneInput": {
+        "$ref": "./schemas/v1.json#/$defs/StorySceneInput"
+      },
+      "StoryMissionPlan": {
+        "$ref": "./schemas/v1.json#/$defs/StoryMissionPlan"
+      },
+      "StoryScene": {
+        "$ref": "./schemas/v1.json#/$defs/StoryScene"
+      },
+      "StoryPayload": {
+        "$ref": "./schemas/v1.json#/$defs/StoryPayload"
       }
     },
     "securitySchemes": {

@@ -201,6 +201,12 @@ Errors include stable codes: `INVALID_INPUT` (400), `UNAUTHENTICATED` (401), `FO
 
 ## 7. Generative director and fine-tuning
 
+Design update, 30 October 2026: [Mission-led generative storytelling](GENERATIVE_STORY_DESIGN.md)
+sets the proposed direction for future story generation, separating missions and
+scenes from curriculum/activity selection. The activity-coupled protocol below
+remains historical context for the implemented v1 authored director; the new
+proposal does not change its contracts or claim live generation is implemented.
+
 ### Authority and data flow
 
 The learning engine chooses the skill, bounds and candidate activity families. The story engine chooses allowed beats and entities. The director chooses among those candidates and produces a short, coherent proposal. It cannot set correctness, XP, inventory, mastery, creature ownership, URLs, executable code, or arbitrary world patches.
