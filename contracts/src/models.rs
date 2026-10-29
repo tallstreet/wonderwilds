@@ -415,6 +415,30 @@ pub struct StoryPayload {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryCommand {
+    pub schema_version: StoryCommandSchemaVersion,
+    pub command_id: String,
+    pub expected_revision: u64,
+    pub payload: StoryCommandPayload,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StorySnapshot {
+    pub schema_version: StorySnapshotSchemaVersion,
+    pub content_version: StorySnapshotContentVersion,
+    pub revision: u64,
+    pub location_id: StorySnapshotLocationId,
+    pub command_budget_exhausted: bool,
+    pub acknowledgeable_entry_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scene_input: Option<StorySceneInput>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scene: Option<StoryScene>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ParametersVariant1 {
     pub total: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1024,6 +1048,41 @@ pub enum StoryPayloadContentVersion {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum StoryCommandPayload {
+    Variant1(StoryCommandPayloadVariant1),
+    Variant2(StoryCommandPayloadVariant2),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StorySnapshotSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StorySnapshotContentVersion {
+    #[serde(rename = "pip-bridge-1")]
+    PipBridge1,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StorySnapshotLocationId {
+    #[serde(rename = "bridge_bank")]
+    BridgeBank,
+    #[serde(rename = "workshop")]
+    Workshop,
+    #[serde(rename = "far_bank")]
+    FarBank,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ParametersVariant3ObjectsItem {
     pub id: String,
@@ -1263,6 +1322,21 @@ pub struct StoryScenePresentationItemVariant2 {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryCommandPayloadVariant1 {
+    pub r#type: StoryCommandPayloadVariant1Type,
+    pub action_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryCommandPayloadVariant2 {
+    pub r#type: StoryCommandPayloadVariant2Type,
+    pub scene_id: String,
+    pub entry_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum StoryScenePresentationItemVariant1Type {
     #[serde(rename = "dialogue")]
     Dialogue,
@@ -1272,4 +1346,16 @@ pub enum StoryScenePresentationItemVariant1Type {
 pub enum StoryScenePresentationItemVariant2Type {
     #[serde(rename = "narration")]
     Narration,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryCommandPayloadVariant1Type {
+    #[serde(rename = "choose")]
+    Choose,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryCommandPayloadVariant2Type {
+    #[serde(rename = "acknowledge")]
+    Acknowledge,
 }

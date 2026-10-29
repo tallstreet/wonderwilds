@@ -144,3 +144,10 @@ jobs:
       - name: Check training with real API and disposable PostgreSQL
         if: matrix.suite == 'browser'
         run: node qa/e2e/run-training-qa.mjs
+      - name: Check authored story with real API and disposable PostgreSQL
+        if: matrix.suite == 'browser'
+        env:
+          WW_QA_BROWSER_TEST: qa/e2e/story-browser.mjs
+        run: |
+          node qa/e2e/run-training-qa.mjs
+          WW_STORY_SOURCE=workshop node qa/e2e/run-training-qa.mjs

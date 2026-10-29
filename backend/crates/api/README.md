@@ -29,13 +29,31 @@ HTTPS Origin and `X-CSRF-Token`. `X-Wonderwilds-Profile` is a selector checked a
 the authenticated parent. Identity never comes from a game command body.
 
 Implemented JSON routes match `contracts/openapi.yaml`: game snapshot, commands,
-encounters, attempts and hints. The command route also accepts `abandon` with
+encounters, attempts, hints and the separate authored story routes described below.
+The game command route also accepts `abandon` with
 an encounter ID, recording unassessed abandonment and releasing its pending slot
 without rewards. Closed encounters cannot accept later answers. Attempt/hint route IDs must match their command
 payload. Errors use the versioned stable error code/correlation envelope. Body
 limit is 32 KiB, blocking operation concurrency is 16, SQL statements/locks have
 bounded timeouts, and a development aggregate accepts at most 2,000 distinct
 commands without evicting idempotency receipts.
+
+`GET /api/v1/story` returns a validated `StorySnapshot`: authoritative revision,
+location, deterministic scene input, authored scene and explicit acknowledgeable
+entry IDs. `POST /api/v1/story/commands` accepts only a revision-bound action handle
+or scene/entry acknowledgement. Both reuse session/profile ownership; writes also
+require Origin/CSRF. Only the woodcutter introduction currently records a presented
+history fact. Merely fetching or rendering a scene does not acknowledge it.
+
+Migration `0003_story_progress.sql` adds separate forced-RLS checkpoints and
+original-response receipts and includes them in profile export/delete. Checkpoint
+and receipt commit under the owned profile lock. Exact retries return the original
+response even after later progress, so clients refresh before offering new actions.
+Story revision, inventory and milestones never update assessed game progress or
+learning records. At the 256-command development cap the snapshot is terminal,
+omits scene/action payloads and preserves the save; old exact retries still work.
+There is no story reset/import endpoint or model call. `/story.html` is the opt-in
+local demo client, with coarse location controls rather than Phaser path traversal.
 
 The authored development slice uses the exact skill/template IDs from story and
 friendship packs and real server assessment. It exposes Meadow menu interactions;

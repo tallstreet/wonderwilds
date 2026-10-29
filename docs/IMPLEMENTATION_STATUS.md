@@ -24,6 +24,7 @@ No release, deployment, curriculum approval or learning-efficacy claim is made.
 | WW-17 | Existing guest parent view preserved; Rust summaries/client foundation available | New parent learning view, approved pack workflow and coverage dashboard |
 | WW-18 | Local reproducible install/start/migration/check helpers and GitHub Actions configuration | Hosted CI execution, database/browser CI, deployment, observability, backup restore and rollback drills, operational owner |
 | WW-19–20 | Automated foundations and synthetic checks only | Integrated QA/security review, consented pilot, educator audit and measured curriculum expansion |
+| Authored story slice | Pure Pip bridge runtime/payload builder, separate authenticated PostgreSQL saves and opt-in `/story.html` controls | Phaser/world integration, broader missions/preferences, model adapter/evaluation and human usability review |
 
 Design-only update, 30 October 2026: the [generative story design](GENERATIVE_STORY_DESIGN.md)
 proposes separate mission-planning and scene-continuation protocols, with reusable
@@ -397,3 +398,33 @@ local consistency-checked records, not trusted imported progress, and the develo
 runtime is capped at 256 commands. No database/browser integration behavior changed
 or was verified; ordinary Rust tests still ignore two existing database tests.
 Content approval/release gates remain unchanged.
+
+### Authenticated story and browser slice — 30 October 2026
+
+The [story implementation plan](STORY_IMPLEMENTATION_PLAN.md) now includes verified
+S6–S9 integration: separate story snapshot/command routes, profile-owned
+PostgreSQL checkpoints and original-response receipts, and an opt-in `/story.html`
+view. Sessions, CSRF/Origin, profile locks and forced RLS protect the new routes.
+Story data participates in profile export/delete. The existing adventure and
+educational records remain separate; the browser journey checks that they do not
+change during the mission.
+
+The view supports both wood sources, an explicit presented-introduction
+acknowledgement, pause/resume, inventory/milestones and the shared crossing outcome.
+It validates shared contracts and preserves exact uncertain commands across
+reload/authentication failures, refreshing authoritative state after an old receipt.
+Three coarse locations use keyboard/touch controls; Phaser walking and the existing
+assessed bridge are not integrated. Only one authored mission exists, preferences
+are defaults, and the 256-command development cap ends actionable scenes without
+discarding the save. No model, next-mission generator or reset endpoint is enabled.
+
+Three implementation subagents and the integration owner reviewed the combined
+work. The full aggregate check passed (102 shared fixtures, 98 frontend tests,
+content validation, workspace checks/build and legacy tests). Disposable PostgreSQL
+checks passed, including the three ignored database tests, ownership/RLS, rollback,
+races, corruption and lifecycle checks. Both story source journeys, existing
+training, guest desktop/tablet and accessible activity browser checks passed.
+Desktop/mobile story screenshots were inspected and the final recovery/label
+polish was retested. CI now schedules both story routes; hosted execution and Node
+24 were not verified locally (Node 26.12.0 was available). Human accessibility and
+child usability research remain pending, as do all content/release approvals.

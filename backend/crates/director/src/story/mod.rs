@@ -214,20 +214,39 @@ fn capabilities(state: &State) -> Vec<Value> {
     result
 }
 
-fn action_description(action: &Action) -> String {
+fn action_description(state: &State, action: &Action) -> String {
     match action {
-        Action::AcceptMission => "Accept or resume Pip's mission.".into(),
-        Action::CancelMission => "Pause the mission; keep items and world changes.".into(),
-        Action::Travel { destination_id } => format!("Travel to {destination_id}."),
+        Action::AcceptMission if state.mission_status() == MissionStatus::Abandoned => {
+            "Keep helping Pip with the bridge.".into()
+        }
+        Action::AcceptMission => "Help Pip cross the stream.".into(),
+        Action::CancelMission => "Take a break from helping Pip.".into(),
+        Action::Travel { destination_id } => {
+            let destination = match destination_id.as_str() {
+                "bridge_bank" => "the bridge bank",
+                "workshop" => "the workshop",
+                "far_bank" => "the far bank",
+                _ => "the next clearing",
+            };
+            format!("Walk to {destination}.")
+        }
         Action::Collect {
             source_id,
             quantity,
             ..
-        } => format!("Collect {quantity} wood from {source_id}."),
-        Action::Exchange { .. } => "Give 3 wood to the woodcutter and receive 3 planks.".into(),
+        } => {
+            if source_id == "fallen_wood" {
+                format!("Collect {quantity} pieces of wood from fallen branches.")
+            } else {
+                format!("Collect {quantity} pieces of spare wood.")
+            }
+        }
+        Action::Exchange { .. } => {
+            "Ask the woodcutter to turn 3 pieces of wood into 3 planks.".into()
+        }
         Action::Assemble { .. } => "Use 3 planks to repair the bridge.".into(),
         Action::Accompany { .. } => "Cross the repaired bridge together with Pip.".into(),
-        Action::Acknowledge { .. } => "Acknowledge presented story text.".into(),
+        Action::Acknowledge { .. } => "Continue.".into(),
     }
 }
 fn action_handle(state: &State, index: usize) -> String {
@@ -286,7 +305,7 @@ pub fn build_scene_input(state: &State) -> Result<Value, Error> {
     } else {
         Value::Null
     };
-    let actions: Vec<_> = state.available_actions().iter().enumerate().map(|(i,a)|json!({"id":action_handle(state,i),"description":action_description(a),"action":a})).collect();
+    let actions: Vec<_> = state.available_actions().iter().enumerate().map(|(i,a)|json!({"id":action_handle(state,i),"description":action_description(state,a),"action":a})).collect();
     checked(
         "StorySceneInput",
         json!({"mode":"continue_story","context":context(state),"here":{"description":description(state.location()),"characters":characters,"objects":objects},"mission":mission,"availableActions":actions}),

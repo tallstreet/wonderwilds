@@ -163,7 +163,19 @@ The latter starts temporary servers on port 5191 and an ephemeral API port, uses
 synthetic sessions and mocks the provider. A real account/model call is still
 needed to verify hackathon access and transcription quality.
 
-## Authored story foundation (headless)
+## Authored story development slice
+
+After starting `sh scripts/local-demo.sh`, open
+[the story view](http://127.0.0.1:5173/story.html). This opt-in scene view runs Pip's
+bridge mission against authenticated PostgreSQL saves. Choose either wood source,
+meet the woodcutter, exchange wood for planks, repair the bridge and cross with Pip.
+Keyboard/touch controls show current inventory and milestones; reload restores
+server progress. If saving is uncertain, use **Retry the same action**. It preserves
+the original command across reloads and then refreshes current progress.
+
+Story saves are separate from the existing adventure, guest saves and educational
+activities. This view uses three coarse locations; it does not implement Phaser
+walking or synchronize the existing assessed bridge. Model generation is disabled.
 
 The [story implementation plan](docs/STORY_IMPLEMENTATION_PLAN.md) starts with an
 isolated Rust mission and deterministic model-input builder. Run Pip's bridge
@@ -193,10 +205,21 @@ execute one action; add a new output directory to retain the result. Handles are
 revision-bound. Presentation acknowledgement changes revision, so rebuild choices
 after it. The normal scripted journey records the woodcutter introduction explicitly.
 
-This is a developer foundation, not a new live game mode. Local checkpoints verify
+The CLI remains a developer harness. Local checkpoints verify
 replay consistency, not authenticity; never import them as trusted server progress.
-The 256-command harness limit is explicit. API/database persistence, browser
-placements/controls, broader mission planning and model generation remain later
-stages. Existing guest/assessed bridge progress and content review gates are unchanged.
+Both CLI and server retain the 256-command development limit. At that limit the
+browser shows a terminal view and preserves the save; there is no reset endpoint.
+Broader mission planning, Phaser integration and model generation remain later
+stages. Content review gates are unchanged.
 See the [payload builder notes](backend/crates/director/src/story/README.md) for
 field sources, contracts and implementation limits.
+
+Run story browser QA against a fresh disposable database (never `.local-demo/`):
+
+```sh
+WW_QA_BROWSER_TEST=qa/e2e/story-browser.mjs node qa/e2e/run-training-qa.mjs
+WW_STORY_SOURCE=workshop WW_QA_BROWSER_TEST=qa/e2e/story-browser.mjs node qa/e2e/run-training-qa.mjs
+```
+
+Set `CHROMIUM_PATH` to your Chromium executable if required. Persistence checks run
+with `sh scripts/check-postgres.sh` and also create a disposable database.

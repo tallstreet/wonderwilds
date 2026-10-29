@@ -1,13 +1,15 @@
 # Mission-led generative storytelling
 
-Status: design with a first headless implementation; game/model integration pending. Revised: 30 October 2026.
+Status: authored runtime, payload builder and separate API/browser slice implemented; broader world/model integration pending. Revised: 30 October 2026.
 
 Implementation update: the [story implementation plan](STORY_IMPLEMENTATION_PLAN.md)
-now delivers an isolated headless subset: authored Rust mechanics, replay checkpoints,
-new additive Story contracts and deterministic planning/scene payloads. The broader
-design below remains a proposal for integration. The [builder notes](../backend/crates/director/src/story/README.md)
-record implemented refinements and limits. No API/browser or model integration is
-implied; source-map entries below still identify work needed in the live game.
+now delivers authored Rust mechanics, deterministic planning/scene payloads,
+authenticated PostgreSQL story saves and an opt-in `/story.html` scene view.
+The broader design below remains a proposal for integration. The
+[builder notes](../backend/crates/director/src/story/README.md) record implemented
+refinements and limits. This separate slice does not integrate Phaser walking,
+the existing assessed bridge, player preferences or model generation; source-map
+entries below still identify work needed for that broader live-game design.
 
 ## Purpose
 

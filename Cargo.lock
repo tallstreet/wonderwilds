@@ -1622,6 +1622,7 @@ dependencies = [
  "tower",
  "wonderwilds-content",
  "wonderwilds-contracts",
+ "wonderwilds-director",
  "wonderwilds-domain",
  "wonderwilds-learning",
 ]

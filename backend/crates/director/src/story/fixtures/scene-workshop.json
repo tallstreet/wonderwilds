@@ -4,7 +4,7 @@
       "action": {
         "type": "cancel_mission"
       },
-      "description": "Pause the mission; keep items and world changes.",
+      "description": "Take a break from helping Pip.",
       "id": "story-3-0"
     },
     {
@@ -12,7 +12,7 @@
         "destinationId": "bridge_bank",
         "type": "travel"
       },
-      "description": "Travel to bridge_bank.",
+      "description": "Walk to the bridge bank.",
       "id": "story-3-1"
     },
     {
@@ -22,7 +22,7 @@
         "sourceId": "spare_wood",
         "type": "collect"
       },
-      "description": "Collect 3 wood from spare_wood.",
+      "description": "Collect 3 pieces of spare wood.",
       "id": "story-3-2"
     },
     {
@@ -31,7 +31,7 @@
         "recipeId": "wood_to_planks",
         "type": "exchange"
       },
-      "description": "Give 3 wood to the woodcutter and receive 3 planks.",
+      "description": "Ask the woodcutter to turn 3 pieces of wood into 3 planks.",
       "id": "story-3-3"
     }
   ],

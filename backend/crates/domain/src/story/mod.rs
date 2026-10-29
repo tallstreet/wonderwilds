@@ -495,10 +495,9 @@ impl State {
     /// Calling this read-only method does not establish a meeting or any progress.
     pub fn presentation(&self) -> Presentation {
         let (speaker, text) = match self.location {
-            Location::Workshop if self.met_woodcutter => (
-                "woodcutter",
-                "Welcome back! I can help shape wood into sturdy planks.",
-            ),
+            Location::Workshop if self.met_woodcutter => {
+                ("woodcutter", "I can help shape wood into sturdy planks.")
+            }
             Location::Workshop => (
                 "woodcutter",
                 "Hello! I am the woodcutter. I can shape wood into sturdy planks.",

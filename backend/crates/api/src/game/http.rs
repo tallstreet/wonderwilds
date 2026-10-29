@@ -91,12 +91,22 @@ impl Repository for DisabledRepository {
         Err(Error::Unavailable)
     }
 }
+struct DisabledStoryRepository;
+impl crate::story::repository::Repository for DisabledStoryRepository {
+    fn read(&self, _: &Identity) -> Result<Value, Error> {
+        Err(Error::Unavailable)
+    }
+    fn execute(&self, _: &Identity, _: &Value) -> Result<Value, Error> {
+        Err(Error::Unavailable)
+    }
+}
 #[derive(Clone)]
 pub struct AppState {
     repository: Arc<dyn Repository>,
-    auth: Arc<dyn Authenticator>,
+    pub(crate) auth: Arc<dyn Authenticator>,
+    pub(crate) story_repository: Arc<dyn crate::story::repository::Repository>,
     content: Content,
-    permits: Arc<tokio::sync::Semaphore>,
+    pub(crate) permits: Arc<tokio::sync::Semaphore>,
     configured: bool,
 }
 impl AppState {
@@ -104,6 +114,12 @@ impl AppState {
     /// production adapter must configure verified DB TLS and an identity issuer.
     pub fn development(connection: Option<String>, origin: String) -> Result<Self, Error> {
         let content = development_content()?;
+        let story_repository: Arc<dyn crate::story::repository::Repository> = match &connection {
+            Some(value) => Arc::new(crate::story::repository::PostgresRepository::new(
+                value.clone(),
+            )),
+            None => Arc::new(DisabledStoryRepository),
+        };
         let (repository, auth, configured): (Arc<dyn Repository>, Arc<dyn Authenticator>, bool) =
             if let Some(connection) = connection {
                 let config: postgres::Config =
@@ -128,6 +144,7 @@ impl AppState {
         Ok(Self {
             repository,
             auth,
+            story_repository,
             content,
             permits: Arc::new(tokio::sync::Semaphore::new(16)),
             configured,
@@ -156,6 +173,8 @@ pub fn router(state: AppState) -> Router {
             get(|| async { Json(json!({"status":"ok","mode":"authored-development"})) }),
         )
         .route("/readyz", get(ready))
+        .route("/api/v1/story", get(crate::story::http::snapshot))
+        .route("/api/v1/story/commands", post(crate::story::http::command))
         .route("/api/v1/game", get(snapshot))
         .route("/api/v1/commands", post(command))
         .route("/api/v1/encounters/{id}", get(encounter))
@@ -174,7 +193,7 @@ async fn ready(App(state): App<AppState>) -> Result<Json<Value>, Error> {
         .clone()
         .try_acquire_owned()
         .map_err(|_| Error::RateLimited)?;
-    tokio::task::spawn_blocking(move||{let _permit=permit;state.repository.readiness()?;Ok(Json(json!({"status":"ready","mode":"authored-development","releaseReady":false,"contentReview":"pending"}))) }).await.map_err(|_|Error::Unavailable)?
+    tokio::task::spawn_blocking(move||{let _permit=permit;state.repository.readiness()?;state.story_repository.readiness()?;Ok(Json(json!({"status":"ready","mode":"authored-development","releaseReady":false,"contentReview":"pending"}))) }).await.map_err(|_|Error::Unavailable)?
 }
 fn now() -> Result<u64, Error> {
     std::time::SystemTime::now()

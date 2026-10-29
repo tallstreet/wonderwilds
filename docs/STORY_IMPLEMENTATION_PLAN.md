@@ -1,6 +1,6 @@
 # Story implementation plan
 
-Status: first headless delivery implemented and checked. 30 October 2026.
+Status: authored foundation and separate API/browser delivery implemented and checked. 30 October 2026.
 
 Design: [Mission-led generative storytelling](GENERATIVE_STORY_DESIGN.md).
 The first delivery is an executable headless authored mission and deterministic
@@ -77,7 +77,51 @@ explicitly after this foundation is verified.
    feasibility validation and whole-journey diversity evidence exist. Fine-tuning
    remains optional and follows a measured prompted baseline.
 
-## Delivery evidence
+## Second delivery: authenticated persistence and browser view
+
+This delivery implements the first two follow-on stages as an opt-in `/story.html`
+view. It uses the authored bridge and deterministic inputs, with model generation
+still disabled. The view represents three coarse locations using accessible scene
+controls. It does not claim Phaser path traversal, change the current assessed
+bridge or share its inventory/rewards with this separate story slice.
+
+| Work | Owner | Acceptance |
+| --- | --- | --- |
+| S6. Story HTTP contracts/application | API subagent | Authenticated GET story and POST story commands, closed contracts, current handle/revision checks, explicit acknowledgement metadata, original error/auth conventions |
+| S7. PostgreSQL storage | Storage subagent | New migration, separate profile-owned story progress/receipt tables, forced RLS, transaction lock, exact original-response retries, rollback/corruption/race/deletion/export checks |
+| S8. Opt-in browser | Browser subagent | Shared-schema response validation, actual server-derived scenes/progress, keyboard/touch controls, exact uncertain retry across reload, no client-granted progress |
+| S9. Integration review | Integration owner and cross-review | Review source against these criteria; run disposable database and real browser journeys; record limitations and results |
+
+### Required boundaries
+
+- Reuse verified sessions, profile ownership and Origin/CSRF protections. No new
+  login bypass, checkpoint import or reset endpoint.
+- Store story separately from the existing educational/game aggregate. A story
+  action cannot alter learning evidence, Explorer XP or current game progression.
+- Lock the owner-scoped profile row for story writes and deletion. Save checkpoint
+  and original command response together; replay a same-body/ID response even
+  after later progress. Reject changed-body duplicates and stale new commands.
+- Migration is additive and numbered. Corrupt stored state fails closed rather
+  than silently starting over. Profile deletion cascades; export covers story data.
+- Browser sends action handles and acknowledgement entry IDs, not inventory/state
+  patches. Acknowledgement must not loop as scene revisions change. Exact pending
+  commands survive reload separately from server progress; uncertain writes are
+  retried without inventing a new ID or body.
+- The existing 256-command bound remains. At exhaustion, reads expose an honest
+  terminal view with no actionable choices; old exact receipt retries still work.
+- Tests always use a fresh synthetic PostgreSQL cluster. Never run destructive
+  fixtures against `.local-demo/` or user progress.
+
+### Evidence to collect
+
+HTTP auth/CSRF/schema tests; PostgreSQL rollback, races, ownership/RLS, original
+retry response, corruption, export/delete and old-game isolation; browser full
+mission, both material sources where practical, acknowledgement, pause/resume,
+reload, uncertain retry, keyboard/mobile, safe rendering and original-game isolation.
+Run the aggregate suite and inspect the final diff. Browser travel is a verified
+coarse state transition selected by a control, not proof of continuous walking.
+
+## Delivery evidence — first headless slice
 
 S1–S5 are delivered for the headless scope above:
 
@@ -116,7 +160,7 @@ Validation performed:
 - `git diff --check` passed. Checks used pinned Rust 1.99.1 and available Node
   26.12.0; Node 24 was unavailable. The existing Phaser bundle-size warning remains.
 
-No database or browser behavior changed, so new PostgreSQL/browser integration
+At the first delivery, no database or browser behavior changed, so PostgreSQL/browser integration
 checks were not run. Two existing database tests remain ignored by the ordinary
 Rust suite. This delivery does not establish API persistence, browser movement,
 production save authenticity, accessibility of new controls or model quality.
@@ -128,3 +172,44 @@ fixed defaults. Local checkpoints replay and check consistency but are not
 authenticated saves. Capability descriptions and mechanics are checked together by
 tests; the broader shared content catalogue is still follow-on work. No release
 review, provider call, training run or content activation occurred.
+
+## Delivery evidence — authenticated story slice
+
+S6–S9 are delivered for the separate scene-view scope:
+
+- API/contracts subagent added `StoryCommand` and `StorySnapshot`, authenticated
+  story routes, current-handle/acknowledgement checks and terminal snapshots.
+  All pre-existing schema definitions are unchanged. Only the woodcutter greeting
+  currently creates a presented-history fact, through explicit Continue.
+- Storage subagent added migration 0003, forced-RLS story checkpoints/receipts,
+  atomic profile-locked persistence and profile export/delete coverage. Reads
+  replay saved checkpoints; neither GET nor rendering changes progress.
+- Browser subagent added `/story.html`, shared-schema validation, responsive
+  keyboard/touch controls and exact pending-command persistence in profile-scoped
+  session storage. Server progress is never loaded from browser storage.
+- The integration owner reviewed source and desktop/mobile screenshots, ran the
+  real journeys and regressions, and added both wood routes to browser CI. The
+  storage subagent independently reviewed API/persistence and browser recovery.
+
+Review fixes preserve uncertain commands through authentication/validation
+failures, reconnect after browser back-cache restoration, and require a current
+snapshot after replaying an older receipt. Failed refresh keeps new choices
+disabled. Raw action IDs were replaced with friendly labels and pause is a
+secondary control after progress actions. These fixes have regression coverage.
+
+Validation passed: `bash scripts/check.sh` (102 shared fixtures, 98 frontend tests,
+workspace format/Clippy/tests, content checks, production build and four legacy
+tests); disposable `scripts/check-postgres.sh` (including all three ignored database
+integration tests); both source journeys with real API/PostgreSQL; existing real
+training journey; desktop/tablet guest smoke and accessible activity browser tests.
+Browser checks cover explicit acknowledgement, pause/resume, save-response loss,
+reload/exact retry, inventory, shared crossing, keyboard/mobile controls and
+unchanged assessed-game state. The final UI/recovery polish was checked again on
+the workshop route. `git diff --check` passed. Local tools were pinned Rust 1.99.1
+and available Node 26.12.0; Node 24 and hosted CI execution were not verified.
+
+Limits remain explicit: one authored mission, fixed preferences, three coarse
+locations, 256 accepted commands per profile, no reset/import endpoint, no Phaser
+walking integration and no automatic next mission. This verifies development
+integration, not human accessibility/child usability approval or model quality.
+No model generation, fine-tuning, academic gate or release activation was added.

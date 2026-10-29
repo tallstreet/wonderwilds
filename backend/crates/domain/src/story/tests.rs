@@ -255,7 +255,10 @@ fn introduction_is_recorded_only_by_current_canonical_entry_acknowledgement() {
     );
     assert!(s.met_woodcutter());
     assert_eq!((s.wood(), s.planks()), (0, 0));
-    assert!(s.presentation().entries[0].text.starts_with("Welcome back"));
+    assert_eq!(
+        s.presentation().entries[0].text,
+        "I can help shape wood into sturdy planks."
+    );
 }
 
 #[test]

@@ -30,6 +30,7 @@ export default defineConfig(({ command }) => {
         input: {
           adventure: fileURLToPath(new URL('./index.html', import.meta.url)),
           characters: fileURLToPath(new URL('./characters.html', import.meta.url)),
+          story: fileURLToPath(new URL('./story.html', import.meta.url)),
         },
       },
     },
@@ -74,7 +75,11 @@ export default defineConfig(({ command }) => {
                   void transcribe(req, res);
                   return;
                 }
-                if (!/^\/api\/v1\/(game|commands|encounters\/[a-zA-Z0-9-]+)$/.test(path))
+                if (
+                  !/^\/api\/v1\/(game|commands|story|story\/commands|encounters\/[a-zA-Z0-9-]+)$/.test(
+                    path,
+                  )
+                )
                   return reject(404);
                 if (req.method !== 'GET' && req.method !== 'POST') return reject(405);
                 if (

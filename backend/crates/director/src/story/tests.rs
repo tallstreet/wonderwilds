@@ -330,3 +330,40 @@ fn exhausted_developer_budget_does_not_offer_unexecutable_actions() {
     );
     assert!(authored_plan(&s).is_ok());
 }
+
+#[test]
+fn child_choices_use_friendly_names_and_resume_preserves_action_binding() {
+    let mut state = State::new();
+    for action in state.available_actions() {
+        let label = action_description(&state, &action);
+        assert!(!label.contains('_'));
+        assert!(!label.contains("world changes"));
+    }
+    assert_eq!(
+        action_description(&state, &Action::AcceptMission),
+        "Help Pip cross the stream."
+    );
+    apply(&mut state, Action::AcceptMission);
+    apply(&mut state, Action::CancelMission);
+    let input = build_scene_input(&state).unwrap();
+    let resume = input["availableActions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|a| a["action"]["type"] == "accept_mission")
+        .unwrap();
+    assert_eq!(resume["description"], "Keep helping Pip with the bridge.");
+    assert_eq!(
+        resolve_action(&state, resume["id"].as_str().unwrap()).unwrap(),
+        Action::AcceptMission
+    );
+    assert_eq!(
+        action_description(
+            &state,
+            &Action::Travel {
+                destination_id: "far_bank".into()
+            }
+        ),
+        "Walk to the far bank."
+    );
+}
