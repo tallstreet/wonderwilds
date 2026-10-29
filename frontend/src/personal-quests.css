@@ -56,3 +56,26 @@
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
+
+.quest-interests {
+  margin: 18px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f5f0fa;
+}
+.quest-interests button {
+  margin: 4px;
+  min-height: 44px;
+}
+.quest-interests button[aria-pressed='true'] {
+  outline: 3px solid #7955ae;
+}
+.quest-acknowledgement,
+.quest-recommendation {
+  display: block;
+  padding: 12px;
+  background: #fff3c7;
+  border-radius: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}

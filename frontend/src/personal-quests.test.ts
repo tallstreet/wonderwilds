@@ -152,3 +152,48 @@ test('Personal activities retain skill meaning without unrelated bridge narratio
   delete encounter.personalQuest;
   assert.equal(authoredPresentation(encounter)!.prompt, 'Help Pip finish the bridge!');
 });
+
+test('Continuity acknowledgements and recommendation text are escaped and interests remain explicit', () => {
+  const state = {
+    ownedCreatures: ['pip'],
+    questInterests: ['night-sky'],
+    questInterestOptions: ['night-sky', 'woodland-trails'],
+    personalQuestOffers: [
+      {
+        questId: 'followup',
+        documentVersion: '1',
+        title: 'Follow up',
+        companionId: 'pip',
+        minimumCharacterLevel: 4,
+        available: false,
+        completed: false,
+        lockedReason: 'Follow a matching clue first',
+      },
+    ],
+  };
+  const library = personalQuestLibrary(state);
+  assert.match(library, /Follow a matching clue first/);
+  assert.match(library, /data-server-quest-interest="night-sky" aria-pressed="true"/);
+  const scene = personalQuestScene({
+    ...state,
+    personalQuest: {
+      questId: 'followup',
+      documentVersion: '1',
+      episodeId: 'episode-2',
+      title: 'Follow up',
+      companionId: 'pip',
+      acknowledgement: 'You chose <img src=x>.',
+      node: {
+        id: 'start',
+        type: 'choice',
+        text: 'A path',
+        choices: [
+          { id: 'a', label: 'One', nextNodeId: 'x' },
+          { id: 'b', label: 'Two', nextNodeId: 'y' },
+        ],
+      },
+    },
+  });
+  assert.match(scene ?? '', /You chose &lt;img/);
+  assert.doesNotMatch(scene ?? '', /<img src=x/);
+});

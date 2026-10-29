@@ -59,6 +59,7 @@ pub enum CommandPayload {
     Variant10(CommandPayloadVariant10),
     Variant11(CommandPayloadVariant11),
     Variant12(CommandPayloadVariant12),
+    Variant13(CommandPayloadVariant13),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -115,6 +116,12 @@ pub struct GameSnapshot {
     pub personal_quest_offers: Option<Vec<PersonalQuestOffer>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub personal_quest: Option<PersonalQuestView>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub narrative_memory: Option<NarrativeMemory>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quest_interests: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quest_interest_options: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -378,6 +385,10 @@ pub struct PersonalQuestOffer {
     pub minimum_character_level: u64,
     pub available: bool,
     pub completed: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recommendation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub locked_reason: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -389,6 +400,8 @@ pub struct PersonalQuestView {
     pub title: String,
     pub companion_id: String,
     pub node: QuestNode,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub acknowledgement: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -451,6 +464,10 @@ pub struct QuestRecentChoice {
     pub quest_id: String,
     pub node_id: String,
     pub choice_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub document_version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub episode_id: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -458,6 +475,20 @@ pub struct QuestRecentChoice {
 pub struct QuestOpenThread {
     pub id: String,
     pub summary: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_quest_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_episode_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_document_version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_node_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_choice_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_choice_label: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -487,6 +518,8 @@ pub struct QuestGenerationContext {
     pub recent_choices: Vec<QuestRecentChoice>,
     pub open_threads: Vec<QuestOpenThread>,
     pub allowed: QuestGenerationAllowlist,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recent_outcomes: Option<Vec<NarrativeOutcome>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -497,6 +530,51 @@ pub struct QuestGenerationProposal {
     pub expected_revision: u64,
     pub context_digest: String,
     pub document: QuestDocument,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NarrativeChoice {
+    pub quest_id: String,
+    pub episode_id: String,
+    pub node_id: String,
+    pub choice_id: String,
+    pub label: String,
+    pub sequence: u64,
+    pub document_version: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NarrativeOutcome {
+    pub quest_id: String,
+    pub episode_id: String,
+    pub summary: String,
+    pub sequence: u64,
+    pub document_version: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NarrativeThread {
+    pub id: String,
+    pub tag: String,
+    pub source_quest_id: String,
+    pub source_episode_id: String,
+    pub source_node_id: String,
+    pub source_choice_id: String,
+    pub summary: String,
+    pub status: NarrativeThreadStatus,
+    pub source_document_version: String,
+    pub source_choice_label: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NarrativeMemory {
+    pub recent_choices: Vec<NarrativeChoice>,
+    pub recent_outcomes: Vec<NarrativeOutcome>,
+    pub threads: Vec<NarrativeThread>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -685,6 +763,13 @@ pub struct CommandPayloadVariant11 {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CommandPayloadVariant12 {
     pub r#type: CommandPayloadVariant12Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant13 {
+    pub r#type: CommandPayloadVariant13Type,
+    pub tags: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1019,6 +1104,14 @@ pub enum QuestGenerationProposalSchemaVersion {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum NarrativeThreadStatus {
+    #[serde(rename = "open")]
+    Open,
+    #[serde(rename = "resolved")]
+    Resolved,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ParametersVariant3ObjectsItem {
     pub id: String,
@@ -1140,6 +1233,12 @@ pub enum CommandPayloadVariant11Type {
 pub enum CommandPayloadVariant12Type {
     #[serde(rename = "abandon_personal_quest")]
     AbandonPersonalQuest,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant13Type {
+    #[serde(rename = "set_quest_interests")]
+    SetQuestInterests,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -622,6 +622,30 @@
             "type"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "set_quest_interests"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 48
+              },
+              "maxItems": 5,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "type",
+            "tags"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -828,11 +852,34 @@
           "items": {
             "$ref": "#/$defs/PersonalQuestOffer"
           },
-          "maxItems": 12,
+          "maxItems": 32,
           "minItems": 0
         },
         "personalQuest": {
           "$ref": "#/$defs/PersonalQuestView"
+        },
+        "narrativeMemory": {
+          "$ref": "#/$defs/NarrativeMemory"
+        },
+        "questInterests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 48
+          },
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "questInterestOptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 48
+          },
+          "maxItems": 32,
+          "uniqueItems": true
         }
       },
       "required": [
@@ -2122,6 +2169,16 @@
         },
         "completed": {
           "type": "boolean"
+        },
+        "recommendation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "lockedReason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
         }
       },
       "required": [
@@ -2167,6 +2224,11 @@
         },
         "node": {
           "$ref": "#/$defs/QuestNode"
+        },
+        "acknowledgement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
         }
       },
       "required": [
@@ -2407,6 +2469,16 @@
           "minLength": 1,
           "maxLength": 120,
           "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "documentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "episodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
         }
       },
       "required": [
@@ -2429,6 +2501,41 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 240
+        },
+        "sourceQuestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sourceEpisodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sourceDocumentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sourceNodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sourceChoiceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sourceChoiceLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
         }
       },
       "required": [
@@ -2577,6 +2684,13 @@
         },
         "allowed": {
           "$ref": "#/$defs/QuestGenerationAllowlist"
+        },
+        "recentOutcomes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NarrativeOutcome"
+          },
+          "maxItems": 8
         }
       },
       "required": [
@@ -2630,6 +2744,197 @@
         "expectedRevision",
         "contextDigest",
         "document"
+      ],
+      "additionalProperties": false
+    },
+    "NarrativeChoice": {
+      "type": "object",
+      "properties": {
+        "questId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "episodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "nodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 24
+        },
+        "choiceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "documentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        }
+      },
+      "required": [
+        "questId",
+        "episodeId",
+        "nodeId",
+        "choiceId",
+        "label",
+        "sequence",
+        "documentVersion"
+      ],
+      "additionalProperties": false
+    },
+    "NarrativeOutcome": {
+      "type": "object",
+      "properties": {
+        "questId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "episodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "documentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        }
+      },
+      "required": [
+        "questId",
+        "episodeId",
+        "summary",
+        "sequence",
+        "documentVersion"
+      ],
+      "additionalProperties": false
+    },
+    "NarrativeThread": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "sourceQuestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "sourceEpisodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sourceNodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 24
+        },
+        "sourceChoiceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "resolved"
+          ]
+        },
+        "sourceDocumentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "sourceChoiceLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "id",
+        "tag",
+        "sourceQuestId",
+        "sourceEpisodeId",
+        "sourceNodeId",
+        "sourceChoiceId",
+        "summary",
+        "status",
+        "sourceDocumentVersion",
+        "sourceChoiceLabel"
+      ],
+      "additionalProperties": false
+    },
+    "NarrativeMemory": {
+      "type": "object",
+      "properties": {
+        "recentChoices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NarrativeChoice"
+          },
+          "maxItems": 16,
+          "uniqueItems": true
+        },
+        "recentOutcomes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NarrativeOutcome"
+          },
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "threads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NarrativeThread"
+          },
+          "maxItems": 8,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "recentChoices",
+        "recentOutcomes",
+        "threads"
       ],
       "additionalProperties": false
     }

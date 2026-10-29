@@ -107,7 +107,13 @@ play a branching episode, complete its supported activity and choose a new
 thread. Choices and the current scene survive reloads. Episodes can be revisited;
 the cosmetic keepsake is earned once. The adventure has no game-wide ending.
 
-Edit the four JSON documents in [`content/quests/`](content/quests/README.md).
+Pip's chosen night-sky or woodland hook now leads to a matching follow-up that
+acknowledges the earlier choice. Follow-ups can hand off to one another. Interests
+selected in Personal adventures rank eligible offers while keeping free choice;
+they never change assessment or rewards. Abandoning a follow-up keeps its source
+thread open. Recent choices, outcomes and source-linked threads survive reloads.
+
+Edit the six JSON documents in [`content/quests/`](content/quests/README.md).
 They use the same scene/choice/activity/handoff format proposed for future model
 output. Rebuild and restart the Rust API after editing bundled JSON; run the quest
 validators before playing both paths. See
@@ -144,5 +150,6 @@ progress. See [browser checks](qa/e2e/README.md) and [CI scope](docs/CI.md).
 
 `node qa/e2e/run-personal-quest-qa.mjs` runs the branching personal adventure
 journey with the same isolated database/session lifecycle. Profiles that begin
-personal episodes use compact envelope version two; the current runtime reads
-older saves, while pre-personal-quest runtimes reject those upgraded profiles.
+personal episodes use compact envelope version two; profiles with continuity
+memory or selected interests use version three. The current runtime reads older
+saves, while older writers reject upgraded profiles instead of dropping progress.

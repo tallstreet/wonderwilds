@@ -21,10 +21,19 @@ reaction and reload with the same progress. The same rules and controls support
 all four Meadow friends. Domain/content, contracts/API, frontend and isolated
 browser QA were integrated and checked; see the current implementation evidence.
 
-The next delivery is JSON-driven personal quest episodes with choices, supported
-activities and continuation hooks. The game has no final ending: completing an
-episode leaves new threads and a choice of another adventure. A fixed authored
-bank proves the format before live generation or fine-tuning is added.
+JSON-driven personal quest episodes now provide choices, supported activities
+and continuation hooks. The game has no final ending: completing an episode
+leaves new threads and a choice of another adventure. A fixed authored bank
+proves the format before live generation or fine-tuning is added.
+
+The continuity delivery now connects episodes through bounded, source-linked
+narrative memory and authored follow-ups. A chosen woodland or night-sky hook
+offers a matching next quest, acknowledges the actual earlier choice and survives
+reload. Player-selected interests rank eligible offers while preserving free
+choice. Abandonment keeps unresolved threads available; only verified episode
+completion resolves the exact source thread. The same authoritative memory
+supplies future model contexts. Next expand these authored chains to the other
+Meadow companions and refine pacing through human playtests.
 
 Then verify the Orchard-unlocked two-slot journey and implement optional companion
 roles, automatic friendship participation and Orchard/Cove story integration.

@@ -34,6 +34,10 @@ Personal quest profiles use envelope version two after their first episode
 starts. The reader still accepts pre-quest version-one checkpoints. This prevents
 a pre-quest runtime from silently dropping episode progress on a later write.
 
+Continuity memory and selected quest interests use envelope version three. The
+current reader accepts earlier version-one/two saves; older writers reject the
+new envelope so they cannot discard the retained choices and unresolved threads.
+
 Two periodic recovery checkpoints are retained, at intervals of 256 API revisions.
 Durable receipts, novelty, evidence and event records are not rotated. New domain
 actions record trusted replay context; historical legacy actions did not record

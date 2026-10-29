@@ -47,6 +47,9 @@ const questId = (value: unknown) =>
 const exactFields = (value: Record<string, unknown>, fields: string[]) =>
   fields.every((field) => Object.hasOwn(value, field)) &&
   Object.keys(value).every((field) => fields.includes(field));
+const exactOptional = (value: Record<string, unknown>, required: string[], optional: string[]) =>
+  required.every((key) => Object.hasOwn(value, key)) &&
+  Object.keys(value).every((key) => [...required, ...optional].includes(key));
 const personalBinding = (value: unknown) =>
   isRecord(value) &&
   exactFields(value, ['questId', 'documentVersion', 'nodeId', 'episodeId']) &&
@@ -200,46 +203,146 @@ export class GameClient {
       boundedInteger(item.requiredLevel, 5, 1) &&
       boundedInteger(item.xp) &&
       id(item.reactionId);
+    const narrativeRecord = (
+      item: unknown,
+      fields: string[],
+      texts: string[],
+      numbers: string[] = [],
+    ) =>
+      isRecord(item) &&
+      exactFields(item, fields) &&
+      texts.every((key) => questText(item[key], key === 'summary' ? 600 : 120)) &&
+      numbers.every((key) => boundedInteger(item[key], Number.MAX_SAFE_INTEGER, 1));
     if (
       !optionalList(
+        value.questInterests,
+        5,
+        (tag) => questText(tag, 48),
+        (tag) => tag as string,
+      ) ||
+      !optionalList(
+        value.questInterestOptions,
+        32,
+        (tag) => questText(tag, 48),
+        (tag) => tag as string,
+      ) ||
+      (value.narrativeMemory !== undefined &&
+        (!isRecord(value.narrativeMemory) ||
+          !exactFields(value.narrativeMemory, ['recentChoices', 'recentOutcomes', 'threads']) ||
+          !Array.isArray(value.narrativeMemory.recentChoices) ||
+          !optionalList(
+            value.narrativeMemory.recentChoices,
+            16,
+            (item) =>
+              narrativeRecord(
+                item,
+                [
+                  'questId',
+                  'documentVersion',
+                  'episodeId',
+                  'nodeId',
+                  'choiceId',
+                  'label',
+                  'sequence',
+                ],
+                ['questId', 'documentVersion', 'episodeId', 'nodeId', 'choiceId', 'label'],
+                ['sequence'],
+              ),
+            (item) => JSON.stringify(item),
+          ) ||
+          !Array.isArray(value.narrativeMemory.recentOutcomes) ||
+          !optionalList(
+            value.narrativeMemory.recentOutcomes,
+            8,
+            (item) =>
+              narrativeRecord(
+                item,
+                ['questId', 'documentVersion', 'episodeId', 'summary', 'sequence'],
+                ['questId', 'documentVersion', 'episodeId', 'summary'],
+                ['sequence'],
+              ),
+            (item) => JSON.stringify(item),
+          ) ||
+          !Array.isArray(value.narrativeMemory.threads) ||
+          !optionalList(
+            value.narrativeMemory.threads,
+            8,
+            (item) =>
+              narrativeRecord(
+                item,
+                [
+                  'id',
+                  'tag',
+                  'sourceQuestId',
+                  'sourceDocumentVersion',
+                  'sourceEpisodeId',
+                  'sourceNodeId',
+                  'sourceChoiceId',
+                  'sourceChoiceLabel',
+                  'summary',
+                  'status',
+                ],
+                [
+                  'id',
+                  'tag',
+                  'sourceQuestId',
+                  'sourceDocumentVersion',
+                  'sourceEpisodeId',
+                  'sourceNodeId',
+                  'sourceChoiceId',
+                  'sourceChoiceLabel',
+                  'summary',
+                  'status',
+                ],
+              ) &&
+              isRecord(item) &&
+              ['open', 'resolved'].includes(String(item.status)),
+            (item) => (item as { id: string }).id,
+          ))) ||
+      !optionalList(
         value.personalQuestOffers,
-        12,
+        32,
         (offer) =>
           isRecord(offer) &&
-          exactFields(offer, [
-            'questId',
-            'documentVersion',
-            'title',
-            'companionId',
-            'minimumCharacterLevel',
-            'available',
-            'completed',
-          ]) &&
+          exactOptional(
+            offer,
+            [
+              'questId',
+              'documentVersion',
+              'title',
+              'companionId',
+              'minimumCharacterLevel',
+              'available',
+              'completed',
+            ],
+            ['recommendation', 'lockedReason'],
+          ) &&
           questId(offer.questId) &&
           questText(offer.documentVersion, 40) &&
           questText(offer.title, 120) &&
           questId(offer.companionId) &&
           boundedInteger(offer.minimumCharacterLevel, 5, 1) &&
           typeof offer.available === 'boolean' &&
-          typeof offer.completed === 'boolean',
+          typeof offer.completed === 'boolean' &&
+          (offer.recommendation === undefined || questText(offer.recommendation, 160)) &&
+          (offer.lockedReason === undefined || questText(offer.lockedReason, 160)),
         (offer) => (offer as { questId: string }).questId,
       ) ||
       (value.personalQuest !== undefined &&
         (!isRecord(value.personalQuest) ||
-          !exactFields(value.personalQuest, [
-            'questId',
-            'documentVersion',
-            'episodeId',
-            'title',
-            'companionId',
-            'node',
-          ]) ||
+          !exactOptional(
+            value.personalQuest,
+            ['questId', 'documentVersion', 'episodeId', 'title', 'companionId', 'node'],
+            ['acknowledgement'],
+          ) ||
           !questId(value.personalQuest.questId) ||
           !questText(value.personalQuest.documentVersion, 40) ||
           !questText(value.personalQuest.episodeId, 120) ||
           !questText(value.personalQuest.title, 120) ||
           !questId(value.personalQuest.companionId) ||
-          !personalNode(value.personalQuest.node))) ||
+          !personalNode(value.personalQuest.node) ||
+          (value.personalQuest.acknowledgement !== undefined &&
+            !questText(value.personalQuest.acknowledgement, 600)))) ||
       value.pendingEncounters.some(
         (encounter) =>
           isRecord(encounter) &&

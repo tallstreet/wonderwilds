@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "questId": "pip-woodland-whispers",
+  "documentVersion": "1",
+  "title": "The whispering woodland path",
+  "companionId": "pip",
+  "regionId": "meadow",
+  "interestTags": [
+    "woodland-trails",
+    "exploring"
+  ],
+  "entryNodeId": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "choice",
+      "text": "The rustling leaves lead to a tiny woodland crossing. Pip wants to mark a safe route with lanterns.",
+      "choices": [
+        {
+          "id": "near",
+          "label": "Look beside the nearest tree",
+          "nextNodeId": "path-one"
+        },
+        {
+          "id": "far",
+          "label": "Follow the brighter path",
+          "nextNodeId": "path-two"
+        }
+      ]
+    },
+    {
+      "id": "path-one",
+      "type": "activity",
+      "text": "Help Pip complete a small lantern line beside the tree.",
+      "activitySlotId": "pip-count",
+      "nextNodeId": "reflection"
+    },
+    {
+      "id": "path-two",
+      "type": "activity",
+      "text": "Help Pip complete a small lantern line along the brighter path.",
+      "activitySlotId": "pip-count",
+      "nextNodeId": "reflection"
+    },
+    {
+      "id": "reflection",
+      "type": "choice",
+      "text": "You explored the clue together. Which little discovery will you follow another day?",
+      "choices": [
+        {
+          "id": "stars",
+          "label": "Look for a star-shaped pebble",
+          "nextNodeId": "handoff-stars"
+        },
+        {
+          "id": "leaves",
+          "label": "Listen for rustling leaves",
+          "nextNodeId": "handoff-leaves"
+        }
+      ]
+    },
+    {
+      "id": "handoff-stars",
+      "type": "handoff",
+      "text": "Pip keeps the new sparkle in mind. Another friendly path will be waiting when you return.",
+      "continuationTags": [
+        "night-sky"
+      ]
+    },
+    {
+      "id": "handoff-leaves",
+      "type": "handoff",
+      "text": "The leaves sway as you head home. Pip is ready to explore another clue next time.",
+      "continuationTags": [
+        "woodland-trails"
+      ]
+    }
+  ]
+}

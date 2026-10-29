@@ -1,6 +1,6 @@
 # Wonderwilds companion progression implementation plan
 
-Updated: 29 October 2026. Status: Meadow training and four JSON-driven personal episodes implemented and verified; companion roles, richer rewards and regional integration remain planned. Test evidence is recorded in IMPLEMENTATION_STATUS.md.
+Updated: 29 October 2026. Status: Meadow training, four starter episodes, two linked Pip follow-ups and source-linked continuity implemented and verified; more companion chains, roles, richer rewards and regional integration remain planned. Test evidence is recorded in IMPLEMENTATION_STATUS.md.
 
 ## Purpose and scope
 

@@ -2569,5 +2569,59 @@
         "rewardXp": 999
       }
     }
+  },
+  {
+    "name": "Bounded narrative memory",
+    "contract": "NarrativeMemory",
+    "valid": true,
+    "value": {
+      "recentChoices": [],
+      "recentOutcomes": [],
+      "threads": []
+    }
+  },
+  {
+    "name": "Selected quest interest command",
+    "contract": "GameCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "interest-command",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "set_quest_interests",
+        "tags": [
+          "night-sky"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Duplicate interests rejected",
+    "contract": "GameCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "interest-command",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "set_quest_interests",
+        "tags": [
+          "night-sky",
+          "night-sky"
+        ]
+      }
+    }
+  },
+  {
+    "name": "Narrative extra authority rejected",
+    "contract": "NarrativeMemory",
+    "valid": false,
+    "value": {
+      "recentChoices": [],
+      "recentOutcomes": [],
+      "threads": [],
+      "reward": 100
+    }
   }
 ]

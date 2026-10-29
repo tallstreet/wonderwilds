@@ -145,7 +145,7 @@ impl Aggregate {
             }
             value
         }).collect();
-        let mut value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"friendship":self.domain.creatures().iter().map(|id|json!({"creatureId":id,"points":self.domain.friendship(id)})).collect::<Vec<_>>(),"transformedCreatures":self.domain.transformed(),"availableHelpingMoments":self.domain.available_helping_moments(content).iter().map(|(creature,quest)|json!({"creatureId":creature,"completedQuestId":quest})).collect::<Vec<_>>(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills,"teamCapacity":self.domain.team_capacity(),"characterProgression":character_progression,"explorerProgression":{"xp":self.domain.xp(),"level":self.domain.level(content)},"personalQuestOffers":self.domain.personal_quest_offers(content)});
+        let mut value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"friendship":self.domain.creatures().iter().map(|id|json!({"creatureId":id,"points":self.domain.friendship(id)})).collect::<Vec<_>>(),"transformedCreatures":self.domain.transformed(),"availableHelpingMoments":self.domain.available_helping_moments(content).iter().map(|(creature,quest)|json!({"creatureId":creature,"completedQuestId":quest})).collect::<Vec<_>>(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills,"teamCapacity":self.domain.team_capacity(),"characterProgression":character_progression,"explorerProgression":{"xp":self.domain.xp(),"level":self.domain.level(content)},"personalQuestOffers":self.domain.personal_quest_offers(content),"narrativeMemory":self.domain.narrative_memory(),"questInterests":self.domain.quest_interests(),"questInterestOptions":content.personal_quests().interest_options()});
         if let Some(personal) = self.domain.personal_quest_view() {
             value["personalQuest"] =
                 serde_json::to_value(personal).map_err(|_| Error::Unavailable)?;
@@ -501,7 +501,10 @@ impl Aggregate {
                 }
                 next.encounters.insert(saved.id.clone(), saved);
             }
-            "start_personal_quest" | "choose_personal_path" | "abandon_personal_quest" => {
+            "start_personal_quest"
+            | "choose_personal_path"
+            | "abandon_personal_quest"
+            | "set_quest_interests" => {
                 if next
                     .encounters
                     .values()
@@ -523,6 +526,14 @@ impl Aggregate {
                             .into(),
                     },
                     Some("abandon_personal_quest") => Action::AbandonPersonalQuest,
+                    Some("set_quest_interests") => Action::SetQuestInterests {
+                        tags: payload["tags"]
+                            .as_array()
+                            .ok_or(Error::InvalidInput)?
+                            .iter()
+                            .map(|tag| tag.as_str().map(str::to_owned).ok_or(Error::InvalidInput))
+                            .collect::<Result<Vec<_>, _>>()?,
+                    },
                     _ => return Err(Error::InvalidInput),
                 };
                 next.domain_apply(action, &domain_id, content, TrustedFacts::default(), now)?;

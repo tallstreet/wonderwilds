@@ -341,6 +341,26 @@ export class BackendWorld {
   }
   private bindPersonalActions() {
     document
+      .querySelectorAll<HTMLButtonElement>('[data-server-quest-interest]')
+      .forEach((button) => {
+        button.onclick = () => {
+          if (this.busy || this.pending || this.activityOpen) return;
+          const tag = button.dataset.serverQuestInterest!;
+          const current = this.snapshot.questInterests ?? [];
+          const tags = current.includes(tag)
+            ? current.filter((value) => value !== tag)
+            : [...current, tag];
+          void this.send({ type: 'set_quest_interests', tags })
+            .then(() => {
+              this.personalAdventures();
+              document
+                .querySelector<HTMLButtonElement>(`[data-server-quest-interest="${tag}"]`)
+                ?.focus();
+            })
+            .catch(() => {});
+        };
+      });
+    document
       .querySelectorAll<HTMLButtonElement>('[data-server-personal-quest]')
       .forEach((button) => {
         button.onclick = () =>

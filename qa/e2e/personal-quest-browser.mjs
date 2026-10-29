@@ -175,6 +175,47 @@ try {
   assert.ok(await page.locator(`[data-server-personal-quest="${quest.questId}"]`).isVisible());
   console.log('PASS: bound activity, wrong answer, support/reload, abandonment/resume, reflection and ongoing handoff');
 
+  // Continue the selected hook into a genuinely related authored episode.
+  const followupId = 'pip-star-pebble';
+  assert.equal(handoff.personalQuestOffers[0].questId, followupId);
+  const originalThread=handoff.narrativeMemory.threads.find(thread=>thread.tag==='night-sky' && thread.status==='open');
+  assert.equal(originalThread.sourceChoiceId, handoffChoice.id);
+  await page.locator(`[data-server-personal-quest="${followupId}"]`).click();
+  await page.locator('.quest-acknowledgement').waitFor();
+  const acknowledgement=await page.locator('.quest-acknowledgement').textContent();
+  assert.match(acknowledgement,/star-shaped pebble/);
+  await page.reload(); await page.waitForSelector('#game canvas'); await resume();
+  assert.equal(await page.locator('.quest-acknowledgement').textContent(),acknowledgement);
+  assert.equal((await snapshot()).narrativeMemory.threads.find(thread=>thread.id===originalThread.id).status,'open');
+  await page.locator('[data-server-personal-choice="near"]').click();
+  await page.locator('#server-personal-activity').click(); await page.locator('.ww-activity').waitFor();
+  const followupActivity=(await snapshot()).pendingEncounters[0];
+  for(let i=0;i<answerFor(followupActivity).value;i++) await click('Add one object');
+  await click('Check my answer');
+  await page.locator('[data-server-personal-choice="leaves"]').waitFor();
+  await page.locator('[data-server-personal-choice="leaves"]').click();
+  await page.getByRole('heading',{name:'What shall we explore next?',exact:true}).waitFor();
+  const continued=await snapshot();
+  assert.equal(continued.narrativeMemory.threads.find(thread=>thread.id===originalThread.id).status,'resolved');
+  assert.equal(continued.personalQuestOffers[0].questId,'pip-woodland-whispers');
+  const woodland=continued.narrativeMemory.threads.find(thread=>thread.tag==='woodland-trails' && thread.status==='open');
+  assert.equal(woodland.sourceQuestId,followupId);
+  await page.locator('[data-server-personal-quest="pip-woodland-whispers"]').click();
+  await page.locator('.quest-acknowledgement').waitFor();
+  assert.match(await page.locator('.quest-acknowledgement').textContent(),/rustling leaves/);
+  await page.reload(); await page.waitForSelector('#game canvas'); await resume();
+  assert.equal((await snapshot()).personalQuest.questId,'pip-woodland-whispers');
+  await page.locator('#server-personal-abandon').click();
+  await waitState(state=>state.personalQuest===undefined);
+  assert.equal((await snapshot()).narrativeMemory.threads.find(thread=>thread.id===woodland.id).status,'open');
+  await page.locator('[data-server-quest-interest="night-sky"]').click();
+  await waitState(state=>state.questInterests.includes('night-sky'));
+  await page.reload(); await page.waitForSelector('#game canvas');
+  await page.locator('#missions').click(); await page.locator('#server-personal-adventures').click();
+  await page.locator('[data-server-quest-interest="night-sky"][aria-pressed="true"]').waitFor();
+  assert.equal((await snapshot()).personalQuestOffers[0].questId,'pip-woodland-whispers','A real unresolved hook outranks a different preferred theme');
+  console.log('PASS: source-linked night-sky follow-up, acknowledged choice/reload, two-hop woodland continuation, unresolved abandonment and persisted interests');
+
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator(`[data-server-personal-quest="${quest.questId}"]`).click();
   await page.locator(`[data-personal-node="${entry.id}"]`).waitFor();

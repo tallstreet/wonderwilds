@@ -49,6 +49,36 @@
       "documentPath": "content/quests/flutter-pattern-parade.v1.json",
       "minimumCharacterLevel": 4,
       "rewardItemId": "flutter-personal-memory"
+    },
+    {
+      "questId": "pip-woodland-whispers",
+      "documentPath": "content/quests/pip-woodland-whispers.v1.json",
+      "minimumCharacterLevel": 4,
+      "rewardItemId": "pip-woodland-whispers-memory",
+      "continuation": {
+        "tag": "woodland-trails",
+        "acknowledgement": "Pip remembers the woodland clue from your earlier adventure.",
+        "sourceQuestIds": [
+          "pip-lantern-trail",
+          "pip-star-pebble",
+          "pip-woodland-whispers"
+        ]
+      }
+    },
+    {
+      "questId": "pip-star-pebble",
+      "documentPath": "content/quests/pip-star-pebble.v1.json",
+      "minimumCharacterLevel": 4,
+      "rewardItemId": "pip-star-pebble-memory",
+      "continuation": {
+        "tag": "night-sky",
+        "acknowledgement": "Pip remembers the night-sky clue from your earlier adventure.",
+        "sourceQuestIds": [
+          "pip-lantern-trail",
+          "pip-star-pebble",
+          "pip-woodland-whispers"
+        ]
+      }
     }
   ]
 }

@@ -5,8 +5,8 @@
 //! same transaction as state/evidence/reward writes. Never build it from a JSON
 //! request, guest import, director output or a client correctness assertion.
 use crate::personal_quests::{
-    Catalog, PersonalActivityBinding, PersonalQuestOffer, PersonalQuestRun, PersonalQuestView,
-    QuestNode,
+    Catalog, NarrativeChoice, NarrativeMemory, NarrativeOutcome, NarrativeThread,
+    PersonalActivityBinding, PersonalQuestOffer, PersonalQuestRun, PersonalQuestView, QuestNode,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -513,6 +513,9 @@ pub struct Command {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Action {
+    SetQuestInterests {
+        tags: Vec<String>,
+    },
     StartPersonalQuest {
         quest_id: String,
     },
@@ -605,6 +608,10 @@ pub struct State {
     external_receipts: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     personal_quest: Option<PersonalQuestRun>,
+    #[serde(default, skip_serializing_if = "NarrativeMemory::is_empty")]
+    narrative_memory: NarrativeMemory,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    quest_interests: Vec<String>,
     #[serde(default, skip_serializing_if = "is_zero")]
     personal_episode_sequence: u64,
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
@@ -652,6 +659,8 @@ impl State {
             receipts: BTreeMap::new(),
             external_receipts: false,
             personal_quest: None,
+            narrative_memory: NarrativeMemory::default(),
+            quest_interests: Vec::new(),
             personal_episode_sequence: 0,
             personal_quest_rewards: BTreeSet::new(),
         }
@@ -662,6 +671,7 @@ impl State {
     pub fn personal_quest_view(&self) -> Option<PersonalQuestView> {
         let run = self.personal_quest.as_ref()?;
         Some(PersonalQuestView {
+            acknowledgement: run.acknowledgement.clone(),
             quest_id: run.document.quest_id.clone(),
             document_version: run.document.document_version.clone(),
             episode_id: run.episode_id.clone(),
@@ -680,8 +690,50 @@ impl State {
     pub fn active_personal_activity(&self) -> Option<PersonalActivityBinding> {
         self.personal_quest.as_ref()?.activity()
     }
+    pub fn narrative_memory(&self) -> &NarrativeMemory {
+        &self.narrative_memory
+    }
+    pub fn quest_interests(&self) -> &[String] {
+        &self.quest_interests
+    }
+    pub fn requires_continuity_runtime(&self) -> bool {
+        !self.narrative_memory.is_empty() || !self.quest_interests.is_empty()
+    }
+    fn matching_thread<'a>(
+        &'a self,
+        content: &Content,
+        quest_id: &str,
+    ) -> Option<&'a NarrativeThread> {
+        let policy = content
+            .personal_quests
+            .entry(quest_id)?
+            .continuation
+            .as_ref()?;
+        let matches = |thread: &&NarrativeThread| {
+            thread.tag == policy.tag && policy.source_quest_ids.contains(&thread.source_quest_id)
+        };
+        self.narrative_memory
+            .threads
+            .iter()
+            .rev()
+            .filter(matches)
+            .find(|thread| thread.status == "open")
+            .or_else(|| {
+                self.personal_quest_rewards
+                    .contains(quest_id)
+                    .then(|| {
+                        self.narrative_memory
+                            .threads
+                            .iter()
+                            .rev()
+                            .filter(matches)
+                            .find(|thread| thread.status == "resolved")
+                    })
+                    .flatten()
+            })
+    }
     pub fn personal_quest_offers(&self, content: &Content) -> Vec<PersonalQuestOffer> {
-        content
+        let mut offers: Vec<_> = content
             .personal_quests
             .documents()
             .map(|document| {
@@ -689,7 +741,36 @@ impl State {
                     .personal_quests
                     .entry(&document.quest_id)
                     .expect("validated catalog entry");
+                let thread = self.matching_thread(content, &document.quest_id);
+                let locked_reason = if !self.creatures.contains(&document.companion_id) {
+                    Some("Befriend this companion first".into())
+                } else if self.character_level(content, &document.companion_id)
+                    < entry.minimum_character_level
+                {
+                    Some(format!(
+                        "Unlock at character level {}",
+                        entry.minimum_character_level
+                    ))
+                } else if entry.continuation.is_some() && thread.is_none() {
+                    Some("Follow a matching clue first".into())
+                } else if !self.pending.is_empty() {
+                    Some("Finish your current activity first".into())
+                } else if self
+                    .personal_quest
+                    .as_ref()
+                    .is_some_and(|run| !run.node().is_some_and(QuestNode::is_handoff))
+                {
+                    Some("Continue your current episode first".into())
+                } else if self.region != document.region_id {
+                    Some("Visit this companion's region first".into())
+                } else {
+                    None
+                };
                 PersonalQuestOffer {
+                    locked_reason,
+                    recommendation: thread
+                        .filter(|t| t.status == "open")
+                        .map(|t| format!("Continue your {} thread", t.tag.replace('-', " "))),
                     quest_id: document.quest_id.clone(),
                     document_version: document.document_version.clone(),
                     title: document.title.clone(),
@@ -704,14 +785,63 @@ impl State {
                         && self
                             .personal_quest
                             .as_ref()
-                            .is_none_or(|run| run.node().is_some_and(QuestNode::is_handoff)),
+                            .is_none_or(|r| r.node().is_some_and(QuestNode::is_handoff))
+                        && (entry.continuation.is_none() || thread.is_some()),
                     completed: self.personal_quest_rewards.contains(&document.quest_id),
                 }
             })
-            .collect()
+            .collect();
+        let score = |offer: &PersonalQuestOffer| {
+            let document = content
+                .personal_quests
+                .document(&offer.quest_id)
+                .expect("catalog document");
+            let interests = document
+                .interest_tags
+                .iter()
+                .filter(|tag| self.quest_interests.contains(tag))
+                .count() as i32;
+            let repeated = self
+                .narrative_memory
+                .recent_outcomes
+                .last()
+                .is_some_and(|o| o.quest_id == offer.quest_id);
+            i32::from(offer.available) * 100_000
+                + self
+                    .matching_thread(content, &offer.quest_id)
+                    .filter(|thread| thread.status == "open")
+                    .and_then(|thread| {
+                        self.narrative_memory
+                            .threads
+                            .iter()
+                            .position(|candidate| candidate.id == thread.id)
+                    })
+                    .map_or(0, |index| (index as i32 + 1) * 100)
+                + interests * 10
+                + i32::from(!offer.completed) * 5
+                - i32::from(repeated) * 20
+        };
+        offers.sort_by(|a, b| {
+            score(b)
+                .cmp(&score(a))
+                .then_with(|| a.quest_id.cmp(&b.quest_id))
+        });
+        offers
     }
     pub fn validate_personal_state(&self, content: &Content) -> Result<(), Rejection> {
-        if self.personal_quest_rewards.len() > 4
+        self.narrative_memory.validate()?;
+        let options = content.personal_quests.interest_options();
+        if self.quest_interests.len() > 5
+            || self
+                .quest_interests
+                .iter()
+                .any(|tag| !options.contains(tag))
+            || self.quest_interests.iter().collect::<BTreeSet<_>>().len()
+                != self.quest_interests.len()
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        if self.personal_quest_rewards.len() > content.personal_quests.len()
             || self
                 .personal_quest_rewards
                 .iter()
@@ -931,6 +1061,9 @@ pub struct Event {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Outcome {
+    QuestInterestsChanged {
+        tags: Vec<String>,
+    },
     PersonalQuestStarted {
         quest_id: String,
         document_version: String,
@@ -1135,6 +1268,61 @@ fn personal_handoff(state: &mut State, outcomes: &mut Vec<Outcome>) -> Result<()
     let episode_id = run.episode_id.clone();
     let tags = continuation_tags.clone();
     let item = run.reward_item_id.clone();
+    let document_version = run.document.document_version.clone();
+    let source_thread = run.source_thread.clone();
+    let summary = match run.node() {
+        Some(QuestNode::Handoff { text, .. }) => text.clone(),
+        _ => return Err(Rejection::InvalidCommand),
+    };
+    let source_choice = run.last_choice().ok_or(Rejection::InvalidCommand)?;
+    let source_choice_label = run
+        .document
+        .nodes
+        .iter()
+        .find_map(|node| match node {
+            QuestNode::Choice { id, choices, .. } if *id == source_choice.0 => choices
+                .iter()
+                .find(|c| c.id == source_choice.1)
+                .map(|c| c.label.clone()),
+            _ => None,
+        })
+        .ok_or(Rejection::InvalidCommand)?;
+    if let Some(source) = source_thread
+        && let Some(thread) = state.narrative_memory.threads.iter_mut().find(|thread| {
+            thread.id == source.id
+                && thread.source_episode_id == source.source_episode_id
+                && thread.source_choice_id == source.source_choice_id
+        })
+    {
+        thread.status = "resolved".into();
+    }
+    crate::personal_quests::remember_outcome(
+        &mut state.narrative_memory,
+        NarrativeOutcome {
+            document_version: document_version.clone(),
+            quest_id: quest_id.clone(),
+            episode_id: episode_id.clone(),
+            summary: summary.clone(),
+            sequence: state.personal_episode_sequence,
+        },
+    );
+    for tag in &tags {
+        crate::personal_quests::remember_thread(
+            &mut state.narrative_memory,
+            NarrativeThread {
+                source_choice_label: source_choice_label.clone(),
+                source_document_version: document_version.clone(),
+                id: format!("thread-{}-{tag}", state.personal_episode_sequence),
+                tag: tag.clone(),
+                source_quest_id: quest_id.clone(),
+                source_episode_id: episode_id.clone(),
+                source_node_id: source_choice.0.clone(),
+                source_choice_id: source_choice.1.clone(),
+                summary: summary.clone(),
+                status: "open".into(),
+            },
+        );
+    }
     if !state.personal_quest_rewards.contains(&quest_id) {
         reward(
             state,
@@ -1245,6 +1433,17 @@ pub fn apply(
     let mut next = state.clone();
     let mut outcomes = Vec::new();
     match &command.action {
+        Action::SetQuestInterests { tags } => {
+            let options = content.personal_quests.interest_options();
+            if tags.len() > 5
+                || tags.iter().any(|tag| !options.contains(tag))
+                || tags.iter().collect::<BTreeSet<_>>().len() != tags.len()
+            {
+                return Err(Rejection::InvalidCommand);
+            }
+            next.quest_interests = tags.clone();
+            outcomes.push(Outcome::QuestInterestsChanged { tags: tags.clone() });
+        }
         Action::StartPersonalQuest { quest_id } => {
             if !state
                 .personal_quest_offers(content)
@@ -1267,7 +1466,22 @@ pub fn apply(
                 .checked_add(1)
                 .ok_or(Rejection::Overflow)?;
             let episode_id = format!("episode-{}", next.personal_episode_sequence);
+            let source_thread = state.matching_thread(content, quest_id).cloned();
+            let acknowledgement = source_thread.as_ref().and_then(|_| {
+                entry.continuation.as_ref().map(|policy| {
+                    format!(
+                        "{} You chose: {}",
+                        policy.acknowledgement,
+                        source_thread
+                            .as_ref()
+                            .expect("matched source")
+                            .source_choice_label
+                    )
+                })
+            });
             next.personal_quest = Some(PersonalQuestRun {
+                source_thread,
+                acknowledgement,
                 node_id: document.entry_node_id.clone(),
                 document: document.clone(),
                 episode_id: episode_id.clone(),
@@ -1299,6 +1513,15 @@ pub fn apply(
                 .ok_or(Rejection::InvalidCommand)?
                 .clone();
             let previous = run.node_id.clone();
+            let memory_choice = NarrativeChoice {
+                document_version: run.document.document_version.clone(),
+                quest_id: run.document.quest_id.clone(),
+                episode_id: run.episode_id.clone(),
+                node_id: previous.clone(),
+                choice_id: choice.id.clone(),
+                label: choice.label.clone(),
+                sequence: run.episode_sequence,
+            };
             run.choices.insert(previous.clone(), choice_id.clone());
             run.node_id = choice.next_node_id.clone();
             outcomes.push(Outcome::PersonalPathChosen {
@@ -1307,6 +1530,7 @@ pub fn apply(
                 choice_id: choice_id.clone(),
                 next_node_id: choice.next_node_id,
             });
+            crate::personal_quests::remember_choice(&mut next.narrative_memory, memory_choice);
             personal_handoff(&mut next, &mut outcomes)?;
         }
         Action::AbandonPersonalQuest => {

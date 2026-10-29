@@ -4,7 +4,7 @@ These disabled, pending-review development episodes are the first editable
 examples of the document shape a future quest-generating model can propose.
 They are short choose-your-own-adventure episodes in a continuing game. A
 `handoff` closes the current episode with a new thread; it never ends the game.
-The current authored bank has four documents and can be revisited. It does not
+The current authored bank has six documents and can be revisited. It does not
 claim an unlimited supply of unique stories or run a model.
 
 ## Where to edit
@@ -15,6 +15,8 @@ claim an unlimited supply of unique stories or run a model.
 | `tansy-welcome-garden.v1.json` | Welcome bees or birds, then follow water or mystery seeds | `tansy-sequence` → M05 / number sequence |
 | `nib-sharing-picnic.v1.json` | Pick a picnic place, then save a song or trail idea | `nib-share` → M08 / equal sharing |
 | `flutter-pattern-parade.v1.json` | Lead with ribbons or petals, then choose rhythm or colour | `flutter-pattern` → M09 / repeating pattern |
+| `pip-star-pebble.v1.json` | Continue the chosen night-sky clue | `pip-count` → M06 / missing quantity |
+| `pip-woodland-whispers.v1.json` | Continue the chosen woodland clue | `pip-count` → M06 / missing quantity |
 
 Each first choice changes the next activity scene. Both supported routes return
 to a reflection choice. Each reflection has its own handoff text and continuation
@@ -125,3 +127,30 @@ cycles, unreachable nodes, activity bypasses, unknown bindings, invented reward
 fields, answer keys, duplicate identifiers, unsafe document paths and self-approval.
 These automated checks do not replace educator, narrative, accessibility or child
 usability review. `releaseEnabled` stays `false` and `reviewStatus` stays `pending`.
+
+
+## Continuity and authored follow-ups
+
+`pip-star-pebble.v1.json` follows an actual night-sky handoff;
+`pip-woodland-whispers.v1.json` follows an actual woodland handoff. Trusted catalog
+`continuation` metadata lists `tag`, bounded `sourceQuestIds`, and acknowledgement
+text. Only a matching stored thread makes a follow-up eligible. The same Pip
+episodes can hand off into one another; each graph still has a finite local goal.
+Catalog validation checks every follow-up is reachable from a starter, while
+allowing cycles between episodes. Adding documents requires listing the bundled
+file in the Rust catalog loader as well as the JSON catalog. The bank is bounded
+to 32 documents and the interest vocabulary to 32 tags.
+
+The server keeps at most sixteen recent choices, eight outcomes and eight threads.
+Each source records the original document version, episode, node, choice and
+authored text rather than reinterpreting old IDs through edited content. Starting
+a follow-up pins its exact source and acknowledgement. Completion resolves that
+source; abandonment leaves its previous status unchanged. Newer matching open
+hooks outrank older hooks, then interests/freshness guide the remaining ordering;
+all eligible episodes remain selectable. Interest tags never alter assessment or
+rewards.
+
+Old version-two saves remain readable. Their current episode is retained, but no
+historical continuity is guessed: revisiting an episode creates the first genuine
+thread. Saves containing continuity memory or selected interests use compact
+envelope version three, so older writers cannot silently discard the new state.

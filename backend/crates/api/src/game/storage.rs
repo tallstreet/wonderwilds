@@ -17,7 +17,9 @@ impl Serialize for Aggregate {
         let mut output =
             serializer.serialize_struct("Aggregate", if self.storage.is_some() { 5 } else { 6 })?;
         if let Some(storage) = &self.storage {
-            let envelope_version = if self.domain.requires_personal_quest_runtime() {
+            let envelope_version = if self.domain.requires_continuity_runtime() {
+                CONTINUITY_ENVELOPE_VERSION
+            } else if self.domain.requires_personal_quest_runtime() {
                 PERSONAL_QUEST_ENVELOPE_VERSION
             } else {
                 FORMAT_VERSION
@@ -62,41 +64,47 @@ impl<'de> Deserialize<'de> for Aggregate {
             storage: StorageState,
         }
         let value = Value::deserialize(deserializer)?;
-        let (revision, domain, encounters, receipts, evidence, events, storage) = if value
-            .get("storageFormat")
-            .is_some()
-        {
-            let compact: Compact =
-                serde_json::from_value(value).map_err(serde::de::Error::custom)?;
-            if ![FORMAT_VERSION, PERSONAL_QUEST_ENVELOPE_VERSION].contains(&compact.storage_format)
-                || compact.storage_format == FORMAT_VERSION
-                    && compact.domain.requires_personal_quest_runtime()
-            {
-                return Err(serde::de::Error::custom(
-                    "unsupported aggregate storage format",
-                ));
-            }
-            (
-                compact.revision,
-                compact.domain,
-                compact.encounters,
-                BTreeMap::new(),
-                Vec::new(),
-                Vec::new(),
-                Some(compact.storage),
-            )
-        } else {
-            let legacy: Legacy = serde_json::from_value(value).map_err(serde::de::Error::custom)?;
-            (
-                legacy.revision,
-                legacy.domain,
-                legacy.encounters,
-                legacy.receipts,
-                legacy.evidence,
-                legacy.events,
-                None,
-            )
-        };
+        let (revision, domain, encounters, receipts, evidence, events, storage) =
+            if value.get("storageFormat").is_some() {
+                let compact: Compact =
+                    serde_json::from_value(value).map_err(serde::de::Error::custom)?;
+                if ![
+                    FORMAT_VERSION,
+                    PERSONAL_QUEST_ENVELOPE_VERSION,
+                    CONTINUITY_ENVELOPE_VERSION,
+                ]
+                .contains(&compact.storage_format)
+                    || compact.storage_format == FORMAT_VERSION
+                        && compact.domain.requires_personal_quest_runtime()
+                    || compact.storage_format < CONTINUITY_ENVELOPE_VERSION
+                        && compact.domain.requires_continuity_runtime()
+                {
+                    return Err(serde::de::Error::custom(
+                        "unsupported aggregate storage format",
+                    ));
+                }
+                (
+                    compact.revision,
+                    compact.domain,
+                    compact.encounters,
+                    BTreeMap::new(),
+                    Vec::new(),
+                    Vec::new(),
+                    Some(compact.storage),
+                )
+            } else {
+                let legacy: Legacy =
+                    serde_json::from_value(value).map_err(serde::de::Error::custom)?;
+                (
+                    legacy.revision,
+                    legacy.domain,
+                    legacy.encounters,
+                    legacy.receipts,
+                    legacy.evidence,
+                    legacy.events,
+                    None,
+                )
+            };
         Ok(Self {
             revision,
             domain,
@@ -114,6 +122,7 @@ impl<'de> Deserialize<'de> for Aggregate {
 
 pub(crate) const FORMAT_VERSION: u32 = 1;
 const PERSONAL_QUEST_ENVELOPE_VERSION: u32 = 2;
+const CONTINUITY_ENVELOPE_VERSION: u32 = 3;
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

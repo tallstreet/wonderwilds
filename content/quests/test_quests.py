@@ -68,6 +68,16 @@ class QuestValidationTests(unittest.TestCase):
     def test_new_versions_need_deliberate_reader(self):
         self.rejects(lambda d: d.update(schemaVersion='2.0'))
 
+    def test_followups_require_reachable_same_companion_source_hooks(self):
+        for policy in [
+            {"tag":"woodland-trails","sourceQuestIds":["pip-woodland-whispers"],"acknowledgement":"Pip remembers a clue."},
+            {"tag":"made-up-tag","sourceQuestIds":["pip-lantern-trail"],"acknowledgement":"Pip remembers a clue."}
+        ]:
+            candidate=copy.deepcopy(self.catalog)
+            next(entry for entry in candidate['quests'] if entry['questId']=='pip-woodland-whispers')['continuation']=policy
+            with self.assertRaises(ValueError):
+                validate_catalog(candidate,self.documents)
+
 
 if __name__ == '__main__':
     unittest.main()

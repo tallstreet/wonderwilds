@@ -143,6 +143,44 @@ pub fn validate_context(context: &QuestGenerationContext) -> Result<(), Rejectio
     Ok(())
 }
 
+/// Construct a future generation request from the same authoritative, bounded
+/// state used by authored offer ranking. No conversation is collected or shared.
+/// The caller supplies the authenticated API revision and server-selected skills.
+pub fn context_from_state(
+    state: &wonderwilds_domain::engine::State,
+    content: &wonderwilds_domain::engine::Content,
+    request_id: &str,
+    revision: u64,
+    companion_id: &str,
+    skill_ids: &[String],
+) -> Result<QuestGenerationContext, Rejection> {
+    let catalog = content.personal_quests();
+    let continuation_tags: BTreeSet<_> = catalog
+        .documents()
+        .flat_map(|doc| doc.nodes.iter())
+        .filter_map(|node| match node {
+            QuestNode::Handoff {
+                continuation_tags, ..
+            } => Some(continuation_tags),
+            _ => None,
+        })
+        .flatten()
+        .cloned()
+        .collect();
+    let choices:Vec<_>=state.narrative_memory().recent_choices.iter().rev().take(8).collect::<Vec<_>>().into_iter().rev().map(|choice|json!({"questId":choice.quest_id,"documentVersion":choice.document_version,"episodeId":choice.episode_id,"nodeId":choice.node_id,"choiceId":choice.choice_id})).collect();
+    let threads:Vec<_>=state.narrative_memory().threads.iter().filter(|thread|thread.status=="open").map(|thread|json!({"id":thread.id,"tag":thread.tag,"summary":thread.summary.chars().take(300).collect::<String>(),"sourceQuestId":thread.source_quest_id,"sourceDocumentVersion":thread.source_document_version,"sourceEpisodeId":thread.source_episode_id,"sourceNodeId":thread.source_node_id,"sourceChoiceId":thread.source_choice_id,"sourceChoiceLabel":thread.source_choice_label})).collect();
+    bind_context(
+        json!({"schemaVersion":"1.0","requestId":request_id,"revision":revision,"contentVersion":catalog.version(),"rulesVersion":RULES_VERSION,
+            "world":{"regionId":state.region(),"canonicalFacts":state.flags(),"ownedCompanionIds":state.creatures()},
+            "progression":{"explorerLevel":state.level(content),"companionLevel":state.character_level(content,companion_id),"companionId":companion_id},
+            "learning":{"skillIds":skill_ids,"supportMode":"available"},
+            "interests":state.quest_interests().iter().map(|tag|json!({"tag":tag,"source":"player_selected"})).collect::<Vec<_>>(),
+            "conversationMemory":{"permission":"not_shared","summary":""},"recentChoices":choices,"recentOutcomes":state.narrative_memory().recent_outcomes,"openThreads":threads,
+            "allowed":{"companionIds":state.creatures(),"regionIds":[state.region()],"activitySlots":catalog.activity_slots().iter().filter(|slot|skill_ids.contains(&slot.skill_id)).collect::<Vec<_>>(),"interestTags":catalog.interest_options(),"continuationTags":continuation_tags}
+        }),
+    )
+}
+
 fn validate_document_context(
     context: &QuestGenerationContext,
     document: &QuestDocument,
@@ -162,6 +200,20 @@ fn validate_document_context(
     if input["progression"]["companionLevel"]
         .as_u64()
         .is_none_or(|level| level < minimum as u64)
+    {
+        return Err(Rejection::NotAllowed);
+    }
+    if let Some(policy) = catalog
+        .entry(&document.quest_id)
+        .and_then(|entry| entry.continuation.as_ref())
+        && !input["openThreads"].as_array().is_some_and(|threads| {
+            threads.iter().any(|thread| {
+                thread["tag"] == policy.tag
+                    && thread["sourceQuestId"]
+                        .as_str()
+                        .is_some_and(|id| policy.source_quest_ids.iter().any(|source| source == id))
+            })
+        })
     {
         return Err(Rejection::NotAllowed);
     }
@@ -235,7 +287,42 @@ pub fn authored_fallback(
     let document = catalog
         .documents()
         .filter(|document| validate_document_context(context, document).is_ok())
-        .min_by_key(|document| &document.quest_id)
+        .max_by(|a, b| {
+            let score = |doc: &QuestDocument| {
+                let hook_rank = catalog
+                    .entry(&doc.quest_id)
+                    .and_then(|entry| entry.continuation.as_ref())
+                    .and_then(|policy| {
+                        context.open_threads.iter().rposition(|thread| {
+                            thread.tag.as_deref() == Some(&policy.tag)
+                                && thread
+                                    .source_quest_id
+                                    .as_ref()
+                                    .is_some_and(|id| policy.source_quest_ids.contains(id))
+                        })
+                    })
+                    .map_or(0, |index| index as i32 + 1);
+                let interests = doc
+                    .interest_tags
+                    .iter()
+                    .filter(|tag| {
+                        context
+                            .interests
+                            .iter()
+                            .any(|interest| interest.tag == **tag)
+                    })
+                    .count() as i32;
+                let repeated = context
+                    .recent_outcomes
+                    .as_ref()
+                    .and_then(|outcomes| outcomes.last())
+                    .is_some_and(|outcome| outcome.quest_id == doc.quest_id);
+                hook_rank * 100 + interests * 10 - i32::from(repeated) * 20
+            };
+            score(a)
+                .cmp(&score(b))
+                .then_with(|| b.quest_id.cmp(&a.quest_id))
+        })
         .ok_or(Rejection::NoPlayableCandidate)?;
     let input = json!({
         "schemaVersion":"1.0",
@@ -509,5 +596,144 @@ mod tests {
         let mut input = value(&context).unwrap();
         input["rulesVersion"] = json!("future-unreviewed-rules");
         assert_eq!(bind_context(input), Err(Rejection::UnsupportedVersion));
+    }
+}
+
+#[cfg(test)]
+mod continuity_state_tests {
+    use super::*;
+    use wonderwilds_domain::engine::{
+        self, Action, Command, Content, Context, State, TrustedFacts, VerifiedCompletion,
+    };
+    fn perform(state: &mut State, content: &Content, action: Action, facts: TrustedFacts) {
+        let result = engine::apply(
+            state,
+            &Command {
+                command_id: format!("context-{}", state.revision()),
+                expected_revision: state.revision(),
+                action,
+            },
+            content,
+            &Context {
+                unix_millis: 1000,
+                recorded_random_choice: 0,
+                facts,
+            },
+        )
+        .unwrap();
+        *state = result.state;
+    }
+    fn finish(state: &mut State, content: &Content, quest_id: &str) {
+        let encounter = format!("context-enc-{}", state.revision());
+        let mut facts = TrustedFacts::default();
+        facts.reachable_quests.insert(quest_id.into());
+        facts
+            .issued_encounters
+            .insert(encounter.clone(), quest_id.into());
+        perform(
+            state,
+            content,
+            Action::BeginQuest {
+                quest_id: quest_id.into(),
+                encounter_id: encounter.clone(),
+            },
+            facts,
+        );
+        let mut facts = TrustedFacts::default();
+        facts.completed_encounters.insert(
+            encounter.clone(),
+            VerifiedCompletion {
+                quest_id: quest_id.into(),
+                supported: true,
+            },
+        );
+        perform(
+            state,
+            content,
+            Action::CompleteQuest {
+                quest_id: quest_id.into(),
+                encounter_id: encounter,
+            },
+            facts,
+        );
+    }
+    #[test]
+    fn generation_context_uses_real_bounded_choices_threads_and_preferences() {
+        let content = Content::development(
+            include_str!("../../../../content/story/adventure.v1.json"),
+            include_str!("../../../../content/story/help-quests.v1.json"),
+            include_str!("../../../../content/creatures/friends.v1.json"),
+            include_str!("../../../../content/story/progression.v1.json"),
+        )
+        .unwrap();
+        let mut state = State::new(&content);
+        for id in [
+            "meadow-welcome",
+            "meadow-bridge",
+            "meadow-picnic",
+            "meadow-garden",
+            "meadow-letter",
+            "meadow-finale",
+            "befriend-pip",
+            "training-pip-1",
+            "training-pip-2",
+            "training-pip-3",
+        ] {
+            finish(&mut state, &content, id);
+        }
+        perform(
+            &mut state,
+            &content,
+            Action::SetQuestInterests {
+                tags: vec!["woodland-trails".into()],
+            },
+            TrustedFacts::default(),
+        );
+        perform(
+            &mut state,
+            &content,
+            Action::StartPersonalQuest {
+                quest_id: "pip-lantern-trail".into(),
+            },
+            TrustedFacts::default(),
+        );
+        perform(
+            &mut state,
+            &content,
+            Action::ChoosePersonalPath {
+                choice_id: "pond".into(),
+            },
+            TrustedFacts::default(),
+        );
+        let binding = state.active_personal_activity().unwrap();
+        finish(&mut state, &content, &binding.quest_id);
+        perform(
+            &mut state,
+            &content,
+            Action::ChoosePersonalPath {
+                choice_id: "leaves".into(),
+            },
+            TrustedFacts::default(),
+        );
+        let state: State = serde_json::from_value(serde_json::to_value(&state).unwrap()).unwrap();
+        let context =
+            context_from_state(&state, &content, "live-context", 42, "pip", &["M06".into()])
+                .unwrap();
+        assert_eq!(context.recent_choices.last().unwrap().choice_id, "leaves");
+        assert_eq!(
+            context.open_threads[0].source_quest_id.as_deref(),
+            Some("pip-lantern-trail")
+        );
+        assert_eq!(
+            context.open_threads[0].source_document_version.as_deref(),
+            Some("1")
+        );
+        assert_eq!(context.interests[0].tag, "woodland-trails");
+        assert!(context.conversation_memory.summary.is_empty());
+        assert_eq!(context.recent_outcomes.as_ref().unwrap().len(), 1);
+        assert_eq!(
+            authored_fallback(&context, 42).unwrap().document.quest_id,
+            "pip-woodland-whispers"
+        );
     }
 }

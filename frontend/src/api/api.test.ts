@@ -434,3 +434,44 @@ test('personal quest projections validate bounded scenes and pinned encounter bi
       (error: unknown) => error instanceof ApiFailure && error.code === 'UNAVAILABLE',
     );
 });
+
+test('Continuity projections retain bounded source data and reject malformed optional fields', async () => {
+  const read = async (fields: object) => {
+    const client = new GameClient(
+      () => 'csrf',
+      async () => Response.json({ ...snapshot, ...fields }),
+    );
+    client.selectProfile('owned-profile');
+    return client.snapshot();
+  };
+  const memory = { recentChoices: [], recentOutcomes: [], threads: [] };
+  assert.deepEqual(
+    (
+      await read({
+        narrativeMemory: memory,
+        questInterests: ['night-sky'],
+        questInterestOptions: ['night-sky'],
+      })
+    ).narrativeMemory,
+    memory,
+  );
+  const offer = {
+    questId: 'pip-star-pebble',
+    documentVersion: '1',
+    title: 'Star',
+    companionId: 'pip',
+    minimumCharacterLevel: 4,
+    available: false,
+    completed: false,
+  };
+  for (const fields of [
+    { narrativeMemory: { ...memory, threads: Array(9).fill({}) } },
+    { questInterests: ['night-sky', 'night-sky'] },
+    { personalQuestOffers: [{ ...offer, lockedReason: 123 }] },
+    { narrativeMemory: { ...memory, secret: 'no' } },
+  ])
+    await assert.rejects(
+      read(fields),
+      (error: unknown) => error instanceof ApiFailure && error.code === 'UNAVAILABLE',
+    );
+});

@@ -1,6 +1,6 @@
 # Wonderwilds implementation plan
 
-Version: 1.3 · Updated: 29 October 2026 · Status: broader architecture and release roadmap
+Version: 1.4 · Updated: 29 October 2026 · Status: broader architecture and release roadmap
 
 The [companion progression plan](COMPANION_PROGRESSION_PLAN.md) governs the next gameplay implementation sequence and supersedes earlier collection/progression sequencing here. Use [implementation status](IMPLEMENTATION_STATUS.md) for delivered work. Existing WW task IDs remain reference scopes, not a queue to rebuild completed foundations. Live AI and fine-tuning are deferred and do not block the authored companion expansion.
 
@@ -30,10 +30,10 @@ The current repository is `/Users/gary/Documents/Development/wonderwilds`, under
 | --- | --- | --- |
 | `frontend/src/world.ts` and movement modules | Playable Meadow, server-driven world changes, two follower support | Regional integration and companion roles |
 | `frontend/src/backend-world.ts` and `backend-world-model.ts` | Server activities, journal, character training and personal episode choices/handoffs | Collection refinements and regional journeys |
-| `backend/crates/domain/src/engine.rs` | Explorer/character XP, friendship, teams, transformations and pinned personal episodes | Optional roles, richer rewards and regional integration |
+| `backend/crates/domain/src/engine.rs` | Explorer/character XP, friendship, teams, transformations, pinned episodes and bounded continuity memory | Optional roles, richer rewards and regional integration |
 | `backend/crates/api/src/game/` | Atomic authenticated transactions, durable retries/checkpoints, training and personal episode commands | Generated document activation and regional eligibility |
 | `contracts/` | Schemas, generated Rust/TS and shared fixtures | Compatible extensions and migration fixtures |
-| `content/` | Regional arcs, twelve friends, training, four branching quest documents and generation examples | Content iteration, regional episodes and human reviews |
+| `content/` | Regional arcs, twelve friends, training, four starter quests, two linked Pip follow-ups and generation examples | More companion chains, regional episodes and human reviews |
 | Guest save and existing art | Separate local progress, preserved hero IDs and distinct artwork for twelve friends | Preserve guest data; directional/transform art and human review |
 | Exploration library | 75 connected destinations; 72 new landscape images and lazy-loaded map previews | Authoritative regional eligibility, activities and discovery integration |
 

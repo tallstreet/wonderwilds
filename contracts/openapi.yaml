@@ -580,6 +580,18 @@
       },
       "PersonalQuestBinding": {
         "$ref": "./schemas/v1.json#/$defs/PersonalQuestBinding"
+      },
+      "NarrativeChoice": {
+        "$ref": "./schemas/v1.json#/$defs/NarrativeChoice"
+      },
+      "NarrativeOutcome": {
+        "$ref": "./schemas/v1.json#/$defs/NarrativeOutcome"
+      },
+      "NarrativeThread": {
+        "$ref": "./schemas/v1.json#/$defs/NarrativeThread"
+      },
+      "NarrativeMemory": {
+        "$ref": "./schemas/v1.json#/$defs/NarrativeMemory"
       }
     },
     "securitySchemes": {

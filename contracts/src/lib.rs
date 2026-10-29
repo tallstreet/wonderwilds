@@ -82,6 +82,7 @@ mod tests {
                     "TrainingOffer" => round_trip!(TrainingOffer),
                     "CharacterProgression" => round_trip!(CharacterProgression),
                     "ExplorerProgression" => round_trip!(ExplorerProgression),
+                    "NarrativeMemory" => round_trip!(NarrativeMemory),
                     "QuestDocument" => round_trip!(QuestDocument),
                     "PersonalQuestView" => round_trip!(PersonalQuestView),
                     "PersonalQuestBinding" => round_trip!(PersonalQuestBinding),

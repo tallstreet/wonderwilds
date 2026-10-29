@@ -1,5 +1,6 @@
 use super::*;
 use crate::personal_quests::{QuestDocument, validate_document};
+use serde_json::json;
 
 fn content() -> Content {
     Content::development(
@@ -171,7 +172,13 @@ fn personal_episodes_branch_reward_once_and_replay_without_a_game_ending() {
 #[test]
 fn all_authored_friends_and_paths_have_equal_supported_memory_rewards() {
     let c = content();
-    for document in c.personal_quests.documents() {
+    for document in c.personal_quests.documents().filter(|d| {
+        c.personal_quests
+            .entry(&d.quest_id)
+            .unwrap()
+            .continuation
+            .is_none()
+    }) {
         for path in 0..2 {
             let mut independent = initial(&c);
             let mut supported = initial(&c);
@@ -361,6 +368,8 @@ fn active_document_and_activity_policy_are_pinned_across_catalog_edits() {
             include_str!("../../../../content/quests/tansy-welcome-garden.v1.json"),
             include_str!("../../../../content/quests/nib-sharing-picnic.v1.json"),
             include_str!("../../../../content/quests/flutter-pattern-parade.v1.json"),
+            include_str!("../../../../content/quests/pip-woodland-whispers.v1.json"),
+            include_str!("../../../../content/quests/pip-star-pebble.v1.json"),
         ],
     )
     .unwrap();
@@ -506,4 +515,304 @@ fn restored_pinned_activity_slots_reject_unknown_mismatched_and_duplicate_bindin
         }
         assert!(malformed.validate().is_err());
     }
+}
+
+#[test]
+fn selected_threads_drive_two_hops_and_survive_reload_without_repeated_rewards() {
+    let c = content();
+    let mut state = initial(&c);
+    let mut log = Vec::new();
+    assert!(
+        !state
+            .personal_quest_offers(&c)
+            .iter()
+            .find(|o| o.quest_id == "pip-star-pebble")
+            .unwrap()
+            .available
+    );
+    episode(&mut state, &c, "pip-lantern-trail", 0, 0, true, &mut log);
+    assert_eq!(
+        state.personal_quest_offers(&c)[0].quest_id,
+        "pip-star-pebble"
+    );
+    let source = state.narrative_memory.threads[0].clone();
+    perform(
+        &mut state,
+        Action::StartPersonalQuest {
+            quest_id: "pip-star-pebble".into(),
+        },
+        &c,
+        context(),
+        &mut log,
+    );
+    assert!(
+        state
+            .personal_quest_view()
+            .unwrap()
+            .acknowledgement
+            .unwrap()
+            .contains("star-shaped pebble")
+    );
+    assert_eq!(
+        state
+            .personal_quest
+            .as_ref()
+            .unwrap()
+            .source_thread
+            .as_ref()
+            .unwrap(),
+        &source
+    );
+    state = serde_json::from_value(serde_json::to_value(&state).unwrap()).unwrap();
+    perform(
+        &mut state,
+        Action::AbandonPersonalQuest,
+        &c,
+        context(),
+        &mut log,
+    );
+    assert_eq!(state.narrative_memory.threads[0].status, "open");
+    episode(&mut state, &c, "pip-star-pebble", 1, 1, true, &mut log);
+    assert_eq!(
+        state
+            .narrative_memory
+            .threads
+            .iter()
+            .find(|t| t.id == source.id)
+            .unwrap()
+            .status,
+        "resolved"
+    );
+    let woodland = state
+        .narrative_memory
+        .threads
+        .iter()
+        .find(|t| t.tag == "woodland-trails" && t.status == "open")
+        .unwrap()
+        .clone();
+    assert_eq!(woodland.source_quest_id, "pip-star-pebble");
+    assert_eq!(
+        state.personal_quest_offers(&c)[0].quest_id,
+        "pip-woodland-whispers"
+    );
+    perform(
+        &mut state,
+        Action::StartPersonalQuest {
+            quest_id: "pip-woodland-whispers".into(),
+        },
+        &c,
+        context(),
+        &mut log,
+    );
+    assert_eq!(
+        state
+            .personal_quest
+            .as_ref()
+            .unwrap()
+            .source_thread
+            .as_ref()
+            .unwrap()
+            .id,
+        woodland.id
+    );
+    let acknowledgement = state
+        .personal_quest_view()
+        .unwrap()
+        .acknowledgement
+        .unwrap();
+    assert!(acknowledgement.contains("rustling leaves"));
+    state = serde_json::from_value(serde_json::to_value(&state).unwrap()).unwrap();
+    assert_eq!(
+        state
+            .personal_quest_view()
+            .unwrap()
+            .acknowledgement
+            .unwrap(),
+        acknowledgement
+    );
+    choose(&mut state, &c, 0, &mut log);
+    complete(&mut state, &c, true, &mut log);
+    choose(&mut state, &c, 0, &mut log);
+    assert_eq!(
+        state.inventory.get("pip-woodland-whispers-memory"),
+        Some(&1)
+    );
+    episode(
+        &mut state,
+        &c,
+        "pip-woodland-whispers",
+        1,
+        1,
+        false,
+        &mut log,
+    );
+    assert_eq!(
+        state.inventory.get("pip-woodland-whispers-memory"),
+        Some(&1)
+    );
+    state.validate_personal_state(&c).unwrap();
+}
+
+#[test]
+fn interests_rank_eligible_quests_without_unlocking_threads_or_changing_rewards() {
+    let c = content();
+    let mut state = initial(&c);
+    let mut log = Vec::new();
+    let options = c.personal_quests.interest_options();
+    let tansy = c
+        .personal_quests
+        .document("tansy-welcome-garden")
+        .unwrap()
+        .interest_tags[0]
+        .clone();
+    assert!(options.contains(&tansy));
+    let xp = state.character_xp.clone();
+    let inventory = state.inventory.clone();
+    perform(
+        &mut state,
+        Action::SetQuestInterests { tags: vec![tansy] },
+        &c,
+        context(),
+        &mut log,
+    );
+    assert_eq!(
+        state.personal_quest_offers(&c)[0].quest_id,
+        "tansy-welcome-garden"
+    );
+    assert!(
+        !state
+            .personal_quest_offers(&c)
+            .iter()
+            .find(|o| o.quest_id == "pip-woodland-whispers")
+            .unwrap()
+            .available
+    );
+    assert_eq!(state.character_xp, xp);
+    assert_eq!(state.inventory, inventory);
+    let before = state.clone();
+    let invalid = command(
+        &state,
+        Action::SetQuestInterests {
+            tags: vec!["made-up-interest".into()],
+        },
+    );
+    assert_eq!(
+        apply(&state, &invalid, &c, &context()),
+        Err(Rejection::InvalidCommand)
+    );
+    assert_eq!(state, before);
+    assert_eq!(replay(&initial(&c), &c, &log).unwrap(), state);
+}
+
+#[test]
+fn continuity_history_is_bounded_and_activity_can_lead_directly_to_handoff() {
+    let mut c = content();
+    let catalog = include_str!("../../../../content/quests/catalog.v1.json");
+    let mut pip: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../../content/quests/pip-lantern-trail.v1.json"
+    ))
+    .unwrap();
+    pip["nodes"][1]["nextNodeId"] = json!("handoff-stars");
+    pip["nodes"][2]["nextNodeId"] = json!("handoff-leaves");
+    pip["nodes"]
+        .as_array_mut()
+        .unwrap()
+        .retain(|n| n["id"] != "reflection");
+    let docs = [
+        pip.to_string(),
+        include_str!("../../../../content/quests/tansy-welcome-garden.v1.json").into(),
+        include_str!("../../../../content/quests/nib-sharing-picnic.v1.json").into(),
+        include_str!("../../../../content/quests/flutter-pattern-parade.v1.json").into(),
+        include_str!("../../../../content/quests/pip-woodland-whispers.v1.json").into(),
+        include_str!("../../../../content/quests/pip-star-pebble.v1.json").into(),
+    ];
+    c.personal_quests = crate::personal_quests::Catalog::load(
+        catalog,
+        &docs.iter().map(String::as_str).collect::<Vec<_>>(),
+    )
+    .unwrap();
+    let mut state = initial(&c);
+    let mut log = Vec::new();
+    for n in 0..20 {
+        perform(
+            &mut state,
+            Action::StartPersonalQuest {
+                quest_id: "pip-lantern-trail".into(),
+            },
+            &c,
+            context(),
+            &mut log,
+        );
+        choose(&mut state, &c, n % 2, &mut log);
+        complete(&mut state, &c, true, &mut log);
+        assert!(state.personal_quest_view().unwrap().node.is_handoff());
+    }
+    assert_eq!(state.narrative_memory.recent_choices.len(), 16);
+    assert_eq!(state.narrative_memory.recent_outcomes.len(), 8);
+    assert_eq!(state.narrative_memory.threads.len(), 8);
+    assert_eq!(
+        state
+            .narrative_memory
+            .threads
+            .last()
+            .unwrap()
+            .source_node_id,
+        "start"
+    );
+    assert_eq!(state.inventory.get("pip-personal-memory"), Some(&1));
+}
+
+#[test]
+fn newest_chosen_hook_outranks_an_older_abandoned_open_thread() {
+    let c = content();
+    let mut state = initial(&c);
+    let mut log = Vec::new();
+    episode(&mut state, &c, "pip-lantern-trail", 0, 0, true, &mut log);
+    perform(
+        &mut state,
+        Action::StartPersonalQuest {
+            quest_id: "pip-star-pebble".into(),
+        },
+        &c,
+        context(),
+        &mut log,
+    );
+    perform(
+        &mut state,
+        Action::AbandonPersonalQuest,
+        &c,
+        context(),
+        &mut log,
+    );
+    perform(
+        &mut state,
+        Action::SetQuestInterests {
+            tags: vec!["night-sky".into()],
+        },
+        &c,
+        context(),
+        &mut log,
+    );
+    episode(&mut state, &c, "pip-lantern-trail", 1, 1, true, &mut log);
+    assert_eq!(
+        state
+            .narrative_memory
+            .threads
+            .iter()
+            .filter(|thread| thread.status == "open")
+            .count(),
+        2
+    );
+    assert_eq!(
+        state.personal_quest_offers(&c)[0].quest_id,
+        "pip-woodland-whispers"
+    );
+    assert!(
+        state
+            .personal_quest_offers(&c)
+            .iter()
+            .find(|offer| offer.quest_id == "pip-star-pebble")
+            .unwrap()
+            .available
+    );
 }

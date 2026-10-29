@@ -20,4 +20,4 @@ for (const entry of catalog.quests) {
 for (const slot of catalog.activitySlots) check('QuestActivitySlot', slot);
 check('QuestGenerationContext', JSON.parse(await readFile(new URL('./generation-context.example.json', import.meta.url), 'utf8')));
 check('QuestGenerationProposal', JSON.parse(await readFile(new URL('./generation-proposal.example.json', import.meta.url), 'utf8')));
-console.log('Four quest documents, activity slots and future generation examples pass shared schemas.');
+console.log(`${catalog.quests.length} quest documents, activity slots and future generation examples pass shared schemas.`);

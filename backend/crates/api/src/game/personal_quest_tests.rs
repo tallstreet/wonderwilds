@@ -320,7 +320,7 @@ fn personal_pending_state_survives_compaction_with_identical_server_assessment()
     let migration = game.clone().into_storage(&content).unwrap();
     let mut compact = migration.aggregate;
     let serialized = serde_json::to_value(&compact).unwrap();
-    assert_eq!(serialized["storageFormat"], 2);
+    assert_eq!(serialized["storageFormat"], 3);
     // The previous runtime explicitly accepts only envelope 1, so it must reject
     // this profile instead of silently dropping personal episode progress.
     let mut stripped_version = serialized.clone();
@@ -355,4 +355,108 @@ fn personal_pending_state_survives_compaction_with_identical_server_assessment()
     assert_eq!(delta.response["personalQuest"]["node"]["id"], "reflection");
     compact.validate_storage(&content).unwrap();
     assert!(compact.encounters.is_empty());
+}
+
+#[test]
+fn continuity_and_interests_persist_with_safe_envelope_and_no_invented_threads() {
+    let content = development_content().unwrap();
+    let mut game = ready_pip(&content);
+    let locked = game.snapshot(&content).unwrap();
+    assert_eq!(
+        locked["personalQuestOffers"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|o| o["questId"] == "pip-woodland-whispers")
+            .unwrap()["lockedReason"],
+        "Follow a matching clue first"
+    );
+    send(
+        &mut game,
+        &content,
+        json!({"type":"set_quest_interests","tags":["woodland-trails"]}),
+    );
+    assert_eq!(
+        game.snapshot(&content).unwrap()["questInterests"],
+        json!(["woodland-trails"])
+    );
+    start_path(&mut game, &content, "pond");
+    send(
+        &mut game,
+        &content,
+        json!({"type":"start_personal_activity"}),
+    );
+    complete_quantity(&mut game, &content, true);
+    send(
+        &mut game,
+        &content,
+        json!({"type":"choose_personal_path","choiceId":"leaves"}),
+    );
+    let handoff = game.snapshot(&content).unwrap();
+    assert_eq!(
+        handoff["personalQuestOffers"][0]["questId"],
+        "pip-woodland-whispers"
+    );
+    let memory = handoff["narrativeMemory"].clone();
+    let started = send(
+        &mut game,
+        &content,
+        json!({"type":"start_personal_quest","questId":"pip-woodland-whispers"}),
+    );
+    assert!(
+        started["personalQuest"]["acknowledgement"]
+            .as_str()
+            .unwrap()
+            .contains("rustling leaves")
+    );
+    assert_eq!(started["narrativeMemory"], memory);
+    let mut compact = game.clone().into_storage(&content).unwrap().aggregate;
+    let serialized = serde_json::to_value(&compact).unwrap();
+    assert_eq!(serialized["storageFormat"], 3);
+    for version in [1, 2] {
+        let mut old = serialized.clone();
+        old["storageFormat"] = json!(version);
+        assert!(serde_json::from_value::<Aggregate>(old).is_err());
+    }
+    compact = serde_json::from_value(serialized).unwrap();
+    assert_eq!(compact.snapshot(&content).unwrap(), started);
+    let command = request(
+        &game,
+        "continuity-abandon",
+        json!({"type":"abandon_personal_quest"}),
+    );
+    let delta = compact
+        .execute_persisted(&command, &content, 100, "quest-session", None, &mut |_| {
+            Ok(true)
+        })
+        .unwrap();
+    assert_eq!(
+        delta.response["narrativeMemory"]["threads"][0]["status"],
+        "open"
+    );
+    assert_eq!(delta.response["questInterests"], json!(["woodland-trails"]));
+}
+
+#[test]
+fn pre_continuity_v1_and_v2_saves_still_load_without_fabricated_threads() {
+    let content = development_content().unwrap();
+    let game = ready_pip(&content);
+    let compact = game.into_storage(&content).unwrap().aggregate;
+    let v1 = serde_json::to_value(&compact).unwrap();
+    assert_eq!(v1["storageFormat"], 1);
+    let _: Aggregate = serde_json::from_value(v1).unwrap();
+    let mut game = ready_pip(&content);
+    send(
+        &mut game,
+        &content,
+        json!({"type":"start_personal_quest","questId":"pip-lantern-trail"}),
+    );
+    let compact = game.into_storage(&content).unwrap().aggregate;
+    let v2 = serde_json::to_value(&compact).unwrap();
+    assert_eq!(v2["storageFormat"], 2);
+    let loaded: Aggregate = serde_json::from_value(v2).unwrap();
+    assert_eq!(
+        loaded.snapshot(&content).unwrap()["narrativeMemory"]["threads"],
+        json!([])
+    );
 }

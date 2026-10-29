@@ -6,7 +6,7 @@ quest activation in this change. Documents and the catalog remain pending review
 
 The adventure continues through episodes. A quest can resolve a small problem,
 leave a memory and hand off to another thread; that resolution is not a global
-game ending. The initial four Meadow documents can be revisited with different
+game ending. Four starter documents and two linked Pip follow-ups can be revisited with different
 choices. This authored bank is finite and does not promise unlimited unique prose.
 
 ## The artifact we iterate on
@@ -18,6 +18,8 @@ output. The playable examples are under `content/quests/`:
 - `tansy-welcome-garden.v1.json`
 - `nib-sharing-picnic.v1.json`
 - `flutter-pattern-parade.v1.json`
+- `pip-star-pebble.v1.json`
+- `pip-woodland-whispers.v1.json`
 
 Each document declares its identity/version, companion, region, title, interest
 tags, entry node and a bounded node graph. Nodes use three capabilities:
@@ -70,6 +72,7 @@ complete synthetic example is
 | `interests` | Bounded preference tags with `player_selected` or `curated_conversation` provenance |
 | `conversationMemory` | Optional curated summary with explicit `not_shared` or `shared_summary` permission |
 | `recentChoices` | A bounded selection of actual prior quest/node/choice IDs |
+| `recentOutcomes` | Optional bounded completed episode summaries with their original document versions and episode IDs |
 | `openThreads` | Bounded narrative hooks carried forward by the server/editor |
 | `allowed` | Exact permitted actors, regions, activity-slot bindings, interest tags and continuation tags |
 
@@ -147,3 +150,15 @@ review/evaluation labels; held-out examples should include changed interests,
 supported learning, repeated visits and conflicting conversation hints. Model
 training, provider selection, consented data collection, budgets and deployment
 remain separate future work. No synthetic example here represents a real child.
+
+
+## Context from current gameplay
+
+`quest_generation::context_from_state` now builds the same request from an
+authoritative `State`, trusted content, the current authenticated API revision
+and server-selected learning skills. It supplies actual flags/ownership/levels,
+player-selected interests, bounded recent choices and outcomes, and only unresolved
+threads with source quest/document/episode/node/choice provenance. Conversation
+sharing remains `not_shared`; no chat capture is added. The digest binds these
+fields, and authored fallback respects actual thread prerequisites and newest-hook
+ordering. Structural validation still cannot prove arbitrary prose coherent.

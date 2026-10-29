@@ -119,7 +119,7 @@ def validate_catalog(catalog: dict, documents: dict[str, dict]) -> None:
     keys(catalog, {"schemaVersion", "contentVersion", "reviewStatus", "releaseEnabled", "activitySlots", "quests"}, "QuestCatalog")
     require(catalog["schemaVersion"] == "1.0" and catalog["contentVersion"] == "personal-quests-1.0.0", "unsupported catalog version")
     require(catalog["reviewStatus"] == "pending" and catalog["releaseEnabled"] is False, "development content must remain disabled and pending review")
-    require(isinstance(catalog["activitySlots"], list) and len(catalog["activitySlots"]) == 4, "four authored activity slots required")
+    require(isinstance(catalog["activitySlots"], list) and 1 <= len(catalog["activitySlots"]) <= 16, "bounded authored activity slots required")
     slots = {}
     for slot in catalog["activitySlots"]:
         keys(slot, {"id", "skillId", "templateId"}, "QuestActivitySlot")
@@ -127,10 +127,10 @@ def validate_catalog(catalog: dict, documents: dict[str, dict]) -> None:
         require(slot["id"] not in slots, "duplicate activity slot")
         require((slot["skillId"], slot["templateId"]) in COMPANIONS.values(), "unsupported slot binding")
         slots[slot["id"]] = slot
-    require(isinstance(catalog["quests"], list) and len(catalog["quests"]) == 4, "four personal quests required")
+    require(isinstance(catalog["quests"], list) and 4 <= len(catalog["quests"]) <= 32, "bounded personal quest bank required")
     ids, rewards, companions, paths = set(), set(), set(), set()
     for entry in catalog["quests"]:
-        keys(entry, {"questId", "documentPath", "minimumCharacterLevel", "rewardItemId"}, "QuestCatalogEntry")
+        keys(entry, {"questId", "documentPath", "minimumCharacterLevel", "rewardItemId"} | ({"continuation"} if "continuation" in entry else set()), "QuestCatalogEntry")
         text(entry["questId"], 120, "catalog questId", True)
         text(entry["rewardItemId"], 120, "rewardItemId", True)
         require(entry["minimumCharacterLevel"] == 4, "personal quests unlock at character level four")
@@ -142,8 +142,24 @@ def validate_catalog(catalog: dict, documents: dict[str, dict]) -> None:
         document = documents[expected]
         validate_document(document, slots)
         require(document["questId"] == entry["questId"], "catalog/document identity mismatch")
-        require(document["companionId"] not in companions, "duplicate companion personal quest")
+        if "continuation" in entry:
+            policy=entry["continuation"]
+            keys(policy,{"tag","sourceQuestIds","acknowledgement"},"ContinuationPolicy")
+            text(policy["acknowledgement"],600,"acknowledgement")
+            identifiers(policy["sourceQuestIds"],1,8,"continuation source quests")
+            for source_id in policy["sourceQuestIds"]:
+                source=documents.get(f'content/quests/{source_id}.v1.json')
+                require(source is not None and source["companionId"]==document["companionId"],"invalid continuation source")
+                require(any(policy["tag"] in n.get("continuationTags",[]) for n in source["nodes"]),"missing source handoff")
         companions.add(document["companionId"])
+    reachable={entry["questId"] for entry in catalog["quests"] if "continuation" not in entry}
+    while True:
+        before=len(reachable)
+        reachable.update(entry["questId"] for entry in catalog["quests"] if "continuation" in entry and any(source in reachable for source in entry["continuation"]["sourceQuestIds"]))
+        if len(reachable)==before:
+            break
+    require(reachable==ids,"unreachable continuation bank")
+    require(len({tag for document in documents.values() for tag in document["interestTags"]})<=32,"oversized interest vocabulary")
     require(companions == set(COMPANIONS), "incomplete Meadow personal quests")
     require(paths == set(documents), "uncatalogued quest documents")
 
@@ -156,4 +172,4 @@ def load() -> tuple[dict, dict[str, dict]]:
 
 if __name__ == "__main__":
     validate_catalog(*load())
-    print("Personal quests valid: four branching episodes with continuing handoffs; release remains disabled.")
+    print("Personal quests valid: branching episodes with continuing handoffs; release remains disabled.")
