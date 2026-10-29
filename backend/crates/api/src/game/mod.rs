@@ -46,6 +46,10 @@ pub struct SavedEncounter {
     #[serde(default)]
     abandoned: bool,
     session_id: String,
+    #[serde(default)]
+    training: Option<wire::TrainingBinding>,
+    #[serde(default)]
+    training_policy: Option<String>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 struct Receipt {
@@ -139,7 +143,25 @@ impl Aggregate {
             };
             *value = json!({"skillId":skill_id,"status":status,"explanation":summary.explanation});
         }
-        let value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"friendship":self.domain.creatures().iter().map(|id|json!({"creatureId":id,"points":self.domain.friendship(id)})).collect::<Vec<_>>(),"transformedCreatures":self.domain.transformed(),"availableHelpingMoments":self.domain.available_helping_moments(content).iter().map(|(creature,quest)|json!({"creatureId":creature,"completedQuestId":quest})).collect::<Vec<_>>(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills.into_values().collect::<Vec<_>>()});
+        let available = self.domain.available_training(content);
+        let character_progression: Vec<Value> = self.domain.creatures().iter().map(|id| {
+            let level = self.domain.character_level(content, id);
+            let mut value = json!({
+                "creatureId": id,
+                "xp": self.domain.character_xp(id),
+                "level": level,
+                "completedTrainingIds": content.training_definitions().filter(|t| t.creature_id == *id && self.domain.training_completed(&t.id)).map(|t| t.id.clone()).collect::<Vec<_>>(),
+                "availableTraining": available.iter().filter(|t| t.creature_id == *id).map(|t| json!({"trainingId":t.id,"requiredLevel":t.required_level,"xp":t.xp,"reactionId":t.reaction_id})).collect::<Vec<_>>()
+            });
+            if let Some(threshold) = content.character_level_thresholds().get(level) {
+                value["nextLevelXp"] = json!(threshold);
+            }
+            if let Some(training) = content.training_definitions().filter(|t| t.creature_id == *id && self.domain.training_completed(&t.id)).max_by_key(|t| t.required_level) {
+                value["reactionId"] = json!(training.reaction_id);
+            }
+            value
+        }).collect();
+        let value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"friendship":self.domain.creatures().iter().map(|id|json!({"creatureId":id,"points":self.domain.friendship(id)})).collect::<Vec<_>>(),"transformedCreatures":self.domain.transformed(),"availableHelpingMoments":self.domain.available_helping_moments(content).iter().map(|(creature,quest)|json!({"creatureId":creature,"completedQuestId":quest})).collect::<Vec<_>>(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills.into_values().collect::<Vec<_>>(),"teamCapacity":self.domain.team_capacity(),"characterProgression":character_progression,"explorerProgression":{"xp":self.domain.xp(),"level":self.domain.level(content)}});
         wire::validate("GameSnapshot", &value).map_err(|_| Error::Unavailable)?;
         Ok(value)
     }
@@ -151,6 +173,7 @@ impl Aggregate {
         let (_, mut encounter) = authored_encounter(&saved.skill, saved.seed, &saved.id)
             .map_err(|_| Error::Unavailable)?;
         encounter.support = saved.support.clone();
+        encounter.training = saved.training.clone();
         serde_json::to_value(encounter).map_err(|_| Error::Unavailable)
     }
     fn domain_apply(
@@ -267,6 +290,14 @@ impl Aggregate {
                         completed: false,
                         abandoned: false,
                         session_id: session_id.into(),
+                        training_policy: training_policy(content, quest),
+                        training: content
+                            .training(quest)
+                            .map(|training| wire::TrainingBinding {
+                                training_id: training.id.clone(),
+                                creature_id: training.creature_id.clone(),
+                                rules_version: content.training_rules_version().into(),
+                            }),
                     },
                 );
             }
@@ -279,6 +310,23 @@ impl Aggregate {
                     .ok_or(Error::NotFound)?;
                 if saved.completed || saved.abandoned {
                     return Err(Error::RevisionConflict);
+                }
+                // Never silently evaluate a pending training instance under changed rules
+                // or redirect its reward recipient after content or team changes.
+                if payload["type"] != "abandon"
+                    && let Some(binding) = &saved.training
+                {
+                    let training = content
+                        .training(&binding.training_id)
+                        .ok_or(Error::Unavailable)?;
+                    if saved.training_policy != training_policy(content, &saved.quest)
+                        || binding.rules_version != content.training_rules_version()
+                        || binding.creature_id != training.creature_id
+                        || saved.quest != training.id
+                        || saved.skill != training.skill_id
+                    {
+                        return Err(Error::Unavailable);
+                    }
                 }
                 let (task, mut encounter) = authored_encounter(&saved.skill, saved.seed, &saved.id)
                     .map_err(|_| Error::Unavailable)?;
@@ -388,6 +436,21 @@ impl Aggregate {
                     now,
                 )?;
             }
+            "select_team" => {
+                let creature_ids = payload["creatureIds"]
+                    .as_array()
+                    .ok_or(Error::InvalidInput)?
+                    .iter()
+                    .map(|id| id.as_str().map(String::from).ok_or(Error::InvalidInput))
+                    .collect::<Result<Vec<_>, _>>()?;
+                next.domain_apply(
+                    Action::SelectTeam { creature_ids },
+                    &domain_id,
+                    content,
+                    TrustedFacts::default(),
+                    now,
+                )?;
+            }
             "help_friend" => {
                 next.domain_apply(
                     Action::HelpFriend {
@@ -436,6 +499,24 @@ impl Aggregate {
         Ok(response)
     }
 }
+fn training_policy(content: &Content, quest: &str) -> Option<String> {
+    content.training(quest).map(|training| {
+        digest_id(
+            &json!({
+                "rulesVersion": content.training_rules_version(),
+                "thresholds": content.character_level_thresholds(),
+                "creatureId": training.creature_id,
+                "skillId": training.skill_id,
+                "templateId": training.template_id,
+                "requiredLevel": training.required_level,
+                "xp": training.xp,
+                "reactionId": training.reaction_id,
+            })
+            .to_string(),
+        )
+    })
+}
+
 fn representation(skill: &str) -> &'static str {
     match skill {
         "M06" => "countable_planks",

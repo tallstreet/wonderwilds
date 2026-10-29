@@ -33,5 +33,163 @@
     "eligibleExpeditionBoundPerFriend": 4,
     "policy": "Pip is first in Meadow. Thereafter select a missing eligible friend using seeded choice; help-quest completion befriends them. Declined help remains offered without rerolling. Once all four are befriended, seeded optional revisits exclude the last friend when alternatives exist.",
     "essentialRouteRequiresDiscovery": false
+  },
+  "characterProgression": {
+    "rulesVersion": "character-training-1.0.0",
+    "levels": [
+      0,
+      10,
+      20,
+      30,
+      40
+    ],
+    "supportedCompletionMultiplier": 1,
+    "repeatMilestoneXp": 0,
+    "training": [
+      {
+        "id": "training-pip-1",
+        "creatureId": "pip",
+        "skillId": "M06",
+        "templateId": "missing_quantity",
+        "requiredLevel": 1,
+        "xp": 10,
+        "reactionId": "lantern-cheer"
+      },
+      {
+        "id": "training-pip-2",
+        "creatureId": "pip",
+        "skillId": "M06",
+        "templateId": "missing_quantity",
+        "requiredLevel": 2,
+        "xp": 10,
+        "reactionId": "pip-milestone-3"
+      },
+      {
+        "id": "training-pip-3",
+        "creatureId": "pip",
+        "skillId": "M06",
+        "templateId": "missing_quantity",
+        "requiredLevel": 3,
+        "xp": 10,
+        "reactionId": "pip-milestone-4"
+      },
+      {
+        "id": "training-pip-4",
+        "creatureId": "pip",
+        "skillId": "M06",
+        "templateId": "missing_quantity",
+        "requiredLevel": 4,
+        "xp": 10,
+        "reactionId": "pip-milestone-5"
+      },
+      {
+        "id": "training-tansy-1",
+        "creatureId": "tansy",
+        "skillId": "M05",
+        "templateId": "pattern_sort",
+        "requiredLevel": 1,
+        "xp": 10,
+        "reactionId": "flower-cheer"
+      },
+      {
+        "id": "training-tansy-2",
+        "creatureId": "tansy",
+        "skillId": "M05",
+        "templateId": "pattern_sort",
+        "requiredLevel": 2,
+        "xp": 10,
+        "reactionId": "tansy-milestone-3"
+      },
+      {
+        "id": "training-tansy-3",
+        "creatureId": "tansy",
+        "skillId": "M05",
+        "templateId": "pattern_sort",
+        "requiredLevel": 3,
+        "xp": 10,
+        "reactionId": "tansy-milestone-4"
+      },
+      {
+        "id": "training-tansy-4",
+        "creatureId": "tansy",
+        "skillId": "M05",
+        "templateId": "pattern_sort",
+        "requiredLevel": 4,
+        "xp": 10,
+        "reactionId": "tansy-milestone-5"
+      },
+      {
+        "id": "training-nib-1",
+        "creatureId": "nib",
+        "skillId": "M08",
+        "templateId": "equal_sharing",
+        "requiredLevel": 1,
+        "xp": 10,
+        "reactionId": "berry-cheer"
+      },
+      {
+        "id": "training-nib-2",
+        "creatureId": "nib",
+        "skillId": "M08",
+        "templateId": "equal_sharing",
+        "requiredLevel": 2,
+        "xp": 10,
+        "reactionId": "nib-milestone-3"
+      },
+      {
+        "id": "training-nib-3",
+        "creatureId": "nib",
+        "skillId": "M08",
+        "templateId": "equal_sharing",
+        "requiredLevel": 3,
+        "xp": 10,
+        "reactionId": "nib-milestone-4"
+      },
+      {
+        "id": "training-nib-4",
+        "creatureId": "nib",
+        "skillId": "M08",
+        "templateId": "equal_sharing",
+        "requiredLevel": 4,
+        "xp": 10,
+        "reactionId": "nib-milestone-5"
+      },
+      {
+        "id": "training-flutter-1",
+        "creatureId": "flutter",
+        "skillId": "M09",
+        "templateId": "pattern_sort",
+        "requiredLevel": 1,
+        "xp": 10,
+        "reactionId": "wing-cheer"
+      },
+      {
+        "id": "training-flutter-2",
+        "creatureId": "flutter",
+        "skillId": "M09",
+        "templateId": "pattern_sort",
+        "requiredLevel": 2,
+        "xp": 10,
+        "reactionId": "flutter-milestone-3"
+      },
+      {
+        "id": "training-flutter-3",
+        "creatureId": "flutter",
+        "skillId": "M09",
+        "templateId": "pattern_sort",
+        "requiredLevel": 3,
+        "xp": 10,
+        "reactionId": "flutter-milestone-4"
+      },
+      {
+        "id": "training-flutter-4",
+        "creatureId": "flutter",
+        "skillId": "M09",
+        "templateId": "pattern_sort",
+        "requiredLevel": 4,
+        "xp": 10,
+        "reactionId": "flutter-milestone-5"
+      }
+    ]
   }
 }

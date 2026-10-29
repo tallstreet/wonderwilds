@@ -92,8 +92,22 @@ localStorage is untouched. Server flags repair the bridge, bloom the garden and 
 journal selects a following companion; the selected team survives reloads.
 Friend artwork is provisional. Camera, hero choice and movement remain local
 under a separate profile-specific view key; no guest evidence is imported.
-Regional travel, transformations, director integration, identity-provider login,
-save import and parent lifecycle screens remain outstanding. No spatial/measurement task is reachable in Meadow.
+The journal now presents separate character XP/levels and sixteen authored Meadow
+training milestones, with repeat practice earning no extra XP. The training
+clearing and journal open the same server-assessed activities, including support,
+abandonment and resume. A first-time milestone awards 10 character XP and a
+level-up celebration. Character levels use thresholds 0/10/20/30/40; Explorer XP
+remains separate. Team selection/removal respects existing story-owned capacity,
+and the world can render both followers. The second slot retains its Orchard
+unlock; this does not activate Orchard gameplay.
+
+Friendship memory and reversible glow controls are connected in the journal.
+Server-authoritative regional travel, companion exploration roles, personal
+quests, distinct transformation art, director integration, identity-provider
+login, save import and parent lifecycle screens remain outstanding. The 75-map
+exploration library does not establish regional story eligibility. No
+spatial/measurement task is reachable in Meadow. The development API retains its
+2,000-command cap; see the [long-play storage design](docs/LONG_PLAY_STORAGE_PLAN.md).
 Hints currently repeat the authored instruction and suggest helper support;
 worked-example text and narration are not yet supplied by the API.
 
@@ -103,3 +117,8 @@ Vite port 5180 (`WW_DEMO_PORT=5180 WW_DEMO_API_PORT=3002`) with the local sessio
 config, and set `CHROMIUM_PATH` to an installed Chromium executable. It verifies
 incorrect/correct answers, support persistence, abandonment, four friendships,
 companion selection, reloads, mobile layout, and local access boundaries.
+
+For the actual world training journey in the prepared Linux environment, run
+`node qa/e2e/run-training-qa.mjs`. It creates and removes its own synthetic QA
+database and temporary session, using ports 3002/5180 without changing demo
+progress. See [browser checks](qa/e2e/README.md) and [CI scope](docs/CI.md).

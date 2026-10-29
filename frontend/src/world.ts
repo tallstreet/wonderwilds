@@ -26,7 +26,7 @@ export function createWorld(
   onMapChange?: (region: MapId, position: Point) => void,
   backend?: {
     encounters(): WorldEncounter[];
-    companion(): { sprite: string; name: string } | undefined;
+    companions(): { sprite: string; name: string }[];
   },
 ) {
   class Island extends Phaser.Scene {
@@ -39,10 +39,8 @@ export function createWorld(
       Phaser.Input.Keyboard.Key
     >;
     player!: Actor;
-    friend: Actor | null = null;
-    friendTrail: Point[] = [];
+    followers: { actor: Actor; trail: Point[]; label?: Phaser.GameObjects.Text }[] = [];
     markers: (Point & { e: WorldEncounter; cat: Phaser.GameObjects.Image })[] = [];
-    friendLabel?: Phaser.GameObjects.Text;
     you!: Phaser.GameObjects.Text;
     prompt!: Phaser.GameObjects.Text;
     lastSave = 0;
@@ -199,16 +197,20 @@ export function createWorld(
         })
         .setOrigin(0.5)
         .setDepth(pos.y + 100);
-      this.friend = null;
-      this.friendLabel = undefined;
-      this.friendTrail = [];
-      const companion = backend?.companion();
-      if (backend ? companion : s.done.length === 3) {
-        const start = !this.blocked(pos.x - 40, pos.y) ? { x: pos.x - 40, y: pos.y } : pos;
-        this.friend = this.makeActor(start.x, start.y, companion?.sprite ?? 'pip', 78, 87);
-        if (companion) this.friendLabel = this.label(start.x, start.y - 90, companion.name, 10);
-        this.friendTrail = findRoute(start, pos, fixed, s.region);
-        this.friendTrail.push({ x: pos.x, y: pos.y });
+      this.followers = [];
+      const companions =
+        backend?.companions() ?? (s.done.length === 3 ? [{ sprite: 'pip', name: '' }] : []);
+      for (const [index, companion] of companions.entries()) {
+        const offset = 40 + index * 42;
+        const start = !this.blocked(pos.x - offset, pos.y) ? { x: pos.x - offset, y: pos.y } : pos;
+        const actor = this.makeActor(start.x, start.y, companion.sprite, 78, 87);
+        const trail = findRoute(start, pos, fixed, s.region);
+        trail.push({ x: pos.x, y: pos.y });
+        this.followers.push({
+          actor,
+          trail,
+          label: companion.name ? this.label(start.x, start.y - 90, companion.name, 10) : undefined,
+        });
       }
       this.prompt = this.label(
         560,
@@ -423,7 +425,7 @@ export function createWorld(
       if (document.querySelector('dialog[open]')) {
         // Do not leave a bunny suspended above its shadow while a modal is open.
         this.poseActor(this.player, 0, 0, 0);
-        if (this.friend) this.poseActor(this.friend, 0, 0, 0);
+        for (const follower of this.followers) this.poseActor(follower.actor, 0, 0, 0);
         return;
       }
       let dx = 0,
@@ -461,15 +463,15 @@ export function createWorld(
       this.player.setPosition(motion.x, motion.y);
       this.poseActor(this.player, motion.x - oldX, motion.y - oldY, motion.distance);
       this.you.setPosition(this.player.x, this.player.y - 120).setDepth(this.player.y + 100);
-      if (this.friend) {
-        this.friendTrail.push(...motion.path);
-        const before = { x: this.friend.x, y: this.friend.y };
-        const follow = advanceFollower(before, this.friendTrail, dt * 0.26, 48, (x, y) =>
+      for (const [index, follower] of this.followers.entries()) {
+        follower.trail.push(...motion.path);
+        const before = { x: follower.actor.x, y: follower.actor.y };
+        const follow = advanceFollower(before, follower.trail, dt * 0.26, 48 + index * 46, (x, y) =>
           this.blocked(x, y),
         );
-        this.friend.setPosition(follow.x, follow.y);
-        this.friendLabel?.setPosition(follow.x, follow.y - 90).setDepth(follow.y + 100);
-        this.poseActor(this.friend, follow.x - before.x, follow.y - before.y, follow.distance);
+        follower.actor.setPosition(follow.x, follow.y);
+        follower.label?.setPosition(follow.x, follow.y - 90).setDepth(follow.y + 100);
+        this.poseActor(follower.actor, follow.x - before.x, follow.y - before.y, follow.distance);
       }
       const exit = mapExit(getState().region, this.player);
       if (!exit) this.exitArmed = true;

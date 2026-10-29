@@ -285,6 +285,9 @@
         },
         "support": {
           "$ref": "#/$defs/SupportState"
+        },
+        "training": {
+          "$ref": "#/$defs/TrainingBinding"
         }
       },
       "required": [
@@ -526,6 +529,30 @@
             "enabled"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "select_team"
+            },
+            "creatureIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "maxItems": 2,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "type",
+            "creatureIds"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -710,6 +737,22 @@
           },
           "maxItems": 200,
           "uniqueItems": true
+        },
+        "characterProgression": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CharacterProgression"
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "explorerProgression": {
+          "$ref": "#/$defs/ExplorerProgression"
+        },
+        "teamCapacity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
         }
       },
       "required": [
@@ -1606,6 +1649,140 @@
       "required": [
         "creatureId",
         "completedQuestId"
+      ],
+      "additionalProperties": false
+    },
+    "TrainingBinding": {
+      "type": "object",
+      "properties": {
+        "trainingId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "creatureId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "rulesVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "trainingId",
+        "creatureId",
+        "rulesVersion"
+      ],
+      "additionalProperties": false
+    },
+    "TrainingOffer": {
+      "type": "object",
+      "properties": {
+        "trainingId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "requiredLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "xp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "reactionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "trainingId",
+        "requiredLevel",
+        "xp",
+        "reactionId"
+      ],
+      "additionalProperties": false
+    },
+    "CharacterProgression": {
+      "type": "object",
+      "properties": {
+        "creatureId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "xp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "nextLevelXp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "reactionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "completedTrainingIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "availableTraining": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TrainingOffer"
+          },
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "creatureId",
+        "xp",
+        "level",
+        "completedTrainingIds",
+        "availableTraining"
+      ],
+      "additionalProperties": false
+    },
+    "ExplorerProgression": {
+      "type": "object",
+      "properties": {
+        "xp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "xp",
+        "level"
       ],
       "additionalProperties": false
     }

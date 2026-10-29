@@ -161,3 +161,230 @@ fn companion_commands_preserve_authority_retries_and_persisted_progress() {
         "social/cosmetic commands must not fabricate learning evidence"
     );
 }
+
+pub(super) fn recruited_pip(content: &Content) -> Aggregate {
+    let mut game = Aggregate::new(content);
+    for quest in [
+        "meadow-welcome",
+        "meadow-bridge",
+        "meadow-picnic",
+        "meadow-garden",
+        "meadow-letter",
+        "meadow-finale",
+        "befriend-pip",
+    ] {
+        finish(&mut game, content, quest);
+    }
+    game
+}
+
+#[test]
+fn training_is_bound_persistent_supported_and_rewards_only_once() {
+    let content = development_content().unwrap();
+    let mut game = recruited_pip(&content);
+    let explorer_xp = game.domain.xp();
+    let start = request(
+        &game,
+        "training-start",
+        json!({"type":"start_encounter","beatId":"training-pip-1"}),
+    );
+    let snapshot = game.execute(&start, &content, 2, "session").unwrap();
+    let pending = &snapshot["pendingEncounters"][0];
+    assert_eq!(pending["training"]["creatureId"], "pip");
+    assert_eq!(pending["training"]["trainingId"], "training-pip-1");
+    let encounter = pending["id"].as_str().unwrap().to_owned();
+    let original = serde_json::to_value(&game).unwrap();
+    game = serde_json::from_value(original).unwrap();
+    assert_eq!(
+        game.execute(&start, &content, 3, "session").unwrap(),
+        snapshot
+    );
+    game.execute(
+        &request(
+            &game,
+            "training-team-clear",
+            json!({"type":"select_team","creatureIds":[]}),
+        ),
+        &content,
+        3,
+        "session",
+    )
+    .unwrap();
+    game.execute(
+        &request(
+            &game,
+            "training-hint",
+            json!({"type":"hint","encounterId":encounter,"supportKind":"hint"}),
+        ),
+        &content,
+        3,
+        "session",
+    )
+    .unwrap();
+    let pending = game.public_encounter(&encounter).unwrap();
+    let answer = pending["parameters"]["total"].as_u64().unwrap()
+        - pending["parameters"]["given"].as_u64().unwrap();
+    let complete = request(
+        &game,
+        "training-answer",
+        json!({"type":"attempt","encounterId":encounter,"answer":{"kind":"quantity","value":answer}}),
+    );
+    let result = game.execute(&complete, &content, 4, "session").unwrap();
+    assert_eq!(result["characterProgression"][0]["level"], 2);
+    assert!(result["characterProgression"][0]["xp"].as_u64().unwrap() > 0);
+    assert_eq!(game.domain.xp(), explorer_xp);
+    assert_eq!(game.evidence.last().unwrap().support.hint_count, 1);
+    let xp = game.domain.character_xp("pip");
+    let evidence = game.evidence.len();
+    assert_eq!(
+        game.execute(&complete, &content, 5, "session").unwrap(),
+        result
+    );
+    assert_eq!(game.evidence.len(), evidence);
+    game.execute(
+        &request(
+            &game,
+            "training-practice",
+            json!({"type":"start_encounter","beatId":"training-pip-1"}),
+        ),
+        &content,
+        5,
+        "session",
+    )
+    .unwrap();
+    let pending = game.snapshot(&content).unwrap()["pendingEncounters"][0].clone();
+    let answer = pending["parameters"]["total"].as_u64().unwrap()
+        - pending["parameters"]["given"].as_u64().unwrap();
+    game.execute(&request(&game, "practice-answer", json!({"type":"attempt","encounterId":pending["id"],"answer":{"kind":"quantity","value":answer}})), &content, 6, "session").unwrap();
+    assert_eq!(game.domain.character_xp("pip"), xp);
+    assert_eq!(game.domain.character_level(&content, "pip"), 2);
+}
+
+#[test]
+fn training_rejects_unowned_locked_and_client_invented_rewards_without_mutation() {
+    let content = development_content().unwrap();
+    let mut game = Aggregate::new(&content);
+    let before = serde_json::to_value(&game).unwrap();
+    assert_eq!(
+        game.execute(
+            &request(
+                &game,
+                "unowned-training",
+                json!({"type":"start_encounter","beatId":"training-pip-1"})
+            ),
+            &content,
+            1,
+            "session"
+        ),
+        Err(Error::Forbidden)
+    );
+    assert_eq!(serde_json::to_value(&game).unwrap(), before);
+    let mut game = recruited_pip(&content);
+    assert_eq!(
+        game.execute(
+            &request(
+                &game,
+                "locked-training",
+                json!({"type":"start_encounter","beatId":"training-pip-4"})
+            ),
+            &content,
+            1,
+            "session"
+        ),
+        Err(Error::Forbidden)
+    );
+    assert_eq!(
+        game.execute(
+            &request(
+                &game,
+                "invented-xp",
+                json!({"type":"start_encounter","beatId":"training-pip-1","xp":99999})
+            ),
+            &content,
+            1,
+            "session"
+        ),
+        Err(Error::InvalidInput)
+    );
+    let started = game
+        .execute(
+            &request(
+                &game,
+                "abandon-start",
+                json!({"type":"start_encounter","beatId":"training-pip-1"}),
+            ),
+            &content,
+            1,
+            "session",
+        )
+        .unwrap();
+    game.execute(
+        &request(
+            &game,
+            "abandon-training",
+            json!({"type":"abandon","encounterId":started["pendingEncounters"][0]["id"]}),
+        ),
+        &content,
+        1,
+        "session",
+    )
+    .unwrap();
+    assert_eq!(game.domain.character_xp("pip"), 0);
+    assert!(!game.domain.training_completed("training-pip-1"));
+}
+
+#[test]
+fn changed_training_policy_blocks_awards_but_allows_abandonment() {
+    let content = development_content().unwrap();
+    let mut game = recruited_pip(&content);
+    let snapshot = game
+        .execute(
+            &request(
+                &game,
+                "policy-start",
+                json!({"type":"start_encounter","beatId":"training-pip-1"}),
+            ),
+            &content,
+            1,
+            "session",
+        )
+        .unwrap();
+    let encounter = snapshot["pendingEncounters"][0]["id"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    game.encounters.get_mut(&encounter).unwrap().training_policy = Some("old-policy".into());
+    let before = serde_json::to_value(&game).unwrap();
+    assert_eq!(
+        game.execute(
+            &request(
+                &game,
+                "policy-answer",
+                json!({"type":"hint","encounterId":encounter,"supportKind":"hint"})
+            ),
+            &content,
+            2,
+            "session"
+        ),
+        Err(Error::Unavailable)
+    );
+    assert_eq!(serde_json::to_value(&game).unwrap(), before);
+    game.execute(
+        &request(
+            &game,
+            "policy-abandon",
+            json!({"type":"abandon","encounterId":encounter}),
+        ),
+        &content,
+        2,
+        "session",
+    )
+    .unwrap();
+    assert_eq!(game.domain.character_xp("pip"), 0);
+    assert!(
+        game.snapshot(&content).unwrap()["pendingEncounters"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+}

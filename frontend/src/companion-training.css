@@ -1,0 +1,46 @@
+.companion-training {
+  width: 100%;
+  padding: 12px 0;
+  color: #493f55;
+  line-height: 1.5;
+}
+#dialog:has(.ww-activity) > h2.training-heading {
+  display: block;
+}
+.companion-training p {
+  margin: 8px 0;
+}
+.companion-training button {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  white-space: normal;
+}
+.character-level {
+  font-weight: bold;
+}
+.training-reaction {
+  padding: 8px;
+  border-radius: 12px;
+  background: #fff2bb;
+}
+.training-celebration .friend-portrait {
+  animation: training-wiggle 700ms ease-in-out 2;
+}
+@keyframes training-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  75% {
+    transform: rotate(8deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .training-celebration .friend-portrait {
+    animation: none;
+  }
+}

@@ -6,6 +6,7 @@ import {
   meadowBeats,
   questReady,
   worldQuests,
+  trainingClearing,
 } from './backend-world-model.ts';
 import { findRoute, isBlocked } from './navigation.ts';
 const blank = (): GameSnapshot => ({
@@ -36,7 +37,7 @@ test('Server flags drive scenery; guest progress is never a prerequisite', () =>
 test('World interactions have reachable approaches, including early friendships before bridge repair', () => {
   const state = blank();
   state.storyFlags = meadowBeats.find((b) => b.id === 'meadow-welcome')!.completionFlags;
-  for (const quest of worldQuests) {
+  for (const quest of [...worldQuests, trainingClearing]) {
     const fixed = !questReady(state, quest.id);
     const approach = { x: quest.x - 30, y: quest.y + 25 };
     assert.equal(isBlocked(approach.x, approach.y, fixed), false, quest.id);

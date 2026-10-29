@@ -77,6 +77,37 @@ def validate_development(development=None, friends=None, adventure=None):
     return errors
 
 
+def validate_training(progression=None):
+    progression = progression if progression is not None else load('content/story/progression.v1.json')
+    policy = progression.get('characterProgression', {})
+    errors = []
+    def require(condition, message):
+        if not condition:
+            errors.append(message)
+    levels = policy.get('levels', [])
+    require(levels == [0, 10, 20, 30, 40], 'invalid character thresholds')
+    require(policy.get('rulesVersion') == 'character-training-1.0.0', 'unknown training rules')
+    require(policy.get('supportedCompletionMultiplier') == 1, 'training support penalty')
+    require(policy.get('repeatMilestoneXp') == 0, 'training XP farming')
+    training = policy.get('training', [])
+    ids = [t.get('id') for t in training]
+    require(len(ids) == len(set(ids)), 'duplicate training ID')
+    mappings = {'pip': ('M06', 'missing_quantity'), 'tansy': ('M05', 'pattern_sort'),
+                'nib': ('M08', 'equal_sharing'), 'flutter': ('M09', 'pattern_sort')}
+    for friend, mapping in mappings.items():
+        milestones = sorted([t for t in training if t.get('creatureId') == friend], key=lambda t: t.get('requiredLevel', 0))
+        require([t.get('requiredLevel') for t in milestones] == [1, 2, 3, 4], 'missing training milestone')
+        xp = 0
+        for t in milestones:
+            require((t.get('skillId'), t.get('templateId')) == mapping, 'unsupported training skill/template')
+            require(type(t.get('xp')) is int and t.get('xp') == 10, 'invalid training XP')
+            require(isinstance(t.get('reactionId'), str) and bool(t.get('reactionId')), 'missing training reaction')
+            xp += t.get('xp', 0) if type(t.get('xp')) is int else 0
+        require(xp >= 40, 'unreachable character level five')
+    require(len(training) == 16 and all(t.get('creatureId') in mappings for t in training), 'invalid training roster')
+    return errors
+
+
 def validate(adventure=None, friends=None, assets=None):
     adventure = adventure or load('content/story/adventure.v1.json')
     friends = friends or load('content/creatures/friends.v1.json')
@@ -163,6 +194,7 @@ def validate(adventure=None, friends=None, assets=None):
     require(progression['xpPolicy']['repeatQuestXp'] == 0, 'repeated XP farming')
     require(progression['xpPolicy']['supportedCompletionMultiplier'] == 1, 'support penalises story rewards')
     require(progression['friendship']['inactivityLoss'] == 0, 'inactivity penalty forbidden')
+    errors.extend(validate_training())
     errors.extend(validate_development(friends=friends, adventure=adventure))
     return errors
 

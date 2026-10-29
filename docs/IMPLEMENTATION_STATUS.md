@@ -1,6 +1,6 @@
 # Wonderwilds implementation evidence
 
-Foundation evidence recorded 28 October 2026; integration updates dated below. Broader roadmap: [Wonderwilds implementation plan](WONDERWILDS_IMPLEMENTATION_PLAN.md) v1.1. Active gameplay sequence: [Companion progression plan](COMPANION_PROGRESSION_PLAN.md).
+Foundation evidence recorded 28 October 2026; integration updates dated below. Broader roadmap: [Wonderwilds implementation plan](WONDERWILDS_IMPLEMENTATION_PLAN.md) v1.2. Active gameplay sequence: [Companion progression plan](COMPANION_PROGRESSION_PLAN.md). Validation counts in earlier sections describe their original delivery, not the latest checkout.
 Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
@@ -8,21 +8,21 @@ No release, deployment, curriculum approval or learning-efficacy claim is made.
 | Plan work | Current implementation | Remaining gate |
 | --- | --- | --- |
 | WW-01 | Baseline ADR, asset hashes/provenance inventory, synthetic save fixtures, desktop/tablet smoke | Independent rights review and child usability research |
-| WW-02 | Pinned Rust workspace, closed schemas, generated serde/TS, OpenAPI, 51 shared fixtures and drift checks | Parent lifecycle API contracts expand with the selected provider |
+| WW-02 | Pinned Rust workspace, closed schemas, generated serde/TS, OpenAPI, shared fixtures and drift checks; companion/training projections and team commands | Parent lifecycle API contracts expand with the selected provider |
 | WW-03 | 33-node DAG, ladders, coverage/review ledgers, graph/bounds/hash validators | Educator prerequisite review, exact descriptor verification, release approval |
-| WW-04 | Three chapter spines, 18 beats, 12 friends, supported ending, discovery and progression data | 23 missing art assets and human reviews; activation disabled |
-| WW-05 | Pure domain engine, unique rewards, quests, collection/team/friendship/transformations, replay | Persist replay facts and validate actual world paths during browser integration |
+| WW-04 | Three chapter spines, 18 beats, 12 illustrated friends, supported ending, discovery and progression data; sixteen Meadow training milestones | Directional/transformation art, richer milestone rewards and human reviews; activation disabled |
+| WW-05 | Pure domain engine, unique rewards, quests, collection/team/friendship/transformations, character XP/training and replay | Durable replay/checkpoint storage, optional roles/personal quests and authoritative world paths |
 | WW-06 | Six assessment families, bounded generation, explicit wire adapters, authored prompts, honest support | Educator calibration, broader item/context coverage and approved release pack |
 | WW-07 | Experimental deterministic policy, frontier/enrichment, support/difficulty advice, replay checks | Calibrated policy, context/subject balance, durable recompute CLI and window-scoped freshness |
 | WW-08 | PostgreSQL ownership/RLS, sessions/CSRF primitives, consent/export/delete adapters, tombstones, migration tooling | Reviewed identity provider, HTTP lifecycle flows, cleanup/retention workers, external-object deletion and backup recovery |
 | WW-09 | Axum gameplay routes, actual DB transactions, idempotency/revisions, atomic evidence/rewards/outbox, auth boundaries | Full regional/world eligibility, production roles/TLS/provider, durable worker and full integration |
 | WW-10 | Typed cloud client, exact retries, profile/logout cancellation, recoverable unverified import preparation | Real import endpoint and account/profile UX; no migration UI enabled |
 | WW-11 | Six accessible DOM renderers, authored presentation binding, keyboard/touch controls, support-before-narration | Entrypoint/account integration, human screen-reader/accessibility review and complete browser journeys |
-| WW-12 | Authored content and existing world preserved | New region/collection/team presentation integration and full playable ending |
+| WW-12 | Meadow world, character journal, training entry point, team controls/two followers; 75-destination exploration library | Server regional/discovery/story integration, optional roles and full playable ending |
 | WW-13 | Bounded proposal validation, authored-only director/fallback, exact task binding and deterministic replay | API commit integration and approved content activation |
 | WW-14–16 | Not implemented; authored game has no model dependency | Provider/privacy/budget decisions, adapter, evaluation corpus and gated training experiment |
 | WW-17 | Existing guest parent view preserved; Rust summaries/client foundation available | New parent learning view, approved pack workflow and coverage dashboard |
-| WW-18 | Local reproducible install/start/migration/check helpers | Deployment/CI, observability, backup restore and rollback drills, operational owner |
+| WW-18 | Local reproducible install/start/migration/check helpers and GitHub Actions configuration | Hosted CI execution, database/browser CI, deployment, observability, backup restore and rollback drills, operational owner |
 | WW-19–20 | Automated foundations and synthetic checks only | Integrated QA/security review, consented pilot, educator audit and measured curriculum expansion |
 
 ## Combined validation
@@ -134,3 +134,74 @@ child usability review.
 ## Companion progression planning update — 29 October 2026
 
 The companion progression plan now defines the next gameplay work: per-character levels, training, collection presentation, teams, friendship/transformations and regional discovery. Existing domain systems are reused; individual character XP and training remain unimplemented. The frontend-first plan was replaced with a planning index, and obsolete foundation sequencing was removed from the broader roadmap. This documentation update adds no gameplay features or new application test results.
+
+## Exploration library and companion training delivery — 29 October 2026
+
+The merged exploration library provides 75 connected destinations, with individual
+WebP landscape images for the 72 new maps and shared lazy-loaded previews. This
+does not activate server-authoritative Orchard/Cove quests, recruitment or the
+ending. Twelve original friend portraits and Meadow world sprites are already
+available; the older provisional-art notes above describe earlier milestones.
+
+The first training delivery adds separate character XP, five levels and sixteen
+authored training milestones across Pip, Tansy, Nib and Flutter. Each first-time
+milestone grants ten character XP; supported and independent completions receive
+equal rewards. Replaying a rewarded milestone remains practice with zero extra
+XP. Wrong answers and abandonment grant none. Explorer progression and learning
+evidence remain separate from character level.
+
+Server-issued training stores the recipient, rules version and policy fingerprint.
+Team changes cannot redirect XP. Changed policy rejects assessment while allowing
+abandonment. Existing aggregates load with zero character XP and retain ownership,
+friendship and transformations. Training rewards, evidence and grant events use
+the existing atomic PostgreSQL transaction and exact-command retry path.
+
+The journal exposes levels, XP, next thresholds, training/practice and explorer
+progress. A reachable Meadow clearing opens the same activity controls. A
+server-confirmed level increase shows a portrait celebration with a reduced-motion
+alternative. Team selection/removal uses server capacity and the world supports
+two followers. The second slot retains its original Orchard story prerequisite;
+its rendering is not evidence of unlocked regional gameplay.
+
+The [GitHub Actions configuration](../.github/workflows/checks.yml) now covers the
+repository's Rust, contracts, content and frontend checks. Hosted execution and
+database/browser CI remain unverified; see [CI scope](CI.md).
+
+Remaining gameplay work: character-specific optional roles, personal quests,
+distinct higher-level rewards, directional/transformation art, automatic verified
+friendship participation, discovery and regional story integration, and the full
+supported ending. The 2,000-command limit remains. The concrete
+[storage/checkpoint design](LONG_PLAY_STORAGE_PLAN.md) is a proposal, not an
+implemented scalability claim. Account/import/lifecycle/parent-view work, human
+content/accessibility/security review and deployment/backup operations remain
+public-release gates. No release or content approval is implied by this delivery.
+
+### Verification for this delivery
+
+`bash scripts/check.sh` passed after adding Rust round-trip coverage for the new
+contract types: workspace formatting/Clippy/tests, 73 shared contract fixtures,
+generated-code drift, curriculum/story/art validators, frontend checks/build,
+nested client tests and legacy saves. The workspace includes 17 domain tests and
+15 API tests; two database tests are intentionally ignored by that command.
+
+`sh scripts/check-postgres.sh` passed both real database tests and the SQL
+ownership/export/deletion, repeat-migration and negative hash-drift checks in its
+own disposable database. Added training coverage verifies rollback before commit,
+concurrent duplicate completion, exact retry, one XP grant and persistent evidence.
+
+Chromium guest desktop/tablet smoke, six-family activity component checks and
+desktop/tablet synthetic-API friendship/glow flows passed. The real world training
+journey also passed through `node qa/e2e/run-training-qa.mjs` against its own fresh
+PostgreSQL database and temporary session. It recruits the four Meadow friends
+through real assessed HTTP commands, then verifies keyboard selection/training,
+wrong answers, recorded support, reload/resume, abandonment, supported level-two
+celebration, saved XP, exact completion retries, unrewarded repeat practice and
+phone-sized training. Independent and supported first milestones award equal XP.
+The runner removes its database/session and does not touch persistent demo data.
+
+Integration checks found and fixed missing Rust round-trip dispatch for new
+contract fixtures and an activity stylesheet hiding the training heading. The
+training context is now visible; reduced-motion celebration remains supported.
+The existing large Phaser build warning remains. Hosted CI execution, human
+review, sustained storage beyond the command cap, the Orchard-unlocked second-slot
+browser journey and a complete three-region playthrough remain unverified.

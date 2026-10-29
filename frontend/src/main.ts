@@ -515,7 +515,7 @@ async function boot() {
       toast(`Welcome to ${maps[region].name}! Follow the paths to explore.`);
     },
     backend
-      ? { encounters: () => backend!.markers, companion: () => backend!.companion() }
+      ? { encounters: () => backend!.markers, companions: () => backend!.companions() }
       : undefined,
   );
   tools.forEach((button) => {

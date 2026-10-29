@@ -313,6 +313,91 @@ mod tests {
             ..identity.clone()
         };
         assert!(matches!(repo.read(&foreign), Err(Error::Forbidden)));
+        // Exercise actual training persistence with a separate synthetic recruited
+        // profile: failed commits publish neither XP, evidence nor reward grants.
+        let training_profile = "52000000-0000-0000-0000-000000000003";
+        admin.execute("INSERT INTO wonderwilds.profiles(id,parent_id,ability_band) VALUES($1::text::uuid,$2::text::uuid,'beginning')", &[&training_profile, &parent]).unwrap();
+        let recruited = super::super::companion_tests::recruited_pip(&content);
+        let seeded = serde_json::to_value(recruited).unwrap();
+        admin
+            .execute(
+                "INSERT INTO wonderwilds.progress(profile_id,snapshot) VALUES($1::text::uuid,$2)",
+                &[&training_profile, &seeded],
+            )
+            .unwrap();
+        let training_identity = Identity {
+            profile_id: training_profile.into(),
+            ..identity.clone()
+        };
+        let started = repo
+            .execute(
+                &training_identity,
+                &command(
+                    "db-training-start",
+                    0,
+                    json!({"type":"start_encounter","beatId":"training-pip-1"}),
+                ),
+                20,
+            )
+            .unwrap();
+        let encounter = &started["pendingEncounters"][0];
+        let answer = encounter["parameters"]["total"].as_u64().unwrap()
+            - encounter["parameters"]["given"].as_u64().unwrap();
+        let attempt = command(
+            "db-training-answer",
+            1,
+            json!({"type":"attempt","encounterId":encounter["id"],"answer":{"kind":"quantity","value":answer}}),
+        );
+        assert_eq!(
+            faulty.execute(&training_identity, &attempt, 21),
+            Err(Error::Unavailable)
+        );
+        assert_eq!(
+            repo.read(&training_identity)
+                .unwrap()
+                .domain
+                .character_xp("pip"),
+            0
+        );
+        let count: i64 = admin
+            .query_one(
+                "SELECT count(*) FROM wonderwilds.reward_grants WHERE profile_id::text=$1",
+                &[&training_profile],
+            )
+            .unwrap()
+            .get(0);
+        assert_eq!(count, 0);
+        let r1 = repo.clone();
+        let i1 = training_identity.clone();
+        let a1 = attempt.clone();
+        let t1 = std::thread::spawn(move || r1.execute(&i1, &a1, 22));
+        let r2 = repo.clone();
+        let i2 = training_identity.clone();
+        let a2 = attempt.clone();
+        let t2 = std::thread::spawn(move || r2.execute(&i2, &a2, 22));
+        let earned = t1.join().unwrap().unwrap();
+        assert_eq!(t2.join().unwrap().unwrap(), earned);
+        assert_eq!(earned["characterProgression"][0]["level"], 2);
+        assert_eq!(
+            repo.execute(&training_identity, &attempt, 23).unwrap(),
+            earned
+        );
+        let count: i64 = admin.query_one("SELECT count(*) FROM wonderwilds.reward_grants WHERE profile_id::text=$1 AND reward_definition='character-xp:training-pip-1'", &[&training_profile]).unwrap().get(0);
+        assert_eq!(count, 1);
+        let count: i64 = admin
+            .query_one(
+                "SELECT count(*) FROM wonderwilds.learning_events WHERE profile_id::text=$1",
+                &[&training_profile],
+            )
+            .unwrap()
+            .get(0);
+        assert_eq!(count, 2);
+        admin
+            .execute(
+                "DELETE FROM wonderwilds.profiles WHERE id::text=$1",
+                &[&training_profile],
+            )
+            .unwrap();
         // Deletion covers game effects through cascade; tombstone remains independently.
         admin.batch_execute(&format!("BEGIN; SELECT set_config('app.parent_id','{parent}',true); SELECT wonderwilds.delete_profile('{profile}'); COMMIT;")).unwrap();
         for table in [

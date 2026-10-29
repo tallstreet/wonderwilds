@@ -1,0 +1,83 @@
+name: Repository checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: Rust rules and API
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install repository-pinned Rust toolchain
+        shell: bash
+        run: |
+          toolchain=$(python3 -c 'import tomllib; print(tomllib.load(open("rust-toolchain.toml", "rb"))["toolchain"]["channel"])')
+          rustup toolchain install "$toolchain" --profile minimal --component rustfmt --component clippy
+          rustc --version
+      - name: Fetch locked dependencies
+        run: cargo fetch --locked
+      - name: Check formatting
+        run: cargo fmt --all --check
+      - name: Check Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Run unit, HTTP and shared-fixture tests
+        run: cargo test --workspace --locked
+
+  web-and-content:
+    name: Contracts, content and frontend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            contracts/package-lock.json
+            frontend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install locked contracts dependencies
+        working-directory: contracts
+        run: npm ci
+      - name: Install locked frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Check contracts, fixtures and generated-code drift
+        working-directory: contracts
+        run: |
+          npm test
+          npm run typecheck
+          npm run check:generated
+      - name: Check authored content and artwork
+        run: |
+          python3 content/curriculum/validate.py
+          python3 -m unittest discover -s content/curriculum -p 'test_*.py'
+          node content/curriculum/check-schema.mjs
+          python3 content/story/validate.py
+          python3 content/creatures/art/validate.py
+          python3 -m unittest discover -s content/story -p 'test_*.py'
+      - name: Check frontend and nested API tests
+        working-directory: frontend
+        run: |
+          npm run check
+          node --import tsx src/api/api.test.ts
+      - name: Check legacy guest saves
+        run: node --import ./frontend/node_modules/tsx/dist/loader.mjs qa/fixtures/legacy/baseline.test.ts
