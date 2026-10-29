@@ -1785,6 +1785,948 @@
         "level"
       ],
       "additionalProperties": false
+    },
+    "StoryAction": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "collect"
+            },
+            "sourceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "itemId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 999
+            }
+          },
+          "required": [
+            "type",
+            "sourceId",
+            "itemId",
+            "quantity"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "travel"
+            },
+            "destinationId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "type",
+            "destinationId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "exchange"
+            },
+            "characterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "recipeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "type",
+            "characterId",
+            "recipeId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "assemble"
+            },
+            "objectId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "recipeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "type",
+            "objectId",
+            "recipeId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "accompany"
+            },
+            "characterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "destinationId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "type",
+            "characterId",
+            "destinationId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "accept_mission"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "cancel_mission"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dismiss"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "StoryPreferences": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string",
+          "enum": [
+            "short_simple",
+            "simple",
+            "standard"
+          ]
+        },
+        "interests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "helping_friends",
+              "exploring",
+              "building"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 4
+        },
+        "avoid": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "spooky_scenes"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 4
+        }
+      },
+      "required": [
+        "language",
+        "interests",
+        "avoid"
+      ],
+      "additionalProperties": false
+    },
+    "StoryContext": {
+      "type": "object",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "player": {
+          "$ref": "#/$defs/StoryPreferences"
+        },
+        "locationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "inventory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "itemId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 999
+              }
+            },
+            "required": [
+              "itemId",
+              "quantity"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 12
+        },
+        "memory": {
+          "type": "object",
+          "properties": {
+            "facts": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 12
+            },
+            "recentEvents": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 6
+            },
+            "recentMissions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 3
+            }
+          },
+          "required": [
+            "facts",
+            "recentEvents",
+            "recentMissions"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "trigger",
+        "player",
+        "locationId",
+        "inventory",
+        "memory"
+      ],
+      "additionalProperties": false
+    },
+    "StoryNarrative": {
+      "type": "object",
+      "properties": {
+        "premise": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "participantIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "minItems": 0,
+          "maxItems": 4
+        },
+        "payoff": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        }
+      },
+      "required": [
+        "premise",
+        "participantIds",
+        "payoff"
+      ],
+      "additionalProperties": false
+    },
+    "StoryPlanInput": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "const": "plan_mission"
+        },
+        "context": {
+          "$ref": "#/$defs/StoryContext"
+        },
+        "area": {
+          "type": "object",
+          "properties": {
+            "locations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "id",
+                  "description"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 8
+            },
+            "routes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "requirement": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "requirement"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 16
+            },
+            "characters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "locationId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "relationship": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "id",
+                  "locationId",
+                  "description",
+                  "relationship"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "locations",
+            "routes",
+            "characters"
+          ],
+          "additionalProperties": false
+        },
+        "opportunities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "outcomeId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "outcome": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "meaning": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "meaning"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 0,
+                "maxItems": 10
+              }
+            },
+            "required": [
+              "id",
+              "description",
+              "outcomeId",
+              "outcome",
+              "conditions"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 4
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "$ref": "#/$defs/StoryAction"
+              },
+              "at": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "requires": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "minItems": 0,
+                "maxItems": 8
+              },
+              "effects": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "minItems": 0,
+                "maxItems": 8
+              }
+            },
+            "required": [
+              "action",
+              "at",
+              "requires",
+              "effects"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 24
+        }
+      },
+      "required": [
+        "mode",
+        "context",
+        "area",
+        "opportunities",
+        "capabilities"
+      ],
+      "additionalProperties": false
+    },
+    "StoryMissionPlan": {
+      "type": "object",
+      "properties": {
+        "opportunityId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "goal": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "narrative": {
+          "$ref": "#/$defs/StoryNarrative"
+        },
+        "milestones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "conditionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required": [
+              "label",
+              "conditionId"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "opportunityId",
+        "goal",
+        "narrative",
+        "milestones"
+      ],
+      "additionalProperties": false
+    },
+    "StorySceneInput": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "const": "continue_story"
+        },
+        "context": {
+          "$ref": "#/$defs/StoryContext"
+        },
+        "here": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "characters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "relationship": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "id",
+                  "description",
+                  "relationship"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 4
+            },
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "id",
+                  "state"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 12
+            }
+          },
+          "required": [
+            "description",
+            "characters",
+            "objects"
+          ],
+          "additionalProperties": false
+        },
+        "mission": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "goal": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "narrative": {
+              "$ref": "#/$defs/StoryNarrative"
+            },
+            "completed": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 10
+            },
+            "current": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "remaining": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 10
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "active",
+                "abandoned",
+                "completed"
+              ]
+            }
+          },
+          "required": [
+            "goal",
+            "narrative",
+            "completed",
+            "current",
+            "remaining",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        "availableActions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "action": {
+                "$ref": "#/$defs/StoryAction"
+              }
+            },
+            "required": [
+              "id",
+              "description",
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 12
+        }
+      },
+      "required": [
+        "mode",
+        "context",
+        "here",
+        "mission",
+        "availableActions"
+      ],
+      "additionalProperties": false
+    },
+    "StoryScene": {
+      "type": "object",
+      "properties": {
+        "sceneId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "presentation": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "dialogue"
+                  },
+                  "entryId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "speakerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 180
+                  }
+                },
+                "required": [
+                  "type",
+                  "entryId",
+                  "speakerId",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "narration"
+                  },
+                  "entryId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 180
+                  }
+                },
+                "required": [
+                  "type",
+                  "entryId",
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 6
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "actionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required": [
+              "label",
+              "actionId"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 12
+        }
+      },
+      "required": [
+        "sceneId",
+        "presentation",
+        "choices"
+      ],
+      "additionalProperties": false
+    },
+    "StoryPayload": {
+      "type": "object",
+      "properties": {
+        "protocol": {
+          "type": "string",
+          "const": "story-proposal-1"
+        },
+        "stateRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "input": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StoryPlanInput"
+            },
+            {
+              "$ref": "#/$defs/StorySceneInput"
+            }
+          ]
+        },
+        "contentVersion": {
+          "type": "string",
+          "const": "pip-bridge-1"
+        }
+      },
+      "required": [
+        "protocol",
+        "stateRevision",
+        "input",
+        "contentVersion"
+      ],
+      "additionalProperties": false
     }
   }
 }

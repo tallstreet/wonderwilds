@@ -25,6 +25,14 @@ No release, deployment, curriculum approval or learning-efficacy claim is made.
 | WW-18 | Local reproducible install/start/migration/check helpers and GitHub Actions configuration | Hosted CI execution, database/browser CI, deployment, observability, backup restore and rollback drills, operational owner |
 | WW-19–20 | Automated foundations and synthetic checks only | Integrated QA/security review, consented pilot, educator audit and measured curriculum expansion |
 
+Design-only update, 30 October 2026: the [generative story design](GENERATIVE_STORY_DESIGN.md)
+proposes separate mission-planning and scene-continuation protocols, with reusable
+actions, outcome-based milestones, a persistent narrative brief and a full Pip
+bridge example. It also maps input fields to existing/new data sources and defines
+context assembly and staged integration. Education is excluded from story generation. No model adapter,
+new wire contract, operation registry or gameplay behavior is implemented by this
+document; WW-14–16 and the existing authored-director limitations remain unchanged.
+
 ## Combined validation
 
 `bash scripts/check.sh` passed Rust formatting and Clippy with warnings denied,
@@ -354,3 +362,38 @@ and a temporary HTTP bridge test with synthetic sessions and mocked Baseten.
 than the requested Node 24. The existing Phaser bundle-size warning remains.
 Live hackathon access, real speech quality and Safari/iPad recording are unverified.
 No Rust, database or gameplay-contract changes required database verification.
+
+### Authored story and payload foundation — 30 October 2026
+
+The [story implementation plan](STORY_IMPLEMENTATION_PLAN.md) now has an isolated
+headless delivery: a pure Rust authored Pip bridge mission with two wood sources,
+exchange/assembly, coarse travel, persistent milestone receipts and explicit shared
+crossing; deterministic planning/scene payloads; additive Story contracts; and a
+runnable journey with bounded replay checkpoints. Education and the existing
+assessed bridge are unchanged. No model call is made.
+
+The builder derives inventory, facts, progress and legal actions from actual story
+state. Authored content supplies descriptions and the fixed narrative; preferences
+use defaults. Rendering does not record meetings or grant progress. Explicit
+presentation acknowledgements establish presented history. Revision-bound handles,
+atomic rejection and exact-command retries prevent stale or duplicate effects.
+
+Two implementation subagents and an independent reviewer worked against the plan.
+Review fixed absent-character dialogue, incorrect pre-repaired-bridge credit,
+missing paused-mission context and premature relationship assertions. The owner
+added reachable-state payload/action integration coverage and checked compatibility
+of all prior schema definitions and fixtures.
+
+`bash scripts/check.sh` passed, including workspace format/Clippy/tests, 89 shared
+fixtures/generated checks, content validators/tests, all 91 frontend tests/build
+and four legacy tests. Both CLI source journeys and checkpoint/manual-action/error
+checks passed. `git diff --check` passed. Rust 1.99.1 and available Node 26.12.0 were
+used; Node 24 was unavailable. The existing Phaser bundle-size warning remains.
+
+This is not a new playable browser mode. API/database storage, authenticated saves,
+real world placements/movement, new accessible controls, broad content catalogues,
+generated-plan validation and provider integration remain pending. Checkpoints are
+local consistency-checked records, not trusted imported progress, and the developer
+runtime is capped at 256 commands. No database/browser integration behavior changed
+or was verified; ordinary Rust tests still ignore two existing database tests.
+Content approval/release gates remain unchanged.
