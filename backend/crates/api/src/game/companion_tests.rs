@@ -388,3 +388,109 @@ fn changed_training_policy_blocks_awards_but_allows_abandonment() {
             .is_empty()
     );
 }
+
+/// A production-shaped legacy aggregate: every domain action, observation and
+/// API receipt was produced through the same assessed application boundary.
+pub(super) fn recruited_pip_via_api(content: &Content) -> Aggregate {
+    let mut game = Aggregate::new(content);
+    for quest in [
+        "meadow-welcome",
+        "meadow-bridge",
+        "meadow-picnic",
+        "meadow-garden",
+        "meadow-letter",
+        "meadow-finale",
+        "befriend-pip",
+    ] {
+        let started = game
+            .execute(
+                &request(
+                    &game,
+                    &format!("real-start-{quest}"),
+                    json!({"type":"start_encounter","beatId":quest}),
+                ),
+                content,
+                1,
+                "session",
+            )
+            .unwrap();
+        let encounter = &started["pendingEncounters"][0];
+        let p = &encounter["parameters"];
+        let answer = match encounter["templateId"].as_str().unwrap() {
+            "missing_quantity" => {
+                json!({"kind":"quantity","value":p["total"].as_u64().unwrap()-p["given"].as_u64().unwrap()})
+            }
+            "equal_sharing" => {
+                json!({"kind":"groups","groups":vec![p["total"].as_u64().unwrap()/p["recipients"].as_u64().unwrap();p["recipients"].as_u64().unwrap() as usize]})
+            }
+            _ => {
+                let ids: Vec<String> = match p["instructionId"]
+                    .as_str()
+                    .or_else(|| p["promptId"].as_str())
+                    .unwrap()
+                {
+                    "count-next" => {
+                        let objects = p["objects"].as_array().unwrap();
+                        let expected =
+                            objects[p["prefixLength"].as_u64().unwrap() as usize - 1]["label"]
+                                .as_str()
+                                .unwrap()
+                                .parse::<u64>()
+                                .unwrap()
+                                + 1;
+                        vec![
+                            objects
+                                .iter()
+                                .find(|o| {
+                                    o["attribute"] == "choice"
+                                        && o["label"].as_str().unwrap().parse::<u64>().unwrap()
+                                            == expected
+                                })
+                                .unwrap()["id"]
+                                .as_str()
+                                .unwrap()
+                                .into(),
+                        ]
+                    }
+                    "sound-s" => vec![
+                        p["tiles"]
+                            .as_array()
+                            .unwrap()
+                            .iter()
+                            .position(|t| t == "s")
+                            .unwrap()
+                            .to_string(),
+                    ],
+                    "seed-order" => {
+                        vec!["find_seed".into(), "plant_seed".into(), "water_seed".into()]
+                    }
+                    "listen-direction" => vec![
+                        p["cards"]
+                            .as_array()
+                            .unwrap()
+                            .iter()
+                            .find(|c| c["text"] == "Put the cup beside the tree.")
+                            .unwrap()["id"]
+                            .as_str()
+                            .unwrap()
+                            .into(),
+                    ],
+                    other => panic!("Unexpected Meadow task {other}"),
+                };
+                json!({"kind":"choices","choiceIds":ids})
+            }
+        };
+        game.execute(
+            &request(
+                &game,
+                &format!("real-finish-{quest}"),
+                json!({"type":"attempt","encounterId":encounter["id"],"answer":answer}),
+            ),
+            content,
+            2,
+            "session",
+        )
+        .unwrap();
+    }
+    game
+}

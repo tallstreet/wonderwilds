@@ -115,7 +115,7 @@ node --import ./frontend/node_modules/tsx/dist/loader.mjs qa/fixtures/legacy/bas
   separate-port setup for `qa/e2e/backend-demo.mjs`; do not run it on demo progress.
 - Persistence changes need the real database checks in
   `sh scripts/check-postgres.sh` in its supported environment. The ordinary Rust
-  suite deliberately ignores two database integration tests and is insufficient
+  suite deliberately ignores three database integration tests and is insufficient
   to establish database correctness alone.
 - Add regression coverage for changed logic or bugs using the existing test
   structure. Documentation-only edits do not require the application suite.

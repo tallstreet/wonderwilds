@@ -44,7 +44,7 @@ From the root, `bash scripts/check.sh` runs Rust format/Clippy/tests, shared
 schema and generated-code checks, content validators, frontend checks/build,
 client tests and legacy fixtures. `sh scripts/check-postgres.sh` separately runs
 real migration, RLS, ownership, deletion, race and rollback tests in a disposable
-database. Its two database tests are deliberately ignored in the default Rust
+database. Its three database tests are deliberately ignored in the default Rust
 suite and explicitly executed by this helper. With Vite running, run:
 
 ```sh
@@ -106,8 +106,13 @@ Server-authoritative regional travel, companion exploration roles, personal
 quests, distinct transformation art, director integration, identity-provider
 login, save import and parent lifecycle screens remain outstanding. The 75-map
 exploration library does not establish regional story eligibility. No
-spatial/measurement task is reachable in Meadow. The development API retains its
-2,000-command cap; see the [long-play storage design](docs/LONG_PLAY_STORAGE_PLAN.md).
+spatial/measurement task is reachable in Meadow. PostgreSQL saves now use compact
+checkpoints and durable retry/history records, with a limit of 120 new commands
+per profile per minute instead of a lifetime command cap. Exact retries retain
+their original responses and bypass the rate limit. Standalone in-memory
+aggregates retain the 2,000-command guard. See the
+[durable storage decision](docs/adr/durable-game-storage.md) for migration,
+reconstruction and the remaining backup/retention requirements.
 Hints currently repeat the authored instruction and suggest helper support;
 worked-example text and narration are not yet supplied by the API.
 

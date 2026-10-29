@@ -22,10 +22,11 @@ browser QA were integrated and checked; see the current implementation evidence.
 Next add richer Meadow milestones, verify the Orchard-unlocked two-slot journey,
 and implement optional companion roles, automatic friendship participation,
 Orchard/Cove story integration and the
-supported ending. Before sustained training, implement bounded history storage
-with durable duplicate prevention; do not remove the 2,000-command guard alone.
-The [long-play storage design](LONG_PLAY_STORAGE_PLAN.md) specifies the required
-receipt, checkpoint, migration and acceptance work; it is not yet implemented.
+supported ending. PostgreSQL storage now uses bounded working checkpoints with
+durable duplicate prevention; its request-rate policy replaces the lifetime cap.
+The [durable storage decision](adr/durable-game-storage.md) records the implemented
+format and migration policy. The [original storage design](LONG_PLAY_STORAGE_PLAN.md)
+retains the acceptance reference; operational retention and restore drills remain.
 
 Public release separately requires reviewed parent identity and lifecycle flows,
 save import, parent learning views, educator/content/art/accessibility approval,

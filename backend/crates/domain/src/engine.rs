@@ -531,7 +531,7 @@ pub enum Action {
     },
 }
 /// Server-owned, persisted encounter completion, not a request body.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct VerifiedCompletion {
     pub quest_id: String,
     pub supported: bool,
@@ -539,13 +539,13 @@ pub struct VerifiedCompletion {
 /// Trusted transaction inputs. Assessment/factory adapters must verify profile,
 /// encounter/session ownership, hint history, and server correctness first.
 /// `reachable_quests` comes from server world/path validation, never browser XY.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct TrustedFacts {
     pub issued_encounters: BTreeMap<String, String>,
     pub completed_encounters: BTreeMap<String, VerifiedCompletion>,
     pub reachable_quests: BTreeSet<String>,
 }
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Context {
     pub unix_millis: u64,
     pub recorded_random_choice: u32,
@@ -576,12 +576,24 @@ pub struct State {
     grants: BTreeSet<(String, String)>,
     discoveries: BTreeMap<String, String>,
     last_discovery: BTreeMap<String, String>,
-    receipts: BTreeMap<String, Receipt>,
+    receipts: BTreeMap<String, DomainReceipt>,
+    /// Compact snapshots require durable receipt lookup by their transaction owner.
+    /// Older standalone saves omit this field and keep their embedded receipts.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    external_receipts: bool,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-struct Receipt {
-    command: Command,
-    events: Vec<Event>,
+pub struct DomainReceipt {
+    pub command: Command,
+    pub events: Vec<Event>,
+}
+/// Result of the owner's durable lookup, performed under the same profile lock
+/// as the state update. `Absent` is an assertion of a completed lookup, not an
+/// instruction to discard an old receipt. Persist new receipts atomically with
+/// state, evidence and events before acknowledging the command.
+pub enum DurableLookup<'a> {
+    Absent,
+    Found(&'a DomainReceipt),
 }
 impl State {
     pub fn new(content: &Content) -> Self {
@@ -607,7 +619,107 @@ impl State {
             discoveries: BTreeMap::new(),
             last_discovery: BTreeMap::new(),
             receipts: BTreeMap::new(),
+            external_receipts: false,
         }
+    }
+    pub fn event_sequence(&self) -> u64 {
+        self.sequence
+    }
+    pub fn is_storage_checkpoint(&self) -> bool {
+        self.external_receipts
+    }
+    /// Verify the independently stored high-water marks when loading a compact
+    /// checkpoint. A receipt-bearing or counter-inconsistent checkpoint fails
+    /// closed rather than being treated as a new profile.
+    pub fn validate_checkpoint(&self, revision: u64, event_sequence: u64) -> Result<(), Rejection> {
+        if !self.external_receipts
+            || !self.receipts.is_empty()
+            || self.revision != revision
+            || self.sequence != event_sequence
+            || self.sequence < self.revision
+            || (self.revision == 0) != (self.sequence == 0)
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        Ok(())
+    }
+    /// Explicit migration boundary: return every legacy receipt to the owner
+    /// for durable insertion, and a bounded domain snapshot with a durable-mode
+    /// marker. Commit both in one transaction. Repeating this on a compact state
+    /// returns no receipts and does not change its counters or gameplay facts.
+    pub fn storage_checkpoint(&self) -> Result<(Self, Vec<DomainReceipt>), Rejection> {
+        if self.external_receipts {
+            self.validate_checkpoint(self.revision, self.sequence)?;
+            return Ok((self.clone(), Vec::new()));
+        }
+        if u64::try_from(self.receipts.len()).map_err(|_| Rejection::Overflow)? != self.revision {
+            return Err(Rejection::ReplayMismatch);
+        }
+        let mut sequences = BTreeSet::new();
+        let mut revisions = BTreeSet::new();
+        for (id, receipt) in &self.receipts {
+            validate_receipt(receipt)?;
+            if *id != receipt.command.command_id
+                || !revisions.insert(receipt.command.expected_revision)
+                || receipt.command.expected_revision >= self.revision
+                || receipt.events.iter().any(|event| {
+                    event.sequence > self.sequence
+                        || event.content_version != self.content_version
+                        || !sequences.insert(event.sequence)
+                })
+            {
+                return Err(Rejection::ReplayMismatch);
+            }
+        }
+        if u64::try_from(sequences.len()).map_err(|_| Rejection::Overflow)? != self.sequence
+            || self.sequence < self.revision
+            || (self.revision == 0) != (self.sequence == 0)
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        let mut ordered: Vec<_> = self.receipts.values().collect();
+        ordered.sort_by_key(|receipt| receipt.command.expected_revision);
+        let mut previous_sequence = 0u64;
+        for receipt in ordered {
+            if receipt.events[0].sequence
+                != previous_sequence
+                    .checked_add(1)
+                    .ok_or(Rejection::Overflow)?
+            {
+                return Err(Rejection::ReplayMismatch);
+            }
+            previous_sequence = receipt
+                .events
+                .last()
+                .ok_or(Rejection::ReplayMismatch)?
+                .sequence;
+        }
+        let mut checkpoint = self.clone();
+        checkpoint.external_receipts = true;
+        let receipts = std::mem::take(&mut checkpoint.receipts)
+            .into_values()
+            .collect();
+        Ok((checkpoint, receipts))
+    }
+    /// Deliberate rollback/export reconstruction from the complete durable
+    /// receipt history. This is not the normal compact request path. Partial,
+    /// duplicated or inconsistent history cannot silently re-enable standalone
+    /// execution, because that would forget command IDs and permit replay.
+    pub fn restore_embedded_receipts(
+        &self,
+        receipts: Vec<DomainReceipt>,
+    ) -> Result<Self, Rejection> {
+        self.validate_checkpoint(self.revision, self.sequence)?;
+        let mut restored = self.clone();
+        restored.external_receipts = false;
+        for receipt in receipts {
+            let id = receipt.command.command_id.clone();
+            if restored.receipts.insert(id, receipt).is_some() {
+                return Err(Rejection::ReplayMismatch);
+            }
+        }
+        restored.storage_checkpoint()?;
+        Ok(restored)
     }
     pub fn character_xp(&self, id: &str) -> u32 {
         *self.character_xp.get(id).unwrap_or(&0)
@@ -650,6 +762,11 @@ impl State {
     }
     pub fn completed(&self) -> &BTreeSet<String> {
         &self.completed
+    }
+    /// Read-only binding projection for trusted storage adapters to verify that
+    /// their active encounter records exactly match the domain checkpoint.
+    pub fn pending_encounters(&self) -> &BTreeMap<String, String> {
+        &self.pending
     }
     pub fn flags(&self) -> &BTreeSet<String> {
         &self.flags
@@ -756,6 +873,80 @@ pub struct Applied {
     pub duplicate: bool,
 }
 
+fn validate_receipt(receipt: &DomainReceipt) -> Result<(), Rejection> {
+    let command = &receipt.command;
+    let revision = command
+        .expected_revision
+        .checked_add(1)
+        .ok_or(Rejection::Overflow)?;
+    if !valid_id(&command.command_id)
+        || receipt.events.is_empty()
+        || receipt.events.iter().any(|event| {
+            event.command_id != command.command_id
+                || event.revision != revision
+                || event.sequence == 0
+                || event.rules_version.is_empty()
+                || event.content_version.is_empty()
+                || event.rules_version != receipt.events[0].rules_version
+                || event.content_version != receipt.events[0].content_version
+        })
+        || receipt
+            .events
+            .windows(2)
+            .any(|pair| pair[0].sequence.checked_add(1) != Some(pair[1].sequence))
+    {
+        return Err(Rejection::ReplayMismatch);
+    }
+    Ok(())
+}
+
+/// Compact-state transition for a transaction owner with a durable receipt
+/// store. Lookup precedes revision/content checks, preserving old exact retries.
+/// New execution returns no embedded history: the owner must construct and
+/// persist `DomainReceipt { command, events }` in the same transaction as state.
+/// Ordinary `apply` deliberately cannot execute the returned checkpoint.
+pub fn apply_persisted(
+    state: &State,
+    command: &Command,
+    content: &Content,
+    context: &Context,
+    lookup: DurableLookup<'_>,
+) -> Result<Applied, Rejection> {
+    state.validate_checkpoint(state.revision, state.sequence)?;
+    if !valid_id(&command.command_id) {
+        return Err(Rejection::InvalidCommand);
+    }
+    if let DurableLookup::Found(receipt) = lookup {
+        validate_receipt(receipt)?;
+        if receipt.command.command_id != command.command_id {
+            return Err(Rejection::ReplayMismatch);
+        }
+        if receipt.command != *command {
+            return Err(Rejection::CommandIdReused);
+        }
+        if receipt
+            .events
+            .iter()
+            .any(|event| event.revision > state.revision || event.sequence > state.sequence)
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        return Ok(Applied {
+            state: state.clone(),
+            events: receipt.events.clone(),
+            duplicate: true,
+        });
+    }
+    // Reuse exactly the standalone transition and its verification rules, with
+    // at most this command's receipt temporarily resident in the candidate.
+    let mut candidate = state.clone();
+    candidate.external_receipts = false;
+    let mut applied = apply(&candidate, command, content, context)?;
+    applied.state.receipts.clear();
+    applied.state.external_receipts = true;
+    Ok(applied)
+}
+
 fn valid_id(id: &str) -> bool {
     !id.is_empty()
         && id.len() <= 128
@@ -848,6 +1039,9 @@ pub fn apply(
     content: &Content,
     context: &Context,
 ) -> Result<Applied, Rejection> {
+    if state.external_receipts {
+        return Err(Rejection::InvalidCommand);
+    }
     if !valid_id(&command.command_id) {
         return Err(Rejection::InvalidCommand);
     }
@@ -1153,7 +1347,7 @@ pub fn apply(
     }
     next.receipts.insert(
         command.command_id.clone(),
-        Receipt {
+        DomainReceipt {
             command: command.clone(),
             events: events.clone(),
         },
@@ -1167,7 +1361,7 @@ pub fn apply(
 
 /// Persist with the event stream. Context contains only recorded server facts;
 /// replay never contacts an assessment service, random source, clock or model.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct ReplayEntry {
     pub command: Command,
     pub context: Context,
@@ -1181,6 +1375,33 @@ pub fn replay(
     let mut state = initial.clone();
     for entry in entries {
         let applied = apply(&state, &entry.command, content, &entry.context)?;
+        if applied.events != entry.events {
+            return Err(Rejection::ReplayMismatch);
+        }
+        state = applied.state;
+    }
+    Ok(state)
+}
+
+/// Replay a contiguous suffix after a verified compact checkpoint. Entries
+/// carry recorded server facts, never client correctness claims. Durable retry
+/// resolution happens before recording a new entry; duplicated or reordered
+/// entries therefore fail revision/event comparison rather than executing twice.
+pub fn replay_persisted(
+    initial: &State,
+    content: &Content,
+    entries: &[ReplayEntry],
+) -> Result<State, Rejection> {
+    initial.validate_checkpoint(initial.revision, initial.sequence)?;
+    let mut state = initial.clone();
+    for entry in entries {
+        let applied = apply_persisted(
+            &state,
+            &entry.command,
+            content,
+            &entry.context,
+            DurableLookup::Absent,
+        )?;
         if applied.events != entry.events {
             return Err(Rejection::ReplayMismatch);
         }
@@ -1372,6 +1593,220 @@ mod tests {
                 "{pointer}"
             );
         }
+    }
+
+    #[test]
+    fn storage_checkpoint_preserves_old_retries_and_supports_complete_rollback() {
+        let c = content();
+        let mut legacy = State::new(&c);
+        let mut log = Vec::new();
+        finish(&mut legacy, "meadow-welcome", &c, true, &mut log);
+        let mut old_json = serde_json::to_value(&legacy).unwrap();
+        assert!(
+            !old_json
+                .as_object()
+                .unwrap()
+                .contains_key("external_receipts")
+        );
+        let old: State = serde_json::from_value(old_json.clone()).unwrap();
+        let (checkpoint, receipts) = old.storage_checkpoint().unwrap();
+        assert_eq!(receipts.len(), 2);
+        checkpoint
+            .validate_checkpoint(legacy.revision(), legacy.event_sequence())
+            .unwrap();
+        assert_eq!(checkpoint.xp(), legacy.xp());
+        assert_eq!(checkpoint.flags(), legacy.flags());
+        assert_eq!(checkpoint.pending, legacy.pending);
+        assert_eq!(
+            checkpoint.storage_checkpoint().unwrap(),
+            (checkpoint.clone(), Vec::new())
+        );
+        let receipt = &receipts[0];
+        assert_eq!(
+            apply(&checkpoint, &receipt.command, &c, &context()),
+            Err(Rejection::InvalidCommand)
+        );
+        let retried = apply_persisted(
+            &checkpoint,
+            &receipt.command,
+            &c,
+            &context(),
+            DurableLookup::Found(receipt),
+        )
+        .unwrap();
+        assert!(retried.duplicate);
+        assert_eq!(retried.events, receipt.events);
+        assert_eq!(retried.state, checkpoint);
+        let mut changed = receipt.command.clone();
+        changed.action = Action::SelectTeam {
+            creature_ids: Vec::new(),
+        };
+        assert_eq!(
+            apply_persisted(
+                &checkpoint,
+                &changed,
+                &c,
+                &context(),
+                DurableLookup::Found(receipt)
+            ),
+            Err(Rejection::CommandIdReused)
+        );
+        assert_eq!(
+            checkpoint
+                .restore_embedded_receipts(receipts.clone())
+                .unwrap(),
+            legacy
+        );
+        assert_eq!(
+            checkpoint.restore_embedded_receipts(receipts[..1].to_vec()),
+            Err(Rejection::ReplayMismatch)
+        );
+        old_json["sequence"] = serde_json::json!(legacy.sequence + 1);
+        let corrupted: State = serde_json::from_value(old_json).unwrap();
+        assert_eq!(
+            corrupted.storage_checkpoint(),
+            Err(Rejection::ReplayMismatch)
+        );
+    }
+
+    #[test]
+    fn persisted_execution_remains_bounded_beyond_old_command_cap_and_replays() {
+        let c = content();
+        let initial = State::new(&c);
+        let (mut checkpoint, _) = initial.storage_checkpoint().unwrap();
+        let mut durable = BTreeMap::new();
+        let mut replay_log = Vec::new();
+        for index in 0..2100 {
+            let cmd = Command {
+                command_id: format!("persisted-{index}"),
+                expected_revision: checkpoint.revision(),
+                action: Action::SelectTeam {
+                    creature_ids: Vec::new(),
+                },
+            };
+            let ctx = context();
+            let applied =
+                apply_persisted(&checkpoint, &cmd, &c, &ctx, DurableLookup::Absent).unwrap();
+            let receipt = DomainReceipt {
+                command: cmd.clone(),
+                events: applied.events.clone(),
+            };
+            assert!(durable.insert(cmd.command_id.clone(), receipt).is_none());
+            replay_log.push(ReplayEntry {
+                command: cmd,
+                context: ctx,
+                events: applied.events,
+            });
+            checkpoint = applied.state;
+            assert!(checkpoint.receipts.is_empty());
+            if index % 256 == 0 {
+                checkpoint =
+                    serde_json::from_value(serde_json::to_value(&checkpoint).unwrap()).unwrap();
+                checkpoint
+                    .validate_checkpoint(index + 1, index + 1)
+                    .unwrap();
+            }
+        }
+        assert_eq!(checkpoint.revision(), 2100);
+        assert_eq!(checkpoint.event_sequence(), 2100);
+        assert!(serde_json::to_vec(&checkpoint).unwrap().len() < 1024);
+        let first = &durable["persisted-0"];
+        let retried = apply_persisted(
+            &checkpoint,
+            &first.command,
+            &c,
+            &context(),
+            DurableLookup::Found(first),
+        )
+        .unwrap();
+        assert_eq!(retried.state, checkpoint);
+        assert_eq!(retried.events, first.events);
+        let replayed = replay(&initial, &c, &replay_log).unwrap();
+        assert_eq!(replayed.storage_checkpoint().unwrap().0, checkpoint);
+        assert_eq!(
+            replay_persisted(&initial.storage_checkpoint().unwrap().0, &c, &replay_log).unwrap(),
+            checkpoint
+        );
+        let standalone = checkpoint
+            .restore_embedded_receipts(durable.into_values().collect())
+            .unwrap();
+        assert_eq!(standalone, replayed);
+    }
+
+    #[test]
+    fn compact_state_and_durable_receipt_corruption_fail_closed() {
+        let c = content();
+        let legacy = State::new(&c);
+        let (mut checkpoint, _) = legacy.storage_checkpoint().unwrap();
+        let cmd = command(
+            &checkpoint,
+            Action::SelectTeam {
+                creature_ids: Vec::new(),
+            },
+        );
+        assert_eq!(
+            apply_persisted(&legacy, &cmd, &c, &context(), DurableLookup::Absent),
+            Err(Rejection::ReplayMismatch)
+        );
+        let applied =
+            apply_persisted(&checkpoint, &cmd, &c, &context(), DurableLookup::Absent).unwrap();
+        let mut receipt = DomainReceipt {
+            command: cmd.clone(),
+            events: applied.events.clone(),
+        };
+        checkpoint = applied.state;
+        assert_eq!(
+            checkpoint.validate_checkpoint(2, 1),
+            Err(Rejection::ReplayMismatch)
+        );
+        assert_eq!(
+            checkpoint.validate_checkpoint(1, 2),
+            Err(Rejection::ReplayMismatch)
+        );
+        receipt.events[0].sequence += 1;
+        assert_eq!(
+            apply_persisted(
+                &checkpoint,
+                &cmd,
+                &c,
+                &context(),
+                DurableLookup::Found(&receipt)
+            ),
+            Err(Rejection::ReplayMismatch)
+        );
+        checkpoint.receipts.insert(cmd.command_id.clone(), receipt);
+        assert_eq!(
+            checkpoint.validate_checkpoint(1, 1),
+            Err(Rejection::ReplayMismatch)
+        );
+    }
+
+    #[test]
+    fn swapped_receipt_ranges_and_inconsistent_versions_reject_legacy_migration() {
+        let c = content();
+        let mut legacy = State::new(&c);
+        let mut log = Vec::new();
+        for _ in 0..2 {
+            execute(
+                &mut legacy,
+                Action::SelectTeam {
+                    creature_ids: Vec::new(),
+                },
+                &c,
+                context(),
+                &mut log,
+            );
+        }
+        let mut swapped = legacy.clone();
+        swapped.receipts.get_mut("command-0").unwrap().events[0].sequence = 2;
+        swapped.receipts.get_mut("command-1").unwrap().events[0].sequence = 1;
+        assert_eq!(swapped.storage_checkpoint(), Err(Rejection::ReplayMismatch));
+        let mut quest = State::new(&c);
+        finish(&mut quest, "meadow-welcome", &c, false, &mut Vec::new());
+        let receipt = quest.receipts.get_mut("command-1").unwrap();
+        assert!(receipt.events.len() > 1);
+        receipt.events[1].rules_version = "inconsistent-rules".into();
+        assert_eq!(quest.storage_checkpoint(), Err(Rejection::ReplayMismatch));
     }
 
     #[test]

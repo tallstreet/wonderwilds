@@ -16,8 +16,11 @@ use wonderwilds_learning::assessment::{
 mod companion_tests;
 pub mod http;
 pub mod repository;
+pub(crate) mod storage;
+pub(crate) use storage::MasteryItem;
 
 pub const MAX_COMMANDS: usize = 2000;
+type NoveltyLookup<'a> = dyn FnMut(&MasteryItem) -> Result<bool, Error> + 'a;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {
     InvalidInput,
@@ -36,7 +39,7 @@ pub struct Identity {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct SavedEncounter {
-    id: String,
+    pub(crate) id: String,
     quest: String,
     skill: String,
     seed: u64,
@@ -56,7 +59,7 @@ struct Receipt {
     request: Value,
     response: Value,
 }
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone)]
 pub struct Aggregate {
     revision: u64,
     domain: State,
@@ -64,6 +67,10 @@ pub struct Aggregate {
     receipts: BTreeMap<String, Receipt>,
     pub(crate) evidence: Vec<wire::LearningEvidence>,
     pub(crate) events: Vec<engine::Event>,
+    storage: Option<storage::StorageState>,
+    durable_domain_lookup: Option<engine::DomainReceipt>,
+    pending_domain_receipts: Vec<engine::DomainReceipt>,
+    pending_domain_replays: Vec<Value>,
 }
 
 pub fn development_content() -> Result<Content, Error> {
@@ -97,6 +104,10 @@ impl Aggregate {
             receipts: BTreeMap::new(),
             evidence: Vec::new(),
             events: Vec::new(),
+            storage: None,
+            durable_domain_lookup: None,
+            pending_domain_receipts: Vec::new(),
+            pending_domain_replays: Vec::new(),
         }
     }
     pub fn snapshot(&self, content: &Content) -> Result<Value, Error> {
@@ -108,41 +119,7 @@ impl Aggregate {
         {
             pending.push(self.public_encounter(&encounter.id)?);
         }
-        use wonderwilds_learning::mastery::{self, Observation, Status};
-        let mut observations = Vec::new();
-        let mut skills = BTreeMap::new();
-        for evidence in &self.evidence {
-            let saved = self
-                .encounters
-                .get(&evidence.encounter_id)
-                .ok_or(Error::Unavailable)?;
-            if saved.skill != evidence.skill_id {
-                return Err(Error::Unavailable);
-            }
-            let (_, canonical) = authored_encounter(&saved.skill, saved.seed, &saved.id)
-                .map_err(|_| Error::Unavailable)?;
-            let parameters =
-                serde_json::to_string(&canonical.parameters).map_err(|_| Error::Unavailable)?;
-            observations.push(Observation {
-                evidence: evidence.clone(),
-                parameter_fingerprint: digest_id(&parameters),
-                // No draft item has an educator-reviewed novel transfer design.
-                // Reopening an authored item never invents one.
-                novel_transfer: false,
-            });
-            skills.insert(evidence.skill_id.clone(), Value::Null);
-        }
-        for (skill_id, value) in &mut skills {
-            let summary =
-                mastery::recompute(skill_id, &observations, 2).map_err(|_| Error::Unavailable)?;
-            let status = match summary.status {
-                Status::Unseen => "unseen",
-                Status::Introduced => "introduced",
-                Status::Practising => "practising",
-                Status::Secure => "secure",
-            };
-            *value = json!({"skillId":skill_id,"status":status,"explanation":summary.explanation});
-        }
+        let skills = self.learning_summaries()?;
         let available = self.domain.available_training(content);
         let character_progression: Vec<Value> = self.domain.creatures().iter().map(|id| {
             let level = self.domain.character_level(content, id);
@@ -161,7 +138,7 @@ impl Aggregate {
             }
             value
         }).collect();
-        let value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"friendship":self.domain.creatures().iter().map(|id|json!({"creatureId":id,"points":self.domain.friendship(id)})).collect::<Vec<_>>(),"transformedCreatures":self.domain.transformed(),"availableHelpingMoments":self.domain.available_helping_moments(content).iter().map(|(creature,quest)|json!({"creatureId":creature,"completedQuestId":quest})).collect::<Vec<_>>(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills.into_values().collect::<Vec<_>>(),"teamCapacity":self.domain.team_capacity(),"characterProgression":character_progression,"explorerProgression":{"xp":self.domain.xp(),"level":self.domain.level(content)}});
+        let value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"friendship":self.domain.creatures().iter().map(|id|json!({"creatureId":id,"points":self.domain.friendship(id)})).collect::<Vec<_>>(),"transformedCreatures":self.domain.transformed(),"availableHelpingMoments":self.domain.available_helping_moments(content).iter().map(|(creature,quest)|json!({"creatureId":creature,"completedQuestId":quest})).collect::<Vec<_>>(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills,"teamCapacity":self.domain.team_capacity(),"characterProgression":character_progression,"explorerProgression":{"xp":self.domain.xp(),"level":self.domain.level(content)}});
         wire::validate("GameSnapshot", &value).map_err(|_| Error::Unavailable)?;
         Ok(value)
     }
@@ -189,16 +166,24 @@ impl Aggregate {
             expected_revision: self.domain.revision(),
             action,
         };
-        let applied = engine::apply(
-            &self.domain,
-            &command,
-            content,
-            &Context {
-                unix_millis: now.saturating_mul(1000),
-                recorded_random_choice: 0,
-                facts,
-            },
-        )
+        let context = Context {
+            unix_millis: now.saturating_mul(1000),
+            recorded_random_choice: 0,
+            facts,
+        };
+        let applied = if self.storage.is_some() {
+            engine::apply_persisted(
+                &self.domain,
+                &command,
+                content,
+                &context,
+                self.durable_domain_lookup
+                    .as_ref()
+                    .map_or(engine::DurableLookup::Absent, engine::DurableLookup::Found),
+            )
+        } else {
+            engine::apply(&self.domain, &command, content, &context)
+        }
         .map_err(|e| match e {
             engine::Rejection::RevisionConflict | engine::Rejection::CommandIdReused => {
                 Error::RevisionConflict
@@ -207,6 +192,19 @@ impl Aggregate {
             engine::Rejection::Locked | engine::Rejection::UnverifiedEncounter => Error::Forbidden,
             _ => Error::InvalidInput,
         })?;
+        if let Some(storage) = &mut self.storage {
+            storage.domain_revision = applied.state.revision();
+            storage.domain_sequence = applied.state.event_sequence();
+            self.pending_domain_receipts.push(engine::DomainReceipt {
+                command: command.clone(),
+                events: applied.events.clone(),
+            });
+            self.pending_domain_replays.push(storage::replay_value(
+                &command,
+                &context,
+                &applied.events,
+            )?);
+        }
         self.domain = applied.state;
         self.events.extend(applied.events);
         Ok(())
@@ -220,6 +218,19 @@ impl Aggregate {
         now: u64,
         session_id: &str,
     ) -> Result<Value, Error> {
+        if self.storage.is_some() {
+            return Err(Error::Unavailable);
+        }
+        self.execute_inner(request, content, now, session_id, None)
+    }
+    fn execute_inner(
+        &mut self,
+        request: &Value,
+        content: &Content,
+        now: u64,
+        session_id: &str,
+        novelty: Option<&mut NoveltyLookup<'_>>,
+    ) -> Result<Value, Error> {
         wire::validate("GameCommand", request).map_err(|_| Error::InvalidInput)?;
         let id = request["commandId"].as_str().ok_or(Error::InvalidInput)?;
         if let Some(receipt) = self.receipts.get(id) {
@@ -229,7 +240,7 @@ impl Aggregate {
                 Err(Error::RevisionConflict)
             };
         }
-        if self.receipts.len() >= MAX_COMMANDS {
+        if self.storage.is_none() && self.receipts.len() >= MAX_COMMANDS {
             return Err(Error::RateLimited);
         }
         if request["expectedRevision"].as_u64() != Some(self.revision) {
@@ -371,7 +382,7 @@ impl Aggregate {
                         .map_err(|_| Error::InvalidInput)?;
                     let outcome =
                         assess_wire(&task, &encounter, &answer).map_err(|_| Error::InvalidInput)?;
-                    saved.checks += 1;
+                    saved.checks = saved.checks.checked_add(1).ok_or(Error::Unavailable)?;
                     if outcome.correct == Some(true) {
                         let mut facts = TrustedFacts::default();
                         facts.completed_encounters.insert(
@@ -403,11 +414,12 @@ impl Aggregate {
                         },
                     )
                 };
-                let sequence = next.evidence.len() as u64 + 1;
+                let sequence = next.next_evidence_sequence()?;
                 let value = json!({"schemaVersion":"1.0","eventId":format!("evidence-{sequence}-{}",digest_id(&format!("{session_id}:{id}"))),"encounterId":saved.id,"skillId":saved.skill,"variantId":format!("authored-{}",saved.seed),"itemFamily":encounter.template_id,"contextId":saved.quest,"representation":representation(&saved.skill),"result":result,"eventKind":kind,"firstCheck":kind=="answer_check"&&saved.checks==1,"support":saved.support,"sessionId":saved.session_id,"serverSequence":sequence,"provenance":"server_verified"});
                 wire::validate("LearningEvidence", &value).map_err(|_| Error::Unavailable)?;
-                next.evidence
-                    .push(serde_json::from_value(value.clone()).map_err(|_| Error::Unavailable)?);
+                next.append_evidence(
+                    serde_json::from_value(value.clone()).map_err(|_| Error::Unavailable)?,
+                )?;
                 if saved.completed && kind == "answer_check" {
                     let mut completion = value;
                     completion["eventId"] = json!(format!(
@@ -416,11 +428,12 @@ impl Aggregate {
                     ));
                     completion["eventKind"] = json!("completion");
                     completion["firstCheck"] = json!(false);
-                    completion["serverSequence"] = json!(next.evidence.len() as u64 + 1);
+                    completion["serverSequence"] = json!(next.next_evidence_sequence()?);
                     wire::validate("LearningEvidence", &completion)
                         .map_err(|_| Error::Unavailable)?;
-                    next.evidence
-                        .push(serde_json::from_value(completion).map_err(|_| Error::Unavailable)?);
+                    next.append_evidence(
+                        serde_json::from_value(completion).map_err(|_| Error::Unavailable)?,
+                    )?;
                 }
                 next.encounters.insert(saved.id.clone(), saved);
             }
@@ -487,14 +500,19 @@ impl Aggregate {
             _ => return Err(Error::InvalidInput),
         }
         next.revision = next.revision.checked_add(1).ok_or(Error::Unavailable)?;
+        if let Some(novelty) = novelty {
+            next.update_storage_mastery(novelty)?;
+        }
         let response = next.snapshot(content)?;
-        next.receipts.insert(
-            id.into(),
-            Receipt {
-                request: request.clone(),
-                response: response.clone(),
-            },
-        );
+        if next.storage.is_none() {
+            next.receipts.insert(
+                id.into(),
+                Receipt {
+                    request: request.clone(),
+                    response: response.clone(),
+                },
+            );
+        }
         *self = next;
         Ok(response)
     }

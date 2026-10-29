@@ -98,11 +98,16 @@ Training is a separate encounter flow from one-time story quests. Each server-is
 
 Provide fresh task variants for authored training milestones. Replaying a rewarded milestone remains available without further XP; new milestones unlock through character and story progress. Do not award XP for time elapsed, button presses or repeatedly reopening a task. Practice evidence remains labelled appropriately and does not manufacture novel-transfer evidence.
 
-Before extending this into sustained play, address the API's current 2,000-command cap and growing aggregate histories. Define bounded storage, snapshot/replay checkpoints and receipt retention without breaking duplicate prevention or pending retries. Do not simply remove the cap or delete receipts. Test a long-running profile beyond the old cap, plus retries across any compaction boundary.
+Sustained play requires bounded working storage and durable receipt/history
+records, rather than simply removing the old 2,000-command guard. Preserve
+duplicate prevention, pending encounters and exact retries across checkpoint
+boundaries, and verify a long-running profile beyond that old cap.
 
-The concrete [long-play storage design](LONG_PLAY_STORAGE_PLAN.md) defines this
-remaining engineering gate. The first training delivery retains the existing cap;
-its tests must not be presented as evidence of sustained-play storage readiness.
+The follow-up [durable storage implementation](adr/durable-game-storage.md) now
+externalizes retry/history records and bounds the current PostgreSQL save. Its
+rate policy replaces the lifetime cap on that path, while standalone aggregates
+retain their guard. See implementation status for long-profile validation;
+production storage budgets, retention and restore drills remain outstanding.
 
 Acceptance: training raises a character to level two, displays its reward, survives reload, resumes an interrupted encounter, and cannot be farmed through duplicate requests or recipient swapping.
 
