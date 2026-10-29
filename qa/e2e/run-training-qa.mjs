@@ -9,6 +9,12 @@ import { once } from 'node:events';
 import { createServer } from 'node:net';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
+const journey = process.env.WW_QA_JOURNEY || 'training';
+const journeys = {
+  training: 'qa/e2e/training-browser.mjs',
+  'personal-quest': 'qa/e2e/personal-quest-browser.mjs',
+};
+if (!Object.hasOwn(journeys, journey)) throw new Error('Unsupported disposable QA journey');
 const pgBin = process.env.WONDERWILDS_PG_BIN || '/workspace/setup-tools/postgres/usr/lib/postgresql/17/bin';
 const env = {
   ...process.env,
@@ -17,9 +23,9 @@ const env = {
   LD_LIBRARY_PATH: `/workspace/setup-tools/postgres/usr/lib/x86_64-linux-gnu${process.env.LD_LIBRARY_PATH ? `:${process.env.LD_LIBRARY_PATH}` : ''}`,
 };
 const cargo = join(env.CARGO_HOME, 'bin/cargo');
-const db = `ww_training_${Date.now()}_${process.pid}`;
+const db = `ww_${journey.replaceAll('-', '_')}_${Date.now()}_${process.pid}`;
 const database = `host=/workspace/setup-tools/pgsocket port=55432 user=agent dbname=${db}`;
-const temp = await mkdtemp(join(tmpdir(), 'wonderwilds-training-'));
+const temp = await mkdtemp(join(tmpdir(), `wonderwilds-${journey}-`));
 const children = [];
 let databaseCreated = false;
 const run = (bin, args, options = {}) => {
@@ -71,10 +77,10 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
   children.push(vite);
   await waitReady('http://127.0.0.1:5180/', vite);
   // Async child lets this process continue draining the local servers' output.
-  const test = spawn(process.execPath, ['qa/e2e/training-browser.mjs'], { cwd: root, env: { ...env, WW_DEMO_TEST_URL: 'http://127.0.0.1:5180' }, stdio: 'inherit' });
+  const test = spawn(process.execPath, [journeys[journey]], { cwd: root, env: { ...env, WW_DEMO_TEST_URL: 'http://127.0.0.1:5180' }, stdio: 'inherit' });
   children.push(test);
   const [code] = await once(test, 'exit');
-  if (code !== 0) throw new Error(`Training browser journey exited ${code}`);
+  if (code !== 0) throw new Error(`${journey} browser journey exited ${code}`);
 } finally {
   for (const child of children.reverse()) {
     if (child.exitCode !== null) continue;

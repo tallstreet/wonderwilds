@@ -340,3 +340,97 @@ test('training projections validate bounds while older snapshots remain readable
       (error: unknown) => error instanceof ApiFailure && error.code === 'UNAVAILABLE',
     );
 });
+
+test('personal quest projections validate bounded scenes and pinned encounter bindings', async () => {
+  const offer = {
+    questId: 'pip-lantern-trail',
+    documentVersion: '1',
+    title: 'A trail of little lights',
+    companionId: 'pip',
+    minimumCharacterLevel: 4,
+    available: true,
+    completed: false,
+  };
+  const personal = {
+    questId: offer.questId,
+    documentVersion: '1',
+    episodeId: 'episode-1',
+    title: offer.title,
+    companionId: 'pip',
+    node: {
+      id: 'start',
+      type: 'choice',
+      text: 'Which path shall we follow?',
+      choices: [
+        { id: 'pond', label: 'The pond', nextNodeId: 'path-one' },
+        { id: 'hill', label: 'The hill', nextNodeId: 'path-two' },
+      ],
+    },
+  };
+  const read = async (fields: object) => {
+    const client = new GameClient(
+      () => 'csrf',
+      async () => Response.json({ ...snapshot, ...fields }),
+    );
+    client.selectProfile('owned-profile');
+    return client.snapshot();
+  };
+  assert.deepEqual(
+    (await read({ personalQuestOffers: [offer], personalQuest: personal })).personalQuest,
+    personal,
+  );
+  assert.equal((await read({})).personalQuest, undefined);
+  for (const fields of [
+    { personalQuestOffers: [offer, offer] },
+    { personalQuestOffers: [{ ...offer, minimumCharacterLevel: 0 }] },
+    { personalQuestOffers: [{ ...offer, available: 'yes' }] },
+    { personalQuestOffers: [{ ...offer, rewardXp: 100 }] },
+    { personalQuest: { ...personal, node: { ...personal.node, text: 'x'.repeat(601) } } },
+    {
+      personalQuest: {
+        ...personal,
+        node: { ...personal.node, choices: [personal.node.choices[0]] },
+      },
+    },
+    {
+      personalQuest: {
+        ...personal,
+        node: { ...personal.node, choices: [personal.node.choices[0], personal.node.choices[0]] },
+      },
+    },
+    {
+      personalQuest: {
+        ...personal,
+        node: { id: 'done', type: 'ending', text: 'The game is over' },
+      },
+    },
+    {
+      personalQuest: {
+        ...personal,
+        node: {
+          id: 'next',
+          type: 'handoff',
+          text: 'More adventures await',
+          continuationTags: ['stars', 'stars'],
+        },
+      },
+    },
+    {
+      personalQuest: personal,
+      pendingEncounters: [
+        {
+          personalQuest: {
+            questId: offer.questId,
+            documentVersion: '1',
+            episodeId: 'episode-other',
+            nodeId: 'start',
+          },
+        },
+      ],
+    },
+  ])
+    await assert.rejects(
+      read(fields),
+      (error: unknown) => error instanceof ApiFailure && error.code === 'UNAVAILABLE',
+    );
+});

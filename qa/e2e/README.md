@@ -42,3 +42,24 @@ phone-sized training UI. Real educator, child usability and screen-reader review
 remain separate requirements. `training-browser.mjs` can also target an already
 prepared **fresh QA database** via `WW_DEMO_TEST_URL`; never point it at a database
 whose progress should be preserved.
+
+Personal quest documents against the real API and PostgreSQL:
+
+```sh
+node qa/e2e/run-personal-quest-qa.mjs
+```
+
+This selects the personal-quest journey from the runner's fixed allowlist and
+uses the same fresh database, temporary session, private ports and cleanup as
+the training check. It does not read or modify persistent demo progress.
+The journey recruits and trains Pip through real assessed commands, checks the
+level-four unlock, and exercises keyboard narrative choices, reload/resume,
+bound activities, incorrect answers, recorded support, abandonment, reflection,
+ongoing handoffs and mobile alternative branches. Exact retries and revisits
+must not duplicate the fixed keepsake reward. Authored episode JSON supplies the
+expected nodes; the browser does not supply progress, correctness or rewards.
+
+The finite authored episodes can be revisited and do not imply unlimited unique
+generated content. These checks make no model-training, educator approval or
+human accessibility claim. `WW_QA_JOURNEY` accepts only `training` or
+`personal-quest`; arbitrary script paths are rejected before provisioning.

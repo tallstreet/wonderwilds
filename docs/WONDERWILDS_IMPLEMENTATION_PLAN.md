@@ -1,8 +1,14 @@
 # Wonderwilds implementation plan
 
-Version: 1.2 · Updated: 29 October 2026 · Status: broader architecture and release roadmap
+Version: 1.3 · Updated: 29 October 2026 · Status: broader architecture and release roadmap
 
 The [companion progression plan](COMPANION_PROGRESSION_PLAN.md) governs the next gameplay implementation sequence and supersedes earlier collection/progression sequencing here. Use [implementation status](IMPLEMENTATION_STATUS.md) for delivered work. Existing WW task IDs remain reference scopes, not a queue to rebuild completed foundations. Live AI and fine-tuning are deferred and do not block the authored companion expansion.
+
+The game is an ongoing choose-your-own-adventure with no final ending. Authored
+JSON personal quests establish the scene/choice/activity/handoff structure for
+future generated episodes. [Quest generation contract](QUEST_GENERATION_CONTRACT.md)
+defines model inputs and validated proposals; this supersedes earlier finite-game
+ending requirements while retaining existing saved story flags and local arcs.
 
 ## 1. Outcome and non-negotiable decisions
 
@@ -14,7 +20,7 @@ Pokémon provides inspiration through discovery, companion attachment, collectio
 
 The AI director proposes the next adventure beat; a deterministic Rust engine alone commits the next game state. Personalised variation is a goal, not a promise that every playthrough will be globally unique. Every adventure remains playable with AI disabled.
 
-Initial release: three authored regions, an ending, twelve collectible friends, six reusable activity families, a reviewed Foundation skill slice in maths and English, adaptive sequencing, and parent-managed saves. Full Foundation coverage is a later explicitly measured gate; Years 1–2 expansion follows. Do not advertise complete curriculum coverage or proven learning gains at the initial release.
+Initial release: three authored regions, continuing quest episodes, twelve collectible friends, six reusable activity families, a reviewed Foundation skill slice in maths and English, adaptive sequencing, and parent-managed saves. Regional arcs have satisfying local resolutions and hand off to further adventures. Full Foundation coverage is a later explicitly measured gate; Years 1–2 expansion follows. Do not advertise complete curriculum coverage or proven learning gains at the initial release.
 
 ## 2. Existing project: preserve and extend
 
@@ -22,12 +28,12 @@ The current repository is `/Users/gary/Documents/Development/wonderwilds`, under
 
 | Existing material | Current baseline | Next work |
 | --- | --- | --- |
-| `frontend/src/world.ts` and movement modules | Playable Meadow, server-driven world changes, one follower | Team followers and regional integration |
-| `frontend/src/backend-world.ts` and `backend-world-model.ts` | Server activities, journal, companion selection and summaries | Character progression, training and collection UI |
-| `backend/crates/domain/src/engine.rs` | Explorer XP, friendship, teams, discovery and cosmetic transformations | Individual XP, training grants and integration |
-| `backend/crates/api/src/game/` | Authenticated transactions, retries, encounter support and abandonment | Expanded commands/snapshots, training and regional eligibility |
+| `frontend/src/world.ts` and movement modules | Playable Meadow, server-driven world changes, two follower support | Regional integration and companion roles |
+| `frontend/src/backend-world.ts` and `backend-world-model.ts` | Server activities, journal, character training and personal episode choices/handoffs | Collection refinements and regional journeys |
+| `backend/crates/domain/src/engine.rs` | Explorer/character XP, friendship, teams, transformations and pinned personal episodes | Optional roles, richer rewards and regional integration |
+| `backend/crates/api/src/game/` | Atomic authenticated transactions, durable retries/checkpoints, training and personal episode commands | Generated document activation and regional eligibility |
 | `contracts/` | Schemas, generated Rust/TS and shared fixtures | Compatible extensions and migration fixtures |
-| `content/` | Three authored regions, twelve friends, curriculum/activity definitions | Training milestones, personal quests and remaining content reviews |
+| `content/` | Regional arcs, twelve friends, training, four branching quest documents and generation examples | Content iteration, regional episodes and human reviews |
 | Guest save and existing art | Separate local progress, preserved hero IDs and distinct artwork for twelve friends | Preserve guest data; directional/transform art and human review |
 | Exploration library | 75 connected destinations; 72 new landscape images and lazy-loaded map previews | Authoritative regional eligibility, activities and discovery integration |
 
@@ -68,7 +74,10 @@ Core loop: explore → discover a need → choose a friend/tool → manipulate m
 - Abilities reveal optional paths or offer manipulatives, such as lighting a clue or organising objects. They cannot bypass authority checks or count as independent learner answers.
 - Team selection creates gentle strategy: choose a light, garden or pattern helper. Every essential route has a free, accessible alternative; no rare creature blocks learning.
 - Journal includes silhouettes, habitat clues and guaranteed discovery paths. A configurable seeded encounter table limits repetition and guarantees access to missing friends after a bounded number of eligible expeditions.
-- Player choices affect optional ordering and cosmetic outcomes. Fixed chapter anchors, prerequisite checks and an authored ending prevent incoherent or endless stories.
+- Player choices affect paths, memories and future hooks. Canonical world facts,
+  versioned continuity and prerequisite checks maintain coherence across ongoing
+  episodes. Each episode resolves a local goal and hands off to further choices;
+  the adventure has no global ending.
 
 ## 4. Curriculum: original graph and coverage process
 
@@ -355,7 +364,8 @@ Every handoff includes changed files, contract versions, exact test commands/res
 - **Depends:** WW-02. **Scope:** `content/story/`, `content/creatures/`, asset manifest; no existing atlas edits without integration coordination.
 - **Interfaces:** story graph, creature definitions, unlock/reward definitions, approved asset IDs.
 - **Deliverables:** three chapter spines, twelve friends, friendship/XP tables, final expedition, fallback beats and content provenance.
-- **Acceptance:** every story has a supported completion route and ending; essential routes do not require rare friends; no borrowed franchise assets.
+- **Acceptance:** every episode has a supported local resolution and continuation
+  handoff; essential routes do not require rare friends; no borrowed franchise assets.
 - **Tests:** story reachability, unlock-cycle detection, bounded discovery simulation and asset reference validation.
 
 ### WW-05 — Pure Rust gameplay engine
@@ -418,7 +428,8 @@ Every handoff includes changed files, contract versions, exact test commands/res
 
 - **Depends:** WW-04, WW-05, WW-10, WW-11. **Scope:** frontend world feature modules and region data; coordinate edits to existing world/navigation files.
 - **Interfaces:** authoritative story flags, creature roster, map geometry and content manifests.
-- **Deliverables:** Orchard/Cove integration, journal collection, team abilities, transformations, world consequences and ending.
+- **Deliverables:** Orchard/Cove integration, journal collection, team abilities,
+  transformations, world consequences and continuing episode handoffs.
 - **Acceptance:** preserve Meadow navigation and seven existing avatar IDs; all mandatory encounters reachable; assistance and hero choice do not bypass locks or erase progress.
 - **Tests:** bridge/collision regressions, all heroes/regions, reload mid-quest, supported finale, portrait/landscape and collection-completion playthrough.
 
@@ -495,7 +506,7 @@ The original foundation-building waves are superseded by the implemented Rust/AP
 | Pip progression loop | Minimum companion plan phases 1–4 | Recruit, train, level up, see reward and reload without duplicate grants |
 | Complete Meadow progression | Finish phases 1–4 for four friends | Reachable milestones, collection UI, compatible saves and sustained-play storage strategy |
 | Team and friendship gameplay | Phase 5 | Two-slot team, optional roles, friendship and reversible appearances |
-| Full authored journey | Phase 6 and remaining WW-12 integration | Three regions, twelve friends and supported ending |
+| Ongoing authored adventure | Phase 6 and remaining WW-12 integration | Three regions, twelve friends and supported episode handoffs |
 | Public release readiness | Remaining WW-08–10, WW-17–19 requirements | Identity/lifecycle flows, reviewed content, accessibility, security and operational evidence |
 | Optional model experiments | WW-14–16, separately scheduled | Provider/privacy/budget decisions, fallback and evaluation evidence; never an authored-release dependency |
 | Curriculum expansion | WW-20 | Audited Foundation coverage before completeness claims; reviewed extension packs |

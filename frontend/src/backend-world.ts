@@ -8,7 +8,14 @@ import { authoredPresentation } from './learning/presentation.ts';
 import { heroes, heroPortrait } from './art.ts';
 import { companionDetails } from './companions.ts';
 import { trainingDetails, trainingLevelUp } from './companion-training.ts';
+import {
+  activePersonalQuest,
+  personalQuestDetails,
+  personalQuestLibrary,
+  personalQuestScene,
+} from './personal-quests.ts';
 import './companion-training.css';
+import './personal-quests.css';
 import './companions.css';
 import { characterPortrait } from './character-art.ts';
 import './character-art.css';
@@ -105,9 +112,11 @@ export class BackendWorld {
     document.querySelector('#star-count')!.textContent = `${count} / 6`;
     document.querySelector('#mission-status')!.textContent = this.snapshot.pendingEncounters.length
       ? 'Continue your helping adventure'
-      : count === 6
-        ? 'Find your Meadow friends!'
-        : `${6 - count} story moments await`;
+      : this.snapshot.personalQuest && this.snapshot.personalQuest.node.type !== 'handoff'
+        ? `Continue ${this.snapshot.personalQuest.title}`
+        : count === 6
+          ? 'Find your Meadow friends!'
+          : `${6 - count} story moments await`;
     document.querySelector('#save-status')!.textContent =
       `Local server · progress saved · revision ${this.snapshot.revision}`;
   }
@@ -196,7 +205,8 @@ export class BackendWorld {
     if (this.snapshot.pendingEncounters.length) this.mount();
     else {
       this.disposeActivity();
-      this.missions();
+      if (activePersonalQuest(this.snapshot)) this.personalQuest();
+      else this.missions();
     }
   }
   private open(html: string) {
@@ -287,14 +297,91 @@ export class BackendWorld {
     );
     this.bindTrainingActions();
   }
+  personalAdventures() {
+    if (this.busy || this.activityOpen) return;
+    if (this.snapshot.pendingEncounters.length) {
+      this.mount();
+      return;
+    }
+    this.open(personalQuestLibrary(this.snapshot));
+    this.bindPersonalActions();
+  }
+  personalQuest() {
+    if (this.busy || this.activityOpen) return;
+    if (this.snapshot.pendingEncounters.length) {
+      this.mount();
+      return;
+    }
+    const html = personalQuestScene(this.snapshot);
+    if (!html) {
+      this.personalAdventures();
+      return;
+    }
+    this.open(html);
+    this.bindPersonalActions();
+    const heading = document.querySelector<HTMLElement>('#dialog-title');
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus();
+    }
+  }
+  private personalAction(payload: CommandPayload) {
+    if (this.busy || this.pending || this.activityOpen) return;
+    if (this.snapshot.pendingEncounters.length) {
+      this.mount();
+      return;
+    }
+    void this.send(payload)
+      .then(() => {
+        if (this.snapshot.pendingEncounters.length) this.mount();
+        else if (payload.type === 'abandon_personal_quest') this.personalAdventures();
+        else this.personalQuest();
+      })
+      .catch(() => {});
+  }
+  private bindPersonalActions() {
+    document
+      .querySelectorAll<HTMLButtonElement>('[data-server-personal-quest]')
+      .forEach((button) => {
+        button.onclick = () =>
+          this.personalAction({
+            type: 'start_personal_quest',
+            questId: button.dataset.serverPersonalQuest!,
+          });
+      });
+    document
+      .querySelectorAll<HTMLButtonElement>('[data-server-personal-choice]')
+      .forEach((button) => {
+        button.onclick = () =>
+          this.personalAction({
+            type: 'choose_personal_path',
+            choiceId: button.dataset.serverPersonalChoice!,
+          });
+      });
+    document
+      .querySelectorAll<HTMLButtonElement>('[data-server-personal-resume], #server-personal-resume')
+      .forEach((button) => {
+        button.onclick = () => this.personalQuest();
+      });
+    document.querySelector('#server-personal-activity')?.addEventListener('click', () => {
+      this.personalAction({ type: 'start_personal_activity' });
+    });
+    document.querySelector('#server-personal-abandon')?.addEventListener('click', () => {
+      this.personalAction({ type: 'abandon_personal_quest' });
+    });
+    document.querySelector('#server-personal-browse')?.addEventListener('click', () => {
+      this.personalAdventures();
+    });
+  }
   private mount() {
     this.disposeActivity();
     const encounter = this.snapshot.pendingEncounters[0];
     if (!encounter) return;
     const presentation = authoredPresentation(encounter);
+    const personal = encounter.personalQuest ? activePersonalQuest(this.snapshot) : undefined;
     this.activityOpen = true;
     this.open(
-      `<span class="pill">${encounter.training ? 'TRAIN TOGETHER' : 'YOUR MEADOW ADVENTURE'}</span><h2 id="dialog-title"${encounter.training ? ' class="training-heading"' : ''}>${encounter.training ? `Training with ${escape(friendName(encounter.training.creatureId))}` : 'A little help, a big difference'}</h2><div id="server-activity"></div>`,
+      `<span class="pill">${personal ? 'OUR PERSONAL ADVENTURE' : encounter.training ? 'TRAIN TOGETHER' : 'YOUR MEADOW ADVENTURE'}</span><h2 id="dialog-title"${personal ? ' class="personal-quest-heading"' : encounter.training ? ' class="training-heading"' : ''}>${personal ? escape(personal.title) : encounter.training ? `Training with ${escape(friendName(encounter.training.creatureId))}` : 'A little help, a big difference'}</h2>${personal ? `<p class="personal-quest-activity-context">${escape(personal.node.text)}</p>` : ''}<div id="server-activity"></div>`,
     );
     if (!presentation) {
       document.querySelector('#server-activity')!.textContent =
@@ -310,6 +397,13 @@ export class BackendWorld {
           await this.send({ type: 'attempt', encounterId: encounter.id, answer });
           if (!this.snapshot.pendingEncounters.some((e) => e.id === encounter.id)) {
             this.disposeActivity();
+            if (encounter.personalQuest) {
+              this.personalQuest();
+              return {
+                message: 'We helped together. Let’s see where our adventure goes next!',
+                result: 'correct',
+              };
+            }
             const levelUp = encounter.training
               ? trainingLevelUp(before, this.snapshot, encounter.training.creatureId)
               : undefined;
@@ -348,8 +442,12 @@ export class BackendWorld {
       })
       .join('');
     this.open(
-      `<span class="pill">CLOVER MEADOW</span><h2 id="dialog-title">Our next adventure</h2><p>Choose a story moment or a friend. We’ll walk there together.</p>${this.snapshot.pendingEncounters.length ? '<button class="primary" id="server-resume">Continue your activity</button>' : ''}<button class="secondary" id="server-training-clearing">Visit the training clearing</button><div class="modal-quests">${rows}</div><button class="text-button" id="server-refresh">Refresh server progress</button><p class="tiny-note">This local playtest uses draft activities. More islands are still being connected.</p>`,
+      `<span class="pill">CLOVER MEADOW</span><h2 id="dialog-title">Our next adventure</h2><p>Choose a story moment or a friend. We’ll walk there together.</p>${this.snapshot.pendingEncounters.length ? '<button class="primary" id="server-resume">Continue your activity</button>' : ''}${this.snapshot.personalQuest ? '<button class="primary" id="server-personal-resume">Continue your personal adventure</button>' : ''}${this.snapshot.personalQuestOffers ? '<button class="secondary" id="server-personal-adventures">Personal adventures with friends</button>' : ''}<button class="secondary" id="server-training-clearing">Visit the training clearing</button><div class="modal-quests">${rows}</div><button class="text-button" id="server-refresh">Refresh server progress</button><p class="tiny-note">This local playtest uses draft activities. More islands are still being connected.</p>`,
     );
+    this.bindPersonalActions();
+    document
+      .querySelector('#server-personal-adventures')
+      ?.addEventListener('click', () => this.personalAdventures());
     document.querySelector('#server-training-clearing')?.addEventListener('click', () => {
       this.hooks.close();
       this.hooks.visit(trainingClearing);
@@ -377,7 +475,7 @@ export class BackendWorld {
       .map((q) => {
         const owned = this.snapshot.ownedCreatures.includes(q.creatureId),
           selected = this.snapshot.selectedCompanions?.includes(q.creatureId);
-        return `<div class="journal-entry ${owned ? 'earned' : ''}">${characterPortrait(q.creatureId, 110)}<strong>${friendName(q.creatureId)}</strong><small>${owned ? (selected ? 'Walking with you' : 'Your friend') : 'A friendship waiting to grow'}</small>${owned ? `<button class="secondary" data-server-companion="${q.creatureId}" ${!selected && (this.snapshot.selectedCompanions?.length ?? 0) >= (this.snapshot.teamCapacity ?? 1) ? 'disabled' : ''} aria-pressed="${Boolean(selected)}">${selected ? `Rest ${friendName(q.creatureId)}` : `Walk with ${friendName(q.creatureId)}`}</button>` : ''}${trainingDetails(q.creatureId, this.snapshot)}${companionDetails(q.creatureId, owned, this.snapshot)}</div>`;
+        return `<div class="journal-entry ${owned ? 'earned' : ''}">${characterPortrait(q.creatureId, 110)}<strong>${friendName(q.creatureId)}</strong><small>${owned ? (selected ? 'Walking with you' : 'Your friend') : 'A friendship waiting to grow'}</small>${owned ? `<button class="secondary" data-server-companion="${q.creatureId}" ${!selected && (this.snapshot.selectedCompanions?.length ?? 0) >= (this.snapshot.teamCapacity ?? 1) ? 'disabled' : ''} aria-pressed="${Boolean(selected)}">${selected ? `Rest ${friendName(q.creatureId)}` : `Walk with ${friendName(q.creatureId)}`}</button>` : ''}${trainingDetails(q.creatureId, this.snapshot)}${personalQuestDetails(q.creatureId, this.snapshot)}${companionDetails(q.creatureId, owned, this.snapshot)}</div>`;
       })
       .join('');
     this.open(
@@ -395,6 +493,7 @@ export class BackendWorld {
     );
     this.bindFriendshipActions(state);
     this.bindTrainingActions();
+    this.bindPersonalActions();
     document.querySelectorAll<HTMLButtonElement>('[data-server-companion]').forEach((button) => {
       button.onclick = () => {
         if (this.busy) return;

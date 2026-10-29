@@ -82,6 +82,11 @@ mod tests {
                     "TrainingOffer" => round_trip!(TrainingOffer),
                     "CharacterProgression" => round_trip!(CharacterProgression),
                     "ExplorerProgression" => round_trip!(ExplorerProgression),
+                    "QuestDocument" => round_trip!(QuestDocument),
+                    "PersonalQuestView" => round_trip!(PersonalQuestView),
+                    "PersonalQuestBinding" => round_trip!(PersonalQuestBinding),
+                    "QuestGenerationContext" => round_trip!(QuestGenerationContext),
+                    "QuestGenerationProposal" => round_trip!(QuestGenerationProposal),
                     _ => panic!("Missing round trip for {name}"),
                 }
             }

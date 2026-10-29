@@ -288,6 +288,9 @@
         },
         "training": {
           "$ref": "#/$defs/TrainingBinding"
+        },
+        "personalQuest": {
+          "$ref": "#/$defs/PersonalQuestBinding"
         }
       },
       "required": [
@@ -553,6 +556,72 @@
             "creatureIds"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "start_personal_quest"
+            },
+            "questId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z][a-z0-9-]*$"
+            }
+          },
+          "required": [
+            "type",
+            "questId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "choose_personal_path"
+            },
+            "choiceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z][a-z0-9-]*$"
+            }
+          },
+          "required": [
+            "type",
+            "choiceId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "start_personal_activity"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "abandon_personal_quest"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -753,6 +822,17 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 2
+        },
+        "personalQuestOffers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PersonalQuestOffer"
+          },
+          "maxItems": 12,
+          "minItems": 0
+        },
+        "personalQuest": {
+          "$ref": "#/$defs/PersonalQuestView"
         }
       },
       "required": [
@@ -1783,6 +1863,773 @@
       "required": [
         "xp",
         "level"
+      ],
+      "additionalProperties": false
+    },
+    "QuestChoice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "nextNodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "nextNodeId"
+      ],
+      "additionalProperties": false
+    },
+    "QuestNode": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z][a-z0-9-]*$"
+            },
+            "type": {
+              "type": "string",
+              "const": "choice"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 600
+            },
+            "choices": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/QuestChoice"
+              },
+              "maxItems": 3,
+              "minItems": 2
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "text",
+            "choices"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z][a-z0-9-]*$"
+            },
+            "type": {
+              "type": "string",
+              "const": "activity"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 600
+            },
+            "activitySlotId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z][a-z0-9-]*$"
+            },
+            "nextNodeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z][a-z0-9-]*$"
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "text",
+            "activitySlotId",
+            "nextNodeId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "pattern": "^[a-z][a-z0-9-]*$"
+            },
+            "type": {
+              "type": "string",
+              "const": "handoff"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 600
+            },
+            "continuationTags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "maxItems": 5,
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "text",
+            "continuationTags"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "QuestDocument": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "questId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "documentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "companionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "regionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "interestTags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "entryNodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QuestNode"
+          },
+          "maxItems": 16,
+          "minItems": 3
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "questId",
+        "documentVersion",
+        "title",
+        "companionId",
+        "regionId",
+        "interestTags",
+        "entryNodeId",
+        "nodes"
+      ],
+      "additionalProperties": false
+    },
+    "PersonalQuestOffer": {
+      "type": "object",
+      "properties": {
+        "questId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "documentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "companionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "minimumCharacterLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "completed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "questId",
+        "documentVersion",
+        "title",
+        "companionId",
+        "minimumCharacterLevel",
+        "available",
+        "completed"
+      ],
+      "additionalProperties": false
+    },
+    "PersonalQuestView": {
+      "type": "object",
+      "properties": {
+        "questId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "documentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "episodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "companionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "node": {
+          "$ref": "#/$defs/QuestNode"
+        }
+      },
+      "required": [
+        "questId",
+        "documentVersion",
+        "episodeId",
+        "title",
+        "companionId",
+        "node"
+      ],
+      "additionalProperties": false
+    },
+    "PersonalQuestBinding": {
+      "type": "object",
+      "properties": {
+        "questId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "documentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "nodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "episodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "questId",
+        "documentVersion",
+        "nodeId",
+        "episodeId"
+      ],
+      "additionalProperties": false
+    },
+    "QuestActivitySlot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "skillId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "missing_quantity",
+            "equal_sharing",
+            "pattern_sort",
+            "spatial_measurement",
+            "phonics_word_building",
+            "story_message"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "skillId",
+        "templateId"
+      ],
+      "additionalProperties": false
+    },
+    "QuestContextWorld": {
+      "type": "object",
+      "properties": {
+        "regionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "canonicalFacts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 40,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "ownedCompanionIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "maxItems": 12,
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "regionId",
+        "canonicalFacts",
+        "ownedCompanionIds"
+      ],
+      "additionalProperties": false
+    },
+    "QuestContextProgression": {
+      "type": "object",
+      "properties": {
+        "explorerLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "companionLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "companionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        }
+      },
+      "required": [
+        "explorerLevel",
+        "companionLevel",
+        "companionId"
+      ],
+      "additionalProperties": false
+    },
+    "QuestLearningNeeds": {
+      "type": "object",
+      "properties": {
+        "skillIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "supportMode": {
+          "type": "string",
+          "enum": [
+            "available",
+            "encouraged",
+            "together"
+          ]
+        }
+      },
+      "required": [
+        "skillIds",
+        "supportMode"
+      ],
+      "additionalProperties": false
+    },
+    "QuestInterest": {
+      "type": "object",
+      "properties": {
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "player_selected",
+            "curated_conversation"
+          ]
+        }
+      },
+      "required": [
+        "tag",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "QuestConversationMemory": {
+      "type": "object",
+      "properties": {
+        "permission": {
+          "type": "string",
+          "enum": [
+            "not_shared",
+            "shared_summary"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "permission",
+        "summary"
+      ],
+      "additionalProperties": false
+    },
+    "QuestRecentChoice": {
+      "type": "object",
+      "properties": {
+        "questId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "nodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "choiceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        }
+      },
+      "required": [
+        "questId",
+        "nodeId",
+        "choiceId"
+      ],
+      "additionalProperties": false
+    },
+    "QuestOpenThread": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        }
+      },
+      "required": [
+        "id",
+        "summary"
+      ],
+      "additionalProperties": false
+    },
+    "QuestGenerationAllowlist": {
+      "type": "object",
+      "properties": {
+        "companionIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "regionIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "activitySlots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QuestActivitySlot"
+          },
+          "maxItems": 12,
+          "minItems": 1
+        },
+        "interestTags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "continuationTags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "companionIds",
+        "regionIds",
+        "activitySlots",
+        "interestTags",
+        "continuationTags"
+      ],
+      "additionalProperties": false
+    },
+    "QuestGenerationContext": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "contextDigest": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "rulesVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "world": {
+          "$ref": "#/$defs/QuestContextWorld"
+        },
+        "progression": {
+          "$ref": "#/$defs/QuestContextProgression"
+        },
+        "learning": {
+          "$ref": "#/$defs/QuestLearningNeeds"
+        },
+        "interests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QuestInterest"
+          },
+          "maxItems": 8,
+          "minItems": 0
+        },
+        "conversationMemory": {
+          "$ref": "#/$defs/QuestConversationMemory"
+        },
+        "recentChoices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QuestRecentChoice"
+          },
+          "maxItems": 12,
+          "minItems": 0
+        },
+        "openThreads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QuestOpenThread"
+          },
+          "maxItems": 8,
+          "minItems": 0
+        },
+        "allowed": {
+          "$ref": "#/$defs/QuestGenerationAllowlist"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "revision",
+        "contextDigest",
+        "contentVersion",
+        "rulesVersion",
+        "world",
+        "progression",
+        "learning",
+        "interests",
+        "conversationMemory",
+        "recentChoices",
+        "openThreads",
+        "allowed"
+      ],
+      "additionalProperties": false
+    },
+    "QuestGenerationProposal": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "contextDigest": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "document": {
+          "$ref": "#/$defs/QuestDocument"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "expectedRevision",
+        "contextDigest",
+        "document"
       ],
       "additionalProperties": false
     }

@@ -11,12 +11,16 @@ export function authoredPresentation(encounter: EncounterInstance): ActivityPres
     !('recipients' in parameters)
   ) {
     return {
-      prompt: 'Help Pip finish the bridge!',
+      prompt: encounter.personalQuest
+        ? `Add the missing objects to make ${parameters.total} altogether.`
+        : 'Help Pip finish the bridge!',
     };
   }
   if (encounter.templateId === 'equal_sharing' && 'recipients' in parameters) {
     return {
-      prompt: `Share ${parameters.total} berries. Give everyone the same!`,
+      prompt: encounter.personalQuest
+        ? `Share ${parameters.total} berries between ${parameters.recipients} friends. Give everyone the same!`
+        : `Share ${parameters.total} berries. Give everyone the same!`,
     };
   }
   const promptId =

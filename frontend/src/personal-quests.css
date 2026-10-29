@@ -1,0 +1,58 @@
+.personal-quest-details {
+  width: 100%;
+  padding: 12px 0;
+  border-top: 1px solid #dfd6e8;
+  line-height: 1.5;
+}
+.personal-quest-details h4 {
+  margin: 8px 0;
+}
+.personal-quest-details button {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  white-space: normal;
+}
+.personal-quest-scene {
+  text-align: center;
+}
+.personal-quest-story {
+  font-size: 1.12rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.personal-quest-choices,
+.personal-quest-offers {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+}
+.personal-quest-choices button,
+.personal-quest-offers button,
+.personal-quest-scene > button {
+  min-height: 48px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.personal-quest-offers article {
+  padding: 14px;
+  border-radius: 16px;
+  background: #f5f0fa;
+  overflow-wrap: anywhere;
+}
+.personal-quest-memory {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff3c7;
+}
+#dialog:has(.ww-activity) > h2.personal-quest-heading {
+  display: block;
+}
+.personal-quest-activity-context {
+  padding: 12px;
+  border-radius: 12px;
+  background: #f5f0fa;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}

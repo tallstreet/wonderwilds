@@ -1,6 +1,6 @@
 # Wonderwilds implementation evidence
 
-Foundation evidence recorded 28 October 2026; integration updates dated below. Broader roadmap: [Wonderwilds implementation plan](WONDERWILDS_IMPLEMENTATION_PLAN.md) v1.2. Active gameplay sequence: [Companion progression plan](COMPANION_PROGRESSION_PLAN.md). Validation counts in earlier sections describe their original delivery, not the latest checkout.
+Foundation evidence recorded 28 October 2026; integration updates dated below. Broader roadmap: [Wonderwilds implementation plan](WONDERWILDS_IMPLEMENTATION_PLAN.md) v1.3. Active gameplay sequence: [Companion progression plan](COMPANION_PROGRESSION_PLAN.md). Validation counts in earlier sections describe their original delivery, not the latest checkout.
 Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
@@ -10,17 +10,17 @@ No release, deployment, curriculum approval or learning-efficacy claim is made.
 | WW-01 | Baseline ADR, asset hashes/provenance inventory, synthetic save fixtures, desktop/tablet smoke | Independent rights review and child usability research |
 | WW-02 | Pinned Rust workspace, closed schemas, generated serde/TS, OpenAPI, shared fixtures and drift checks; companion/training projections and team commands | Parent lifecycle API contracts expand with the selected provider |
 | WW-03 | 33-node DAG, ladders, coverage/review ledgers, graph/bounds/hash validators | Educator prerequisite review, exact descriptor verification, release approval |
-| WW-04 | Three chapter spines, 18 beats, 12 illustrated friends, supported ending, discovery and progression data; sixteen Meadow training milestones | Directional/transformation art, richer milestone rewards and human reviews; activation disabled |
-| WW-05 | Pure domain engine, unique rewards, quests, collection/team/friendship/transformations, character XP/training, compact checkpoints and durable new-command replay facts | Operational replay/recovery drills, optional roles/personal quests and authoritative world paths |
+| WW-04 | Three regional arcs, 18 beats, 12 illustrated friends; sixteen Meadow training milestones and four branching personal quest documents | Directional/transformation art, richer rewards and human reviews; release activation disabled |
+| WW-05 | Pure domain engine, rewards, companion progression, pinned personal episodes/choices, compact checkpoints and durable replay facts | Operational replay/recovery drills, optional companion roles and authoritative world paths |
 | WW-06 | Six assessment families, bounded generation, explicit wire adapters, authored prompts, honest support | Educator calibration, broader item/context coverage and approved release pack |
 | WW-07 | Experimental deterministic policy, frontier/enrichment, support/difficulty advice, replay checks | Calibrated policy, context/subject balance, durable recompute CLI and window-scoped freshness |
 | WW-08 | PostgreSQL ownership/RLS, sessions/CSRF primitives, consent/export/delete adapters, tombstones, migration tooling | Reviewed identity provider, HTTP lifecycle flows, cleanup/retention workers, external-object deletion and backup recovery |
 | WW-09 | Axum gameplay routes, actual DB transactions, idempotency/revisions, atomic evidence/rewards/outbox, auth boundaries | Full regional/world eligibility, production roles/TLS/provider, durable worker and full integration |
 | WW-10 | Typed cloud client, exact retries, profile/logout cancellation, recoverable unverified import preparation | Real import endpoint and account/profile UX; no migration UI enabled |
 | WW-11 | Six accessible DOM renderers, authored presentation binding, keyboard/touch controls, support-before-narration | Entrypoint/account integration, human screen-reader/accessibility review and complete browser journeys |
-| WW-12 | Meadow world, character journal, training entry point, team controls/two followers; 75-destination exploration library | Server regional/discovery/story integration, optional roles and full playable ending |
-| WW-13 | Bounded proposal validation, authored-only director/fallback, exact task binding and deterministic replay | API commit integration and approved content activation |
-| WW-14–16 | Not implemented; authored game has no model dependency | Provider/privacy/budget decisions, adapter, evaluation corpus and gated training experiment |
+| WW-12 | Meadow world, journal/training, personal choice/activity/handoff UI, two followers; 75-destination exploration library | Server regional/discovery/story integration, optional roles and continuing regional episodes |
+| WW-13 | Authored director/fallback; bounded quest context/proposal adapter with exact context binding | Generated-text review/evaluation, activation and commit integration |
+| WW-14–16 | Future-model context/proposal prototype; no provider calls, conversation capture or training | Provider/privacy/budget decisions, model adapter, evaluation corpus and gated fine-tuning |
 | WW-17 | Existing guest parent view preserved; Rust summaries/client foundation available | New parent learning view, approved pack workflow and coverage dashboard |
 | WW-18 | Local reproducible install/start/migration/check helpers; GitHub Actions passed for companion PR #5 | Storage branch hosted execution, database/browser CI, deployment, observability, backup restore and rollback drills, operational owner |
 | WW-19–20 | Automated foundations and synthetic checks only | Integrated QA/security review, consented pilot, educator audit and measured curriculum expansion |
@@ -258,3 +258,66 @@ approved retention, deployed cleanup, full replay recovery and backup/restore
 drills remain outstanding. See [storage decision](adr/durable-game-storage.md)
 and [source review](STORAGE_REVIEW.md). This does not establish public release,
 human content review or production operational readiness.
+
+## JSON personal episodes and future generation contract — 29 October 2026
+
+The product direction is now an ongoing choose-your-own-adventure with no global
+ending. Existing regional/finale save flags are preserved as local arc milestones;
+earlier final-game requirements are superseded by continuing episode handoffs.
+
+Four authored JSON personal quests live in `content/quests/`, one for each Meadow
+friend. At character level four the journal and Missions expose scene choices,
+bound activities, reflections and distinct continuation hooks. Each route resolves
+a small goal and offers further adventures or revisits. The initial bank is finite;
+there is no claim of unlimited unique stories.
+
+`QuestDocument@1` is the iteration artifact for authored and future generated
+episodes. Its bounded graph uses `choice`, `activity` and `handoff` nodes. The
+separate trusted catalog owns character-level availability, supported activity
+bindings and one-time cosmetic keepsakes. Documents cannot grant rewards, invent
+answer keys or mutate arbitrary game state. Preferences do not create learning
+evidence. Incorrect answers permit retry; supported completion advances the same
+episode. Replaying another branch preserves the one-time reward rule.
+
+An active episode pins its complete document, activity slots and reward policy;
+its current node, choices and selected handoff survive reloads. Catalog edits
+apply to subsequent episodes. Compact envelope version two protects profiles
+with personal-quest history from older runtimes silently dropping the new fields;
+the current reader still accepts old legacy and version-one compact saves.
+
+The [generation contract](QUEST_GENERATION_CONTRACT.md) and paired synthetic JSON
+examples define future model input and output. Context separates canonical world
+facts, progression, learning needs, interest provenance, recent choices, open
+threads and an explicitly shared curated conversation summary. A proposal echoes
+the request, revision and SHA-256 context binding and returns a quest document.
+The pure adapter checks structure, graph, allowed references, learning skills and
+sharing rules, with an authored fallback. It does not activate arbitrary prose,
+prove semantic coherence or commit game state. No provider call, conversation
+capture, generated-text activation or fine-tuning is implemented.
+
+Validation passed:
+
+- `bash scripts/check.sh`: strict Rust format/Clippy, 30 domain tests, 26 API tests
+  (three real database tests deliberately ignored), 18 director tests, 23 learning
+  tests, 87 shared Rust/TypeScript fixtures, generated drift, existing validators,
+  new quest graph/schema checks with 13 negative tests, frontend checks/build,
+  twelve client tests and guest-save fixtures. CI now includes quest validators.
+- `sh scripts/check-postgres.sh`: all three real database tests and existing SQL
+  ownership/export/deletion, repeat migrations and hash-drift rejection passed.
+  The long-profile storage/reconstruction regression still passes.
+- `node qa/e2e/run-personal-quest-qa.mjs`: actual PostgreSQL/browser journey passed
+  after the final version-two envelope change, including assessed recruitment and
+  level-four unlock, keyboard branching, invalid-choice rejection, path reload,
+  exact retries, support, wrong/correct answers, abandonment/resume, reflection,
+  distinct handoffs, mobile alternate route, narrative abandonment and no duplicate
+  keepsake. The existing real-API training journey also passed.
+- Existing Chromium guest desktop/tablet smoke and all six activity-family
+  browser checks passed; guest progress and legacy save handling remain separate.
+
+Integration checks found and fixed underscore-containing activity template IDs
+being rejected by the new catalog validator, repeated-path graph traversal work
+(now memoized by node/activity state), and the older-runtime save-write hazard.
+No applied SQL migration or frozen story manifest was changed. Only disposable
+synthetic databases were used. Content remains pending human review and release
+disabled; narration, child usability, generated-text evaluation, future consent
+flows, model integration and regional expansion remain outstanding.

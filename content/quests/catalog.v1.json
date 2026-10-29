@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "personal-quests-1.0.0",
+  "reviewStatus": "pending",
+  "releaseEnabled": false,
+  "activitySlots": [
+    {
+      "id": "pip-count",
+      "skillId": "M06",
+      "templateId": "missing_quantity"
+    },
+    {
+      "id": "tansy-sequence",
+      "skillId": "M05",
+      "templateId": "pattern_sort"
+    },
+    {
+      "id": "nib-share",
+      "skillId": "M08",
+      "templateId": "equal_sharing"
+    },
+    {
+      "id": "flutter-pattern",
+      "skillId": "M09",
+      "templateId": "pattern_sort"
+    }
+  ],
+  "quests": [
+    {
+      "questId": "pip-lantern-trail",
+      "documentPath": "content/quests/pip-lantern-trail.v1.json",
+      "minimumCharacterLevel": 4,
+      "rewardItemId": "pip-personal-memory"
+    },
+    {
+      "questId": "tansy-welcome-garden",
+      "documentPath": "content/quests/tansy-welcome-garden.v1.json",
+      "minimumCharacterLevel": 4,
+      "rewardItemId": "tansy-personal-memory"
+    },
+    {
+      "questId": "nib-sharing-picnic",
+      "documentPath": "content/quests/nib-sharing-picnic.v1.json",
+      "minimumCharacterLevel": 4,
+      "rewardItemId": "nib-personal-memory"
+    },
+    {
+      "questId": "flutter-pattern-parade",
+      "documentPath": "content/quests/flutter-pattern-parade.v1.json",
+      "minimumCharacterLevel": 4,
+      "rewardItemId": "flutter-personal-memory"
+    }
+  ]
+}

@@ -4,10 +4,18 @@
 //! construct it from server-issued encounters and persisted assessment, in the
 //! same transaction as state/evidence/reward writes. Never build it from a JSON
 //! request, guest import, director output or a client correctness assertion.
+use crate::personal_quests::{
+    Catalog, PersonalActivityBinding, PersonalQuestOffer, PersonalQuestRun, PersonalQuestView,
+    QuestNode,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub const RULES_VERSION: &str = "domain-1.0.0";
+
+#[cfg(test)]
+#[path = "personal_quest_tests.rs"]
+mod personal_quest_tests;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Rejection {
@@ -176,6 +184,8 @@ pub struct Content {
     levels: Vec<u32>,
     max_friendship: u32,
     character_progression: CharacterProgression,
+    personal_quests: Catalog,
+    personal_quests_enabled: bool,
 }
 impl Content {
     /// Explicit development loader. Pending author/educator reviews cannot be
@@ -266,6 +276,8 @@ impl Content {
             levels: progression.explorer_levels,
             max_friendship: progression.friendship.maximum,
             character_progression: progression.character_progression,
+            personal_quests: Catalog::bundled()?,
+            personal_quests_enabled: !reviewed,
         };
         if [nc, nb, nh, nf].contains(&0)
             || (
@@ -470,6 +482,9 @@ impl Content {
     pub fn version(&self) -> &str {
         &self.version
     }
+    pub fn personal_quests(&self) -> &Catalog {
+        &self.personal_quests
+    }
     /// Authoritative authored mapping. API factories must use this value rather
     /// than silently assigning a different learning objective to a story beat.
     pub fn quest_skill_id(&self, quest_id: &str) -> Option<&str> {
@@ -498,6 +513,13 @@ pub struct Command {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Action {
+    StartPersonalQuest {
+        quest_id: String,
+    },
+    ChoosePersonalPath {
+        choice_id: String,
+    },
+    AbandonPersonalQuest,
     BeginQuest {
         quest_id: String,
         encounter_id: String,
@@ -581,6 +603,15 @@ pub struct State {
     /// Older standalone saves omit this field and keep their embedded receipts.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     external_receipts: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    personal_quest: Option<PersonalQuestRun>,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    personal_episode_sequence: u64,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    personal_quest_rewards: BTreeSet<String>,
+}
+fn is_zero(value: &u64) -> bool {
+    *value == 0
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DomainReceipt {
@@ -620,10 +651,89 @@ impl State {
             last_discovery: BTreeMap::new(),
             receipts: BTreeMap::new(),
             external_receipts: false,
+            personal_quest: None,
+            personal_episode_sequence: 0,
+            personal_quest_rewards: BTreeSet::new(),
         }
     }
     pub fn event_sequence(&self) -> u64 {
         self.sequence
+    }
+    pub fn personal_quest_view(&self) -> Option<PersonalQuestView> {
+        let run = self.personal_quest.as_ref()?;
+        Some(PersonalQuestView {
+            quest_id: run.document.quest_id.clone(),
+            document_version: run.document.document_version.clone(),
+            episode_id: run.episode_id.clone(),
+            title: run.document.title.clone(),
+            companion_id: run.document.companion_id.clone(),
+            node: run.node()?.clone(),
+        })
+    }
+    /// Once personal episodes have been used, older runtimes must not silently
+    /// discard their state when rewriting a compact save.
+    pub fn requires_personal_quest_runtime(&self) -> bool {
+        self.personal_episode_sequence > 0
+            || self.personal_quest.is_some()
+            || !self.personal_quest_rewards.is_empty()
+    }
+    pub fn active_personal_activity(&self) -> Option<PersonalActivityBinding> {
+        self.personal_quest.as_ref()?.activity()
+    }
+    pub fn personal_quest_offers(&self, content: &Content) -> Vec<PersonalQuestOffer> {
+        content
+            .personal_quests
+            .documents()
+            .map(|document| {
+                let entry = content
+                    .personal_quests
+                    .entry(&document.quest_id)
+                    .expect("validated catalog entry");
+                PersonalQuestOffer {
+                    quest_id: document.quest_id.clone(),
+                    document_version: document.document_version.clone(),
+                    title: document.title.clone(),
+                    companion_id: document.companion_id.clone(),
+                    minimum_character_level: entry.minimum_character_level,
+                    available: self.creatures.contains(&document.companion_id)
+                        && content.personal_quests_enabled
+                        && self.region == document.region_id
+                        && self.character_level(content, &document.companion_id)
+                            >= entry.minimum_character_level
+                        && self.pending.is_empty()
+                        && self
+                            .personal_quest
+                            .as_ref()
+                            .is_none_or(|run| run.node().is_some_and(QuestNode::is_handoff)),
+                    completed: self.personal_quest_rewards.contains(&document.quest_id),
+                }
+            })
+            .collect()
+    }
+    pub fn validate_personal_state(&self, content: &Content) -> Result<(), Rejection> {
+        if self.personal_quest_rewards.len() > 4
+            || self
+                .personal_quest_rewards
+                .iter()
+                .any(|id| content.personal_quests.entry(id).is_none())
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        if let Some(run) = &self.personal_quest {
+            run.validate()?;
+            if run.episode_sequence != self.personal_episode_sequence
+                || !self.creatures.contains(&run.document.companion_id)
+                || content
+                    .personal_quests
+                    .entry(&run.document.quest_id)
+                    .is_none()
+                || run.node().is_some_and(QuestNode::is_handoff)
+                    && !self.personal_quest_rewards.contains(&run.document.quest_id)
+            {
+                return Err(Rejection::ReplayMismatch);
+            }
+        }
+        Ok(())
     }
     pub fn is_storage_checkpoint(&self) -> bool {
         self.external_receipts
@@ -821,6 +931,32 @@ pub struct Event {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Outcome {
+    PersonalQuestStarted {
+        quest_id: String,
+        document_version: String,
+        episode_id: String,
+    },
+    PersonalPathChosen {
+        quest_id: String,
+        node_id: String,
+        choice_id: String,
+        next_node_id: String,
+    },
+    PersonalQuestAdvanced {
+        quest_id: String,
+        node_id: String,
+        next_node_id: String,
+        supported: bool,
+    },
+    PersonalQuestHandoff {
+        quest_id: String,
+        episode_id: String,
+        continuation_tags: Vec<String>,
+    },
+    PersonalQuestAbandoned {
+        quest_id: String,
+        episode_id: String,
+    },
     QuestStarted {
         quest_id: String,
         encounter_id: String,
@@ -987,6 +1123,38 @@ fn reward(
     });
     Ok(())
 }
+fn personal_handoff(state: &mut State, outcomes: &mut Vec<Outcome>) -> Result<(), Rejection> {
+    let run = state.personal_quest.as_ref().ok_or(Rejection::NotFound)?;
+    let Some(QuestNode::Handoff {
+        continuation_tags, ..
+    }) = run.node()
+    else {
+        return Ok(());
+    };
+    let quest_id = run.document.quest_id.clone();
+    let episode_id = run.episode_id.clone();
+    let tags = continuation_tags.clone();
+    let item = run.reward_item_id.clone();
+    if !state.personal_quest_rewards.contains(&quest_id) {
+        reward(
+            state,
+            &quest_id,
+            &Reward::InventoryItem {
+                id: format!("personal-memory:{quest_id}"),
+                value: item,
+                amount: 1,
+            },
+            outcomes,
+        )?;
+        state.personal_quest_rewards.insert(quest_id.clone());
+    }
+    outcomes.push(Outcome::PersonalQuestHandoff {
+        quest_id,
+        episode_id,
+        continuation_tags: tags,
+    });
+    Ok(())
+}
 fn quest<'a>(
     content: &'a Content,
     id: &str,
@@ -1012,6 +1180,17 @@ fn training_eligible(
     Ok(())
 }
 fn eligible(state: &State, content: &Content, id: &str) -> Result<(), Rejection> {
+    if let Some(binding) = state.active_personal_activity()
+        && binding.quest_id == id
+    {
+        let run = state.personal_quest.as_ref().ok_or(Rejection::NotFound)?;
+        if state.region != run.document.region_id
+            || !state.creatures.contains(&run.document.companion_id)
+        {
+            return Err(Rejection::Locked);
+        }
+        return Ok(());
+    }
     if let Some(t) = content.training(id) {
         return training_eligible(state, content, t);
     }
@@ -1062,14 +1241,96 @@ pub fn apply(
     if state.content_version != content.version {
         return Err(Rejection::InvalidContent("state/content mismatch".into()));
     }
+    state.validate_personal_state(content)?;
     let mut next = state.clone();
     let mut outcomes = Vec::new();
     match &command.action {
+        Action::StartPersonalQuest { quest_id } => {
+            if !state
+                .personal_quest_offers(content)
+                .iter()
+                .any(|offer| offer.quest_id == *quest_id && offer.available)
+            {
+                return Err(Rejection::Locked);
+            }
+            let document = content
+                .personal_quests
+                .document(quest_id)
+                .ok_or(Rejection::NotFound)?
+                .clone();
+            let entry = content
+                .personal_quests
+                .entry(quest_id)
+                .ok_or(Rejection::NotFound)?;
+            next.personal_episode_sequence = next
+                .personal_episode_sequence
+                .checked_add(1)
+                .ok_or(Rejection::Overflow)?;
+            let episode_id = format!("episode-{}", next.personal_episode_sequence);
+            next.personal_quest = Some(PersonalQuestRun {
+                node_id: document.entry_node_id.clone(),
+                document: document.clone(),
+                episode_id: episode_id.clone(),
+                episode_sequence: next.personal_episode_sequence,
+                slots: content.personal_quests.activity_slots().to_vec(),
+                reward_item_id: entry.reward_item_id.clone(),
+                choices: BTreeMap::new(),
+            });
+            outcomes.push(Outcome::PersonalQuestStarted {
+                quest_id: quest_id.clone(),
+                document_version: document.document_version,
+                episode_id,
+            });
+        }
+        Action::ChoosePersonalPath { choice_id } => {
+            if !state.pending.is_empty() {
+                return Err(Rejection::Locked);
+            }
+            let run = next.personal_quest.as_mut().ok_or(Rejection::NotFound)?;
+            if run.document.region_id != state.region {
+                return Err(Rejection::Locked);
+            }
+            let QuestNode::Choice { choices, .. } = run.node().ok_or(Rejection::NotFound)? else {
+                return Err(Rejection::InvalidCommand);
+            };
+            let choice = choices
+                .iter()
+                .find(|choice| choice.id == *choice_id)
+                .ok_or(Rejection::InvalidCommand)?
+                .clone();
+            let previous = run.node_id.clone();
+            run.choices.insert(previous.clone(), choice_id.clone());
+            run.node_id = choice.next_node_id.clone();
+            outcomes.push(Outcome::PersonalPathChosen {
+                quest_id: run.document.quest_id.clone(),
+                node_id: previous,
+                choice_id: choice_id.clone(),
+                next_node_id: choice.next_node_id,
+            });
+            personal_handoff(&mut next, &mut outcomes)?;
+        }
+        Action::AbandonPersonalQuest => {
+            if !state.pending.is_empty() {
+                return Err(Rejection::Locked);
+            }
+            let run = next.personal_quest.take().ok_or(Rejection::NotFound)?;
+            outcomes.push(Outcome::PersonalQuestAbandoned {
+                quest_id: run.document.quest_id,
+                episode_id: run.episode_id,
+            });
+        }
         Action::BeginQuest {
             quest_id,
             encounter_id,
         } => {
             eligible(state, content, quest_id)?;
+            if state
+                .active_personal_activity()
+                .is_some_and(|binding| binding.quest_id == *quest_id)
+                && !state.pending.is_empty()
+            {
+                return Err(Rejection::Locked);
+            }
             if state.completed.contains(quest_id) {
                 return Err(Rejection::AlreadyCompleted);
             }
@@ -1113,7 +1374,28 @@ pub fn apply(
                 .get(encounter_id)
                 .filter(|v| v.quest_id == *quest_id)
                 .ok_or(Rejection::UnverifiedEncounter)?;
-            if let Some(t) = content.training(quest_id) {
+            if state
+                .active_personal_activity()
+                .is_some_and(|binding| binding.quest_id == *quest_id)
+            {
+                next.pending.remove(quest_id);
+                let run = next.personal_quest.as_mut().ok_or(Rejection::NotFound)?;
+                let QuestNode::Activity { next_node_id, .. } =
+                    run.node().ok_or(Rejection::NotFound)?
+                else {
+                    return Err(Rejection::InvalidCommand);
+                };
+                let target = next_node_id.clone();
+                let previous = run.node_id.clone();
+                run.node_id = target.clone();
+                outcomes.push(Outcome::PersonalQuestAdvanced {
+                    quest_id: run.document.quest_id.clone(),
+                    node_id: previous,
+                    next_node_id: target,
+                    supported: verified.supported,
+                });
+                personal_handoff(&mut next, &mut outcomes)?;
+            } else if let Some(t) = content.training(quest_id) {
                 next.pending.remove(quest_id);
                 let amount = if next.training_grants.insert(t.id.clone()) {
                     t.xp

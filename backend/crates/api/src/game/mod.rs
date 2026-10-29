@@ -15,6 +15,8 @@ use wonderwilds_learning::assessment::{
 #[cfg(test)]
 mod companion_tests;
 pub mod http;
+#[cfg(test)]
+mod personal_quest_tests;
 pub mod repository;
 pub(crate) mod storage;
 pub(crate) use storage::MasteryItem;
@@ -53,6 +55,8 @@ pub struct SavedEncounter {
     training: Option<wire::TrainingBinding>,
     #[serde(default)]
     training_policy: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    personal_quest: Option<wire::PersonalQuestBinding>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 struct Receipt {
@@ -111,6 +115,9 @@ impl Aggregate {
         }
     }
     pub fn snapshot(&self, content: &Content) -> Result<Value, Error> {
+        self.domain
+            .validate_personal_state(content)
+            .map_err(|_| Error::Unavailable)?;
         let mut pending = Vec::new();
         for encounter in self
             .encounters
@@ -138,7 +145,11 @@ impl Aggregate {
             }
             value
         }).collect();
-        let value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"friendship":self.domain.creatures().iter().map(|id|json!({"creatureId":id,"points":self.domain.friendship(id)})).collect::<Vec<_>>(),"transformedCreatures":self.domain.transformed(),"availableHelpingMoments":self.domain.available_helping_moments(content).iter().map(|(creature,quest)|json!({"creatureId":creature,"completedQuestId":quest})).collect::<Vec<_>>(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills,"teamCapacity":self.domain.team_capacity(),"characterProgression":character_progression,"explorerProgression":{"xp":self.domain.xp(),"level":self.domain.level(content)}});
+        let mut value = json!({"schemaVersion":"1.0","revision":self.revision,"contentVersion":content.version(),"rulesVersion":engine::RULES_VERSION,"storyFlags":self.domain.flags(),"ownedCreatures":self.domain.creatures(),"selectedCompanions":self.domain.team(),"friendship":self.domain.creatures().iter().map(|id|json!({"creatureId":id,"points":self.domain.friendship(id)})).collect::<Vec<_>>(),"transformedCreatures":self.domain.transformed(),"availableHelpingMoments":self.domain.available_helping_moments(content).iter().map(|(creature,quest)|json!({"creatureId":creature,"completedQuestId":quest})).collect::<Vec<_>>(),"inventory":self.domain.inventory().iter().map(|(id,n)|json!({"itemId":id,"quantity":n})).collect::<Vec<_>>(),"pendingEncounters":pending,"learnerSummaries":skills,"teamCapacity":self.domain.team_capacity(),"characterProgression":character_progression,"explorerProgression":{"xp":self.domain.xp(),"level":self.domain.level(content)},"personalQuestOffers":self.domain.personal_quest_offers(content)});
+        if let Some(personal) = self.domain.personal_quest_view() {
+            value["personalQuest"] =
+                serde_json::to_value(personal).map_err(|_| Error::Unavailable)?;
+        }
         wire::validate("GameSnapshot", &value).map_err(|_| Error::Unavailable)?;
         Ok(value)
     }
@@ -147,11 +158,35 @@ impl Aggregate {
         if saved.completed || saved.abandoned {
             return Err(Error::NotFound);
         }
+        self.validate_personal_binding(saved)?;
         let (_, mut encounter) = authored_encounter(&saved.skill, saved.seed, &saved.id)
             .map_err(|_| Error::Unavailable)?;
         encounter.support = saved.support.clone();
         encounter.training = saved.training.clone();
+        encounter.personal_quest = saved.personal_quest.clone();
         serde_json::to_value(encounter).map_err(|_| Error::Unavailable)
+    }
+    /// Pending personal activities stay bound to their pinned document, node,
+    /// episode and server-selected slot even when the following team changes.
+    fn validate_personal_binding(&self, saved: &SavedEncounter) -> Result<(), Error> {
+        match (
+            &saved.personal_quest,
+            self.domain.active_personal_activity(),
+        ) {
+            (Some(binding), Some(active))
+                if binding.quest_id == active.document_quest_id
+                    && binding.document_version == active.document_version
+                    && binding.episode_id == active.episode_id
+                    && binding.node_id == active.node_id
+                    && saved.quest == active.quest_id
+                    && saved.skill == active.skill_id =>
+            {
+                Ok(())
+            }
+            (Some(_), _) => Err(Error::Unavailable),
+            (None, _) if saved.quest.starts_with("personal-") => Err(Error::Unavailable),
+            (None, _) => Ok(()),
+        }
     }
     fn domain_apply(
         &mut self,
@@ -250,7 +285,7 @@ impl Aggregate {
         let payload = &request["payload"];
         let domain_id = format!("api-{}", digest_id(id));
         match payload["type"].as_str().ok_or(Error::InvalidInput)? {
-            "start_encounter" => {
+            "start_encounter" | "start_personal_activity" => {
                 if next
                     .encounters
                     .values()
@@ -258,8 +293,30 @@ impl Aggregate {
                 {
                     return Err(Error::RevisionConflict);
                 }
-                let quest = payload["beatId"].as_str().ok_or(Error::InvalidInput)?;
-                let skill = content.quest_skill_id(quest).ok_or(Error::NotFound)?;
+                let personal = if payload["type"] == "start_personal_activity" {
+                    Some(
+                        next.domain
+                            .active_personal_activity()
+                            .ok_or(Error::Forbidden)?,
+                    )
+                } else {
+                    None
+                };
+                let quest = personal
+                    .as_ref()
+                    .map(|p| p.quest_id.as_str())
+                    .or_else(|| payload["beatId"].as_str())
+                    .ok_or(Error::InvalidInput)?;
+                let skill = personal
+                    .as_ref()
+                    .map(|p| p.skill_id.as_str())
+                    .or_else(|| content.quest_skill_id(quest))
+                    .ok_or(Error::NotFound)?;
+                let expected_template = personal
+                    .as_ref()
+                    .map(|p| p.template_id.as_str())
+                    .or_else(|| content.quest_template_id(quest))
+                    .ok_or(Error::NotFound)?;
                 // This development API exposes authored menu interactions in Meadow.
                 // No browser position is promoted into trusted reachability.
                 if next.domain.region() != "meadow" {
@@ -271,7 +328,7 @@ impl Aggregate {
                     .map_err(|_| Error::Unavailable)?;
                 let template =
                     serde_json::to_value(&encounter.template_id).map_err(|_| Error::Unavailable)?;
-                if template.as_str() != content.quest_template_id(quest) {
+                if template.as_str() != Some(expected_template) {
                     return Err(Error::Unavailable);
                 }
                 let mut facts = TrustedFacts::default();
@@ -309,6 +366,12 @@ impl Aggregate {
                                 creature_id: training.creature_id.clone(),
                                 rules_version: content.training_rules_version().into(),
                             }),
+                        personal_quest: personal.as_ref().map(|p| wire::PersonalQuestBinding {
+                            quest_id: p.document_quest_id.clone(),
+                            document_version: p.document_version.clone(),
+                            node_id: p.node_id.clone(),
+                            episode_id: p.episode_id.clone(),
+                        }),
                     },
                 );
             }
@@ -322,6 +385,7 @@ impl Aggregate {
                 if saved.completed || saved.abandoned {
                     return Err(Error::RevisionConflict);
                 }
+                next.validate_personal_binding(&saved)?;
                 // Never silently evaluate a pending training instance under changed rules
                 // or redirect its reward recipient after content or team changes.
                 if payload["type"] != "abandon"
@@ -436,6 +500,32 @@ impl Aggregate {
                     )?;
                 }
                 next.encounters.insert(saved.id.clone(), saved);
+            }
+            "start_personal_quest" | "choose_personal_path" | "abandon_personal_quest" => {
+                if next
+                    .encounters
+                    .values()
+                    .any(|e| !e.completed && !e.abandoned)
+                {
+                    return Err(Error::RevisionConflict);
+                }
+                let action = match payload["type"].as_str() {
+                    Some("start_personal_quest") => Action::StartPersonalQuest {
+                        quest_id: payload["questId"]
+                            .as_str()
+                            .ok_or(Error::InvalidInput)?
+                            .into(),
+                    },
+                    Some("choose_personal_path") => Action::ChoosePersonalPath {
+                        choice_id: payload["choiceId"]
+                            .as_str()
+                            .ok_or(Error::InvalidInput)?
+                            .into(),
+                    },
+                    Some("abandon_personal_quest") => Action::AbandonPersonalQuest,
+                    _ => return Err(Error::InvalidInput),
+                };
+                next.domain_apply(action, &domain_id, content, TrustedFacts::default(), now)?;
             }
             "select_companion" => {
                 let creature = payload["creatureId"].as_str().ok_or(Error::InvalidInput)?;

@@ -40,6 +40,57 @@ const failureCodes = new Set<string>([
   'UNAVAILABLE',
 ]);
 
+const questText = (value: unknown, maximum: number) =>
+  typeof value === 'string' && value.length > 0 && [...value].length <= maximum;
+const questId = (value: unknown) =>
+  typeof value === 'string' && value.length <= 120 && /^[a-z][a-z0-9-]*$/.test(value);
+const exactFields = (value: Record<string, unknown>, fields: string[]) =>
+  fields.every((field) => Object.hasOwn(value, field)) &&
+  Object.keys(value).every((field) => fields.includes(field));
+const personalBinding = (value: unknown) =>
+  isRecord(value) &&
+  exactFields(value, ['questId', 'documentVersion', 'nodeId', 'episodeId']) &&
+  questId(value.questId) &&
+  questText(value.documentVersion, 40) &&
+  questId(value.nodeId) &&
+  questText(value.episodeId, 120);
+const personalNode = (value: unknown): boolean => {
+  if (!isRecord(value) || !questId(value.id) || !questText(value.text, 600)) return false;
+  if (value.type === 'choice') {
+    return (
+      exactFields(value, ['id', 'type', 'text', 'choices']) &&
+      Array.isArray(value.choices) &&
+      value.choices.length >= 2 &&
+      value.choices.length <= 3 &&
+      value.choices.every(
+        (choice) =>
+          isRecord(choice) &&
+          exactFields(choice, ['id', 'label', 'nextNodeId']) &&
+          questId(choice.id) &&
+          questText(choice.label, 120) &&
+          questId(choice.nextNodeId),
+      ) &&
+      new Set(value.choices.map((choice) => choice.id)).size === value.choices.length
+    );
+  }
+  if (value.type === 'activity')
+    return (
+      exactFields(value, ['id', 'type', 'text', 'activitySlotId', 'nextNodeId']) &&
+      questId(value.activitySlotId) &&
+      questId(value.nextNodeId)
+    );
+  if (value.type === 'handoff')
+    return (
+      exactFields(value, ['id', 'type', 'text', 'continuationTags']) &&
+      Array.isArray(value.continuationTags) &&
+      value.continuationTags.length >= 1 &&
+      value.continuationTags.length <= 5 &&
+      value.continuationTags.every(questId) &&
+      new Set(value.continuationTags).size === value.continuationTags.length
+    );
+  return false;
+};
+
 /** Requests use the parent session cookie; profile identity never comes from command bodies. */
 export class GameClient {
   private context = 0;
@@ -102,7 +153,8 @@ export class GameClient {
       !isRecord(value) ||
       value.schemaVersion !== '1.0' ||
       value.id !== id ||
-      !isRecord(value.parameters)
+      !isRecord(value.parameters) ||
+      (value.personalQuest !== undefined && !personalBinding(value.personalQuest))
     )
       throw new ApiFailure('UNAVAILABLE', 503);
     return value as unknown as EncounterInstance;
@@ -149,6 +201,58 @@ export class GameClient {
       boundedInteger(item.xp) &&
       id(item.reactionId);
     if (
+      !optionalList(
+        value.personalQuestOffers,
+        12,
+        (offer) =>
+          isRecord(offer) &&
+          exactFields(offer, [
+            'questId',
+            'documentVersion',
+            'title',
+            'companionId',
+            'minimumCharacterLevel',
+            'available',
+            'completed',
+          ]) &&
+          questId(offer.questId) &&
+          questText(offer.documentVersion, 40) &&
+          questText(offer.title, 120) &&
+          questId(offer.companionId) &&
+          boundedInteger(offer.minimumCharacterLevel, 5, 1) &&
+          typeof offer.available === 'boolean' &&
+          typeof offer.completed === 'boolean',
+        (offer) => (offer as { questId: string }).questId,
+      ) ||
+      (value.personalQuest !== undefined &&
+        (!isRecord(value.personalQuest) ||
+          !exactFields(value.personalQuest, [
+            'questId',
+            'documentVersion',
+            'episodeId',
+            'title',
+            'companionId',
+            'node',
+          ]) ||
+          !questId(value.personalQuest.questId) ||
+          !questText(value.personalQuest.documentVersion, 40) ||
+          !questText(value.personalQuest.episodeId, 120) ||
+          !questText(value.personalQuest.title, 120) ||
+          !questId(value.personalQuest.companionId) ||
+          !personalNode(value.personalQuest.node))) ||
+      value.pendingEncounters.some(
+        (encounter) =>
+          isRecord(encounter) &&
+          encounter.personalQuest !== undefined &&
+          (!personalBinding(encounter.personalQuest) ||
+            !isRecord(value.personalQuest) ||
+            !isRecord(value.personalQuest.node) ||
+            !isRecord(encounter.personalQuest) ||
+            encounter.personalQuest.questId !== value.personalQuest.questId ||
+            encounter.personalQuest.documentVersion !== value.personalQuest.documentVersion ||
+            encounter.personalQuest.nodeId !== value.personalQuest.node.id ||
+            encounter.personalQuest.episodeId !== value.personalQuest.episodeId),
+      ) ||
       (value.teamCapacity !== undefined && !boundedInteger(value.teamCapacity, 2)) ||
       (value.explorerProgression !== undefined &&
         (!isRecord(value.explorerProgression) ||

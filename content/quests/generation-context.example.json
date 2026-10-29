@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "requestId": "quest-request-1",
+  "revision": 20,
+  "contextDigest": "e1fc54e411021a34f9a736e836ca736c4b44b5c27514d172132dfb7ef2ad5a9d",
+  "contentVersion": "personal-quests-1.0.0",
+  "rulesVersion": "personal-quests-1.0.0",
+  "world": {
+    "regionId": "meadow",
+    "canonicalFacts": [
+      "meadow_light"
+    ],
+    "ownedCompanionIds": [
+      "pip"
+    ]
+  },
+  "progression": {
+    "explorerLevel": 3,
+    "companionLevel": 4,
+    "companionId": "pip"
+  },
+  "learning": {
+    "skillIds": [
+      "M06"
+    ],
+    "supportMode": "available"
+  },
+  "interests": [
+    {
+      "tag": "lanterns",
+      "source": "player_selected"
+    }
+  ],
+  "conversationMemory": {
+    "permission": "not_shared",
+    "summary": ""
+  },
+  "recentChoices": [],
+  "openThreads": [
+    {
+      "id": "rustling-path",
+      "summary": "A soft rustle came from beside the lit path."
+    }
+  ],
+  "allowed": {
+    "companionIds": [
+      "pip"
+    ],
+    "regionIds": [
+      "meadow"
+    ],
+    "activitySlots": [
+      {
+        "id": "pip-count",
+        "skillId": "M06",
+        "templateId": "missing_quantity"
+      }
+    ],
+    "interestTags": [
+      "lanterns",
+      "exploring"
+    ],
+    "continuationTags": [
+      "night-sky",
+      "woodland-trails"
+    ]
+  }
+}

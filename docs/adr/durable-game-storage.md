@@ -30,6 +30,10 @@ Legacy migration validates receipt coverage and exact historical copies before
 writing the new format. The compact wire envelope deliberately cannot be read as
 an old aggregate; rolling back a binary must not silently lose retry history.
 
+Personal quest profiles use envelope version two after their first episode
+starts. The reader still accepts pre-quest version-one checkpoints. This prevents
+a pre-quest runtime from silently dropping episode progress on a later write.
+
 Two periodic recovery checkpoints are retained, at intervals of 256 API revisions.
 Durable receipts, novelty, evidence and event records are not rotated. New domain
 actions record trusted replay context; historical legacy actions did not record
