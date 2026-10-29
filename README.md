@@ -44,7 +44,7 @@ From the root, `bash scripts/check.sh` runs Rust format/Clippy/tests, shared
 schema and generated-code checks, content validators, frontend checks/build,
 client tests and legacy fixtures. `sh scripts/check-postgres.sh` separately runs
 real migration, RLS, ownership, deletion, race and rollback tests in a disposable
-database. Its two database tests are deliberately ignored in the default Rust
+database. Its three database tests are deliberately ignored in the default Rust
 suite and explicitly executed by this helper. With Vite running, run:
 
 ```sh
@@ -101,13 +101,38 @@ remains separate. Team selection/removal respects existing story-owned capacity,
 and the world can render both followers. The second slot retains its Orchard
 unlock; this does not activate Orchard gameplay.
 
+Personal adventures unlock at character level four (three first-time training
+milestones). Open a friend's journal card or Missions → Personal adventures to
+play a branching episode, complete its supported activity and choose a new
+thread. Choices and the current scene survive reloads. Episodes can be revisited;
+the cosmetic keepsake is earned once. The adventure has no game-wide ending.
+
+Pip's chosen night-sky or woodland hook now leads to a matching follow-up that
+acknowledges the earlier choice. Follow-ups can hand off to one another. Interests
+selected in Personal adventures rank eligible offers while keeping free choice;
+they never change assessment or rewards. Abandoning a follow-up keeps its source
+thread open. Recent choices, outcomes and source-linked threads survive reloads.
+
+Edit the six JSON documents in [`content/quests/`](content/quests/README.md).
+They use the same scene/choice/activity/handoff format proposed for future model
+output. Rebuild and restart the Rust API after editing bundled JSON; run the quest
+validators before playing both paths. See
+[quest generation contract](docs/QUEST_GENERATION_CONTRACT.md) for input/output
+examples covering progression, learning needs, interests and curated conversation
+memory. Live generation, conversation capture and fine-tuning remain future work.
+
 Friendship memory and reversible glow controls are connected in the journal.
-Server-authoritative regional travel, companion exploration roles, personal
-quests, distinct transformation art, director integration, identity-provider
+Server-authoritative regional travel, companion exploration roles,
+distinct transformation art, generated-quest activation, identity-provider
 login, save import and parent lifecycle screens remain outstanding. The 75-map
 exploration library does not establish regional story eligibility. No
-spatial/measurement task is reachable in Meadow. The development API retains its
-2,000-command cap; see the [long-play storage design](docs/LONG_PLAY_STORAGE_PLAN.md).
+spatial/measurement task is reachable in Meadow. PostgreSQL saves now use compact
+checkpoints and durable retry/history records, with a limit of 120 new commands
+per profile per minute instead of a lifetime command cap. Exact retries retain
+their original responses and bypass the rate limit. Standalone in-memory
+aggregates retain the 2,000-command guard. See the
+[durable storage decision](docs/adr/durable-game-storage.md) for migration,
+reconstruction and the remaining backup/retention requirements.
 Hints currently repeat the authored instruction and suggest helper support;
 worked-example text and narration are not yet supplied by the API.
 
@@ -122,3 +147,9 @@ For the actual world training journey in the prepared Linux environment, run
 `node qa/e2e/run-training-qa.mjs`. It creates and removes its own synthetic QA
 database and temporary session, using ports 3002/5180 without changing demo
 progress. See [browser checks](qa/e2e/README.md) and [CI scope](docs/CI.md).
+
+`node qa/e2e/run-personal-quest-qa.mjs` runs the branching personal adventure
+journey with the same isolated database/session lifecycle. Profiles that begin
+personal episodes use compact envelope version two; profiles with continuity
+memory or selected interests use version three. The current runtime reads older
+saves, while older writers reject upgraded profiles instead of dropping progress.

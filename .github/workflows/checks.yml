@@ -74,6 +74,9 @@ jobs:
           python3 content/story/validate.py
           python3 content/creatures/art/validate.py
           python3 -m unittest discover -s content/story -p 'test_*.py'
+          python3 content/quests/validate.py
+          python3 -m unittest discover -s content/quests -p 'test_*.py'
+          node content/quests/check-schema.mjs
       - name: Check frontend and nested API tests
         working-directory: frontend
         run: |

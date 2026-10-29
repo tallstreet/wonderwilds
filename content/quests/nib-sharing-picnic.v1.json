@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "questId": "nib-sharing-picnic",
+  "documentVersion": "1",
+  "title": "A picnic with a place for everyone",
+  "companionId": "nib",
+  "regionId": "meadow",
+  "interestTags": [
+    "picnics",
+    "animals"
+  ],
+  "entryNodeId": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "choice",
+      "text": "Nib has gathered a picnic basket. Where would you like to spread the cloth?",
+      "choices": [
+        {
+          "id": "tree",
+          "label": "Under the shady tree",
+          "nextNodeId": "path-one"
+        },
+        {
+          "id": "flowers",
+          "label": "Beside the bright flowers",
+          "nextNodeId": "path-two"
+        }
+      ]
+    },
+    {
+      "id": "path-one",
+      "type": "activity",
+      "text": "The shade is cool and the plates are ready. Help Nib give everyone an equal share.",
+      "activitySlotId": "nib-share",
+      "nextNodeId": "reflection"
+    },
+    {
+      "id": "path-two",
+      "type": "activity",
+      "text": "The flowers nod beside the picnic cloth. Help Nib give everyone an equal share.",
+      "activitySlotId": "nib-share",
+      "nextNodeId": "reflection"
+    },
+    {
+      "id": "reflection",
+      "type": "choice",
+      "text": "Everyone has a share. Which little picnic idea shall we save for another day?",
+      "choices": [
+        {
+          "id": "song",
+          "label": "A picnic song",
+          "nextNodeId": "handoff-song"
+        },
+        {
+          "id": "trail",
+          "label": "A trail of picnic clues",
+          "nextNodeId": "handoff-trail"
+        }
+      ]
+    },
+    {
+      "id": "handoff-song",
+      "type": "handoff",
+      "text": "Nib hums the beginning of a picnic song. A neighbour might know another gentle beat for your next adventure.",
+      "continuationTags": [
+        "music-trails"
+      ]
+    },
+    {
+      "id": "handoff-trail",
+      "type": "handoff",
+      "text": "Nib notices a little leaf beside the packed basket. It could be the first clue on another woodland picnic trail.",
+      "continuationTags": [
+        "woodland-trails"
+      ]
+    }
+  ]
+}

@@ -14,5 +14,8 @@ node content/curriculum/check-schema.mjs
 python3 content/story/validate.py
 python3 content/creatures/art/validate.py
 python3 -m unittest discover -s content/story -p 'test_*.py'
+python3 content/quests/validate.py
+python3 -m unittest discover -s content/quests -p 'test_*.py'
+node content/quests/check-schema.mjs
 (cd frontend && npm run check && node --import tsx src/api/api.test.ts)
 node --import ./frontend/node_modules/tsx/dist/loader.mjs qa/fixtures/legacy/baseline.test.ts

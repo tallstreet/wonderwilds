@@ -4,10 +4,18 @@
 //! construct it from server-issued encounters and persisted assessment, in the
 //! same transaction as state/evidence/reward writes. Never build it from a JSON
 //! request, guest import, director output or a client correctness assertion.
+use crate::personal_quests::{
+    Catalog, NarrativeChoice, NarrativeMemory, NarrativeOutcome, NarrativeThread,
+    PersonalActivityBinding, PersonalQuestOffer, PersonalQuestRun, PersonalQuestView, QuestNode,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub const RULES_VERSION: &str = "domain-1.0.0";
+
+#[cfg(test)]
+#[path = "personal_quest_tests.rs"]
+mod personal_quest_tests;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Rejection {
@@ -176,6 +184,8 @@ pub struct Content {
     levels: Vec<u32>,
     max_friendship: u32,
     character_progression: CharacterProgression,
+    personal_quests: Catalog,
+    personal_quests_enabled: bool,
 }
 impl Content {
     /// Explicit development loader. Pending author/educator reviews cannot be
@@ -266,6 +276,8 @@ impl Content {
             levels: progression.explorer_levels,
             max_friendship: progression.friendship.maximum,
             character_progression: progression.character_progression,
+            personal_quests: Catalog::bundled()?,
+            personal_quests_enabled: !reviewed,
         };
         if [nc, nb, nh, nf].contains(&0)
             || (
@@ -470,6 +482,9 @@ impl Content {
     pub fn version(&self) -> &str {
         &self.version
     }
+    pub fn personal_quests(&self) -> &Catalog {
+        &self.personal_quests
+    }
     /// Authoritative authored mapping. API factories must use this value rather
     /// than silently assigning a different learning objective to a story beat.
     pub fn quest_skill_id(&self, quest_id: &str) -> Option<&str> {
@@ -498,6 +513,16 @@ pub struct Command {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Action {
+    SetQuestInterests {
+        tags: Vec<String>,
+    },
+    StartPersonalQuest {
+        quest_id: String,
+    },
+    ChoosePersonalPath {
+        choice_id: String,
+    },
+    AbandonPersonalQuest,
     BeginQuest {
         quest_id: String,
         encounter_id: String,
@@ -531,7 +556,7 @@ pub enum Action {
     },
 }
 /// Server-owned, persisted encounter completion, not a request body.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct VerifiedCompletion {
     pub quest_id: String,
     pub supported: bool,
@@ -539,13 +564,13 @@ pub struct VerifiedCompletion {
 /// Trusted transaction inputs. Assessment/factory adapters must verify profile,
 /// encounter/session ownership, hint history, and server correctness first.
 /// `reachable_quests` comes from server world/path validation, never browser XY.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct TrustedFacts {
     pub issued_encounters: BTreeMap<String, String>,
     pub completed_encounters: BTreeMap<String, VerifiedCompletion>,
     pub reachable_quests: BTreeSet<String>,
 }
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Context {
     pub unix_millis: u64,
     pub recorded_random_choice: u32,
@@ -576,12 +601,37 @@ pub struct State {
     grants: BTreeSet<(String, String)>,
     discoveries: BTreeMap<String, String>,
     last_discovery: BTreeMap<String, String>,
-    receipts: BTreeMap<String, Receipt>,
+    receipts: BTreeMap<String, DomainReceipt>,
+    /// Compact snapshots require durable receipt lookup by their transaction owner.
+    /// Older standalone saves omit this field and keep their embedded receipts.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    external_receipts: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    personal_quest: Option<PersonalQuestRun>,
+    #[serde(default, skip_serializing_if = "NarrativeMemory::is_empty")]
+    narrative_memory: NarrativeMemory,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    quest_interests: Vec<String>,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    personal_episode_sequence: u64,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    personal_quest_rewards: BTreeSet<String>,
+}
+fn is_zero(value: &u64) -> bool {
+    *value == 0
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-struct Receipt {
-    command: Command,
-    events: Vec<Event>,
+pub struct DomainReceipt {
+    pub command: Command,
+    pub events: Vec<Event>,
+}
+/// Result of the owner's durable lookup, performed under the same profile lock
+/// as the state update. `Absent` is an assertion of a completed lookup, not an
+/// instruction to discard an old receipt. Persist new receipts atomically with
+/// state, evidence and events before acknowledging the command.
+pub enum DurableLookup<'a> {
+    Absent,
+    Found(&'a DomainReceipt),
 }
 impl State {
     pub fn new(content: &Content) -> Self {
@@ -607,7 +657,309 @@ impl State {
             discoveries: BTreeMap::new(),
             last_discovery: BTreeMap::new(),
             receipts: BTreeMap::new(),
+            external_receipts: false,
+            personal_quest: None,
+            narrative_memory: NarrativeMemory::default(),
+            quest_interests: Vec::new(),
+            personal_episode_sequence: 0,
+            personal_quest_rewards: BTreeSet::new(),
         }
+    }
+    pub fn event_sequence(&self) -> u64 {
+        self.sequence
+    }
+    pub fn personal_quest_view(&self) -> Option<PersonalQuestView> {
+        let run = self.personal_quest.as_ref()?;
+        Some(PersonalQuestView {
+            acknowledgement: run.acknowledgement.clone(),
+            quest_id: run.document.quest_id.clone(),
+            document_version: run.document.document_version.clone(),
+            episode_id: run.episode_id.clone(),
+            title: run.document.title.clone(),
+            companion_id: run.document.companion_id.clone(),
+            node: run.node()?.clone(),
+        })
+    }
+    /// Once personal episodes have been used, older runtimes must not silently
+    /// discard their state when rewriting a compact save.
+    pub fn requires_personal_quest_runtime(&self) -> bool {
+        self.personal_episode_sequence > 0
+            || self.personal_quest.is_some()
+            || !self.personal_quest_rewards.is_empty()
+    }
+    pub fn active_personal_activity(&self) -> Option<PersonalActivityBinding> {
+        self.personal_quest.as_ref()?.activity()
+    }
+    pub fn narrative_memory(&self) -> &NarrativeMemory {
+        &self.narrative_memory
+    }
+    pub fn quest_interests(&self) -> &[String] {
+        &self.quest_interests
+    }
+    pub fn requires_continuity_runtime(&self) -> bool {
+        !self.narrative_memory.is_empty() || !self.quest_interests.is_empty()
+    }
+    fn matching_thread<'a>(
+        &'a self,
+        content: &Content,
+        quest_id: &str,
+    ) -> Option<&'a NarrativeThread> {
+        let policy = content
+            .personal_quests
+            .entry(quest_id)?
+            .continuation
+            .as_ref()?;
+        let matches = |thread: &&NarrativeThread| {
+            thread.tag == policy.tag && policy.source_quest_ids.contains(&thread.source_quest_id)
+        };
+        self.narrative_memory
+            .threads
+            .iter()
+            .rev()
+            .filter(matches)
+            .find(|thread| thread.status == "open")
+            .or_else(|| {
+                self.personal_quest_rewards
+                    .contains(quest_id)
+                    .then(|| {
+                        self.narrative_memory
+                            .threads
+                            .iter()
+                            .rev()
+                            .filter(matches)
+                            .find(|thread| thread.status == "resolved")
+                    })
+                    .flatten()
+            })
+    }
+    pub fn personal_quest_offers(&self, content: &Content) -> Vec<PersonalQuestOffer> {
+        let mut offers: Vec<_> = content
+            .personal_quests
+            .documents()
+            .map(|document| {
+                let entry = content
+                    .personal_quests
+                    .entry(&document.quest_id)
+                    .expect("validated catalog entry");
+                let thread = self.matching_thread(content, &document.quest_id);
+                let locked_reason = if !self.creatures.contains(&document.companion_id) {
+                    Some("Befriend this companion first".into())
+                } else if self.character_level(content, &document.companion_id)
+                    < entry.minimum_character_level
+                {
+                    Some(format!(
+                        "Unlock at character level {}",
+                        entry.minimum_character_level
+                    ))
+                } else if entry.continuation.is_some() && thread.is_none() {
+                    Some("Follow a matching clue first".into())
+                } else if !self.pending.is_empty() {
+                    Some("Finish your current activity first".into())
+                } else if self
+                    .personal_quest
+                    .as_ref()
+                    .is_some_and(|run| !run.node().is_some_and(QuestNode::is_handoff))
+                {
+                    Some("Continue your current episode first".into())
+                } else if self.region != document.region_id {
+                    Some("Visit this companion's region first".into())
+                } else {
+                    None
+                };
+                PersonalQuestOffer {
+                    locked_reason,
+                    recommendation: thread
+                        .filter(|t| t.status == "open")
+                        .map(|t| format!("Continue your {} thread", t.tag.replace('-', " "))),
+                    quest_id: document.quest_id.clone(),
+                    document_version: document.document_version.clone(),
+                    title: document.title.clone(),
+                    companion_id: document.companion_id.clone(),
+                    minimum_character_level: entry.minimum_character_level,
+                    available: self.creatures.contains(&document.companion_id)
+                        && content.personal_quests_enabled
+                        && self.region == document.region_id
+                        && self.character_level(content, &document.companion_id)
+                            >= entry.minimum_character_level
+                        && self.pending.is_empty()
+                        && self
+                            .personal_quest
+                            .as_ref()
+                            .is_none_or(|r| r.node().is_some_and(QuestNode::is_handoff))
+                        && (entry.continuation.is_none() || thread.is_some()),
+                    completed: self.personal_quest_rewards.contains(&document.quest_id),
+                }
+            })
+            .collect();
+        let score = |offer: &PersonalQuestOffer| {
+            let document = content
+                .personal_quests
+                .document(&offer.quest_id)
+                .expect("catalog document");
+            let interests = document
+                .interest_tags
+                .iter()
+                .filter(|tag| self.quest_interests.contains(tag))
+                .count() as i32;
+            let repeated = self
+                .narrative_memory
+                .recent_outcomes
+                .last()
+                .is_some_and(|o| o.quest_id == offer.quest_id);
+            i32::from(offer.available) * 100_000
+                + self
+                    .matching_thread(content, &offer.quest_id)
+                    .filter(|thread| thread.status == "open")
+                    .and_then(|thread| {
+                        self.narrative_memory
+                            .threads
+                            .iter()
+                            .position(|candidate| candidate.id == thread.id)
+                    })
+                    .map_or(0, |index| (index as i32 + 1) * 100)
+                + interests * 10
+                + i32::from(!offer.completed) * 5
+                - i32::from(repeated) * 20
+        };
+        offers.sort_by(|a, b| {
+            score(b)
+                .cmp(&score(a))
+                .then_with(|| a.quest_id.cmp(&b.quest_id))
+        });
+        offers
+    }
+    pub fn validate_personal_state(&self, content: &Content) -> Result<(), Rejection> {
+        self.narrative_memory.validate()?;
+        let options = content.personal_quests.interest_options();
+        if self.quest_interests.len() > 5
+            || self
+                .quest_interests
+                .iter()
+                .any(|tag| !options.contains(tag))
+            || self.quest_interests.iter().collect::<BTreeSet<_>>().len()
+                != self.quest_interests.len()
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        if self.personal_quest_rewards.len() > content.personal_quests.len()
+            || self
+                .personal_quest_rewards
+                .iter()
+                .any(|id| content.personal_quests.entry(id).is_none())
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        if let Some(run) = &self.personal_quest {
+            run.validate()?;
+            if run.episode_sequence != self.personal_episode_sequence
+                || !self.creatures.contains(&run.document.companion_id)
+                || content
+                    .personal_quests
+                    .entry(&run.document.quest_id)
+                    .is_none()
+                || run.node().is_some_and(QuestNode::is_handoff)
+                    && !self.personal_quest_rewards.contains(&run.document.quest_id)
+            {
+                return Err(Rejection::ReplayMismatch);
+            }
+        }
+        Ok(())
+    }
+    pub fn is_storage_checkpoint(&self) -> bool {
+        self.external_receipts
+    }
+    /// Verify the independently stored high-water marks when loading a compact
+    /// checkpoint. A receipt-bearing or counter-inconsistent checkpoint fails
+    /// closed rather than being treated as a new profile.
+    pub fn validate_checkpoint(&self, revision: u64, event_sequence: u64) -> Result<(), Rejection> {
+        if !self.external_receipts
+            || !self.receipts.is_empty()
+            || self.revision != revision
+            || self.sequence != event_sequence
+            || self.sequence < self.revision
+            || (self.revision == 0) != (self.sequence == 0)
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        Ok(())
+    }
+    /// Explicit migration boundary: return every legacy receipt to the owner
+    /// for durable insertion, and a bounded domain snapshot with a durable-mode
+    /// marker. Commit both in one transaction. Repeating this on a compact state
+    /// returns no receipts and does not change its counters or gameplay facts.
+    pub fn storage_checkpoint(&self) -> Result<(Self, Vec<DomainReceipt>), Rejection> {
+        if self.external_receipts {
+            self.validate_checkpoint(self.revision, self.sequence)?;
+            return Ok((self.clone(), Vec::new()));
+        }
+        if u64::try_from(self.receipts.len()).map_err(|_| Rejection::Overflow)? != self.revision {
+            return Err(Rejection::ReplayMismatch);
+        }
+        let mut sequences = BTreeSet::new();
+        let mut revisions = BTreeSet::new();
+        for (id, receipt) in &self.receipts {
+            validate_receipt(receipt)?;
+            if *id != receipt.command.command_id
+                || !revisions.insert(receipt.command.expected_revision)
+                || receipt.command.expected_revision >= self.revision
+                || receipt.events.iter().any(|event| {
+                    event.sequence > self.sequence
+                        || event.content_version != self.content_version
+                        || !sequences.insert(event.sequence)
+                })
+            {
+                return Err(Rejection::ReplayMismatch);
+            }
+        }
+        if u64::try_from(sequences.len()).map_err(|_| Rejection::Overflow)? != self.sequence
+            || self.sequence < self.revision
+            || (self.revision == 0) != (self.sequence == 0)
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        let mut ordered: Vec<_> = self.receipts.values().collect();
+        ordered.sort_by_key(|receipt| receipt.command.expected_revision);
+        let mut previous_sequence = 0u64;
+        for receipt in ordered {
+            if receipt.events[0].sequence
+                != previous_sequence
+                    .checked_add(1)
+                    .ok_or(Rejection::Overflow)?
+            {
+                return Err(Rejection::ReplayMismatch);
+            }
+            previous_sequence = receipt
+                .events
+                .last()
+                .ok_or(Rejection::ReplayMismatch)?
+                .sequence;
+        }
+        let mut checkpoint = self.clone();
+        checkpoint.external_receipts = true;
+        let receipts = std::mem::take(&mut checkpoint.receipts)
+            .into_values()
+            .collect();
+        Ok((checkpoint, receipts))
+    }
+    /// Deliberate rollback/export reconstruction from the complete durable
+    /// receipt history. This is not the normal compact request path. Partial,
+    /// duplicated or inconsistent history cannot silently re-enable standalone
+    /// execution, because that would forget command IDs and permit replay.
+    pub fn restore_embedded_receipts(
+        &self,
+        receipts: Vec<DomainReceipt>,
+    ) -> Result<Self, Rejection> {
+        self.validate_checkpoint(self.revision, self.sequence)?;
+        let mut restored = self.clone();
+        restored.external_receipts = false;
+        for receipt in receipts {
+            let id = receipt.command.command_id.clone();
+            if restored.receipts.insert(id, receipt).is_some() {
+                return Err(Rejection::ReplayMismatch);
+            }
+        }
+        restored.storage_checkpoint()?;
+        Ok(restored)
     }
     pub fn character_xp(&self, id: &str) -> u32 {
         *self.character_xp.get(id).unwrap_or(&0)
@@ -650,6 +1002,11 @@ impl State {
     }
     pub fn completed(&self) -> &BTreeSet<String> {
         &self.completed
+    }
+    /// Read-only binding projection for trusted storage adapters to verify that
+    /// their active encounter records exactly match the domain checkpoint.
+    pub fn pending_encounters(&self) -> &BTreeMap<String, String> {
+        &self.pending
     }
     pub fn flags(&self) -> &BTreeSet<String> {
         &self.flags
@@ -704,6 +1061,35 @@ pub struct Event {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Outcome {
+    QuestInterestsChanged {
+        tags: Vec<String>,
+    },
+    PersonalQuestStarted {
+        quest_id: String,
+        document_version: String,
+        episode_id: String,
+    },
+    PersonalPathChosen {
+        quest_id: String,
+        node_id: String,
+        choice_id: String,
+        next_node_id: String,
+    },
+    PersonalQuestAdvanced {
+        quest_id: String,
+        node_id: String,
+        next_node_id: String,
+        supported: bool,
+    },
+    PersonalQuestHandoff {
+        quest_id: String,
+        episode_id: String,
+        continuation_tags: Vec<String>,
+    },
+    PersonalQuestAbandoned {
+        quest_id: String,
+        episode_id: String,
+    },
     QuestStarted {
         quest_id: String,
         encounter_id: String,
@@ -756,6 +1142,80 @@ pub struct Applied {
     pub duplicate: bool,
 }
 
+fn validate_receipt(receipt: &DomainReceipt) -> Result<(), Rejection> {
+    let command = &receipt.command;
+    let revision = command
+        .expected_revision
+        .checked_add(1)
+        .ok_or(Rejection::Overflow)?;
+    if !valid_id(&command.command_id)
+        || receipt.events.is_empty()
+        || receipt.events.iter().any(|event| {
+            event.command_id != command.command_id
+                || event.revision != revision
+                || event.sequence == 0
+                || event.rules_version.is_empty()
+                || event.content_version.is_empty()
+                || event.rules_version != receipt.events[0].rules_version
+                || event.content_version != receipt.events[0].content_version
+        })
+        || receipt
+            .events
+            .windows(2)
+            .any(|pair| pair[0].sequence.checked_add(1) != Some(pair[1].sequence))
+    {
+        return Err(Rejection::ReplayMismatch);
+    }
+    Ok(())
+}
+
+/// Compact-state transition for a transaction owner with a durable receipt
+/// store. Lookup precedes revision/content checks, preserving old exact retries.
+/// New execution returns no embedded history: the owner must construct and
+/// persist `DomainReceipt { command, events }` in the same transaction as state.
+/// Ordinary `apply` deliberately cannot execute the returned checkpoint.
+pub fn apply_persisted(
+    state: &State,
+    command: &Command,
+    content: &Content,
+    context: &Context,
+    lookup: DurableLookup<'_>,
+) -> Result<Applied, Rejection> {
+    state.validate_checkpoint(state.revision, state.sequence)?;
+    if !valid_id(&command.command_id) {
+        return Err(Rejection::InvalidCommand);
+    }
+    if let DurableLookup::Found(receipt) = lookup {
+        validate_receipt(receipt)?;
+        if receipt.command.command_id != command.command_id {
+            return Err(Rejection::ReplayMismatch);
+        }
+        if receipt.command != *command {
+            return Err(Rejection::CommandIdReused);
+        }
+        if receipt
+            .events
+            .iter()
+            .any(|event| event.revision > state.revision || event.sequence > state.sequence)
+        {
+            return Err(Rejection::ReplayMismatch);
+        }
+        return Ok(Applied {
+            state: state.clone(),
+            events: receipt.events.clone(),
+            duplicate: true,
+        });
+    }
+    // Reuse exactly the standalone transition and its verification rules, with
+    // at most this command's receipt temporarily resident in the candidate.
+    let mut candidate = state.clone();
+    candidate.external_receipts = false;
+    let mut applied = apply(&candidate, command, content, context)?;
+    applied.state.receipts.clear();
+    applied.state.external_receipts = true;
+    Ok(applied)
+}
+
 fn valid_id(id: &str) -> bool {
     !id.is_empty()
         && id.len() <= 128
@@ -796,6 +1256,93 @@ fn reward(
     });
     Ok(())
 }
+fn personal_handoff(state: &mut State, outcomes: &mut Vec<Outcome>) -> Result<(), Rejection> {
+    let run = state.personal_quest.as_ref().ok_or(Rejection::NotFound)?;
+    let Some(QuestNode::Handoff {
+        continuation_tags, ..
+    }) = run.node()
+    else {
+        return Ok(());
+    };
+    let quest_id = run.document.quest_id.clone();
+    let episode_id = run.episode_id.clone();
+    let tags = continuation_tags.clone();
+    let item = run.reward_item_id.clone();
+    let document_version = run.document.document_version.clone();
+    let source_thread = run.source_thread.clone();
+    let summary = match run.node() {
+        Some(QuestNode::Handoff { text, .. }) => text.clone(),
+        _ => return Err(Rejection::InvalidCommand),
+    };
+    let source_choice = run.last_choice().ok_or(Rejection::InvalidCommand)?;
+    let source_choice_label = run
+        .document
+        .nodes
+        .iter()
+        .find_map(|node| match node {
+            QuestNode::Choice { id, choices, .. } if *id == source_choice.0 => choices
+                .iter()
+                .find(|c| c.id == source_choice.1)
+                .map(|c| c.label.clone()),
+            _ => None,
+        })
+        .ok_or(Rejection::InvalidCommand)?;
+    if let Some(source) = source_thread
+        && let Some(thread) = state.narrative_memory.threads.iter_mut().find(|thread| {
+            thread.id == source.id
+                && thread.source_episode_id == source.source_episode_id
+                && thread.source_choice_id == source.source_choice_id
+        })
+    {
+        thread.status = "resolved".into();
+    }
+    crate::personal_quests::remember_outcome(
+        &mut state.narrative_memory,
+        NarrativeOutcome {
+            document_version: document_version.clone(),
+            quest_id: quest_id.clone(),
+            episode_id: episode_id.clone(),
+            summary: summary.clone(),
+            sequence: state.personal_episode_sequence,
+        },
+    );
+    for tag in &tags {
+        crate::personal_quests::remember_thread(
+            &mut state.narrative_memory,
+            NarrativeThread {
+                source_choice_label: source_choice_label.clone(),
+                source_document_version: document_version.clone(),
+                id: format!("thread-{}-{tag}", state.personal_episode_sequence),
+                tag: tag.clone(),
+                source_quest_id: quest_id.clone(),
+                source_episode_id: episode_id.clone(),
+                source_node_id: source_choice.0.clone(),
+                source_choice_id: source_choice.1.clone(),
+                summary: summary.clone(),
+                status: "open".into(),
+            },
+        );
+    }
+    if !state.personal_quest_rewards.contains(&quest_id) {
+        reward(
+            state,
+            &quest_id,
+            &Reward::InventoryItem {
+                id: format!("personal-memory:{quest_id}"),
+                value: item,
+                amount: 1,
+            },
+            outcomes,
+        )?;
+        state.personal_quest_rewards.insert(quest_id.clone());
+    }
+    outcomes.push(Outcome::PersonalQuestHandoff {
+        quest_id,
+        episode_id,
+        continuation_tags: tags,
+    });
+    Ok(())
+}
 fn quest<'a>(
     content: &'a Content,
     id: &str,
@@ -821,6 +1368,17 @@ fn training_eligible(
     Ok(())
 }
 fn eligible(state: &State, content: &Content, id: &str) -> Result<(), Rejection> {
+    if let Some(binding) = state.active_personal_activity()
+        && binding.quest_id == id
+    {
+        let run = state.personal_quest.as_ref().ok_or(Rejection::NotFound)?;
+        if state.region != run.document.region_id
+            || !state.creatures.contains(&run.document.companion_id)
+        {
+            return Err(Rejection::Locked);
+        }
+        return Ok(());
+    }
     if let Some(t) = content.training(id) {
         return training_eligible(state, content, t);
     }
@@ -848,6 +1406,9 @@ pub fn apply(
     content: &Content,
     context: &Context,
 ) -> Result<Applied, Rejection> {
+    if state.external_receipts {
+        return Err(Rejection::InvalidCommand);
+    }
     if !valid_id(&command.command_id) {
         return Err(Rejection::InvalidCommand);
     }
@@ -868,14 +1429,132 @@ pub fn apply(
     if state.content_version != content.version {
         return Err(Rejection::InvalidContent("state/content mismatch".into()));
     }
+    state.validate_personal_state(content)?;
     let mut next = state.clone();
     let mut outcomes = Vec::new();
     match &command.action {
+        Action::SetQuestInterests { tags } => {
+            let options = content.personal_quests.interest_options();
+            if tags.len() > 5
+                || tags.iter().any(|tag| !options.contains(tag))
+                || tags.iter().collect::<BTreeSet<_>>().len() != tags.len()
+            {
+                return Err(Rejection::InvalidCommand);
+            }
+            next.quest_interests = tags.clone();
+            outcomes.push(Outcome::QuestInterestsChanged { tags: tags.clone() });
+        }
+        Action::StartPersonalQuest { quest_id } => {
+            if !state
+                .personal_quest_offers(content)
+                .iter()
+                .any(|offer| offer.quest_id == *quest_id && offer.available)
+            {
+                return Err(Rejection::Locked);
+            }
+            let document = content
+                .personal_quests
+                .document(quest_id)
+                .ok_or(Rejection::NotFound)?
+                .clone();
+            let entry = content
+                .personal_quests
+                .entry(quest_id)
+                .ok_or(Rejection::NotFound)?;
+            next.personal_episode_sequence = next
+                .personal_episode_sequence
+                .checked_add(1)
+                .ok_or(Rejection::Overflow)?;
+            let episode_id = format!("episode-{}", next.personal_episode_sequence);
+            let source_thread = state.matching_thread(content, quest_id).cloned();
+            let acknowledgement = source_thread.as_ref().and_then(|_| {
+                entry.continuation.as_ref().map(|policy| {
+                    format!(
+                        "{} You chose: {}",
+                        policy.acknowledgement,
+                        source_thread
+                            .as_ref()
+                            .expect("matched source")
+                            .source_choice_label
+                    )
+                })
+            });
+            next.personal_quest = Some(PersonalQuestRun {
+                source_thread,
+                acknowledgement,
+                node_id: document.entry_node_id.clone(),
+                document: document.clone(),
+                episode_id: episode_id.clone(),
+                episode_sequence: next.personal_episode_sequence,
+                slots: content.personal_quests.activity_slots().to_vec(),
+                reward_item_id: entry.reward_item_id.clone(),
+                choices: BTreeMap::new(),
+            });
+            outcomes.push(Outcome::PersonalQuestStarted {
+                quest_id: quest_id.clone(),
+                document_version: document.document_version,
+                episode_id,
+            });
+        }
+        Action::ChoosePersonalPath { choice_id } => {
+            if !state.pending.is_empty() {
+                return Err(Rejection::Locked);
+            }
+            let run = next.personal_quest.as_mut().ok_or(Rejection::NotFound)?;
+            if run.document.region_id != state.region {
+                return Err(Rejection::Locked);
+            }
+            let QuestNode::Choice { choices, .. } = run.node().ok_or(Rejection::NotFound)? else {
+                return Err(Rejection::InvalidCommand);
+            };
+            let choice = choices
+                .iter()
+                .find(|choice| choice.id == *choice_id)
+                .ok_or(Rejection::InvalidCommand)?
+                .clone();
+            let previous = run.node_id.clone();
+            let memory_choice = NarrativeChoice {
+                document_version: run.document.document_version.clone(),
+                quest_id: run.document.quest_id.clone(),
+                episode_id: run.episode_id.clone(),
+                node_id: previous.clone(),
+                choice_id: choice.id.clone(),
+                label: choice.label.clone(),
+                sequence: run.episode_sequence,
+            };
+            run.choices.insert(previous.clone(), choice_id.clone());
+            run.node_id = choice.next_node_id.clone();
+            outcomes.push(Outcome::PersonalPathChosen {
+                quest_id: run.document.quest_id.clone(),
+                node_id: previous,
+                choice_id: choice_id.clone(),
+                next_node_id: choice.next_node_id,
+            });
+            crate::personal_quests::remember_choice(&mut next.narrative_memory, memory_choice);
+            personal_handoff(&mut next, &mut outcomes)?;
+        }
+        Action::AbandonPersonalQuest => {
+            if !state.pending.is_empty() {
+                return Err(Rejection::Locked);
+            }
+            let run = next.personal_quest.take().ok_or(Rejection::NotFound)?;
+            outcomes.push(Outcome::PersonalQuestAbandoned {
+                quest_id: run.document.quest_id,
+                episode_id: run.episode_id,
+            });
+        }
         Action::BeginQuest {
             quest_id,
             encounter_id,
         } => {
             eligible(state, content, quest_id)?;
+            if state
+                .active_personal_activity()
+                .is_some_and(|binding| binding.quest_id == *quest_id)
+                && !state.pending.is_empty()
+            {
+                return Err(Rejection::Locked);
+            }
             if state.completed.contains(quest_id) {
                 return Err(Rejection::AlreadyCompleted);
             }
@@ -919,7 +1598,28 @@ pub fn apply(
                 .get(encounter_id)
                 .filter(|v| v.quest_id == *quest_id)
                 .ok_or(Rejection::UnverifiedEncounter)?;
-            if let Some(t) = content.training(quest_id) {
+            if state
+                .active_personal_activity()
+                .is_some_and(|binding| binding.quest_id == *quest_id)
+            {
+                next.pending.remove(quest_id);
+                let run = next.personal_quest.as_mut().ok_or(Rejection::NotFound)?;
+                let QuestNode::Activity { next_node_id, .. } =
+                    run.node().ok_or(Rejection::NotFound)?
+                else {
+                    return Err(Rejection::InvalidCommand);
+                };
+                let target = next_node_id.clone();
+                let previous = run.node_id.clone();
+                run.node_id = target.clone();
+                outcomes.push(Outcome::PersonalQuestAdvanced {
+                    quest_id: run.document.quest_id.clone(),
+                    node_id: previous,
+                    next_node_id: target,
+                    supported: verified.supported,
+                });
+                personal_handoff(&mut next, &mut outcomes)?;
+            } else if let Some(t) = content.training(quest_id) {
                 next.pending.remove(quest_id);
                 let amount = if next.training_grants.insert(t.id.clone()) {
                     t.xp
@@ -1153,7 +1853,7 @@ pub fn apply(
     }
     next.receipts.insert(
         command.command_id.clone(),
-        Receipt {
+        DomainReceipt {
             command: command.clone(),
             events: events.clone(),
         },
@@ -1167,7 +1867,7 @@ pub fn apply(
 
 /// Persist with the event stream. Context contains only recorded server facts;
 /// replay never contacts an assessment service, random source, clock or model.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct ReplayEntry {
     pub command: Command,
     pub context: Context,
@@ -1181,6 +1881,33 @@ pub fn replay(
     let mut state = initial.clone();
     for entry in entries {
         let applied = apply(&state, &entry.command, content, &entry.context)?;
+        if applied.events != entry.events {
+            return Err(Rejection::ReplayMismatch);
+        }
+        state = applied.state;
+    }
+    Ok(state)
+}
+
+/// Replay a contiguous suffix after a verified compact checkpoint. Entries
+/// carry recorded server facts, never client correctness claims. Durable retry
+/// resolution happens before recording a new entry; duplicated or reordered
+/// entries therefore fail revision/event comparison rather than executing twice.
+pub fn replay_persisted(
+    initial: &State,
+    content: &Content,
+    entries: &[ReplayEntry],
+) -> Result<State, Rejection> {
+    initial.validate_checkpoint(initial.revision, initial.sequence)?;
+    let mut state = initial.clone();
+    for entry in entries {
+        let applied = apply_persisted(
+            &state,
+            &entry.command,
+            content,
+            &entry.context,
+            DurableLookup::Absent,
+        )?;
         if applied.events != entry.events {
             return Err(Rejection::ReplayMismatch);
         }
@@ -1372,6 +2099,220 @@ mod tests {
                 "{pointer}"
             );
         }
+    }
+
+    #[test]
+    fn storage_checkpoint_preserves_old_retries_and_supports_complete_rollback() {
+        let c = content();
+        let mut legacy = State::new(&c);
+        let mut log = Vec::new();
+        finish(&mut legacy, "meadow-welcome", &c, true, &mut log);
+        let mut old_json = serde_json::to_value(&legacy).unwrap();
+        assert!(
+            !old_json
+                .as_object()
+                .unwrap()
+                .contains_key("external_receipts")
+        );
+        let old: State = serde_json::from_value(old_json.clone()).unwrap();
+        let (checkpoint, receipts) = old.storage_checkpoint().unwrap();
+        assert_eq!(receipts.len(), 2);
+        checkpoint
+            .validate_checkpoint(legacy.revision(), legacy.event_sequence())
+            .unwrap();
+        assert_eq!(checkpoint.xp(), legacy.xp());
+        assert_eq!(checkpoint.flags(), legacy.flags());
+        assert_eq!(checkpoint.pending, legacy.pending);
+        assert_eq!(
+            checkpoint.storage_checkpoint().unwrap(),
+            (checkpoint.clone(), Vec::new())
+        );
+        let receipt = &receipts[0];
+        assert_eq!(
+            apply(&checkpoint, &receipt.command, &c, &context()),
+            Err(Rejection::InvalidCommand)
+        );
+        let retried = apply_persisted(
+            &checkpoint,
+            &receipt.command,
+            &c,
+            &context(),
+            DurableLookup::Found(receipt),
+        )
+        .unwrap();
+        assert!(retried.duplicate);
+        assert_eq!(retried.events, receipt.events);
+        assert_eq!(retried.state, checkpoint);
+        let mut changed = receipt.command.clone();
+        changed.action = Action::SelectTeam {
+            creature_ids: Vec::new(),
+        };
+        assert_eq!(
+            apply_persisted(
+                &checkpoint,
+                &changed,
+                &c,
+                &context(),
+                DurableLookup::Found(receipt)
+            ),
+            Err(Rejection::CommandIdReused)
+        );
+        assert_eq!(
+            checkpoint
+                .restore_embedded_receipts(receipts.clone())
+                .unwrap(),
+            legacy
+        );
+        assert_eq!(
+            checkpoint.restore_embedded_receipts(receipts[..1].to_vec()),
+            Err(Rejection::ReplayMismatch)
+        );
+        old_json["sequence"] = serde_json::json!(legacy.sequence + 1);
+        let corrupted: State = serde_json::from_value(old_json).unwrap();
+        assert_eq!(
+            corrupted.storage_checkpoint(),
+            Err(Rejection::ReplayMismatch)
+        );
+    }
+
+    #[test]
+    fn persisted_execution_remains_bounded_beyond_old_command_cap_and_replays() {
+        let c = content();
+        let initial = State::new(&c);
+        let (mut checkpoint, _) = initial.storage_checkpoint().unwrap();
+        let mut durable = BTreeMap::new();
+        let mut replay_log = Vec::new();
+        for index in 0..2100 {
+            let cmd = Command {
+                command_id: format!("persisted-{index}"),
+                expected_revision: checkpoint.revision(),
+                action: Action::SelectTeam {
+                    creature_ids: Vec::new(),
+                },
+            };
+            let ctx = context();
+            let applied =
+                apply_persisted(&checkpoint, &cmd, &c, &ctx, DurableLookup::Absent).unwrap();
+            let receipt = DomainReceipt {
+                command: cmd.clone(),
+                events: applied.events.clone(),
+            };
+            assert!(durable.insert(cmd.command_id.clone(), receipt).is_none());
+            replay_log.push(ReplayEntry {
+                command: cmd,
+                context: ctx,
+                events: applied.events,
+            });
+            checkpoint = applied.state;
+            assert!(checkpoint.receipts.is_empty());
+            if index % 256 == 0 {
+                checkpoint =
+                    serde_json::from_value(serde_json::to_value(&checkpoint).unwrap()).unwrap();
+                checkpoint
+                    .validate_checkpoint(index + 1, index + 1)
+                    .unwrap();
+            }
+        }
+        assert_eq!(checkpoint.revision(), 2100);
+        assert_eq!(checkpoint.event_sequence(), 2100);
+        assert!(serde_json::to_vec(&checkpoint).unwrap().len() < 1024);
+        let first = &durable["persisted-0"];
+        let retried = apply_persisted(
+            &checkpoint,
+            &first.command,
+            &c,
+            &context(),
+            DurableLookup::Found(first),
+        )
+        .unwrap();
+        assert_eq!(retried.state, checkpoint);
+        assert_eq!(retried.events, first.events);
+        let replayed = replay(&initial, &c, &replay_log).unwrap();
+        assert_eq!(replayed.storage_checkpoint().unwrap().0, checkpoint);
+        assert_eq!(
+            replay_persisted(&initial.storage_checkpoint().unwrap().0, &c, &replay_log).unwrap(),
+            checkpoint
+        );
+        let standalone = checkpoint
+            .restore_embedded_receipts(durable.into_values().collect())
+            .unwrap();
+        assert_eq!(standalone, replayed);
+    }
+
+    #[test]
+    fn compact_state_and_durable_receipt_corruption_fail_closed() {
+        let c = content();
+        let legacy = State::new(&c);
+        let (mut checkpoint, _) = legacy.storage_checkpoint().unwrap();
+        let cmd = command(
+            &checkpoint,
+            Action::SelectTeam {
+                creature_ids: Vec::new(),
+            },
+        );
+        assert_eq!(
+            apply_persisted(&legacy, &cmd, &c, &context(), DurableLookup::Absent),
+            Err(Rejection::ReplayMismatch)
+        );
+        let applied =
+            apply_persisted(&checkpoint, &cmd, &c, &context(), DurableLookup::Absent).unwrap();
+        let mut receipt = DomainReceipt {
+            command: cmd.clone(),
+            events: applied.events.clone(),
+        };
+        checkpoint = applied.state;
+        assert_eq!(
+            checkpoint.validate_checkpoint(2, 1),
+            Err(Rejection::ReplayMismatch)
+        );
+        assert_eq!(
+            checkpoint.validate_checkpoint(1, 2),
+            Err(Rejection::ReplayMismatch)
+        );
+        receipt.events[0].sequence += 1;
+        assert_eq!(
+            apply_persisted(
+                &checkpoint,
+                &cmd,
+                &c,
+                &context(),
+                DurableLookup::Found(&receipt)
+            ),
+            Err(Rejection::ReplayMismatch)
+        );
+        checkpoint.receipts.insert(cmd.command_id.clone(), receipt);
+        assert_eq!(
+            checkpoint.validate_checkpoint(1, 1),
+            Err(Rejection::ReplayMismatch)
+        );
+    }
+
+    #[test]
+    fn swapped_receipt_ranges_and_inconsistent_versions_reject_legacy_migration() {
+        let c = content();
+        let mut legacy = State::new(&c);
+        let mut log = Vec::new();
+        for _ in 0..2 {
+            execute(
+                &mut legacy,
+                Action::SelectTeam {
+                    creature_ids: Vec::new(),
+                },
+                &c,
+                context(),
+                &mut log,
+            );
+        }
+        let mut swapped = legacy.clone();
+        swapped.receipts.get_mut("command-0").unwrap().events[0].sequence = 2;
+        swapped.receipts.get_mut("command-1").unwrap().events[0].sequence = 1;
+        assert_eq!(swapped.storage_checkpoint(), Err(Rejection::ReplayMismatch));
+        let mut quest = State::new(&c);
+        finish(&mut quest, "meadow-welcome", &c, false, &mut Vec::new());
+        let receipt = quest.receipts.get_mut("command-1").unwrap();
+        assert!(receipt.events.len() > 1);
+        receipt.events[1].rules_version = "inconsistent-rules".into();
+        assert_eq!(quest.storage_checkpoint(), Err(Rejection::ReplayMismatch));
     }
 
     #[test]

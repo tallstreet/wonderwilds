@@ -34,8 +34,22 @@ an encounter ID, recording unassessed abandonment and releasing its pending slot
 without rewards. Closed encounters cannot accept later answers. Attempt/hint route IDs must match their command
 payload. Errors use the versioned stable error code/correlation envelope. Body
 limit is 32 KiB, blocking operation concurrency is 16, SQL statements/locks have
-bounded timeouts, and a development aggregate accepts at most 2,000 distinct
-commands without evicting idempotency receipts.
+bounded timeouts, and PostgreSQL profiles accept at most 120 new commands per
+60-second window. Exact retries return their original responses before rate or
+revision checks. The standalone embedded-receipt aggregate keeps its
+2,000-command development guard; the PostgreSQL path has no lifetime command cap.
+
+Migration `0003_game_storage.sql` externalizes API/domain receipts, encounters,
+item novelty and periodic recovery checkpoints. The compact current save retains
+explicit counters, one active encounter and bounded incremental mastery windows.
+Historical receipts and evidence remain durable and are included in parent
+exports/deletion cascades. Legacy saves migrate under the same profile lock;
+inconsistent history fails closed. Compact saves use a distinct tagged envelope
+so a pre-storage binary cannot silently process them with missing history.
+`PostgresRepository::reconstruct_legacy` returns a fully validated recovery/export
+candidate without overwriting progress. Full production restore/rollback drills
+and durable history retention remain operational requirements. See
+`docs/adr/durable-game-storage.md` from the repository root.
 
 The authored development slice uses the exact skill/template IDs from story and
 friendship packs and real server assessment. It exposes Meadow menu interactions;

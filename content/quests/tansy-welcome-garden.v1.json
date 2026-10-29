@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "questId": "tansy-welcome-garden",
+  "documentVersion": "1",
+  "title": "A garden for every visitor",
+  "companionId": "tansy",
+  "regionId": "meadow",
+  "interestTags": [
+    "gardens",
+    "animals"
+  ],
+  "entryNodeId": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "choice",
+      "text": "Tansy has room for a new welcome garden. Who shall we make a little space for?",
+      "choices": [
+        {
+          "id": "bees",
+          "label": "Welcome the busy bees",
+          "nextNodeId": "path-one"
+        },
+        {
+          "id": "birds",
+          "label": "Welcome the singing birds",
+          "nextNodeId": "path-two"
+        }
+      ]
+    },
+    {
+      "id": "path-one",
+      "type": "activity",
+      "text": "Tansy lays out flower pots for the bees. Help plan what comes next in the garden path.",
+      "activitySlotId": "tansy-sequence",
+      "nextNodeId": "reflection"
+    },
+    {
+      "id": "path-two",
+      "type": "activity",
+      "text": "Tansy lays out flower pots near a quiet perch. Help plan what comes next along the path.",
+      "activitySlotId": "tansy-sequence",
+      "nextNodeId": "reflection"
+    },
+    {
+      "id": "reflection",
+      "type": "choice",
+      "text": "The garden has a new welcome. What might we bring on our next visit?",
+      "choices": [
+        {
+          "id": "water",
+          "label": "A little watering can",
+          "nextNodeId": "handoff-water"
+        },
+        {
+          "id": "seeds",
+          "label": "A pocket of mystery seeds",
+          "nextNodeId": "handoff-seeds"
+        }
+      ]
+    },
+    {
+      "id": "handoff-water",
+      "type": "handoff",
+      "text": "A tiny puddle reflects a new shoot. Tansy wonders where the garden water travels and saves that question for another visit.",
+      "continuationTags": [
+        "garden-discoveries"
+      ]
+    },
+    {
+      "id": "handoff-seeds",
+      "type": "handoff",
+      "text": "One seed in Tansy\u2019s pocket has an unfamiliar shape. There is a seed mystery to explore together another day.",
+      "continuationTags": [
+        "seed-mysteries"
+      ]
+    }
+  ]
+}

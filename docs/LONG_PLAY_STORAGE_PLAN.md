@@ -1,8 +1,10 @@
 # Long-running companion profiles
 
-Status: proposed engineering design; not implemented or validated. The existing
-2,000-command limit remains in force. This design is a prerequisite for sustained
-training, rather than a reason to remove the guard now.
+Status: original engineering design, followed by the storage implementation in
+the [durable storage ADR](adr/durable-game-storage.md). The ADR records the actual
+compact envelope, durable records, bounded mastery and request-rate policy;
+[implementation status](IMPLEMENTATION_STATUS.md) records validation evidence.
+Requirements below remain the acceptance reference rather than proof of delivery.
 
 ## Current constraint
 

@@ -32,6 +32,8 @@ pub struct EncounterInstance {
     pub support: SupportState,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub training: Option<TrainingBinding>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub personal_quest: Option<PersonalQuestBinding>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -53,6 +55,11 @@ pub enum CommandPayload {
     Variant6(CommandPayloadVariant6),
     Variant7(CommandPayloadVariant7),
     Variant8(CommandPayloadVariant8),
+    Variant9(CommandPayloadVariant9),
+    Variant10(CommandPayloadVariant10),
+    Variant11(CommandPayloadVariant11),
+    Variant12(CommandPayloadVariant12),
+    Variant13(CommandPayloadVariant13),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -105,6 +112,16 @@ pub struct GameSnapshot {
     pub explorer_progression: Option<ExplorerProgression>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub team_capacity: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub personal_quest_offers: Option<Vec<PersonalQuestOffer>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub personal_quest: Option<PersonalQuestView>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub narrative_memory: Option<NarrativeMemory>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quest_interests: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quest_interest_options: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -330,6 +347,238 @@ pub struct ExplorerProgression {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestChoice {
+    pub id: String,
+    pub label: String,
+    pub next_node_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum QuestNode {
+    Variant1(QuestNodeVariant1),
+    Variant2(QuestNodeVariant2),
+    Variant3(QuestNodeVariant3),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestDocument {
+    pub schema_version: QuestDocumentSchemaVersion,
+    pub quest_id: String,
+    pub document_version: String,
+    pub title: String,
+    pub companion_id: String,
+    pub region_id: String,
+    pub interest_tags: Vec<String>,
+    pub entry_node_id: String,
+    pub nodes: Vec<QuestNode>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PersonalQuestOffer {
+    pub quest_id: String,
+    pub document_version: String,
+    pub title: String,
+    pub companion_id: String,
+    pub minimum_character_level: u64,
+    pub available: bool,
+    pub completed: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recommendation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub locked_reason: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PersonalQuestView {
+    pub quest_id: String,
+    pub document_version: String,
+    pub episode_id: String,
+    pub title: String,
+    pub companion_id: String,
+    pub node: QuestNode,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub acknowledgement: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PersonalQuestBinding {
+    pub quest_id: String,
+    pub document_version: String,
+    pub node_id: String,
+    pub episode_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestActivitySlot {
+    pub id: String,
+    pub skill_id: String,
+    pub template_id: QuestActivitySlotTemplateId,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestContextWorld {
+    pub region_id: String,
+    pub canonical_facts: Vec<String>,
+    pub owned_companion_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestContextProgression {
+    pub explorer_level: u64,
+    pub companion_level: u64,
+    pub companion_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestLearningNeeds {
+    pub skill_ids: Vec<String>,
+    pub support_mode: QuestLearningNeedsSupportMode,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestInterest {
+    pub tag: String,
+    pub source: QuestInterestSource,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestConversationMemory {
+    pub permission: QuestConversationMemoryPermission,
+    pub summary: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestRecentChoice {
+    pub quest_id: String,
+    pub node_id: String,
+    pub choice_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub document_version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub episode_id: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestOpenThread {
+    pub id: String,
+    pub summary: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_quest_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_episode_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_document_version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_node_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_choice_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_choice_label: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tag: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestGenerationAllowlist {
+    pub companion_ids: Vec<String>,
+    pub region_ids: Vec<String>,
+    pub activity_slots: Vec<QuestActivitySlot>,
+    pub interest_tags: Vec<String>,
+    pub continuation_tags: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestGenerationContext {
+    pub schema_version: QuestGenerationContextSchemaVersion,
+    pub request_id: String,
+    pub revision: u64,
+    pub context_digest: String,
+    pub content_version: String,
+    pub rules_version: String,
+    pub world: QuestContextWorld,
+    pub progression: QuestContextProgression,
+    pub learning: QuestLearningNeeds,
+    pub interests: Vec<QuestInterest>,
+    pub conversation_memory: QuestConversationMemory,
+    pub recent_choices: Vec<QuestRecentChoice>,
+    pub open_threads: Vec<QuestOpenThread>,
+    pub allowed: QuestGenerationAllowlist,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recent_outcomes: Option<Vec<NarrativeOutcome>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestGenerationProposal {
+    pub schema_version: QuestGenerationProposalSchemaVersion,
+    pub request_id: String,
+    pub expected_revision: u64,
+    pub context_digest: String,
+    pub document: QuestDocument,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NarrativeChoice {
+    pub quest_id: String,
+    pub episode_id: String,
+    pub node_id: String,
+    pub choice_id: String,
+    pub label: String,
+    pub sequence: u64,
+    pub document_version: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NarrativeOutcome {
+    pub quest_id: String,
+    pub episode_id: String,
+    pub summary: String,
+    pub sequence: u64,
+    pub document_version: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NarrativeThread {
+    pub id: String,
+    pub tag: String,
+    pub source_quest_id: String,
+    pub source_episode_id: String,
+    pub source_node_id: String,
+    pub source_choice_id: String,
+    pub summary: String,
+    pub status: NarrativeThreadStatus,
+    pub source_document_version: String,
+    pub source_choice_label: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NarrativeMemory {
+    pub recent_choices: Vec<NarrativeChoice>,
+    pub recent_outcomes: Vec<NarrativeOutcome>,
+    pub threads: Vec<NarrativeThread>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ParametersVariant1 {
     pub total: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -488,6 +737,39 @@ pub struct CommandPayloadVariant7 {
 pub struct CommandPayloadVariant8 {
     pub r#type: CommandPayloadVariant8Type,
     pub creature_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant9 {
+    pub r#type: CommandPayloadVariant9Type,
+    pub quest_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant10 {
+    pub r#type: CommandPayloadVariant10Type,
+    pub choice_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant11 {
+    pub r#type: CommandPayloadVariant11Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant12 {
+    pub r#type: CommandPayloadVariant12Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CommandPayloadVariant13 {
+    pub r#type: CommandPayloadVariant13Type,
+    pub tags: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -735,6 +1017,102 @@ pub enum SkillNodeReviewStatus {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestNodeVariant1 {
+    pub id: String,
+    pub r#type: QuestNodeVariant1Type,
+    pub text: String,
+    pub choices: Vec<QuestChoice>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestNodeVariant2 {
+    pub id: String,
+    pub r#type: QuestNodeVariant2Type,
+    pub text: String,
+    pub activity_slot_id: String,
+    pub next_node_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestNodeVariant3 {
+    pub id: String,
+    pub r#type: QuestNodeVariant3Type,
+    pub text: String,
+    pub continuation_tags: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestDocumentSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestActivitySlotTemplateId {
+    #[serde(rename = "missing_quantity")]
+    MissingQuantity,
+    #[serde(rename = "equal_sharing")]
+    EqualSharing,
+    #[serde(rename = "pattern_sort")]
+    PatternSort,
+    #[serde(rename = "spatial_measurement")]
+    SpatialMeasurement,
+    #[serde(rename = "phonics_word_building")]
+    PhonicsWordBuilding,
+    #[serde(rename = "story_message")]
+    StoryMessage,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestLearningNeedsSupportMode {
+    #[serde(rename = "available")]
+    Available,
+    #[serde(rename = "encouraged")]
+    Encouraged,
+    #[serde(rename = "together")]
+    Together,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestInterestSource {
+    #[serde(rename = "player_selected")]
+    PlayerSelected,
+    #[serde(rename = "curated_conversation")]
+    CuratedConversation,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestConversationMemoryPermission {
+    #[serde(rename = "not_shared")]
+    NotShared,
+    #[serde(rename = "shared_summary")]
+    SharedSummary,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestGenerationContextSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestGenerationProposalSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum NarrativeThreadStatus {
+    #[serde(rename = "open")]
+    Open,
+    #[serde(rename = "resolved")]
+    Resolved,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ParametersVariant3ObjectsItem {
     pub id: String,
     pub label: String,
@@ -834,6 +1212,36 @@ pub enum CommandPayloadVariant8Type {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant9Type {
+    #[serde(rename = "start_personal_quest")]
+    StartPersonalQuest,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant10Type {
+    #[serde(rename = "choose_personal_path")]
+    ChoosePersonalPath,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant11Type {
+    #[serde(rename = "start_personal_activity")]
+    StartPersonalActivity,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant12Type {
+    #[serde(rename = "abandon_personal_quest")]
+    AbandonPersonalQuest,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CommandPayloadVariant13Type {
+    #[serde(rename = "set_quest_interests")]
+    SetQuestInterests,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum EventOutcomeVariant1Type {
     #[serde(rename = "story_flag_set")]
     StoryFlagSet,
@@ -849,4 +1257,22 @@ pub enum EventOutcomeVariant2Type {
 pub enum EventOutcomeVariant3Type {
     #[serde(rename = "creature_befriended")]
     CreatureBefriended,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestNodeVariant1Type {
+    #[serde(rename = "choice")]
+    Choice,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestNodeVariant2Type {
+    #[serde(rename = "activity")]
+    Activity,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestNodeVariant3Type {
+    #[serde(rename = "handoff")]
+    Handoff,
 }

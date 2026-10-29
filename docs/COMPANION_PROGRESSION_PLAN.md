@@ -1,10 +1,18 @@
 # Wonderwilds companion progression implementation plan
 
-Updated: 29 October 2026. Status: first Meadow training delivery implemented and verified; richer milestones and regional integration remain planned. Test evidence is recorded in IMPLEMENTATION_STATUS.md.
+Updated: 29 October 2026. Status: Meadow training, four starter episodes, two linked Pip follow-ups and source-linked continuity implemented and verified; more companion chains, roles, richer rewards and regional integration remain planned. Test evidence is recorded in IMPLEMENTATION_STATUS.md.
 
 ## Purpose and scope
 
 Build a satisfying loop of discovering friends, training them, unlocking visible growth, choosing a team and exploring together. Start with a complete Meadow experience, then connect Orchard and Cove. Extend the existing Rust authority and Phaser world rather than creating a second progression system in the browser.
+
+The adventure continually evolves and has no game-wide ending. Personal quests
+are short choose-your-own-adventure episodes: a local goal can resolve, followed
+by an open thread and another choice. Initial episodes are authored JSON in
+`content/quests/`, using the same versioned document shape planned for a future
+fine-tuned model. See [quest generation contract](QUEST_GENERATION_CONTRACT.md).
+This direction supersedes earlier requirements for a final authored game ending;
+existing saved chapter/finale flags keep their meanings.
 
 This is the active gameplay implementation sequence. It supersedes the earlier frontend-first plan and the execution order for collection, progression and world integration in the broader [Wonderwilds roadmap](WONDERWILDS_IMPLEMENTATION_PLAN.md). That roadmap retains architecture, curriculum, privacy and release requirements. [Implementation status](IMPLEMENTATION_STATUS.md) records completed work and limitations; planned features below are not completion claims.
 
@@ -18,12 +26,12 @@ This is the active gameplay implementation sequence. It supersedes the earlier f
 | Transformations | Reversible cosmetic changes, requiring friendship and a regional story flag; journal/API controls connected | Distinct transformation artwork and human review |
 | Teams | Two story-unlocked domain slots, typed team command, journal selection/removal and two world followers | Full two-slot regional browser journey; optional roles |
 | Discovery | Domain selection and persistent offers | Connect offers, habitat clues and world eligibility |
-| Character progression | Separate XP, sixteen Meadow training milestones, snapshot/journal controls and level-up reaction; real API/browser reload journey verified | Personal quests, roles, distinct higher-level rewards and pacing review |
+| Character progression | Separate XP, sixteen training milestones, level-up reaction and four level-four personal episodes; real API/browser reload journeys verified | Companion roles, distinct higher-level rewards and pacing review |
 
 The exploration library now contains 75 connected destinations with individual
 landscape images for the 72 new locations. This is a browser exploration surface;
-server regional eligibility, authored Orchard/Cove stories, recruitment and the
-ending still require phase 6. Single front-pose friend artwork is available;
+server regional eligibility, authored Orchard/Cove stories, recruitment and
+continuing regional episode handoffs still require phase 6. Single front-pose friend artwork is available;
 directional animation and separate transformation art remain outstanding.
 
 ### First delivery boundary
@@ -64,7 +72,7 @@ Retain the existing two-slot story unlocks for the first version. Three-characte
 
 ## Phase 1 Rules and content
 
-Extend `content/story/progression.v1.json` with character XP thresholds, milestone rewards and training grant policy. Extend `content/creatures/friends.v1.json` with milestone references, training themes and personal quest references. Add authored training definitions under `content/activities/` and personal quests under `content/story/`.
+Extend `content/story/progression.v1.json` with character XP thresholds, milestone rewards and training grant policy. Extend `content/creatures/friends.v1.json` with milestone references, training themes and personal quest references. Add authored training definitions under `content/activities/`. Personal quest documents and their separate trusted unlock/activity/reward catalog live in `content/quests/`.
 
 Update the content loader and validators, including `content/story/validate.py` and `content/story/test_story.py`. Validate IDs, references, assets, prerequisites, achievable XP totals and unlock cycles. Pin progression rules/content versions for pending activities and replay.
 
@@ -98,11 +106,16 @@ Training is a separate encounter flow from one-time story quests. Each server-is
 
 Provide fresh task variants for authored training milestones. Replaying a rewarded milestone remains available without further XP; new milestones unlock through character and story progress. Do not award XP for time elapsed, button presses or repeatedly reopening a task. Practice evidence remains labelled appropriately and does not manufacture novel-transfer evidence.
 
-Before extending this into sustained play, address the API's current 2,000-command cap and growing aggregate histories. Define bounded storage, snapshot/replay checkpoints and receipt retention without breaking duplicate prevention or pending retries. Do not simply remove the cap or delete receipts. Test a long-running profile beyond the old cap, plus retries across any compaction boundary.
+Sustained play requires bounded working storage and durable receipt/history
+records, rather than simply removing the old 2,000-command guard. Preserve
+duplicate prevention, pending encounters and exact retries across checkpoint
+boundaries, and verify a long-running profile beyond that old cap.
 
-The concrete [long-play storage design](LONG_PLAY_STORAGE_PLAN.md) defines this
-remaining engineering gate. The first training delivery retains the existing cap;
-its tests must not be presented as evidence of sustained-play storage readiness.
+The follow-up [durable storage implementation](adr/durable-game-storage.md) now
+externalizes retry/history records and bounds the current PostgreSQL save. Its
+rate policy replaces the lifetime cap on that path, while standalone aggregates
+retain their guard. See implementation status for long-profile validation;
+production storage budgets, retention and restore drills remain outstanding.
 
 Acceptance: training raises a character to level two, displays its reward, survives reload, resumes an interrupted encounter, and cannot be farmed through duplicate requests or recipient swapping.
 
@@ -122,7 +135,7 @@ Replace Meadow-only world/API assumptions with validated regional progression. E
 
 Connect the existing discovery offers and habitat clues. Persist declined offers across reloads, preserve the guaranteed first Pip encounter and bounded access to missing regional friends. Avoid rerolling rewards through refresh.
 
-Connect Orchard first, then Cove, their eight remaining friendships, personal training paths and regional finales. Supply distinct regional character and transformation assets and validate content references before activation. Complete the full authored ending with support available.
+Connect Orchard first, then Cove, their eight remaining friendships, personal training paths and regional celebrations. Supply distinct regional character and transformation assets and validate content references before activation. Each local arc remains completable with support and offers a handoff into further adventures.
 
 Acceptance: a player can visit all three regions, collect all twelve friends, return to earlier areas and resume the same progression after reload.
 
@@ -137,3 +150,23 @@ For each delivery, cover Rust rules and replay, schema compatibility, old-save l
 Use `bash scripts/check.sh` for repository checks and `sh scripts/check-postgres.sh` for real database checks. Run browser tests against the isolated QA database using the existing README procedure, never the user's demo progress. Record actual results and remaining limitations in `IMPLEMENTATION_STATUS.md`; no new test pass is implied by this plan.
 
 The completion gate is a playable and persistent companion loop with meaningful character choices. Public release continues to require the broader roadmap's identity, content review, accessibility, privacy and operational work. Live AI and model training are not dependencies of this expansion.
+
+## Personal quest document delivery
+
+Start with four Meadow episodes, one per friend, available at character level
+four. A document describes scene text, choices, references to approved activity
+slots and handoff hooks. The trusted server catalog owns availability, actual
+assessment and one-time cosmetic memory rewards; a document cannot set earned
+levels, academic correctness or arbitrary game state.
+
+Player choices and the current episode persist across reloads. Supported activity
+completion advances the same story as independent completion. Revisit the authored
+bank freely without repeating rewards; this is a finite prototype of the
+continuing format, rather than a claim of unlimited unique content.
+
+The future model context separates canonical world facts, companion/explorer
+levels, learning needs, interests, recent choices and open narrative threads.
+Conversation memory is a bounded curated input with explicit provenance and
+consent requirements; raw chat capture and provider calls are later work. The
+model returns a quest proposal tied to that context and revision, which must pass
+schema, graph, eligibility and policy validation before any game transition.

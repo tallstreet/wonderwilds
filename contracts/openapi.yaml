@@ -3,7 +3,7 @@
   "info": {
     "title": "Wonderwilds gameplay API",
     "version": "1.0.0",
-    "description": "Authored development gameplay surface. Commands support explicit encounter abandonment with revision and idempotency checks. Parent lifecycle endpoints remain integration work."
+    "description": "Authored development gameplay surface. Commands support explicit encounter abandonment with revision and idempotency checks. Parent lifecycle endpoints remain integration work. Personal quest commands drive authored choice/activity/handoff documents; generation contracts are future-facing and expose no provider endpoint."
   },
   "servers": [
     {
@@ -562,6 +562,36 @@
       },
       "ExplorerProgression": {
         "$ref": "./schemas/v1.json#/$defs/ExplorerProgression"
+      },
+      "QuestDocument": {
+        "$ref": "./schemas/v1.json#/$defs/QuestDocument"
+      },
+      "QuestGenerationContext": {
+        "$ref": "./schemas/v1.json#/$defs/QuestGenerationContext"
+      },
+      "QuestGenerationProposal": {
+        "$ref": "./schemas/v1.json#/$defs/QuestGenerationProposal"
+      },
+      "PersonalQuestOffer": {
+        "$ref": "./schemas/v1.json#/$defs/PersonalQuestOffer"
+      },
+      "PersonalQuestView": {
+        "$ref": "./schemas/v1.json#/$defs/PersonalQuestView"
+      },
+      "PersonalQuestBinding": {
+        "$ref": "./schemas/v1.json#/$defs/PersonalQuestBinding"
+      },
+      "NarrativeChoice": {
+        "$ref": "./schemas/v1.json#/$defs/NarrativeChoice"
+      },
+      "NarrativeOutcome": {
+        "$ref": "./schemas/v1.json#/$defs/NarrativeOutcome"
+      },
+      "NarrativeThread": {
+        "$ref": "./schemas/v1.json#/$defs/NarrativeThread"
+      },
+      "NarrativeMemory": {
+        "$ref": "./schemas/v1.json#/$defs/NarrativeMemory"
       }
     },
     "securitySchemes": {

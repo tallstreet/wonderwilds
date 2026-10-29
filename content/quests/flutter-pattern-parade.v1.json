@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "questId": "flutter-pattern-parade",
+  "documentVersion": "1",
+  "title": "The wandering pattern parade",
+  "companionId": "flutter",
+  "regionId": "meadow",
+  "interestTags": [
+    "patterns",
+    "music"
+  ],
+  "entryNodeId": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "choice",
+      "text": "Flutter is planning a tiny parade. What shall lead the way?",
+      "choices": [
+        {
+          "id": "ribbons",
+          "label": "Fluttering ribbons",
+          "nextNodeId": "path-one"
+        },
+        {
+          "id": "petals",
+          "label": "Dancing petals",
+          "nextNodeId": "path-two"
+        }
+      ]
+    },
+    {
+      "id": "path-one",
+      "type": "activity",
+      "text": "Flutter arranges the ribbons for the parade. Look closely and help choose what comes next.",
+      "activitySlotId": "flutter-pattern",
+      "nextNodeId": "reflection"
+    },
+    {
+      "id": "path-two",
+      "type": "activity",
+      "text": "Flutter arranges the petals for the parade. Look closely and help choose what comes next.",
+      "activitySlotId": "flutter-pattern",
+      "nextNodeId": "reflection"
+    },
+    {
+      "id": "reflection",
+      "type": "choice",
+      "text": "The parade has a rhythm. Which idea shall we carry into another adventure?",
+      "choices": [
+        {
+          "id": "beat",
+          "label": "A gentle tapping beat",
+          "nextNodeId": "handoff-beat"
+        },
+        {
+          "id": "colours",
+          "label": "A trail of bright colours",
+          "nextNodeId": "handoff-colours"
+        }
+      ]
+    },
+    {
+      "id": "handoff-beat",
+      "type": "handoff",
+      "text": "Flutter follows a gentle tapping beat on the breeze. There may be a new rhythm waiting around the next corner.",
+      "continuationTags": [
+        "music-trails"
+      ]
+    },
+    {
+      "id": "handoff-colours",
+      "type": "handoff",
+      "text": "A bright petal lands beyond the last ribbon. Flutter saves its colour as a clue for another garden adventure.",
+      "continuationTags": [
+        "garden-discoveries"
+      ]
+    }
+  ]
+}
