@@ -81,3 +81,21 @@ export function findRoute(
   }
   return [];
 }
+
+/** Select the nearest character, rather than whichever was added to the scene first. */
+export function nearestCharacter<T extends Point>(
+  player: Point,
+  characters: readonly T[],
+  radius = 110,
+): T | undefined {
+  let nearest: T | undefined;
+  let distance = radius;
+  for (const character of characters) {
+    const candidate = Math.hypot(player.x - character.x, player.y - character.y);
+    if (candidate <= distance) {
+      nearest = character;
+      distance = candidate;
+    }
+  }
+  return nearest;
+}

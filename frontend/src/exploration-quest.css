@@ -1,0 +1,84 @@
+.quest-trail {
+  margin: 1rem 0;
+  padding: clamp(0.8rem, 3vw, 1.4rem);
+  border: 2px solid #d3dfbb;
+  border-radius: 20px;
+  background: #f8fbef;
+  color: #344b3e;
+  text-align: left;
+}
+.quest-trail h3 {
+  margin: 0.6rem 0;
+}
+.quest-trail ol {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0;
+  list-style: none;
+}
+.quest-trail-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.7rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.quest-trail-step.current {
+  background: #fff4cf;
+  border-color: #a17a27;
+}
+.quest-trail-step.complete {
+  background: #e7f3df;
+}
+.quest-trail-step small {
+  display: block;
+  margin-top: 0.25rem;
+  color: #4f6051;
+  line-height: 1.5;
+}
+.quest-trail-symbol {
+  min-width: 1.3rem;
+  font-weight: 800;
+}
+.quest-trail-progress,
+.quest-trail-support {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.quest-dialogue {
+  padding: clamp(0.8rem, 3vw, 1.4rem);
+  margin: 0.8rem 0;
+  border-radius: 18px;
+  background: #fff8e5;
+  color: #493c58;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.game-dock .game-guidance {
+  max-width: min(440px, 100%);
+  min-width: 0;
+}
+#quest-direction {
+  display: block;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+#quest-direction:empty {
+  display: none;
+}
+#quest-direction::after {
+  content: none;
+}
+#quest-guide {
+  pointer-events: auto;
+  min-height: 44px;
+  margin: 5px 0;
+  padding: 8px 14px;
+}
+#quest-guide[hidden] {
+  display: none;
+}

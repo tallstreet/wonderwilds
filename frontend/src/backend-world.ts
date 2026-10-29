@@ -8,7 +8,17 @@ import {
   captureJournalFocus,
   restoreJournalFocus,
 } from './backend-world-views.ts';
-import { isMapId } from './maps.ts';
+import { isMapId, maps } from './maps.ts';
+import { questDirection } from './quest-navigation.ts';
+import {
+  parseQuestTrailState,
+  nextTrailEncounter,
+  trailReadyToReturn,
+  trailChecklistView,
+  encounterDialogue,
+  type QuestTrailState,
+} from './exploration-quest.ts';
+import './exploration-quest.css';
 import type { CommandPayload, GameSnapshot } from '../../contracts/generated/contracts.ts';
 import type { Progress, WorldEncounter } from './types.ts';
 import { isRecord } from './types.ts';
@@ -51,6 +61,9 @@ export class BackendWorld {
   private commands: CommandSession;
   private activityOpen = false;
   private viewKey: string;
+  private trail: QuestTrailState = { accepted: false, returned: false };
+  private trackedId?: string;
+  private viewState?: Progress;
   constructor(
     client: GameClient,
     snapshot: GameSnapshot,
@@ -85,9 +98,13 @@ export class BackendWorld {
     return this.companions()[0];
   }
   restoreView(state: Progress) {
+    this.viewState = state;
     try {
       const saved: unknown = JSON.parse(localStorage.getItem(this.viewKey) ?? 'null');
       if (!isRecord(saved)) return;
+      this.trail = parseQuestTrailState(saved.trail);
+      if (typeof saved.trackedId === 'string' && this.markers.some((q) => q.id === saved.trackedId))
+        this.trackedId = saved.trackedId;
       if (typeof saved.hero === 'string' && Object.hasOwn(heroes, saved.hero))
         state.hero = saved.hero;
       if (isMapId(saved.region)) state.region = saved.region;
@@ -106,14 +123,44 @@ export class BackendWorld {
     }
   }
   saveView(state: Progress) {
+    this.viewState = state;
     try {
       localStorage.setItem(
         this.viewKey,
-        JSON.stringify({ hero: state.hero, region: state.region, position: state.position }),
+        JSON.stringify({
+          hero: state.hero,
+          region: state.region,
+          position: state.position,
+          trail: this.trail,
+          trackedId: this.trackedId,
+        }),
       );
     } catch {
       /* Cosmetic preference only. */
     }
+  }
+  private trackedEncounter() {
+    const selected = this.markers.find((q) => q.id === this.trackedId);
+    if (selected && !questCompleted(this.snapshot, selected.id)) return selected;
+    const next = nextTrailEncounter(this.snapshot, this.trail);
+    return this.markers.find((q) => q.id === next);
+  }
+  private saveTrail() {
+    if (this.viewState) this.saveView(this.viewState);
+    this.updateHud();
+  }
+  private track(quest: WorldEncounter) {
+    this.trackedId = quest.id;
+    this.saveTrail();
+    this.hooks.close();
+    this.hooks.toast(
+      `Following ${quest.short} in ${maps[quest.region].name}. Use Follow path or the arrow keys.`,
+    );
+  }
+  followTracked() {
+    if (this.busy || this.activityOpen) return;
+    const quest = this.trackedEncounter();
+    if (quest) this.hooks.visit(quest);
   }
   updateHud() {
     const count = meadowBeats.filter((b) => questCompleted(this.snapshot, b.id)).length;
@@ -123,6 +170,24 @@ export class BackendWorld {
       : count === meadowBeats.length
         ? 'Find your Meadow friends!'
         : `${meadowBeats.length - count} story moments await`;
+    const tracked = this.trackedEncounter();
+    const guide = document.querySelector<HTMLButtonElement>('#quest-guide');
+    if (guide) {
+      guide.hidden = !tracked;
+      guide.disabled = this.busy || this.activityOpen;
+      guide.textContent =
+        tracked && this.viewState?.region === tracked.region
+          ? `Go to ${tracked.short}`
+          : 'Follow path';
+    }
+    const direction = document.querySelector('#quest-direction');
+    if (direction)
+      direction.textContent =
+        tracked && this.viewState
+          ? `${tracked.short} · ${questDirection(this.viewState.region, tracked.region)}`
+          : this.trail.returned
+            ? 'Trail complete — more friends await!'
+            : '';
     document.querySelector('#save-status')!.textContent =
       `Local server · progress saved · revision ${this.snapshot.revision}`;
   }
@@ -217,7 +282,7 @@ export class BackendWorld {
     }
   }
   encounter(quest: WorldEncounter) {
-    if (this.busy) return;
+    if (this.busy || this.activityOpen || this.commands.hasPending) return;
     if (quest.id === trainingClearing.id) {
       this.training();
       return;
@@ -226,18 +291,51 @@ export class BackendWorld {
       this.mount();
       return;
     }
-    if (questCompleted(this.snapshot, quest.id)) {
-      this.hooks.toast('You already helped here! Open Missions to find your next adventure.');
+    const dialogue = encounterDialogue(quest.id, this.snapshot, this.trail);
+    const offer = quest.id === 'meadow-welcome' && !this.trail.accepted;
+    const returning =
+      quest.id === 'meadow-welcome' &&
+      this.trail.accepted &&
+      !this.trail.returned &&
+      trailReadyToReturn(this.snapshot);
+    const ready = questReady(this.snapshot, quest.id);
+    this.open(
+      `<div class="quest-dialogue"><span class="pill">${quest.id.startsWith('befriend-') ? 'A CREATURE TO BEFRIEND' : 'LET’S TALK'}</span><h2 id="dialog-title">${escape(dialogue.speaker)}</h2><p>${escape(dialogue.text)}</p>${offer ? '<p>Follow our trail through Clover Meadow, Starlight Cove and Peachy Orchard. Help our neighbours, meet Tansy, then come back and tell me about it.</p><button class="primary" id="trail-accept">Let’s help our neighbours</button>' : returning ? '<button class="primary" id="trail-finish">Tell Pip about our adventure</button>' : ready ? `<button class="primary" id="encounter-help">${escape(dialogue.actionLabel)}</button>` : '<p>Open Missions to see your next step. You can come back and chat any time.</p>'}<button class="secondary" id="encounter-later">Keep exploring</button></div>`,
+    );
+    this.dialog
+      .querySelector('#encounter-later')
+      ?.addEventListener('click', () => this.hooks.close());
+    this.dialog.querySelector('#trail-accept')?.addEventListener('click', () => {
+      this.trail = { accepted: true, returned: false };
+      this.trackedId = undefined;
+      this.saveTrail();
+      this.encounter(quest);
+    });
+    this.dialog.querySelector('#trail-finish')?.addEventListener('click', () => {
+      if (!trailReadyToReturn(this.snapshot)) return;
+      this.trail.returned = true;
+      this.trackedId = undefined;
+      this.saveTrail();
+      this.open(
+        `<div class="quest-dialogue"><span class="pill">TRAIL COMPLETE</span><h2 id="dialog-title">Little kindnesses, a brighter island</h2><p>“The bridge is safe, the picnic is shared, and the garden is blooming. And you made a new friend in Tansy! Thank you for helping our neighbours.” — Pip</p>${trailChecklistView(this.snapshot, this.trail)}<button class="primary" id="trail-done">Keep exploring</button></div>`,
+      );
+      this.dialog.querySelector('#trail-done')?.addEventListener('click', () => this.hooks.close());
+    });
+    this.dialog
+      .querySelector('#encounter-help')
+      ?.addEventListener('click', () => this.startWorldEncounter(quest));
+  }
+  private startWorldEncounter(quest: WorldEncounter) {
+    if (
+      this.busy ||
+      this.activityOpen ||
+      this.commands.hasPending ||
+      !questReady(this.snapshot, quest.id)
+    )
       return;
-    }
-    if (!questReady(this.snapshot, quest.id)) {
-      this.hooks.toast('There is more to do first. Open Missions to find your next story moment.');
-      return;
-    }
     this.open(
       `<span class="pill">A HELPING MOMENT</span><h2 id="dialog-title">${escape(quest.short)}</h2><p>Let’s see how we can help.</p>`,
     );
-    // Keep movement paused while the server issues the encounter.
     this.activityOpen = true;
     void this.send({ type: 'start_encounter', beatId: quest.id })
       .then(() => this.mount())
@@ -300,9 +398,12 @@ export class BackendWorld {
             const levelUp = encounter.training
               ? trainingLevelUp(before, this.snapshot, encounter.training.creatureId)
               : undefined;
-            const friend = encounter.training?.creatureId;
+            const newFriend = this.snapshot.ownedCreatures.find(
+              (id) => !before.ownedCreatures.includes(id),
+            );
+            const friend = encounter.training?.creatureId ?? newFriend;
             this.open(
-              `<div class="success ${levelUp ? 'training-celebration' : ''}"><span class="pill">${levelUp ? 'LEVEL UP!' : encounter.training ? 'TRAINING COMPLETE!' : 'YOU HELPED!'}</span><h2 id="dialog-title">${levelUp ? `${escape(friendName(levelUp.creatureId))} reached level ${levelUp.level}!` : encounter.training ? 'Growing together' : 'A brighter Meadow'}</h2><p>${levelUp ? 'A happy wiggle for a new adventure milestone! Your character progress is saved.' : encounter.training ? 'Your practice and character progress are saved. Help is always welcome.' : 'Your adventure and learning progress are saved. Head back outside to see what changed!'}</p>${friend ? characterPortrait(friend, 110) : heroPortrait('pip', 110)}<button class="primary" id="server-return">Back to exploring →</button></div>`,
+              `<div class="success ${levelUp ? 'training-celebration' : ''}"><span class="pill">${levelUp ? 'LEVEL UP!' : encounter.training ? 'TRAINING COMPLETE!' : 'YOU HELPED!'}</span><h2 id="dialog-title">${levelUp ? `${escape(friendName(levelUp.creatureId))} reached level ${levelUp.level}!` : encounter.training ? 'Growing together' : newFriend ? `${escape(friendName(newFriend))} is your new friend!` : 'A brighter Meadow'}</h2><p>${levelUp ? 'A happy wiggle for a new adventure milestone! Your character progress is saved.' : encounter.training ? 'Your practice and character progress are saved. Help is always welcome.' : newFriend ? 'You solved a problem together and earned their trust. Open your journal to invite your new friend to walk with you.' : 'Your adventure and learning progress are saved. Head back outside to see what changed!'}</p>${friend ? characterPortrait(friend, 110) : heroPortrait('pip', 110)}<button class="primary" id="server-return">Back to exploring →</button></div>`,
             );
             document.querySelector<HTMLButtonElement>('#server-return')!.onclick = () =>
               this.hooks.close();
@@ -327,11 +428,22 @@ export class BackendWorld {
   }
   missions() {
     if (this.activityOpen || this.busy) return;
-    this.open(missionsView(this.snapshot));
+    this.open(
+      missionsView(
+        this.snapshot,
+        trailChecklistView(this.snapshot, this.trail) +
+          '<button class="primary" id="trail-track">Follow the kindness trail</button>',
+      ),
+    );
+    this.dialog.querySelector('#trail-track')?.addEventListener('click', () => {
+      this.trackedId = undefined;
+      const next = this.trackedEncounter();
+      if (next) this.track(next);
+      else this.hooks.toast('You finished this trail! Choose another friend or story moment.');
+    });
     bindMissionsActions(this.dialog, {
       training: () => {
-        this.hooks.close();
-        this.hooks.visit(trainingClearing);
+        this.track(trainingClearing);
       },
       resume: () => this.mount(),
       refresh: () => {
@@ -343,14 +455,17 @@ export class BackendWorld {
           this.mount();
           return;
         }
-        this.hooks.close();
-        this.hooks.visit(quest);
+        this.track(quest);
       },
     });
+    const title = this.dialog.querySelector<HTMLElement>('#dialog-title');
+    title?.setAttribute('tabindex', '-1');
+    title?.focus({ preventScroll: true });
+    this.dialog.scrollTop = 0;
   }
   journal(state: Progress) {
     if (this.activityOpen || this.busy) return;
-    this.open(journalView(this.snapshot, state));
+    this.open(journalView(this.snapshot, state) + trailChecklistView(this.snapshot, this.trail));
     this.bindTrainingActions();
     bindJournalActions(this.dialog, {
       companion: (id) => {

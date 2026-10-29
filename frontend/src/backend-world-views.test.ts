@@ -38,3 +38,17 @@ test('View extraction preserves locked missions and unowned training guidance', 
   assert.match(trainingView(state), /Befriend a Meadow character/);
   assert.doesNotMatch(trainingView(state), /data-server-training=/);
 });
+
+test('Missions identify the destination of activities and training', () => {
+  const html = missionsView(blank());
+  for (const name of [
+    'Clover Meadow',
+    'Starlight Cove',
+    'Peachy Orchard',
+    'Fern Hollow',
+    'Mossy Clearing',
+    'Owl Grove',
+  ]) {
+    assert.ok(html.includes(name), name);
+  }
+});

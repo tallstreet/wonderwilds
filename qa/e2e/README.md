@@ -44,3 +44,16 @@ phone-sized training UI. Real educator, child usability and screen-reader review
 remain separate requirements. `training-browser.mjs` can also target an already
 prepared **fresh QA database** via `WW_DEMO_TEST_URL`; never point it at a database
 whose progress should be preserved.
+
+Exploration quest against a fresh API/PostgreSQL profile:
+
+```sh
+WW_QA_BROWSER_TEST=qa/e2e/exploration-quest.mjs node qa/e2e/run-training-qa.mjs
+```
+
+This uses the same disposable-cluster runner and separate ports. It walks the
+three-map kindness trail through actual dialogue and curriculum controls, checks
+wrong answers, supported friendship, reload/resume and abandonment, then returns
+to Pip and verifies the saved checklist and phone layout. Conversation acceptance
+and return are local presentation state; the test verifies that neither issues
+server rewards. Assessment steps and creature ownership come from the real API.

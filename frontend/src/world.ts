@@ -4,7 +4,8 @@ import Phaser from 'phaser';
 import { maps, mapExit, exitPoint, type MapId } from './maps.ts';
 import { encounters } from './content.ts';
 import { HERO_ATLAS, PROP_ATLAS, heroFrames, propFrames, registerAtlas } from './sprites.ts';
-import { isBlocked, findRoute } from './navigation.ts';
+import { questWaypoint } from './quest-navigation.ts';
+import { isBlocked, findRoute, nearestCharacter } from './navigation.ts';
 import { heroes } from './art.ts';
 import { moveGround, advanceFollower } from './grounding.ts';
 import {
@@ -87,11 +88,15 @@ export function createWorld(
       this.game.events.on('reset-position', () => this.player.setPosition(160, 490));
       this.game.events.on('visit', (e: WorldEncounter) => {
         if (getState().region !== e.region) {
-          onMapChange?.('meadow', { x: 160, y: 490 });
+          onMapChange?.(e.region, { x: 160, y: 490 });
           this.paint();
         }
         const m = this.markers.find((m) => m.e.id === e.id);
         if (m) this.walkTo({ x: m.x - 30, y: m.y + 25 }, m.e);
+      });
+      this.game.events.on('guide', (e: WorldEncounter) => {
+        const waypoint = questWaypoint(getState().region, e);
+        if (waypoint) this.walkTo(waypoint.point, waypoint.arrived ? e : null);
       });
       keyboard.on('keydown-SPACE', () => this.interact());
     }
@@ -122,7 +127,7 @@ export function createWorld(
       const s = getState();
       this.paintedRegion = s.region;
       const fixed = s.done.includes('meadow-bridge');
-      paintScenery(this, s);
+      paintScenery(this, s, Boolean(backend));
       if (s.region === 'meadow')
         this.add
           .zone(1030, 355, 85, 110)
@@ -132,7 +137,7 @@ export function createWorld(
           });
       this.markers = [];
       ((backend?.encounters() ?? encounters) as WorldEncounter[])
-        .filter((e) => e.region === s.region && s.region === 'meadow')
+        .filter((e) => e.region === s.region)
         .forEach((e, i) => {
           const complete = s.done.includes(e.id),
             x = backend ? e.x : e.x + (i === 0 ? -105 : 50),
@@ -170,7 +175,11 @@ export function createWorld(
             .zone(x, y - 43, 88, 144)
             .setDepth(y + 102)
             .setInteractive({ useHandCursor: true });
-          zone.on('pointerdown', () => this.walkTo({ x: x - 30, y: y + 25 }, e));
+          zone.on('pointerdown', () => {
+            if (document.querySelector('dialog[open]')) return;
+            if (Math.hypot(this.player.x - x, this.player.y - y) <= 110) this.chat(e);
+            else this.walkTo({ x: x - 30, y: y + 25 }, e);
+          });
           this.markers.push({ e, x, y, cat });
           if (backend) this.label(x, y + 12, e.character, 10);
           if (!complete && !this.reducedMotion)
@@ -320,11 +329,18 @@ export function createWorld(
         });
       }
     }
+    chat(encounter: WorldEncounter) {
+      if (document.querySelector('dialog[open]')) return;
+      // Stop any click-to-walk interaction so it cannot reopen chat after closing.
+      this.target = null;
+      this.route = [];
+      this.pending = null;
+      onEncounter(encounter);
+    }
     interact() {
-      const close = this.markers.find(
-        (m) => Phaser.Math.Distance.Between(this.player.x, this.player.y, m.x, m.y) < 110,
-      );
-      if (close) onEncounter(close.e);
+      if (document.querySelector('dialog[open]')) return;
+      const close = nearestCharacter(this.player, this.markers);
+      if (close) this.chat(close.e);
       else if (
         getState().region === 'meadow' &&
         this.player.x > 950 &&
@@ -453,7 +469,7 @@ export function createWorld(
           const pending = this.pending;
           this.pending = null;
           if (pending === 'portal') onPortal();
-          else onEncounter(pending);
+          else this.chat(pending);
         }
       }
       const oldX = this.player.x,

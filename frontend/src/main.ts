@@ -53,7 +53,7 @@ function persist() {
 $('#app').innerHTML =
   `<main class="game-shell"><div id="game" role="application" aria-label="Clover Meadow. Tap to walk or use arrow keys and WASD. Press Space near a friend. Open Missions to find an activity."></div>
 <header class="game-hud"><div class="location-badge"><img class="app-logo" src="/assets/starwhisker-logo-v1.png" width="64" height="64" alt=""/><div><small>STARWHISKER ISLAND</small><h1>Clover Meadow</h1></div></div><nav aria-label="Game tools"><div class="hud-stars" aria-label="Hero stars"><span>✦</span><strong id="star-count">0 / 3</strong></div><button class="hud-button" id="explore" aria-label="Explore 75 places">◎<span>Explore</span></button><button class="hud-button" id="journal" aria-label="My journal" title="My journal">▧<span>Journal</span></button><button class="hud-button" id="grownup" aria-label="For grown-ups" title="For grown-ups">⚙<span>Grown-ups</span></button><button class="hud-button fullscreen-button" id="fullscreen" aria-label="Enter full screen" title="Enter full screen">⛶</button></nav></header>
-<footer class="game-dock"><button class="mission-button" id="missions"><span class="mission-symbol">✦</span><span><small>YOUR ADVENTURE</small><strong id="mission-status">Three ways to be a hero</strong></span><span class="mission-open">Missions ↗</span></button><div class="game-guidance"><span>Tap to explore <b>·</b> Arrows to walk <b>·</b> Space to chat</span><small id="save-status" role="status"></small></div></footer></main><dialog id="dialog" aria-labelledby="dialog-title"></dialog><div id="toast" role="status"></div>`;
+<footer class="game-dock"><button class="mission-button" id="missions"><span class="mission-symbol">✦</span><span><small>YOUR ADVENTURE</small><strong id="mission-status">Three ways to be a hero</strong></span><span class="mission-open">Missions ↗</span></button><div class="game-guidance"><span id="quest-direction" role="status"></span><button id="quest-guide" class="secondary" hidden>Follow path</button><span>Tap to explore <b>·</b> Arrows to walk <b>·</b> Space to chat</span><small id="save-status" role="status"></small></div></footer></main><dialog id="dialog" aria-labelledby="dialog-title"></dialog><div id="toast" role="status"></div>`;
 const dialog = $<HTMLDialogElement>('#dialog');
 function render() {
   const mapName = maps[state.region as MapId].name;
@@ -77,7 +77,7 @@ function missions() {
 }
 function explore() {
   openDialog(
-    `<span class="pill">A WORLD OF LITTLE ADVENTURES</span><h2 id="dialog-title">75 places to explore</h2><p class="muted">Choose somewhere to visit, or follow the paths to walk between places. Story missions await in Clover Meadow.</p><label for="place-search">Find a place</label><input id="place-search" type="search" placeholder="Search places or environments…"/><div id="place-library"></div>`,
+    `<span class="pill">A WORLD OF LITTLE ADVENTURES</span><h2 id="dialog-title">75 places to explore</h2><p class="muted">Choose somewhere to visit, or follow the paths to walk between places. Look for activities along the way; each destination lists what you can find.</p><label for="place-search">Find a place</label><input id="place-search" type="search" placeholder="Search places or environments…"/><div id="place-library"></div>`,
   );
   const show = () => {
     const query = $<HTMLInputElement>('#place-search').value.trim().toLowerCase();
@@ -91,7 +91,7 @@ function explore() {
               `${map.name} ${group}`.toLowerCase().includes(query),
           );
           return places.length
-            ? `<section class="place-group"><h3>${group}</h3><div class="place-grid">${places.map(([id, map]) => `<button class="place-card" data-place="${id}" ${id === state.region ? 'aria-current="location"' : ''}><img src="${mapImageUrl(id)}" alt="" loading="lazy" decoding="async" width="224" height="138"/><strong>${map.name}</strong><small>${id === state.region ? 'You are here' : 'Visit →'}</small></button>`).join('')}</div></section>`
+            ? `<section class="place-group"><h3>${group}</h3><div class="place-grid">${places.map(([id, map]) => `<button class="place-card" data-place="${id}" ${id === state.region ? 'aria-current="location"' : ''}><img src="${mapImageUrl(id)}" alt="" loading="lazy" decoding="async" width="224" height="138"/><strong>${map.name}</strong><small>${id === state.region ? 'You are here · ' : ''}${(backend?.markers ?? activeEncounters).filter((e) => e.region === id).length ? `Activities: ${(backend?.markers ?? activeEncounters).filter((e) => e.region === id).length}` : 'Explore →'}</small></button>`).join('')}</div></section>`
             : '';
         })
         .join('') || '<p>No places found. Try another name.</p>';
@@ -317,6 +317,7 @@ document.addEventListener('click', (event) => {
   if (backend?.working) return;
   if (button.classList.contains('close')) return closeDialog();
   if (button.id === 'explore') return explore();
+  if (button.id === 'quest-guide') return backend?.followTracked();
   if (isMapId(button.dataset.place)) {
     state.region = button.dataset.place;
     state.position = { x: 160, y: 490 };
@@ -466,7 +467,7 @@ async function boot() {
         open: openDialog,
         close: closeDialog,
         toast,
-        visit: (quest) => game.events.emit('visit', quest),
+        visit: (quest) => game.events.emit('guide', quest),
         apply: (snapshot) => {
           state.done = completedWorldQuests(snapshot);
           render();

@@ -70,7 +70,7 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
   children.push(vite);
   await waitReady('http://127.0.0.1:5180/', vite);
   // Async child lets this process continue draining the local servers' output.
-  const test = spawn(process.execPath, ['qa/e2e/training-browser.mjs'], { cwd: root, env: { ...env, WW_DEMO_TEST_URL: 'http://127.0.0.1:5180' }, stdio: 'inherit' });
+  const test = spawn(process.execPath, [process.env.WW_QA_BROWSER_TEST || 'qa/e2e/training-browser.mjs'], { cwd: root, env: { ...env, WW_DEMO_TEST_URL: 'http://127.0.0.1:5180' }, stdio: 'inherit' });
   children.push(test);
   const [code] = await once(test, 'exit');
   if (code !== 0) throw new Error(`Training browser journey exited ${code}`);

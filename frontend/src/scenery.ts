@@ -4,6 +4,7 @@ import { maps, biomes } from './maps.ts';
 import { mapImageUrl, createImageRequests } from './mapImages.ts';
 import { paintLandscape } from './landscape.ts';
 import { BRIDGE } from './mapGeometry.ts';
+import { meadowPlacements } from './world-placements.ts';
 // The generated landscape and these props share one shaded 3D art direction.
 // Rewards remain data-driven: code counts planks/berries and switches garden state.
 export function paintScenery(
@@ -11,9 +12,40 @@ export function paintScenery(
     label(x: number, y: number, text: string, size?: number): Phaser.GameObjects.Text;
   },
   state: Progress,
+  backendWorld = false,
 ) {
   if (state.region !== 'meadow') {
     paintExplorationMap(scene, state.region);
+    if (backendWorld) {
+      const picnic = meadowPlacements['meadow-picnic'];
+      const garden = meadowPlacements['meadow-garden'];
+      if (state.region === picnic.region) {
+        const y = picnic.y - 100;
+        scene.add.image(picnic.x, y, 'prop-atlas', 'picnic').setDisplaySize(136, 100).setDepth(y);
+        scene.label(
+          picnic.x,
+          y - 70,
+          state.done.includes('meadow-picnic') ? 'PICNIC SHARED' : 'BERRIES TO SHARE',
+          11,
+        );
+        if (state.done.includes('meadow-picnic')) {
+          for (let i = 0; i < 6; i++)
+            scene.add
+              .image(picnic.x - 25 + i * 10, y + 16, 'prop-atlas', 'berry')
+              .setDisplaySize(9, 9)
+              .setDepth(y + 1);
+        }
+      }
+      if (state.region === garden.region) {
+        const grown = state.done.includes('meadow-garden');
+        const y = garden.y - 95;
+        scene.add
+          .image(garden.x, y, 'prop-atlas', grown ? 'garden-blooming' : 'garden-sleeping')
+          .setDisplaySize(134, 100)
+          .setDepth(y);
+        scene.label(garden.x, y - 70, grown ? 'OUR GARDEN IS GROWING!' : 'A GARDEN TO GROW', 11);
+      }
+    }
     return;
   }
   scene.add.image(0, 0, 'meadow-map').setOrigin(0).setDisplaySize(1120, 690).setDepth(-10);

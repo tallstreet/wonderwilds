@@ -19,14 +19,14 @@ const placedEncounters = placeWorldEncounters(
   [
     ...meadowBeats.map((b) => ({
       id: b.id,
-      region: b.chapterId,
+      region: meadowPlacements[b.id].region,
       short: b.title,
       character: b.id === 'meadow-welcome' ? 'Pip' : b.title,
       sprite: 'pip',
     })),
     ...meadowFriends.map((q) => ({
       id: q.id,
-      region: 'meadow',
+      region: meadowPlacements[q.id].region,
       short: q.title,
       character: friendName(q.creatureId),
       sprite: friendSprites[q.creatureId],
@@ -36,7 +36,7 @@ const placedEncounters = placeWorldEncounters(
       short: 'Train together',
       character: 'Training clearing',
       sprite: 'pip',
-      region: 'meadow',
+      region: meadowPlacements['meadow-training-clearing'].region,
     },
   ],
   meadowPlacements,

@@ -52,3 +52,19 @@ test('Every authored placement including training has a reachable approach after
     );
   }
 });
+
+test('Encounters are spread across six destinations with at most two per map', () => {
+  const counts = new Map<string, number>();
+  for (const encounter of [...worldQuests, trainingClearing]) {
+    counts.set(encounter.region, (counts.get(encounter.region) ?? 0) + 1);
+  }
+  assert.equal(counts.size, 6);
+  assert.equal(counts.get('meadow'), 2);
+  assert.deepEqual([...counts.values()].sort(), [1, 2, 2, 2, 2, 2]);
+  for (const id of ['meadow-welcome', 'meadow-bridge']) {
+    const encounter = worldQuests.find((q) => q.id === id)!;
+    const target = { x: encounter.x - 30, y: encounter.y + 25 };
+    const route = findRoute({ x: 160, y: 490 }, target, false, encounter.region);
+    assert.ok(Math.hypot(route.at(-1)!.x - target.x, route.at(-1)!.y - target.y) < 24, id);
+  }
+});

@@ -87,8 +87,14 @@ The runtime database role is not a superuser and cannot bypass RLS. Do not expos
 this development bridge through a tunnel or use it with personal data.
 
 The game world mounts the typed client and activity controls for the six Meadow
-story beats and four Meadow friendships. Missions route the player to labelled
-NPCs; clicking a character or pressing Space nearby opens the same activity. Answers, support, abandonment, rewards,
+story beats and four Meadow friendships. The ten story/friendship encounters are spread in pairs across Clover Meadow,
+Starlight Cove, Peachy Orchard, Fern Hollow and Mossy Clearing; training is in Owl Grove.
+These are browser placements for the Meadow content, not new regional story unlocks.
+Missions tracks a destination; Follow path walks to the next connected exit or
+nearby character. Clicking a character or pressing Space nearby opens dialogue
+before starting an activity. The first exploration quest, “A trail of little
+kindnesses”, links Pip, bridge repair, the Cove picnic, Tansy and the Orchard garden
+before a return to Pip. Its seven-step checklist appears in Missions and Journal. Answers, support, abandonment, rewards,
 companion selection and learning summaries are saved by the real API. Guest
 localStorage is untouched. Server flags repair the bridge, bloom the garden and update the picnic. The
 journal selects a following companion; the selected team survives reloads.

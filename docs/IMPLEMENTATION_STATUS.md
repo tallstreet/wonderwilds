@@ -259,3 +259,69 @@ Hosted CI also exposed an undeclared `rg` dependency in the database runner's
 migration-drift log assertion, after both database tests had passed. That literal
 log check now uses portable `grep -Fq`; the complete disposable database check
 passes locally with the corrected assertion.
+
+### Activity distribution — 29 October 2026
+
+The local backend world's ten story/friendship encounters now occupy five maps
+with two per map: Clover Meadow, Starlight Cove, Peachy Orchard, Fern Hollow and
+Mossy Clearing. The training clearing is in Owl Grove. Welcome and bridge repair
+remain reachable on the starting map before the bridge is fixed. Missions travel
+to the encounter's actual destination and show map names; Explore lists encounter
+counts. The existing 75-map library still has exploration-only destinations.
+These browser placements retain Meadow server eligibility, prerequisites, saved
+IDs and rewards; they do not activate Orchard/Cove story packs. Guest activities
+retain their existing placement.
+
+Validation: frontend check passed (80 tests, typecheck, lint, formatting and
+production build); synthetic-API browser checks verified mission travel and
+walking to all four relocated friends, and guest smoke passed on desktop/tablet.
+`git diff --check` passed. The existing Phaser bundle-size warning remains.
+No real database assessment changes were made or tested for this placement update.
+
+### First exploration quest — 29 October 2026
+
+“A trail of little kindnesses” now connects existing assessed content into a
+seven-step journey: accept Pip’s invitation, listen to his message, repair the
+bridge, share the Cove picnic, befriend Tansy in Orchard, grow the garden, and
+return to Pip. Conversations precede story/friendship activities and allow the
+player to leave without starting an encounter. Missions and Journal show current,
+later and completed steps; existing server progress counts without replay.
+
+Missions now tracks a target instead of teleporting. The HUD describes the next
+connected exit, and Follow path walks there or approaches the character on the
+current map. Players can still walk with arrows/WASD or tap exits. Explore retains
+its explicit map-selection travel. Cove picnic berries and the Orchard garden
+reflect server completion; newly confirmed friendships get a named celebration.
+
+The trail uses existing server-owned activity, support, abandonment, friendship
+and reward rules. Acceptance, tracked target and return conversation are validated
+local preferences stored under the profile-specific view key; they are not new
+server quest grants or cross-device conversation state. They cannot establish
+learning evidence or creature ownership. Guest saves and content review/activation
+remain unchanged. This is one authored trail, not procedural wild encounters or
+an expansion of the server’s regional gameplay eligibility.
+
+Validation: frontend typecheck/lint/format, all 87 tests and production build
+passed. A new real-API browser journey passed against the disposable PostgreSQL
+runner: dialogue/decline, incorrect answer without progress, support, reload/resume,
+abandonment, bridge repair, actual walking between the three maps, picnic,
+supported Tansy recruitment, garden, return conversation without an extra reward,
+saved completion and phone layout. Desktop/tablet guest and synthetic companion
+memory/glow checks passed. The local Node runtime was 26.12.0; Node 24 was not
+available. The existing Phaser bundle-size warning remains; human playtesting and
+cross-device conversation persistence are not established by these checks.
+The updated synthetic distribution check also passed walking routes to all four
+friends across the five encounter maps, including dialogue before encounter start.
+
+### Direct character interaction — 29 October 2026
+
+Clicking a nearby character now opens its conversation immediately; clicking from
+farther away still walks over first. Space selects the nearest character within
+chat range. Both paths clear pending walking interactions before opening the
+conversation, so closing it cannot resume an old route and reopen the chat.
+The conversation retains its action to start the server-assessed activity.
+
+Validation passed: all 88 frontend tests/type/lint/format/build checks, the real
+three-map QA journey now beginning with a direct character click and Space to
+reopen chat and start the activity, desktop/tablet guest smoke, and diff checks.
+The existing Phaser bundle-size warning remains.
