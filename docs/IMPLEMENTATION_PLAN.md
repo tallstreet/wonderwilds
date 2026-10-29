@@ -1,11 +1,13 @@
 # Wonderwilds implementation planning
 
-Updated: 29 October 2026.
+Updated: 30 October 2026.
 
 The earlier Starwhisker Island frontend-first plan has been superseded. Wonderwilds now has a Rust backend, versioned contracts, a server-backed Meadow adventure, twelve illustrated character profiles and 75 connected exploration destinations; do not rebuild those foundations or follow the old suggested frontend layout. Exploration destinations are not evidence of server-authoritative regional story integration.
 
 - [Companion progression plan](COMPANION_PROGRESSION_PLAN.md) is the active gameplay sequence: individual levels, training, collection, teams, friendship, transformations and regional discovery.
 - [Wonderwilds roadmap](WONDERWILDS_IMPLEMENTATION_PLAN.md) retains architecture, curriculum, privacy and broader release requirements.
+- [Generative story design](GENERATIVE_STORY_DESIGN.md) specifies mission-led story inputs, outputs and a worked Pip bridge journey, separate from education. Its first headless subset is implemented; full game/model integration remains proposed.
+- [Story implementation plan](STORY_IMPLEMENTATION_PLAN.md) stages that design, beginning with the isolated authored Rust bridge mission, deterministic payload builder and runnable headless journey. API/browser integration and model generation are separate follow-on gates.
 - [Implementation status](IMPLEMENTATION_STATUS.md) records delivered systems, validation evidence and outstanding integration work.
 - [First milestone review](MILESTONE_REVIEW.md) preserves acceptance evidence for the earlier guest adventure.
 

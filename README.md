@@ -162,3 +162,41 @@ with `CHROMIUM_PATH` as above and `node frontend/src/learning/voice-bridge.brows
 The latter starts temporary servers on port 5191 and an ephemeral API port, uses
 synthetic sessions and mocks the provider. A real account/model call is still
 needed to verify hackathon access and transcription quality.
+
+## Authored story foundation (headless)
+
+The [story implementation plan](docs/STORY_IMPLEMENTATION_PLAN.md) starts with an
+isolated Rust mission and deterministic model-input builder. Run Pip's bridge
+journey without a model, database or browser:
+
+```sh
+cargo run -p wonderwilds-director --example story_bridge --locked -- --source bank
+cargo run -p wonderwilds-director --example story_bridge --locked -- --source workshop
+```
+
+Each journey accepts the mission, obtains wood, visits the woodcutter, exchanges
+wood for planks, returns, repairs the bridge and crosses with Pip. It verifies
+exact command retries and checkpoint replay; final JSON contains the actual planning
+input, scene input and authored output. Diagnostics go to stderr.
+
+Add `--output-dir /tmp/wonderwilds-story-trace` to save payload/checkpoint JSON at
+every revision. The directory must not already exist. Inspect/resume a captured
+workshop checkpoint with:
+
+```sh
+cargo run -p wonderwilds-director --example story_bridge --locked -- \
+  --resume /tmp/wonderwilds-story-trace/003-checkpoint.json
+```
+
+Use `--choose` with an exact `availableActions[].id` from that resumed scene to
+execute one action; add a new output directory to retain the result. Handles are
+revision-bound. Presentation acknowledgement changes revision, so rebuild choices
+after it. The normal scripted journey records the woodcutter introduction explicitly.
+
+This is a developer foundation, not a new live game mode. Local checkpoints verify
+replay consistency, not authenticity; never import them as trusted server progress.
+The 256-command harness limit is explicit. API/database persistence, browser
+placements/controls, broader mission planning and model generation remain later
+stages. Existing guest/assessed bridge progress and content review gates are unchanged.
+See the [payload builder notes](backend/crates/director/src/story/README.md) for
+field sources, contracts and implementation limits.

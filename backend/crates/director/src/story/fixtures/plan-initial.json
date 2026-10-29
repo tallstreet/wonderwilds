@@ -1,0 +1,238 @@
+{
+  "area": {
+    "characters": [
+      {
+        "description": "A curious and patient friend.",
+        "id": "pip",
+        "locationId": "bridge_bank",
+        "relationship": "No prior shared mission is recorded."
+      },
+      {
+        "description": "A patient neighbour who shapes wood.",
+        "id": "woodcutter",
+        "locationId": "workshop",
+        "relationship": "No recorded presentation of the woodcutter's introduction."
+      }
+    ],
+    "locations": [
+      {
+        "description": "A bridge beside a quiet stream, with a path to the workshop.",
+        "id": "bridge_bank"
+      },
+      {
+        "description": "An open-air workshop beside the stream path.",
+        "id": "workshop"
+      },
+      {
+        "description": "A quiet clearing across the stream.",
+        "id": "far_bank"
+      }
+    ],
+    "routes": [
+      {
+        "from": "bridge_bank",
+        "requirement": null,
+        "to": "workshop"
+      },
+      {
+        "from": "workshop",
+        "requirement": null,
+        "to": "bridge_bank"
+      },
+      {
+        "from": "bridge_bank",
+        "requirement": "Bridge repaired",
+        "to": "far_bank"
+      },
+      {
+        "from": "far_bank",
+        "requirement": "Bridge repaired",
+        "to": "bridge_bank"
+      }
+    ]
+  },
+  "capabilities": [
+    {
+      "action": {
+        "destinationId": "workshop",
+        "type": "travel"
+      },
+      "at": "bridge_bank",
+      "effects": [
+        "Player arrives at workshop; inventory unchanged."
+      ],
+      "requires": []
+    },
+    {
+      "action": {
+        "destinationId": "bridge_bank",
+        "type": "travel"
+      },
+      "at": "workshop",
+      "effects": [
+        "Player arrives at bridge_bank; inventory unchanged."
+      ],
+      "requires": []
+    },
+    {
+      "action": {
+        "destinationId": "far_bank",
+        "type": "travel"
+      },
+      "at": "bridge_bank",
+      "effects": [
+        "Player arrives at far_bank; inventory unchanged."
+      ],
+      "requires": [
+        "Bridge repaired"
+      ]
+    },
+    {
+      "action": {
+        "destinationId": "bridge_bank",
+        "type": "travel"
+      },
+      "at": "far_bank",
+      "effects": [
+        "Player arrives at bridge_bank; inventory unchanged."
+      ],
+      "requires": [
+        "Bridge repaired"
+      ]
+    },
+    {
+      "action": {
+        "itemId": "wood",
+        "quantity": 3,
+        "sourceId": "fallen_wood",
+        "type": "collect"
+      },
+      "at": "bridge_bank",
+      "effects": [
+        "Source loses 3 wood",
+        "Player gains 3 wood"
+      ],
+      "requires": [
+        "Active mission",
+        "Source has 3 wood"
+      ]
+    },
+    {
+      "action": {
+        "itemId": "wood",
+        "quantity": 3,
+        "sourceId": "spare_wood",
+        "type": "collect"
+      },
+      "at": "workshop",
+      "effects": [
+        "Source loses 3 wood",
+        "Player gains 3 wood"
+      ],
+      "requires": [
+        "Active mission",
+        "Source has 3 wood"
+      ]
+    },
+    {
+      "action": {
+        "characterId": "woodcutter",
+        "recipeId": "wood_to_planks",
+        "type": "exchange"
+      },
+      "at": "workshop",
+      "effects": [
+        "Consume 3 wood",
+        "Grant 3 planks"
+      ],
+      "requires": [
+        "Active mission",
+        "Player has 3 wood",
+        "Bridge broken"
+      ]
+    },
+    {
+      "action": {
+        "objectId": "bridge",
+        "recipeId": "repair_bridge",
+        "type": "assemble"
+      },
+      "at": "bridge_bank",
+      "effects": [
+        "Consume 3 planks",
+        "Bridge becomes repaired"
+      ],
+      "requires": [
+        "Active mission",
+        "Player has 3 planks",
+        "Bridge broken"
+      ]
+    },
+    {
+      "action": {
+        "characterId": "pip",
+        "destinationId": "far_bank",
+        "type": "accompany"
+      },
+      "at": "bridge_bank",
+      "effects": [
+        "Player and Pip arrive at far bank",
+        "Record shared crossing"
+      ],
+      "requires": [
+        "Active mission",
+        "Bridge repaired",
+        "Pip present"
+      ]
+    }
+  ],
+  "context": {
+    "inventory": [],
+    "locationId": "bridge_bank",
+    "memory": {
+      "facts": [
+        "The bridge is broken.",
+        "Pip is at bridge_bank."
+      ],
+      "recentEvents": [],
+      "recentMissions": []
+    },
+    "player": {
+      "avoid": [],
+      "interests": [],
+      "language": "short_simple"
+    },
+    "trigger": "The authored bridge story is ready."
+  },
+  "mode": "plan_mission",
+  "opportunities": [
+    {
+      "conditions": [
+        {
+          "id": "wood_ready",
+          "meaning": "Have at least three compatible wood; existing wood counts."
+        },
+        {
+          "id": "planks_ready",
+          "meaning": "Have at least three compatible planks; existing planks count."
+        },
+        {
+          "id": "planks_at_bridge",
+          "meaning": "Be at the bridge bank carrying at least three planks."
+        },
+        {
+          "id": "bridge_repaired",
+          "meaning": "The bridge is repaired."
+        },
+        {
+          "id": "crossed_with_pip",
+          "meaning": "The player and Pip have completed a shared crossing."
+        }
+      ],
+      "description": "Help Pip reach the far bank together, repairing the bridge if needed.",
+      "id": "pips_bridge",
+      "outcome": "The bridge is repaired and the player has crossed it with Pip.",
+      "outcomeId": "bridge_and_crossing"
+    }
+  ]
+}
