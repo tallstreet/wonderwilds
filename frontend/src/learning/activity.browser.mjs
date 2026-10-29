@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
 const browser = await chromium.launch({
   executablePath: process.env.CHROMIUM_PATH ?? '/usr/bin/chromium',
   headless: true,
-  args: ['--no-sandbox'],
+  args: ['--no-sandbox', '--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'],
 });
 const page = await browser.newPage({
   viewport: { width: 768, height: 1024 },
@@ -52,6 +52,21 @@ try {
           support: { hintCount: 0, workedExample: false, readAloud: false },
         },
         {
+          recorder: {
+            start: async () => {
+              window.calls.push(['record']);
+            },
+            finish: async () => {
+              if (window.delayTranscript)
+                return new Promise((resolve) => {
+                  window.resolveTranscript = resolve;
+                });
+              return window.transcript ?? 'three';
+            },
+            cancel: () => {
+              window.calls.push(['cancel-record']);
+            },
+          },
           onAttempt: async (answer) => {
             window.calls.push(['attempt', answer]);
             if (window.delayAttempt)
@@ -303,6 +318,98 @@ try {
     await Promise.resolve();
   });
   assert.equal(await page.getByRole('status').count(), 0);
+  // Speech is an editable draft, never an automatic attempt or correctness judgement.
+  await mount('missing_quantity', { total: 6, given: 2 });
+  await click('Say my answer');
+  assert.equal(
+    await page.getByRole('button', { name: 'Check my answer', exact: true }).isDisabled(),
+    true,
+  );
+  await click('Finish recording');
+  await page.waitForFunction(() => document.querySelector('input')?.value === 'three');
+  assert.equal(await lastAnswer(), undefined);
+  await click('Use this answer');
+  await click('Check my answer');
+  assert.deepEqual(await lastAnswer(), { kind: 'quantity', value: 3 });
+  await page.getByRole('textbox', { name: 'Your answer', exact: true }).fill('two');
+  await click('Use this answer');
+  await click('Check my answer');
+  assert.deepEqual(await lastAnswer(), { kind: 'quantity', value: 2 });
+  await page.getByRole('textbox', { name: 'Your answer', exact: true }).fill('two or three');
+  await click('Use this answer');
+  await click('Check my answer');
+  assert.deepEqual(await lastAnswer(), { kind: 'quantity', value: 2 });
+  await page.evaluate(() => {
+    window.delayTranscript = true;
+  });
+  await click('Say my answer');
+  await click('Finish recording');
+  await click('Cancel recording');
+  await page.evaluate(() => window.resolveTranscript('six'));
+  assert.equal(
+    await page.getByRole('textbox', { name: 'Your answer', exact: true }).inputValue(),
+    'two or three',
+  );
+  await click('Say my answer');
+  await click('Finish recording');
+  await page.evaluate(() => {
+    window.activity.destroy();
+    window.resolveTranscript('six');
+  });
+  assert.equal(await page.locator('section').count(), 0);
+  await page.evaluate(() => {
+    window.delayTranscript = false;
+  });
+  await mount('phonics_word_building', { tiles: ['c', 'a', 't'], promptId: 'word-cat' });
+  assert.equal(await page.getByRole('button', { name: 'Say my answer' }).count(), 0);
+  await mount('missing_quantity', { total: 6, given: 2 }, {}, 'M06', ['hint']);
+  assert.equal(await page.getByRole('button', { name: 'Say my answer' }).isDisabled(), true);
+  assert.equal(
+    await page.getByRole('textbox', { name: 'Your answer', exact: true }).isDisabled(),
+    true,
+  );
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mount('missing_quantity', { total: 6, given: 2 });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await mount(
+    'story_message',
+    {
+      cards: [
+        { id: 'red', text: 'Red cup' },
+        { id: 'blue', text: 'Blue cup' },
+      ],
+      promptId: 'read-red-cup',
+    },
+    { choiceMode: 'single' },
+    'E06',
+  );
+  await page.getByRole('textbox', { name: 'Your answer', exact: true }).fill('Blue cup.');
+  await click('Use this answer');
+  await click('Check my answer');
+  assert.deepEqual(await lastAnswer(), { kind: 'choices', choiceIds: ['blue'] });
+
+  // Exercise real browser recording and WAV conversion with a synthetic microphone.
+  let upload;
+  await page.route('**/__demo/transcribe', async (route) => {
+    upload = route.request().postDataBuffer();
+    assert.equal(route.request().headers()['x-csrf-token'], 'test-token');
+    await route.fulfill({ contentType: 'text/plain', body: 'four' });
+  });
+  const transcript = await page.evaluate(async () => {
+    const { createRecorder } = await import('/src/learning/voice.ts');
+    const recorder = createRecorder('test-token', 'test-profile');
+    await recorder.start();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const text = await recorder.finish();
+    recorder.cancel();
+    return text;
+  });
+  assert.equal(transcript, 'four');
+  assert.equal(upload.toString('ascii', 0, 4), 'RIFF');
+  assert.equal(upload.readUInt32LE(24), 16000);
+  assert.equal(upload.readUInt16LE(22), 1);
+  assert.ok(upload.length > 44 && upload.length <= 640044);
   assert.deepEqual(errors, []);
   console.log(
     'Activity browser checks PASS: six families, sort, keyboard, editable answers, support-before-audio, failed support, duplicate guard, safe text, permission guards, invalid content, tablet targets.',

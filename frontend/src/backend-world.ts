@@ -24,6 +24,7 @@ import type { Progress, WorldEncounter } from './types.ts';
 import { isRecord } from './types.ts';
 import { GameClient, ApiFailure } from './api/client.ts';
 import { CommandSession } from './api/command-session.ts';
+import { createRecorder, type AnswerRecorder } from './learning/voice.ts';
 import { mountActivity } from './learning/activity.ts';
 import { authoredPresentation } from './learning/presentation.ts';
 import { heroes, heroPortrait } from './art.ts';
@@ -69,6 +70,7 @@ export class BackendWorld {
     snapshot: GameSnapshot,
     profileId: string,
     private hooks: Hooks,
+    private recorder?: AnswerRecorder,
   ) {
     this.commands = new CommandSession(client, snapshot);
     this.viewKey = `wonderwilds.world-view.v1:${profileId}`;
@@ -421,6 +423,7 @@ export class BackendWorld {
           };
         },
         onAbandon: () => this.leave(),
+        recorder: this.recorder,
       },
       presentation,
     );
@@ -539,6 +542,16 @@ export async function connectBackend(hooks: Hooks): Promise<BackendWorld | undef
   const csrf = session.csrf;
   const client = new GameClient(() => csrf);
   client.selectProfile(session.profileId);
-  return new BackendWorld(client, await client.snapshot(), session.profileId, hooks);
+  return new BackendWorld(
+    client,
+    await client.snapshot(),
+    session.profileId,
+    hooks,
+    session.voiceInput === true &&
+      typeof MediaRecorder !== 'undefined' &&
+      typeof navigator.mediaDevices?.getUserMedia === 'function'
+      ? createRecorder(csrf, session.profileId)
+      : undefined,
+  );
 }
 export { completedWorldQuests };

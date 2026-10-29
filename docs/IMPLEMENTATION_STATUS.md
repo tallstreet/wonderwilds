@@ -325,3 +325,32 @@ Validation passed: all 88 frontend tests/type/lint/format/build checks, the real
 three-map QA journey now beginning with a direct character click and Space to
 reopen chat and start the activity, desktop/tablet guest smoke, and diff checks.
 The existing Phaser bundle-size warning remains.
+
+### Optional Muse spoken answers — 30 October 2026
+
+The local backend-world activity UI supports typed answers and optional recorded
+answers for missing quantities and non-phonics single-choice tasks. A configured
+`BASETEN_API_KEY` enables the local server bridge to
+`meta-models/muse-spark-open-1026`. The microphone records at most 20 seconds;
+transcripts are editable drafts requiring explicit application and the normal
+server-assessed attempt. Existing touch/keyboard controls remain. Phonics,
+ordered/multiple answers and sharing retain their existing controls. Read-aloud
+output, pronunciation assessment, live story generation and fine-tuning are not
+part of this change.
+
+The local-only bridge validates binary WAV bounds, Host/Origin, CSRF/profile and
+backend session before sending audio. Provider requests and responses are bounded;
+recordings/transcripts are not persisted by the application. This does not establish
+provider retention policy, child-speech accuracy, approved child-data processing
+or a production audio API. No real provider request or child recording was used.
+The authored director and gameplay/learning rules are unchanged.
+
+Validation passed: frontend typecheck/lint/format, all 91 unit/API tests and
+production build; the six-family Chromium activity suite including synthetic
+microphone capture, WAV conversion, editable transcripts, cancellation/late
+results, typed single-choice mapping and phone layout; desktop/tablet guest smoke;
+and a temporary HTTP bridge test with synthetic sessions and mocked Baseten.
+`git diff --check` passed. Checks used the available Node 26.12.0 runtime rather
+than the requested Node 24. The existing Phaser bundle-size warning remains.
+Live hackathon access, real speech quality and Safari/iPad recording are unverified.
+No Rust, database or gameplay-contract changes required database verification.

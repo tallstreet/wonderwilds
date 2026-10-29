@@ -2,6 +2,8 @@ import type { Answer, EncounterInstance } from '../../../contracts/generated/con
 import './activity.css';
 import { art, picture } from './visuals.ts';
 import { pointerMoves } from './drag.ts';
+import { matchingChoice, spokenNumber } from './answer-text.ts';
+import type { AnswerRecorder } from './voice.ts';
 
 export type SupportKind = 'hint' | 'worked_example' | 'read_aloud';
 export type ActivityFeedback = {
@@ -23,6 +25,7 @@ export type ActivityCallbacks = {
   narrate?(text: string): Promise<void> | void;
   stopNarration?(): void;
   onAbandon?(): Promise<void>;
+  recorder?: AnswerRecorder;
 };
 
 let nextActivityId = 0;
@@ -67,7 +70,11 @@ export function mountActivity(
   let busy = false;
   let answer: () => Answer = () => ({ kind: 'choices', choiceIds: [] });
   let refresh: () => void = () => {};
-  const drag = pointerMoves(root, () => !busy && !destroyed);
+  let applyText: ((text: string) => boolean) | undefined;
+  let recording = false;
+  let textInput: HTMLInputElement | undefined;
+  let cancelRecording: (() => void) | undefined;
+  const drag = pointerMoves(root, () => !busy && !recording && !destroyed);
   const buttons: HTMLButtonElement[] = [];
   const conditions = new Map<HTMLButtonElement, () => boolean>();
 
@@ -77,7 +84,7 @@ export function mountActivity(
     node.textContent = label;
     node.setAttribute('aria-label', label);
     node.addEventListener('click', () => {
-      if (!busy && !destroyed) action();
+      if (!busy && !recording && !destroyed) action();
     });
     buttons.push(node);
     conditions.set(node, disabled);
@@ -86,7 +93,10 @@ export function mountActivity(
   function update() {
     if (destroyed) return;
     refresh();
-    for (const node of buttons) node.disabled = busy || Boolean(conditions.get(node)?.());
+    for (const node of buttons)
+      node.disabled = busy || recording || Boolean(conditions.get(node)?.());
+    if (textInput)
+      textInput.disabled = busy || recording || !encounter.permittedActions.includes('attempt');
     root.setAttribute('aria-busy', String(busy));
   }
   async function perform(operation: () => Promise<void>) {
@@ -218,6 +228,13 @@ export function mountActivity(
         });
         spaces.hidden = placed.size > 0;
         count.textContent = `${given} ready + ${placed.size} added`;
+      };
+      applyText = (text) => {
+        const value = spokenNumber(text, parameters.total);
+        if (value === undefined) return false;
+        placed.clear();
+        for (let i = 0; i < value; i++) placed.add(i);
+        return true;
       };
       answer = () => ({ kind: 'quantity', value: placed.size });
       return true;
@@ -382,6 +399,14 @@ export function mountActivity(
         ? 'ordered'
         : 'single');
     let selected: string[] = [];
+    if (mode === 'single' && encounter.templateId !== 'phonics_word_building') {
+      applyText = (text) => {
+        const id = matchingChoice(text, choices);
+        if (!id) return false;
+        selected = [id];
+        return true;
+      };
+    }
     const line = node('div', 'ww-pattern-line');
     prefix.forEach((label) => {
       const tile = node('span', 'ww-shown-tile');
@@ -527,6 +552,127 @@ export function mountActivity(
   const configured = presentation.prompt.trim().length > 0 && configure();
   if (!configured && !controls.textContent) unsupported();
   if (configured) {
+    if (applyText) {
+      const entry = document.createElement('fieldset');
+      entry.className = 'ww-answer-entry';
+      const legend = document.createElement('legend');
+      legend.textContent = callbacks.recorder ? 'Type or say your answer' : 'Type your answer';
+      const label = document.createElement('label');
+      label.htmlFor = `${id}-answer-text`;
+      label.textContent = 'Your answer';
+      textInput = document.createElement('input');
+      textInput.id = label.htmlFor;
+      textInput.type = 'text';
+      textInput.maxLength = 300;
+      textInput.autocomplete = 'off';
+      if (encounter.templateId === 'missing_quantity') textInput.inputMode = 'numeric';
+      const apply = button(
+        'Use this answer',
+        () => {
+          if (!applyText?.(textInput!.value)) {
+            live.textContent =
+              'Please enter a number or the exact words on one choice. You can also use the pieces.';
+            return;
+          }
+          live.textContent = 'Your idea is ready. Check it when you are happy with it.';
+          update();
+        },
+        () => !encounter.permittedActions.includes('attempt'),
+      );
+      entry.append(legend, label, textInput, apply);
+      if (callbacks.recorder) {
+        const recorder = callbacks.recorder;
+        const stop = document.createElement('button');
+        stop.type = 'button';
+        stop.textContent = 'Finish recording';
+        stop.hidden = true;
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.textContent = 'Cancel recording';
+        cancel.hidden = true;
+        let voiceGeneration = 0;
+        let recordingTimer: ReturnType<typeof setTimeout> | undefined;
+        cancelRecording = () => {
+          voiceGeneration++;
+          clearTimeout(recordingTimer);
+          recorder.cancel();
+          recording = false;
+          stop.hidden = true;
+          cancel.hidden = true;
+          update();
+        };
+        const start = button(
+          'Say my answer',
+          () => {
+            const current = ++voiceGeneration;
+            recording = true;
+            drag.cancel();
+            callbacks.stopNarration?.();
+            cancel.hidden = false;
+            update();
+            live.textContent =
+              'Allow microphone access to record. Only your recording is sent to Baseten when you finish.';
+            void recorder
+              .start()
+              .then(() => {
+                if (destroyed || current !== voiceGeneration) return;
+                stop.hidden = false;
+                stop.disabled = false;
+                stop.focus();
+                live.textContent =
+                  'Listening. Press Finish recording when ready (up to 20 seconds).';
+                recordingTimer = setTimeout(() => {
+                  stop.click();
+                }, 20000);
+              })
+              .catch(() => {
+                if (destroyed || current !== voiceGeneration) return;
+                cancelRecording?.();
+                live.textContent =
+                  'The microphone is unavailable. You can still type or use the pieces.';
+              });
+          },
+          () => !encounter.permittedActions.includes('attempt'),
+        );
+        stop.onclick = () => {
+          if (stop.disabled || destroyed || !recording) return;
+          clearTimeout(recordingTimer);
+          stop.disabled = true;
+          const current = voiceGeneration;
+          live.textContent = 'Listening to your recording…';
+          void recorder
+            .finish()
+            .then((text) => {
+              if (destroyed || current !== voiceGeneration) return;
+              if (text.trim()) textInput!.value = text;
+              live.textContent = text.trim()
+                ? 'Here is what I heard. Edit it if needed, then choose Use this answer.'
+                : 'I could not hear an answer. Try again or type it.';
+            })
+            .catch(() => {
+              if (!destroyed && current === voiceGeneration)
+                live.textContent =
+                  'That recording could not be understood. Your previous answer is still here. Try again or type.';
+            })
+            .finally(() => {
+              if (!destroyed && current === voiceGeneration) {
+                cancelRecording?.();
+                textInput?.focus();
+              }
+            });
+        };
+        cancel.onclick = () => {
+          cancelRecording?.();
+          live.textContent = 'Recording cancelled. You can type or use the pieces.';
+          start.focus();
+        };
+        const privacy = document.createElement('p');
+        privacy.textContent =
+          'Say my answer records up to 20 seconds and sends it to Baseten to turn speech into text. Check the words before using them.';
+        entry.append(start, stop, cancel, privacy);
+      }
+      controls.append(entry);
+    }
     const check = button(
       'Check my answer',
       () => {
@@ -615,6 +761,8 @@ export function mountActivity(
     },
     destroy: () => {
       destroyed = true;
+      cancelRecording?.();
+      callbacks.recorder?.cancel();
       drag.destroy();
       callbacks.stopNarration?.();
       root.remove();

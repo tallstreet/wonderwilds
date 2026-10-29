@@ -130,3 +130,35 @@ For the actual world training journey with local PostgreSQL installed, run
 `node qa/e2e/run-training-qa.mjs`. It creates and removes its own synthetic QA
 database and temporary session, using ports 3002/5180 without changing demo
 progress. See [browser checks](qa/e2e/README.md) and [CI scope](docs/CI.md).
+
+### Optional spoken answers (Baseten hackathon)
+
+Export `BASETEN_API_KEY` in the terminal environment before starting
+`sh scripts/local-demo.sh`. Keep the key out of browser code and `VITE_*`
+variables. Restart the demo after changing the key. When configured, supported
+browsers show **Say my answer** for missing quantities and unambiguous single-choice
+activities. Typing and the existing pieces remain available. Phonics, ordered
+sequences and multi-recipient sharing do not use transcription for assessment.
+
+The child starts a recording, finishes it (automatically at 20 seconds), reviews
+or edits the transcript, chooses **Use this answer**, then **Check my idea**.
+Cancellation stops the microphone and pending request. Microphone denial or
+provider failure leaves the existing answer intact. Transcription never submits
+an attempt automatically or determines correctness. Rust still assesses answers.
+This adds audio input only, not read-aloud output or pronunciation scoring.
+
+The local Vite bridge sends a bounded mono WAV to Baseten's OpenAI-compatible
+chat endpoint using exactly `meta-models/muse-spark-open-1026`. The provider key
+stays in the server environment. Host/Origin, browser CSRF, profile and the real
+backend session are checked before a provider call. Only the recording and fixed
+transcription instructions are sent, with no question, answer key or profile.
+The application does not persist recordings or transcripts. Baseten's retention,
+child-data terms and child-speech accuracy have not been verified; this remains
+a local synthetic/adult-playtest feature, not approved child-data deployment.
+The local bridge must not be tunneled or exposed publicly.
+
+Voice verification (no paid requests): run the existing activity browser suite
+with `CHROMIUM_PATH` as above and `node frontend/src/learning/voice-bridge.browser.mjs`.
+The latter starts temporary servers on port 5191 and an ephemeral API port, uses
+synthetic sessions and mocks the provider. A real account/model call is still
+needed to verify hackathon access and transcription quality.

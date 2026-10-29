@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { museHandler } from './server/muse.ts';
 import { readFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +12,18 @@ export default defineConfig(({ command }) => {
   const apiPort = Number(process.env.WW_DEMO_API_PORT ?? 3001);
   const host = `127.0.0.1:${port}`;
   const origin = `http://${host}`;
+  const museKey = process.env.BASETEN_API_KEY;
+  const transcribe = museHandler(museKey, async () => {
+    const response = await fetch(`http://127.0.0.1:${apiPort}/api/v1/game`, {
+      headers: {
+        Cookie: `wonderwilds_session=${demo.session}`,
+        'X-Wonderwilds-Profile': demo.profileId,
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+    await response.body?.cancel();
+    return response.ok;
+  });
   return {
     build: {
       rollupOptions: {
@@ -43,8 +56,23 @@ export default defineConfig(({ command }) => {
                 if (path === '/__demo/bootstrap' && req.method === 'GET') {
                   res.setHeader('Content-Type', 'application/json');
                   return res.end(
-                    JSON.stringify({ profileId: demo.profileId, csrf: demo.browserToken }),
+                    JSON.stringify({
+                      profileId: demo.profileId,
+                      csrf: demo.browserToken,
+                      voiceInput: Boolean(museKey),
+                    }),
                   );
+                }
+                if (path === '/__demo/transcribe') {
+                  if (req.method !== 'POST') return reject(405);
+                  if (
+                    req.headers.origin !== origin ||
+                    req.headers['x-csrf-token'] !== demo.browserToken ||
+                    req.headers['x-wonderwilds-profile'] !== demo.profileId
+                  )
+                    return reject(403);
+                  void transcribe(req, res);
+                  return;
                 }
                 if (!/^\/api\/v1\/(game|commands|encounters\/[a-zA-Z0-9-]+)$/.test(path))
                   return reject(404);

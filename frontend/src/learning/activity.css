@@ -536,3 +536,29 @@
     scroll-behavior: auto !important;
   }
 }
+
+.ww-answer-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  border: 2px solid #d6e4cd;
+  border-radius: 1rem;
+  padding: 0.8rem;
+  min-width: 0;
+}
+.ww-answer-entry input {
+  min-height: 44px;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 10rem;
+  font: inherit;
+}
+.ww-answer-entry p {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+}
+.ww-answer-entry [hidden] {
+  display: none;
+}

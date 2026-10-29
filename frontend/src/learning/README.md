@@ -43,3 +43,29 @@ server callback. Controls freeze during submissions, and destroy cancels gesture
 plate transfers, card reordering, exact answer payloads and narrow-screen layout.
 Run it with the local Vite server and `CHROMIUM_PATH` as for the other browser tests.
 The component suite still covers all six families and support/lifecycle boundaries.
+
+## Optional spoken and typed answers
+
+`ActivityCallbacks.recorder` supplies `start`, `finish` (transcript) and `cancel`.
+The backend-world host supplies the recorder only when the local bootstrap reports
+voice enabled and the browser supports microphone recording. The component
+provides typing for missing quantity and non-phonics single-choice activities;
+spoken transcripts fill that same editable field. Explicit **Use this answer**
+performs bounded numeric or unique exact-label matching, never assessment. Unknown
+or ambiguous text preserves the existing selection. **Check my idea** still calls
+`onAttempt` independently. Ordering, sharing and phonics retain their existing
+controls. No model-generated text is treated as an approved activity prompt.
+
+Recording freezes answer controls and offers Finish/Cancel. Destruction and
+cancellation stop microphone tracks and invalidate late transcripts; denial,
+empty transcription and provider errors preserve the previous answer. Browser
+recordings are decoded/downmixed/resampled to at most 20 seconds of 16-kHz PCM WAV
+before upload. Narration behavior is unchanged; this feature is input only.
+
+The development-only `POST /__demo/transcribe` protocol takes `audio/wav` binary
+RIFF PCM16 mono, 16 kHz, up to 640044 bytes, and returns at most 300 characters of
+`text/plain` (not HTML or a gameplay JSON contract). The existing bridge requires
+Host/Origin/CSRF/profile checks, then verifies the backend session, with one
+active request, a two-second start interval and a 30-second deadline. Errors are
+empty HTTP 400/401/403/405/413/415/429/502/503/504 responses; no provider errors,
+keys or recordings are logged. No new gameplay schema or persistence is involved.
