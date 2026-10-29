@@ -3,24 +3,15 @@
 set -eu
 umask 077
 task_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-task_bin=/workspace/setup-tools/postgres/usr/lib/postgresql/17/bin
-export LD_LIBRARY_PATH=/workspace/setup-tools/postgres/usr/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-export CARGO_HOME=/workspace/.cargo RUSTUP_HOME=/workspace/.rustup
-export PATH=/workspace/.cargo/bin:$PATH
-"$task_root/scripts/start-postgres.sh" >/dev/null
-# Test roles are cluster-scoped, so serialize this complete check helper locally.
-exec 9>/workspace/setup-tools/pg-check.lock
-flock 9
-task_name=ww_check_$(date +%s)_$$
-"$task_bin/createdb" -h /workspace/setup-tools/pgsocket -p 55432 "$task_name"
-cleanup() {
-    task_exit=$?
-    trap - EXIT HUP INT TERM
-    "$task_bin/dropdb" -h /workspace/setup-tools/pgsocket -p 55432 "$task_name" || task_exit=1
-    exit "$task_exit"
-}
-trap cleanup EXIT HUP INT TERM
-export WONDERWILDS_DATABASE_URL="host=/workspace/setup-tools/pgsocket port=55432 user=agent dbname=$task_name"
+if [ "${1:-}" != '--qa-child' ]; then
+    exec python3 "$task_root/scripts/with-qa-postgres.py" sh "$task_root/scripts/check-postgres.sh" --qa-child
+fi
+# Internal invocation must match the wrapper's generated cluster, never a supplied URL.
+[ -n "${WW_QA_CLUSTER_DIR:-}" ] && [ -f "$WW_QA_CLUSTER_DIR/data/postmaster.pid" ]
+[ "$WW_QA_DATABASE_URL" = "host=$WW_QA_CLUSTER_DIR/socket port=55432 user=ww_qa_admin dbname=ww_qa" ]
+task_bin=$WONDERWILDS_PG_BIN
+# The wrapper owns this fresh cluster and removes it even when checks fail.
+export WONDERWILDS_DATABASE_URL=$WW_QA_DATABASE_URL
 "$task_root/scripts/migrate-postgres.sh"
 # A second run must preserve state and succeed from its recorded hashes.
 "$task_root/scripts/migrate-postgres.sh"
@@ -40,13 +31,13 @@ if "$task_root/scripts/migrate-postgres.sh" >"$task_drift_log" 2>&1; then
     echo 'Migration history drift was incorrectly accepted' >&2
     exit 1
 fi
-if ! rg -q 'Migration hash drift: 0001_parent_profiles.sql' "$task_drift_log"; then
+if ! grep -Fq 'Migration hash drift: 0001_parent_profiles.sql' "$task_drift_log"; then
     cat "$task_drift_log" >&2
     rm -f "$task_drift_log"
     exit 1
 fi
 rm -f "$task_drift_log"
-task_hash=$(sha256sum "$task_root/backend/migrations/0001_parent_profiles.sql" | cut -d ' ' -f 1)
+task_hash=$(python3 -c 'import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$task_root/backend/migrations/0001_parent_profiles.sql")
 "$task_bin/psql" --dbname="$WONDERWILDS_DATABASE_URL" --no-psqlrc --set ON_ERROR_STOP=1 \
     --command "UPDATE public.wonderwilds_schema_history SET sha256='$task_hash' WHERE version='0001_parent_profiles.sql'" >/dev/null
 "$task_root/scripts/migrate-postgres.sh"

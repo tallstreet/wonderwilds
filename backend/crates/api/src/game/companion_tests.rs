@@ -388,3 +388,56 @@ fn changed_training_policy_blocks_awards_but_allows_abandonment() {
             .is_empty()
     );
 }
+
+#[test]
+fn public_projection_preserves_legacy_shape_and_persisted_receipts() {
+    let content = development_content().unwrap();
+    let mut game = Aggregate::new(&content);
+    let mut snapshots = vec![game.snapshot(&content).unwrap()];
+    for quest in [
+        "meadow-welcome",
+        "meadow-bridge",
+        "meadow-picnic",
+        "meadow-garden",
+        "meadow-letter",
+        "meadow-finale",
+        "befriend-pip",
+        "befriend-tansy",
+        "befriend-nib",
+        "befriend-flutter",
+    ] {
+        finish(&mut game, &content, quest);
+    }
+    let start = request(
+        &game,
+        "projection-training",
+        json!({"type":"start_encounter", "beatId":"training-pip-1"}),
+    );
+    let started = game.execute(&start, &content, 2, "session").unwrap();
+    let encounter = started["pendingEncounters"][0]["id"].as_str().unwrap();
+    let hint = request(
+        &game,
+        "projection-hint",
+        json!({"type":"hint", "encounterId":encounter, "supportKind":"worked_example"}),
+    );
+    let response = game.execute(&hint, &content, 3, "session").unwrap();
+    snapshots.push(response.clone());
+    let persisted = serde_json::to_value(&game).unwrap();
+    let mut restored: Aggregate = serde_json::from_value(persisted.clone()).unwrap();
+    assert_eq!(serde_json::to_value(&restored).unwrap(), persisted);
+    assert_eq!(restored.snapshot(&content).unwrap(), response);
+    assert_eq!(
+        restored.execute(&start, &content, 4, "session").unwrap(),
+        started
+    );
+    assert_eq!(
+        restored.execute(&hint, &content, 4, "session").unwrap(),
+        response
+    );
+    // Captured from the pre-refactor JSON projection, including array ordering and optional fields.
+    let golden: Vec<Value> = serde_json::from_str(include_str!(
+        "../../tests/fixtures/snapshot-projections.v1.json"
+    ))
+    .unwrap();
+    assert_eq!(snapshots, golden);
+}

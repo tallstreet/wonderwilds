@@ -1,13 +1,23 @@
+import {
+  trainingView,
+  missionsView,
+  journalView,
+  bindTrainingActions,
+  bindMissionsActions,
+  bindJournalActions,
+  captureJournalFocus,
+  restoreJournalFocus,
+} from './backend-world-views.ts';
 import { isMapId } from './maps.ts';
 import type { CommandPayload, GameSnapshot } from '../../contracts/generated/contracts.ts';
 import type { Progress, WorldEncounter } from './types.ts';
 import { isRecord } from './types.ts';
-import { GameClient, ApiFailure, type PreparedCommand } from './api/client.ts';
+import { GameClient, ApiFailure } from './api/client.ts';
+import { CommandSession } from './api/command-session.ts';
 import { mountActivity } from './learning/activity.ts';
 import { authoredPresentation } from './learning/presentation.ts';
 import { heroes, heroPortrait } from './art.ts';
-import { companionDetails } from './companions.ts';
-import { trainingDetails, trainingLevelUp } from './companion-training.ts';
+import { trainingLevelUp } from './companion-training.ts';
 import './companion-training.css';
 import './companions.css';
 import { characterPortrait } from './character-art.ts';
@@ -18,7 +28,6 @@ import {
   friendName,
   friendSprites,
   meadowBeats,
-  meadowFriends,
   questCompleted,
   questReady,
   worldQuests,
@@ -39,17 +48,23 @@ type Hooks = {
 };
 export class BackendWorld {
   private activity?: ReturnType<typeof mountActivity>;
-  private pending?: { payload: CommandPayload; command: PreparedCommand };
-  private busy = false;
+  private commands: CommandSession;
   private activityOpen = false;
   private viewKey: string;
   constructor(
-    private client: GameClient,
-    public snapshot: GameSnapshot,
+    client: GameClient,
+    snapshot: GameSnapshot,
     profileId: string,
     private hooks: Hooks,
   ) {
+    this.commands = new CommandSession(client, snapshot);
     this.viewKey = `wonderwilds.world-view.v1:${profileId}`;
+  }
+  get snapshot() {
+    return this.commands.snapshot;
+  }
+  private get busy() {
+    return this.commands.busy;
   }
   get ownsActivity() {
     return this.activityOpen;
@@ -102,12 +117,12 @@ export class BackendWorld {
   }
   updateHud() {
     const count = meadowBeats.filter((b) => questCompleted(this.snapshot, b.id)).length;
-    document.querySelector('#star-count')!.textContent = `${count} / 6`;
+    document.querySelector('#star-count')!.textContent = `${count} / ${meadowBeats.length}`;
     document.querySelector('#mission-status')!.textContent = this.snapshot.pendingEncounters.length
       ? 'Continue your helping adventure'
-      : count === 6
+      : count === meadowBeats.length
         ? 'Find your Meadow friends!'
-        : `${6 - count} story moments await`;
+        : `${meadowBeats.length - count} story moments await`;
     document.querySelector('#save-status')!.textContent =
       `Local server · progress saved · revision ${this.snapshot.revision}`;
   }
@@ -129,7 +144,7 @@ export class BackendWorld {
         ? 'Another tab changed this adventure.'
         : 'The server could not confirm that action.';
       host.append(message);
-      if (this.pending) {
+      if (this.commands.hasPending) {
         const retry = document.createElement('button');
         retry.textContent = 'Retry saving';
         retry.className = 'secondary';
@@ -148,48 +163,24 @@ export class BackendWorld {
     }
   }
   private async send(payload: CommandPayload) {
-    if (this.busy) throw new Error('An action is still saving');
-    if (this.pending && JSON.stringify(this.pending.payload) !== JSON.stringify(payload))
-      throw new Error('Retry the pending action first');
-    this.pending ??= {
-      payload,
-      command: this.client.prepare({
-        schemaVersion: '1.0',
-        commandId: crypto.randomUUID(),
-        expectedRevision: this.snapshot.revision,
-        payload,
-      }),
-    };
-    this.busy = true;
     try {
-      this.snapshot = await this.client.send(this.pending.command);
-      this.pending = undefined;
+      await this.commands.send(payload);
       this.apply();
       document.querySelector('#server-error')?.replaceChildren();
     } catch (error) {
-      if (error instanceof ApiFailure && !['UNAVAILABLE', 'RATE_LIMITED'].includes(error.code))
-        this.pending = undefined;
       this.fail(error);
       throw error;
-    } finally {
-      this.busy = false;
     }
   }
   private async retry() {
-    if (!this.pending) return;
-    await this.send(this.pending.payload);
+    if (!(await this.commands.retry())) return;
+    this.apply();
     this.reconcile();
   }
   async refresh() {
     if (this.busy) return;
-    this.busy = true;
-    try {
-      this.snapshot = await this.client.snapshot();
-      this.pending = undefined;
-      this.apply();
-    } finally {
-      this.busy = false;
-    }
+    await this.commands.refresh();
+    this.apply();
     this.reconcile();
   }
   private reconcile() {
@@ -212,7 +203,7 @@ export class BackendWorld {
       this.hooks.toast('Wait for your adventure to finish saving.');
       return;
     }
-    if (this.pending) {
+    if (this.commands.hasPending) {
       this.fail(new Error('Resolve the uncertain action first'));
       return;
     }
@@ -253,7 +244,7 @@ export class BackendWorld {
       .catch(() => {});
   }
   private startTraining(trainingId: string) {
-    if (this.busy || this.pending) return;
+    if (this.busy || this.commands.hasPending) return;
     if (this.snapshot.pendingEncounters.length) {
       this.mount();
       return;
@@ -268,10 +259,11 @@ export class BackendWorld {
         this.activityOpen = false;
       });
   }
+  private get dialog() {
+    return document.querySelector<HTMLDialogElement>('#dialog')!;
+  }
   private bindTrainingActions() {
-    document.querySelectorAll<HTMLButtonElement>('[data-server-training]').forEach((button) => {
-      button.onclick = () => this.startTraining(button.dataset.serverTraining!);
-    });
+    bindTrainingActions(this.dialog, (id) => this.startTraining(id));
   }
   training() {
     if (this.busy || this.activityOpen) return;
@@ -279,12 +271,7 @@ export class BackendWorld {
       this.mount();
       return;
     }
-    const friends = meadowFriends.filter((q) =>
-      this.snapshot.ownedCreatures.includes(q.creatureId),
-    );
-    this.open(
-      `<span class="pill">MEADOW TRAINING CLEARING</span><h2 id="dialog-title">Grow together</h2><p>Choose a friend for a little practice. You can ask for help at every step.</p><div class="journal-entries">${friends.map((q) => `<div class="journal-entry earned">${characterPortrait(q.creatureId, 110)}<strong>${escape(friendName(q.creatureId))}</strong>${trainingDetails(q.creatureId, this.snapshot)}</div>`).join('') || '<p>Befriend a Meadow character to start training together.</p>'}</div>`,
-    );
+    this.open(trainingView(this.snapshot));
     this.bindTrainingActions();
   }
   private mount() {
@@ -340,65 +327,34 @@ export class BackendWorld {
   }
   missions() {
     if (this.activityOpen || this.busy) return;
-    const rows = worldQuests
-      .map((q) => {
-        const done = questCompleted(this.snapshot, q.id),
-          ready = questReady(this.snapshot, q.id);
-        return `<button class="quest ${done ? 'complete' : ''}" data-server-visit="${q.id}" ${done || !ready ? 'disabled' : ''}><span class="quest-icon">${done ? '✓' : ready ? '✦' : '◇'}</span><span><strong>${escape(q.short)}</strong><small>${done ? 'A lovely memory' : ready ? 'Walk to this adventure' : 'Complete earlier story moments first'}</small></span><span>→</span></button>`;
-      })
-      .join('');
-    this.open(
-      `<span class="pill">CLOVER MEADOW</span><h2 id="dialog-title">Our next adventure</h2><p>Choose a story moment or a friend. We’ll walk there together.</p>${this.snapshot.pendingEncounters.length ? '<button class="primary" id="server-resume">Continue your activity</button>' : ''}<button class="secondary" id="server-training-clearing">Visit the training clearing</button><div class="modal-quests">${rows}</div><button class="text-button" id="server-refresh">Refresh server progress</button><p class="tiny-note">This local playtest uses draft activities. More islands are still being connected.</p>`,
-    );
-    document.querySelector('#server-training-clearing')?.addEventListener('click', () => {
-      this.hooks.close();
-      this.hooks.visit(trainingClearing);
-    });
-    document.querySelector('#server-resume')?.addEventListener('click', () => this.mount());
-    document.querySelector('#server-refresh')?.addEventListener('click', () => {
-      void this.refresh().catch((e) => this.fail(e));
-    });
-    document.querySelectorAll<HTMLButtonElement>('[data-server-visit]').forEach((button) => {
-      button.onclick = () => {
-        const quest = worldQuests.find((q) => q.id === button.dataset.serverVisit);
-        if (!quest || this.busy) return;
+    this.open(missionsView(this.snapshot));
+    bindMissionsActions(this.dialog, {
+      training: () => {
+        this.hooks.close();
+        this.hooks.visit(trainingClearing);
+      },
+      resume: () => this.mount(),
+      refresh: () => {
+        void this.refresh().catch((e) => this.fail(e));
+      },
+      visit: (quest) => {
+        if (this.busy) return;
         if (this.snapshot.pendingEncounters.length) {
           this.mount();
           return;
         }
         this.hooks.close();
         this.hooks.visit(quest);
-      };
+      },
     });
   }
   journal(state: Progress) {
     if (this.activityOpen || this.busy) return;
-    const cards = meadowFriends
-      .map((q) => {
-        const owned = this.snapshot.ownedCreatures.includes(q.creatureId),
-          selected = this.snapshot.selectedCompanions?.includes(q.creatureId);
-        return `<div class="journal-entry ${owned ? 'earned' : ''}">${characterPortrait(q.creatureId, 110)}<strong>${friendName(q.creatureId)}</strong><small>${owned ? (selected ? 'Walking with you' : 'Your friend') : 'A friendship waiting to grow'}</small>${owned ? `<button class="secondary" data-server-companion="${q.creatureId}" ${!selected && (this.snapshot.selectedCompanions?.length ?? 0) >= (this.snapshot.teamCapacity ?? 1) ? 'disabled' : ''} aria-pressed="${Boolean(selected)}">${selected ? `Rest ${friendName(q.creatureId)}` : `Walk with ${friendName(q.creatureId)}`}</button>` : ''}${trainingDetails(q.creatureId, this.snapshot)}${companionDetails(q.creatureId, owned, this.snapshot)}</div>`;
-      })
-      .join('');
-    this.open(
-      `<span class="pill">OUR LITTLE MEMORIES</span><h2 id="dialog-title">My adventure journal</h2><h3>Choose your hero</h3><div class="hero-choices">${Object.entries(
-        heroes,
-      )
-        .filter(([id]) => id !== 'pip')
-        .map(
-          ([id, h]) =>
-            `<button data-hero="${id}" class="hero-choice ${state.hero === id ? 'selected' : ''}" aria-label="Play as ${h.name}">${heroPortrait(id, 60)}<strong>${h.name}</strong></button>`,
-        )
-        .join(
-          '',
-        )}</div>${this.snapshot.explorerProgression ? `<p class="explorer-level">Explorer level ${this.snapshot.explorerProgression.level} · ${this.snapshot.explorerProgression.xp} adventure XP</p>` : ''}<h3>Your Meadow friends</h3><p>Team: ${this.snapshot.selectedCompanions?.length ?? 0} / ${this.snapshot.teamCapacity ?? 1} companions. Let a friend rest to make room.</p><p><a href="/characters.html">Meet all twelve Wonderwilds friends</a></p><div class="journal-entries">${cards}</div><h3>Collected treasures</h3><p>${this.snapshot.inventory.map((i) => `${escape(i.itemId)} × ${i.quantity}`).join(' · ') || 'Help your neighbours to collect rewards.'}</p><p class="tiny-note">Your companion, character progress and shared memories are saved on the server.</p>`,
-    );
-    this.bindFriendshipActions(state);
+    this.open(journalView(this.snapshot, state));
     this.bindTrainingActions();
-    document.querySelectorAll<HTMLButtonElement>('[data-server-companion]').forEach((button) => {
-      button.onclick = () => {
+    bindJournalActions(this.dialog, {
+      companion: (id) => {
         if (this.busy) return;
-        const id = button.dataset.serverCompanion!;
         const team = this.snapshot.selectedCompanions ?? [];
         const creatureIds = team.includes(id)
           ? team.filter((member) => member !== id)
@@ -406,70 +362,28 @@ export class BackendWorld {
         void this.send({ type: 'select_team', creatureIds })
           .then(() => {
             this.journal(state);
-            document.querySelector<HTMLButtonElement>(`[data-server-companion="${id}"]`)?.focus();
+            Array.from(this.dialog.querySelectorAll<HTMLButtonElement>('[data-server-companion]'))
+              .find((button) => button.dataset.serverCompanion === id)
+              ?.focus();
             this.hooks.toast('Your walking team is saved.');
           })
           .catch(() => {});
-      };
-    });
-  }
-  private refreshFriendshipJournal(state: Progress, source: HTMLButtonElement) {
-    const expanded = new Set(
-      Array.from(document.querySelectorAll<HTMLDetailsElement>('.companion-details[open]')).map(
-        (details) => details.querySelector('summary')?.textContent,
-      ),
-    );
-    const sourceSummary = source.closest('details')?.querySelector('summary')?.textContent;
-    this.journal(state);
-    let fallback: HTMLElement | undefined;
-    document.querySelectorAll<HTMLDetailsElement>('.companion-details').forEach((details) => {
-      const summary = details.querySelector('summary');
-      details.open = expanded.has(summary?.textContent);
-      if (summary && summary.textContent === sourceSummary) fallback = summary;
-    });
-    const action = Array.from(
-      document.querySelectorAll<HTMLButtonElement>(
-        '[data-server-help-friend], [data-server-transform]',
-      ),
-    ).find((button) =>
-      source.dataset.serverTransform
-        ? button.dataset.serverTransform === source.dataset.serverTransform
-        : button.dataset.serverHelpFriend === source.dataset.serverHelpFriend &&
-          button.dataset.completedQuest === source.dataset.completedQuest,
-    );
-    // A remembered moment disappears after acknowledgement; its summary remains a stable target.
-    (action ?? fallback)?.focus();
-  }
-  private bindFriendshipActions(state: Progress) {
-    document.querySelectorAll<HTMLButtonElement>('[data-server-help-friend]').forEach((button) => {
-      button.onclick = () => {
+      },
+      friendship: (payload, source) => {
         if (this.busy) return;
-        void this.send({
-          type: 'help_friend',
-          creatureId: button.dataset.serverHelpFriend!,
-          completedQuestId: button.dataset.completedQuest!,
-        })
+        void this.send(payload)
           .then(() => {
-            this.refreshFriendshipJournal(state, button);
-            this.hooks.toast('A shared memory, saved together!');
+            const focus = captureJournalFocus(this.dialog, source);
+            this.journal(state);
+            restoreJournalFocus(this.dialog, focus);
+            this.hooks.toast(
+              payload.type === 'help_friend'
+                ? 'A shared memory, saved together!'
+                : 'Your friend’s glow is saved.',
+            );
           })
           .catch(() => {});
-      };
-    });
-    document.querySelectorAll<HTMLButtonElement>('[data-server-transform]').forEach((button) => {
-      button.onclick = () => {
-        if (this.busy) return;
-        void this.send({
-          type: 'transform_companion',
-          creatureId: button.dataset.serverTransform!,
-          enabled: button.dataset.transformEnabled === 'true',
-        })
-          .then(() => {
-            this.refreshFriendshipJournal(state, button);
-            this.hooks.toast('Your friend’s glow is saved.');
-          })
-          .catch(() => {});
-      };
+      },
     });
   }
   grownup() {

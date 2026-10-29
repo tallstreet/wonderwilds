@@ -74,10 +74,73 @@ jobs:
           python3 content/story/validate.py
           python3 content/creatures/art/validate.py
           python3 -m unittest discover -s content/story -p 'test_*.py'
-      - name: Check frontend and nested API tests
+      - name: Check frontend including nested API tests
         working-directory: frontend
-        run: |
-          npm run check
-          node --import tsx src/api/api.test.ts
+        run: npm run check
       - name: Check legacy guest saves
         run: node --import ./frontend/node_modules/tsx/dist/loader.mjs qa/fixtures/legacy/baseline.test.ts
+
+
+  integration:
+    name: ${{ matrix.suite }} integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [database, browser]
+    env:
+      WONDERWILDS_PG_BIN: /usr/lib/postgresql/17/bin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install PostgreSQL 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl --fail --silent --show-error https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-17
+      - name: Install repository-pinned Rust toolchain
+        run: |
+          toolchain=$(python3 -c 'import tomllib; print(tomllib.load(open("rust-toolchain.toml", "rb"))["toolchain"]["channel"])')
+          rustup toolchain install "$toolchain" --profile minimal
+      - name: Check disposable PostgreSQL migrations and transactions
+        if: matrix.suite == 'database'
+        run: sh scripts/check-postgres.sh
+      - uses: actions/setup-node@v4
+        if: matrix.suite == 'browser'
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            qa/e2e/package-lock.json
+      - name: Install browser dependencies
+        if: matrix.suite == 'browser'
+        run: |
+          npm ci --prefix frontend
+          npm ci --prefix qa/e2e
+          cd qa/e2e
+          npx playwright install --with-deps chromium
+          node --input-type=module -e 'import { chromium } from "playwright"; console.log(`CHROMIUM_PATH=${chromium.executablePath()}`)' >> "$GITHUB_ENV"
+      - name: Check guest world and accessible activities
+        if: matrix.suite == 'browser'
+        run: |
+          node frontend/node_modules/vite/bin/vite.js frontend --host 127.0.0.1 --port 5173 --strictPort > /tmp/wonderwilds-vite.log 2>&1 &
+          vite_pid=$!
+          trap 'kill "$vite_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:5173/ > /dev/null; then break; fi
+            if ! kill -0 "$vite_pid" 2>/dev/null; then cat /tmp/wonderwilds-vite.log; exit 1; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:5173/ > /dev/null
+          npm test --prefix qa/e2e
+          WONDERWILDS_TEST_URL=http://127.0.0.1:5173 node qa/e2e/companion-smoke.mjs
+          node frontend/src/learning/activity.browser.mjs
+      - name: Check training with real API and disposable PostgreSQL
+        if: matrix.suite == 'browser'
+        run: node qa/e2e/run-training-qa.mjs

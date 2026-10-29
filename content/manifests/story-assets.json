@@ -6,7 +6,7 @@
     {
       "id": "map-meadow",
       "path": "frontend/public/assets/clover-meadow-v2.png",
-      "sha256": "08df06b2c4eccefac19f1c7f252e76eae7f98f2a60c202e695b55bfb942bdd27",
+      "sha256": "421f77ccab86d5759a71abd2e1b3a62b308ce9a3d691b36b15bbfb864563bf78",
       "status": "present_provenance_review_pending",
       "source": "Existing repository generated artwork; see frontend/docs/CONSISTENT_ART.md. Rights and provenance are not independently verified.",
       "approved": false
@@ -14,7 +14,7 @@
     {
       "id": "map-orchard",
       "path": "frontend/public/assets/peachy-orchard-v2.png",
-      "sha256": "e800c487229b2b20f4e82c520cce736a8f7de932e216f83dedc3dd380a711a17",
+      "sha256": "ac87cc2811e1be6c08b895c486df2343f7899c57a981801e5f278a870a15b764",
       "status": "present_provenance_review_pending",
       "source": "Existing repository generated artwork; see frontend/docs/CONSISTENT_ART.md. Rights and provenance are not independently verified.",
       "approved": false
@@ -22,7 +22,7 @@
     {
       "id": "map-cove",
       "path": "frontend/public/assets/starlight-cove-v2.png",
-      "sha256": "e3fbb7e23068764c27661ff0fd3345802d8dac50e13720d122cb68f5948801a5",
+      "sha256": "a3dd4d320a187a62c139a62d4ed4a1fdb58dda89d8178c06d4a946e69684eb34",
       "status": "present_provenance_review_pending",
       "source": "Existing repository generated artwork; see frontend/docs/CONSISTENT_ART.md. Rights and provenance are not independently verified.",
       "approved": false
@@ -30,7 +30,7 @@
     {
       "id": "friend-pip",
       "path": "frontend/public/assets/hero-atlas-v2.png",
-      "sha256": "7422b9f25bc4361c6d43818f240f3059bc7fb3f03e77328ee0be13ac95baacaf",
+      "sha256": "75a86cfb0e7bcf174bcf826f3d407d583530dfdebb6a871f09779ee236996c73",
       "atlasFrame": "pip",
       "status": "present_provenance_review_pending",
       "source": "Existing repository hero atlas frame pip; see frontend/src/sprites.ts.",

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-export CARGO_HOME="${CARGO_HOME:-/workspace/.cargo}"
-export RUSTUP_HOME="${RUSTUP_HOME:-/workspace/.rustup}"
+export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}"
 export PATH="$CARGO_HOME/bin:$PATH"
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
@@ -14,5 +14,5 @@ node content/curriculum/check-schema.mjs
 python3 content/story/validate.py
 python3 content/creatures/art/validate.py
 python3 -m unittest discover -s content/story -p 'test_*.py'
-(cd frontend && npm run check && node --import tsx src/api/api.test.ts)
+(cd frontend && npm run check)
 node --import ./frontend/node_modules/tsx/dist/loader.mjs qa/fixtures/legacy/baseline.test.ts

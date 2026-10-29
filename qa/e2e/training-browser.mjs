@@ -90,6 +90,8 @@ try {
   assert.equal(resumed.id, firstEncounter.id);
   assert.equal(resumed.support.hintCount, 1);
   await click('Return to exploring');
+  // Closing follows the server acknowledgement; a click alone does not await the command.
+  await page.locator('#dialog').waitFor({ state: 'hidden' });
   assert.equal((await snapshot()).pendingEncounters.length, 0);
   assert.equal(progression(await snapshot(), 'pip').xp, 0);
   await journal();

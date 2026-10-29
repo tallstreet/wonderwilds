@@ -1,11 +1,11 @@
 {
   "inventoryVersion": 1,
-  "baselineCommit": "9e484b43eb349b9aa78342e781a3cb2f2236d524",
+  "baselineCommit": "cd852f769fd54db703582f763803842dae18661b",
   "assets": [
     {
       "path": "frontend/public/assets/clover-meadow-v2.png",
-      "sha256": "08df06b2c4eccefac19f1c7f252e76eae7f98f2a60c202e695b55bfb942bdd27",
-      "bytes": 3519411,
+      "sha256": "421f77ccab86d5759a71abd2e1b3a62b308ce9a3d691b36b15bbfb864563bf78",
+      "bytes": 3244079,
       "width": 1598,
       "height": 984,
       "provenanceDocument": "frontend/docs/GENERATED_MAP.md",
@@ -14,8 +14,8 @@
     },
     {
       "path": "frontend/public/assets/hero-atlas-v2.png",
-      "sha256": "7422b9f25bc4361c6d43818f240f3059bc7fb3f03e77328ee0be13ac95baacaf",
-      "bytes": 2079093,
+      "sha256": "75a86cfb0e7bcf174bcf826f3d407d583530dfdebb6a871f09779ee236996c73",
+      "bytes": 2003941,
       "width": 1774,
       "height": 887,
       "provenanceDocument": "frontend/docs/CONSISTENT_ART.md",
@@ -24,8 +24,8 @@
     },
     {
       "path": "frontend/public/assets/hero-back-atlas-v3.png",
-      "sha256": "f876419127002ab576c9fcbe001ed8e928aa382d148a3de2ca3bc457ccc97722",
-      "bytes": 1817437,
+      "sha256": "8f2e347ea2f461413be607b4dbdf78404143441c7836ec070b313f66062fbb0d",
+      "bytes": 1752471,
       "width": 1774,
       "height": 887,
       "provenanceDocument": "docs/DIRECTIONAL_POSES.md",
@@ -34,8 +34,8 @@
     },
     {
       "path": "frontend/public/assets/hero-side-atlas-v3.png",
-      "sha256": "6ac1a232270cdad56b088265d6f2d21a3df7777b4b4162491867d7cc5d6df399",
-      "bytes": 1774765,
+      "sha256": "e36b998e1d96d5b5db8995f80649c783a9512cf3b9a5922c9f330fa216b08b18",
+      "bytes": 1728557,
       "width": 1774,
       "height": 887,
       "provenanceDocument": "docs/DIRECTIONAL_POSES.md",
@@ -44,8 +44,8 @@
     },
     {
       "path": "frontend/public/assets/hero-squad.png",
-      "sha256": "3755e7fce086f7ee45613ba7139acb944a0b612f34d4808bc0c81c46e8137d27",
-      "bytes": 2717878,
+      "sha256": "1acaa41a4844fb4d2a8b580bc461ec3ac88b927981491c65b2286d48b15face3",
+      "bytes": 2587060,
       "width": 1536,
       "height": 1024,
       "provenanceDocument": "frontend/docs/VISUAL_DIRECTION.md",
@@ -54,8 +54,8 @@
     },
     {
       "path": "frontend/public/assets/peachy-orchard-v2.png",
-      "sha256": "e800c487229b2b20f4e82c520cce736a8f7de932e216f83dedc3dd380a711a17",
-      "bytes": 3510208,
+      "sha256": "ac87cc2811e1be6c08b895c486df2343f7899c57a981801e5f278a870a15b764",
+      "bytes": 3240484,
       "width": 1599,
       "height": 984,
       "provenanceDocument": "docs/MAP_ART_PROMPTS.md",
@@ -64,8 +64,8 @@
     },
     {
       "path": "frontend/public/assets/prop-atlas-v2.png",
-      "sha256": "da22dbd41f720625863acf75ef97a5d3cf1d5f78022c4e36292b6a50c38aa318",
-      "bytes": 1457340,
+      "sha256": "de1e38a3cec948c9d08b142de57f623fd74f0c264b3381f74ae4ff48b515938f",
+      "bytes": 1428007,
       "width": 1774,
       "height": 887,
       "provenanceDocument": "frontend/docs/CONSISTENT_ART.md",
@@ -74,8 +74,8 @@
     },
     {
       "path": "frontend/public/assets/rosie-walk-v1.png",
-      "sha256": "d5ca60d511e0a686026580950af1832d3e47161095f6a91c4370f439eee9956c",
-      "bytes": 2331376,
+      "sha256": "467bcd1289ed81a8586d5cf1832d968374e0e0215fd250bc35cdb6f6e8bfd6ef",
+      "bytes": 2202451,
       "width": 1536,
       "height": 1024,
       "provenanceDocument": "frontend/docs/LOCOMOTION.md",
@@ -84,8 +84,8 @@
     },
     {
       "path": "frontend/public/assets/starlight-cove-v2.png",
-      "sha256": "e3fbb7e23068764c27661ff0fd3345802d8dac50e13720d122cb68f5948801a5",
-      "bytes": 3465300,
+      "sha256": "a3dd4d320a187a62c139a62d4ed4a1fdb58dda89d8178c06d4a946e69684eb34",
+      "bytes": 3220564,
       "width": 1599,
       "height": 984,
       "provenanceDocument": "docs/MAP_ART_PROMPTS.md",
@@ -94,13 +94,14 @@
     },
     {
       "path": "frontend/public/assets/starwhisker-logo-v1.png",
-      "sha256": "a755000c477e1ca6f8e32c7a902029b78a835da601aa1f562ad0e23834e99728",
-      "bytes": 2211412,
+      "sha256": "47b3f55540f77abd0c5146ce59055ed8d540340c307d9639f6ab28008963564c",
+      "bytes": 2154255,
       "width": 1254,
       "height": 1254,
       "provenanceDocument": "frontend/docs/APP_LOGO.md",
       "provenanceStatus": "repository-documented imagegen",
       "licenseStatus": "pending owner verification"
     }
-  ]
+  ],
+  "originalBaselineCommit": "9e484b43eb349b9aa78342e781a3cb2f2236d524"
 }

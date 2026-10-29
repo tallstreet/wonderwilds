@@ -205,3 +205,57 @@ training context is now visible; reduced-motion celebration remains supported.
 The existing large Phaser build warning remains. Hosted CI execution, human
 review, sustained storage beyond the command cap, the Orchard-unlocked second-slot
 browser journey and a complete three-region playthrough remain unverified.
+
+## Maintainability refactor — 29 October 2026
+
+The world and diagnostic demo now share a DOM-independent command session with
+explicit sending, refresh and uncertain-retry states. Exact prepared commands
+remain intact across retries. Journal, mission and training views have separate
+rendering/binding helpers, and journal expansion/focus restoration uses creature
+IDs. A validated placement manifest checks authored encounter coverage, map IDs
+and coordinate bounds; regression tests check reachable approaches.
+
+The API validates commands before decoding generated Rust types and dispatches
+exhaustively. Public snapshots use typed projection builders with golden JSON
+compatibility coverage. The domain engine is separated into content, state,
+transitions, replay and tests while retaining its public API and saved formats.
+No gameplay eligibility, rewards, content activation or persistence schema changed.
+
+Frontend test discovery includes nested API tests. PostgreSQL and training QA now
+use fresh temporary private-socket clusters on local macOS/Linux installations.
+CI includes database and browser integration jobs; hosted execution remains
+unverified. The existing persistent demo database is not used by these checks.
+
+Local validation passed Rust formatting/Clippy/workspace tests, contracts and
+generated-code checks, curriculum checks, frontend type/lint/format/unit/build,
+character-art validation, disposable PostgreSQL integration, guest desktop/tablet,
+companion journal desktop/tablet, six-family activity browser checks and the
+real server-backed training journey (including reload/resume, acknowledged
+abandonment, exact retries, reward prevention and mobile training). The training
+test now waits for the acknowledged dialog closure before checking progress.
+The aggregate check remains blocked by four pre-existing story asset hash
+mismatches (Meadow, Orchard, Cove and the hero atlas); all four image files match
+HEAD exactly. The story unit suite's authored-content check and the legacy
+artwork-baseline check fail for that same existing mismatch. Historical manifests
+were not rewritten. Guest-save compatibility tests pass. The existing large
+Phaser bundle warning remains.
+
+### CI artwork integrity follow-up — 29 October 2026
+
+The failing hosted content check was traced to ImgBot commit `cd852f7`, which
+recompressed the ten original PNGs without updating their byte inventories.
+Comparing decoded RGBA dimensions and pixels against the original baseline
+confirmed all ten images are unchanged visually. The legacy inventory now records
+the optimization commit and retains the original baseline reference; its byte
+counts/hashes and the four story asset hashes have been intentionally updated.
+The dependent story pack hash was regenerated. Integrity checks remain strict,
+and no content approval or release activation changed.
+
+`bash scripts/check.sh` now passes locally in full, including story validation,
+all thirteen story tests and all four legacy fixture tests. The existing Phaser
+bundle-size warning remains; hosted results are tracked on PR #7.
+
+Hosted CI also exposed an undeclared `rg` dependency in the database runner's
+migration-drift log assertion, after both database tests had passed. That literal
+log check now uses portable `grep -Fq`; the complete disposable database check
+passes locally with the corrected assertion.
