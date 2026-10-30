@@ -6,6 +6,11 @@ judge requests, and exports human-approved supervised examples. It does not call
 model, upload data, train, change gameplay, or validate newly invented missions.
 Use Python 3 and the repository's pinned Rust toolchain. No Python dependencies.
 
+The separate [mission planning evaluator](planning/README.md) tests structured
+mission plans against bounded completion searches in the real authored runtime.
+It includes explicit inference against the current Modal model and keeps planning
+results separate from this scene-writing dataset.
+
 The [versioned pilot dataset](datasets/pilot-2026-10-30/README.md) preserves the
 137 inputs, 411 generated candidates, independent quality review and 96/40
 training/evaluation shortlists. It includes commands for verifying, reviewing,
