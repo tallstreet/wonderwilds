@@ -1344,3 +1344,19 @@ was added. Real API/browser tests passed for automatic closure and travel-away /
 return reconciliation; component and standard browser suites passed at desktop
 and phone sizes, including keyboard/touch controls, preserved answers and mocked
 STT. No live provider calls or persistent demo data changes were made.
+
+### Walking during activity-save recovery — 31 October 2026
+
+Local walking now uses a separate lock from story commands. Pending activity
+commands, their in-flight retries and learning-to-story reconciliation do not
+freeze the character. Story actions and automatic area exits remain locked until
+the save is confirmed, preserving transaction and reward safety. Reloads retry
+the exact preserved activity command automatically after reading current progress.
+
+The disposable API/browser regression verifies walking before and during a held
+retry response, unchanged story revisions while walking, exact command bytes
+across reload, and the existing activity-completion journey. It passed. The full
+frontend check reached a formatting failure in the pre-existing, unrelated edit
+to `frontend/src/learning/activity.ts`; that edit was preserved. Typechecking,
+linting, 129 frontend tests, the production build and changed-file formatting
+passed separately. `git diff --check` passed.

@@ -85,7 +85,11 @@ export class StoryWorld {
   }
   async start() {
     await this.commands.refresh();
-    void this.refreshLearning().catch(() => undefined);
+    // Reloads preserve uncertain commands. Reconcile the exact saved request in
+    // the background instead of waiting for the child to find a retry button.
+    void this.refreshLearning()
+      .then(() => (this.learning.hasPending ? this.retryMissionLearning() : undefined))
+      .catch(() => undefined);
     if (this.disposed) throw new Error('Story page is no longer active');
     this.apply();
     if (this.snapshot.commandBudgetExhausted) {
@@ -108,7 +112,7 @@ export class StoryWorld {
         decorations: () => storyDecorations(this.snapshot),
         allowExits: false,
         blocked: (x, y) => storyBounds(this.snapshot.locationId, this.crossing)(x, y),
-        inputLocked: () => this.locked(),
+        inputLocked: () => this.movementLocked(),
         observe: (point, followers) => {
           this.positionMetadata(point.x, point.y);
           if (!this.locked()) {
@@ -329,13 +333,20 @@ export class StoryWorld {
   }
   private locked() {
     return (
+      this.movementLocked() ||
+      this.learningBusy ||
+      this.learning.hasPending ||
+      this.storyAfterLearningNeedsRefresh
+    );
+  }
+  private movementLocked() {
+    // Walking changes only local position. Pending learning saves still block
+    // story commands and automatic exits, but must not freeze the character.
+    return (
       this.commands.busy ||
       this.commands.hasPending ||
       this.commands.needsRefresh ||
       this.crossing ||
-      this.learningBusy ||
-      this.learning.hasPending ||
-      this.storyAfterLearningNeedsRefresh ||
       this.snapshot.commandBudgetExhausted
     );
   }

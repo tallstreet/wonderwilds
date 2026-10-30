@@ -358,12 +358,44 @@ try {
   assert.notEqual(replaced.variantId,second.variantId);
   assert.notDeepEqual(replaced.task,second.task);
   assert.equal((await storySnapshot()).revision,beforeWrong,'Wrong answer cannot advance the story');
+  const walkWhileSaving = async () => {
+    const start = await page.locator('#game').evaluate(el => [Number(el.dataset.storyPlayerX), Number(el.dataset.storyPlayerY)]);
+    let moved = false;
+    for (const key of ['ArrowLeft','ArrowDown','ArrowRight','ArrowUp']) {
+      await page.keyboard.down(key);
+      try {
+        await page.waitForFunction(([x,y]) => {
+          const el = document.querySelector('#game');
+          return Math.hypot(Number(el.dataset.storyPlayerX)-x, Number(el.dataset.storyPlayerY)-y) > 5;
+        }, start, {timeout:1000});
+        moved = true;
+      } catch {} finally { await page.keyboard.up(key); }
+      if (moved) break;
+    }
+    assert.equal(moved,true,'A pending activity save must not freeze local walking');
+    assert.equal((await storySnapshot()).revision,beforeWrong,'Walking during recovery cannot commit story actions');
+  };
+  await page.getByRole('button',{name:'Close dialog',exact:true}).click();
+  await walkWhileSaving();
+  // Hold the automatic retry response across reload: walking must also work
+  // while recovery is in flight, without submitting another story command.
+  let releaseRetry;
+  const retryGate = new Promise(resolve=>{releaseRetry=resolve;});
+  await page.route('**/api/v1/mission-learning/commands',async route=>{
+    assert.equal(route.request().postData(),wrongBody);
+    const response=await route.fetch();
+    await retryGate;
+    await route.fulfill({response});
+  },{times:1});
+  const request=page.waitForRequest(r=>r.url().endsWith('/mission-learning/commands'));
   await page.reload();
   await page.locator('#game canvas').waitFor();
-  await page.locator('#missions').click();
-  const request=page.waitForRequest(r=>r.url().endsWith('/mission-learning/commands'));
-  await page.getByRole('button',{name:'Retry the same practice save',exact:true}).click();
   assert.equal((await request).postData(),wrongBody);
+  await walkWhileSaving();
+  releaseRetry();
+  await page.waitForFunction(profile=>sessionStorage.getItem(`wonderwilds.mission-learning.pending.v1:${profile}`)===null,bootstrap.profileId);
+  await page.locator('#missions').click();
+  await page.getByRole('button',{name:'Resume the mission task',exact:true}).click();
   await page.locator(`[data-activity-variant="${replaced.variantId}"]`).waitFor();
   assert.deepEqual((await learningSnapshot()).activeActivity,replaced,'Retry must not issue another question');
   assert.equal(await page.locator('.ww-mission-task input:checked').count(),0);

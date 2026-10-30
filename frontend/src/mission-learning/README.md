@@ -84,3 +84,9 @@ learning safely, but a changed revision skips their story effect.
 Concurrent reads share a request, and preparing an answer waits for them. Reads
 remain forbidden during a submitted command. Transport failures retain the exact
 pending command and its retry UI, rather than preparing another write.
+
+The world permits local walking while an activity command is pending or retrying.
+Story commands and automatic exits remain blocked until the uncertain write is
+confirmed. On reload, the world automatically retries the exact saved command
+after its progress read, preserving the answer and avoiding a child-facing retry
+step during ordinary recovery.
