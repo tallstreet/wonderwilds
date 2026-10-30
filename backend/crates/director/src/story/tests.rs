@@ -180,7 +180,10 @@ fn every_offered_handle_is_currently_executable_and_bound() {
         }
         apply(&mut s, action);
     }
-    assert_eq!(build_plan_input(&s).unwrap()["opportunities"], json!([]));
+    assert_eq!(
+        build_plan_input(&s).unwrap()["opportunities"][0]["id"],
+        "pips_picnic"
+    );
     assert_eq!(
         build_scene_input(&s).unwrap()["mission"]["current"],
         Value::Null
@@ -296,7 +299,7 @@ fn paused_mission_keeps_its_brief_and_progress_after_detours() {
     let input = build_scene_input(&s).unwrap();
     assert_eq!(input["mission"]["status"], "abandoned");
     assert_eq!(input["mission"]["current"], "Get the planks ready.");
-    assert_eq!(input["mission"]["narrative"], narrative());
+    assert_eq!(input["mission"]["narrative"], narrative(Mission::Bridge));
     assert!(
         input["availableActions"]
             .as_array()
@@ -329,4 +332,239 @@ fn exhausted_developer_budget_does_not_offer_unexecutable_actions() {
         Err(Error::CommandBudgetExhausted)
     );
     assert!(authored_plan(&s).is_ok());
+}
+
+#[test]
+fn child_choices_use_friendly_names_and_resume_preserves_action_binding() {
+    let mut state = State::new();
+    for action in state.available_actions() {
+        let label = action_description(&state, &action);
+        assert!(!label.contains('_'));
+        assert!(!label.contains("world changes"));
+    }
+    assert_eq!(
+        action_description(&state, &Action::AcceptMission),
+        "Help Pip cross the stream."
+    );
+    apply(&mut state, Action::AcceptMission);
+    apply(&mut state, Action::CancelMission);
+    let input = build_scene_input(&state).unwrap();
+    let resume = input["availableActions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|a| a["action"]["type"] == "accept_mission")
+        .unwrap();
+    assert_eq!(resume["description"], "Keep helping Pip with the bridge.");
+    assert_eq!(
+        resolve_action(&state, resume["id"].as_str().unwrap()).unwrap(),
+        Action::AcceptMission
+    );
+    assert_eq!(
+        action_description(
+            &state,
+            &Action::Travel {
+                destination_id: "far_bank".into()
+            }
+        ),
+        "Walk to the far bank."
+    );
+}
+
+fn mock_stage(state: &State) -> String {
+    let scene = authored_scene(state).unwrap();
+    scene["presentation"].as_array().unwrap().last().unwrap()["entryId"]
+        .as_str()
+        .unwrap()
+        .into()
+}
+
+#[test]
+fn mock_scenes_follow_full_bridge_journey_and_detours_without_granting_state() {
+    let mut s = State::new();
+    assert_eq!(mock_stage(&s), "bridge_offer");
+    apply(&mut s, Action::AcceptMission);
+    assert_eq!(mock_stage(&s), "gather");
+    assert!(
+        authored_scene(&s).unwrap()["presentation"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("We need three pieces")
+    );
+    apply(&mut s, Action::CancelMission);
+    assert_eq!(mock_stage(&s), "paused");
+    apply(&mut s, Action::AcceptMission);
+    apply(
+        &mut s,
+        Action::Collect {
+            source_id: "fallen_wood".into(),
+            item_id: "wood".into(),
+            quantity: 3,
+        },
+    );
+    assert_eq!(mock_stage(&s), "gather");
+    assert!(
+        authored_scene(&s).unwrap()["presentation"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("You found enough wood")
+    );
+    apply(
+        &mut s,
+        Action::Travel {
+            destination_id: "workshop".into(),
+        },
+    );
+    assert_eq!(mock_stage(&s), "workshop_intro");
+    let scene = authored_scene(&s).unwrap();
+    apply(
+        &mut s,
+        Action::Acknowledge {
+            scene_id: scene["sceneId"].as_str().unwrap().into(),
+            entry_id: "greeting".into(),
+        },
+    );
+    assert_eq!(mock_stage(&s), "exchange");
+    let exchange = s
+        .available_actions()
+        .into_iter()
+        .find(|a| matches!(a, Action::Exchange { .. }))
+        .unwrap();
+    apply(&mut s, exchange);
+    assert_eq!(mock_stage(&s), "return");
+    apply(
+        &mut s,
+        Action::Travel {
+            destination_id: "bridge_bank".into(),
+        },
+    );
+    assert_eq!(mock_stage(&s), "repair");
+    let repair = s
+        .available_actions()
+        .into_iter()
+        .find(|a| matches!(a, Action::Assemble { .. }))
+        .unwrap();
+    apply(&mut s, repair);
+    assert_eq!(mock_stage(&s), "shared_crossing");
+    let crossing = s
+        .available_actions()
+        .into_iter()
+        .find(|a| matches!(a, Action::Accompany { .. }))
+        .unwrap();
+    apply(&mut s, crossing);
+    assert_eq!(mock_stage(&s), "completed");
+    let before = s.checkpoint();
+    assert_eq!(authored_scene(&s).unwrap(), authored_scene(&s).unwrap());
+    assert_eq!(before, s.checkpoint());
+    // Returning alone must never make an absent Pip speak.
+    apply(
+        &mut s,
+        Action::Travel {
+            destination_id: "bridge_bank".into(),
+        },
+    );
+    assert_eq!(
+        authored_scene(&s).unwrap()["presentation"][0]["type"],
+        "narration"
+    );
+}
+
+#[test]
+fn scene_provider_rejects_unbound_outputs_and_falls_back_to_canonical() {
+    struct Broken(usize);
+    impl SceneProvider for Broken {
+        fn propose(&self, _: &Value, canonical: &Value) -> Result<Value, Error> {
+            let mut bad = canonical.clone();
+            match self.0 {
+                0 => bad["choices"][0]["actionId"] = json!("story-999-0"),
+                1 => bad["presentation"][0]["speakerId"] = json!("absent-character"),
+                2 => bad["grants"] = json!({"planks":3}),
+                3 => bad["sceneId"] = json!("wrong-scene"),
+                4 => {
+                    bad["choices"].as_array_mut().unwrap().pop();
+                }
+                5 => bad["presentation"][0]["text"] = json!("Changed introduction"),
+                _ => return Err(Error::InvalidPayload("mock failure".into())),
+            }
+            Ok(bad)
+        }
+    }
+    let state = workshop();
+    let input = build_scene_input(&state).unwrap();
+    let canonical = canonical_scene(&state, &input).unwrap();
+    let before = state.checkpoint();
+    for i in 0..7 {
+        assert_eq!(scene_with_provider(&state, &Broken(i)).unwrap(), canonical);
+    }
+    assert_eq!(before, state.checkpoint());
+}
+
+#[test]
+fn sequel_planning_sources_preserve_partial_remaining_quantities() {
+    let legacy: Value = serde_json::from_str(include_str!(
+        "../../../domain/src/story/fixtures/bridge-completed-v1.json"
+    ))
+    .unwrap();
+    let mut s = State::from_checkpoint(&legacy).unwrap();
+    apply(&mut s, Action::AcceptMission);
+    apply(
+        &mut s,
+        Action::Collect {
+            source_id: "berry_bush".into(),
+            item_id: "berries".into(),
+            quantity: 1,
+        },
+    );
+    let caps = capabilities(&s, Mission::Picnic);
+    let berry = caps
+        .iter()
+        .find(|c| c["action"]["sourceId"] == "berry_bush")
+        .unwrap();
+    assert_eq!(berry["action"]["quantity"], 2);
+    apply(
+        &mut s,
+        serde_json::from_value(berry["action"].clone()).unwrap(),
+    );
+    for (kind, destination) in [
+        ("travel", Some("bridge_bank")),
+        ("travel", Some("workshop")),
+        ("exchange", None),
+        ("travel", Some("bridge_bank")),
+        ("assemble", None),
+        ("travel", Some("far_bank")),
+        ("accompany", Some("bridge_bank")),
+        ("accept_mission", None),
+        ("travel", Some("far_bank")),
+    ] {
+        let input = build_scene_input(&s).unwrap();
+        let binding = input["availableActions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| {
+                a["action"]["type"] == kind
+                    && destination.is_none_or(|d| a["action"]["destinationId"] == d)
+            })
+            .unwrap();
+        let action = resolve_action(&s, binding["id"].as_str().unwrap()).unwrap();
+        apply(&mut s, action);
+    }
+    apply(
+        &mut s,
+        Action::Collect {
+            source_id: "glow_stones".into(),
+            item_id: "glow_pebbles".into(),
+            quantity: 1,
+        },
+    );
+    let caps = capabilities(&s, Mission::WelcomeLights);
+    let glow = caps
+        .iter()
+        .find(|c| c["action"]["sourceId"] == "glow_stones")
+        .unwrap();
+    assert_eq!(glow["action"]["quantity"], 2);
+    apply(
+        &mut s,
+        serde_json::from_value(glow["action"].clone()).unwrap(),
+    );
 }

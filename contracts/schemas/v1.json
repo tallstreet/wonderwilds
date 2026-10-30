@@ -2536,6 +2536,14 @@
                 "abandoned",
                 "completed"
               ]
+            },
+            "missionId": {
+              "type": "string",
+              "enum": [
+                "pips_bridge",
+                "pips_picnic",
+                "welcome_lights"
+              ]
             }
           },
           "required": [
@@ -2717,7 +2725,10 @@
         },
         "contentVersion": {
           "type": "string",
-          "const": "pip-bridge-1"
+          "enum": [
+            "pip-bridge-1",
+            "pip-stories-2"
+          ]
         }
       },
       "required": [
@@ -2727,6 +2738,179 @@
         "contentVersion"
       ],
       "additionalProperties": false
+    },
+    "StoryCommand": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "commandId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[A-Za-z0-9_:-]+$"
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 256
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "choose"
+                },
+                "actionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "type",
+                "actionId"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "acknowledge"
+                },
+                "sceneId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "entryId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "type",
+                "sceneId",
+                "entryId"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "commandId",
+        "expectedRevision",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "StorySnapshot": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "contentVersion": {
+          "type": "string",
+          "enum": [
+            "pip-bridge-1",
+            "pip-stories-2"
+          ]
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 256
+        },
+        "locationId": {
+          "type": "string",
+          "enum": [
+            "bridge_bank",
+            "workshop",
+            "far_bank"
+          ]
+        },
+        "commandBudgetExhausted": {
+          "type": "boolean"
+        },
+        "acknowledgeableEntryIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "sceneInput": {
+          "$ref": "#/$defs/StorySceneInput"
+        },
+        "scene": {
+          "$ref": "#/$defs/StoryScene"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "contentVersion",
+        "revision",
+        "locationId",
+        "commandBudgetExhausted",
+        "acknowledgeableEntryIds"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "commandBudgetExhausted": {
+                "const": false
+              }
+            },
+            "required": [
+              "commandBudgetExhausted"
+            ]
+          },
+          "then": {
+            "required": [
+              "sceneInput",
+              "scene"
+            ],
+            "properties": {
+              "sceneInput": {},
+              "scene": {},
+              "revision": {
+                "type": "integer",
+                "maximum": 255
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "sceneInput": false,
+              "scene": false,
+              "revision": {
+                "const": 256
+              },
+              "acknowledgeableEntryIds": {
+                "type": "array",
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

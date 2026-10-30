@@ -21,11 +21,13 @@ export function findRoute(
   target: Point,
   bridgeFixed: boolean,
   region = 'meadow',
+  extraBlocked?: (x: number, y: number) => boolean,
 ): Point[] {
   const step = 16,
     cols = 71,
     rows = 44;
-  const blocked = (x: number, y: number) => isBlocked(x, y, bridgeFixed, region);
+  const blocked = (x: number, y: number) =>
+    isBlocked(x, y, bridgeFixed, region) || Boolean(extraBlocked?.(x, y));
   const nearest = (point: Point) => {
     let best = null,
       d = Infinity;

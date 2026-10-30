@@ -57,3 +57,35 @@ wrong answers, supported friendship, reload/resume and abandonment, then returns
 to Pip and verifies the saved checklist and phone layout. Conversation acceptance
 and return are local presentation state; the test verifies that neither issues
 server rewards. Assessment steps and creature ownership come from the real API.
+
+Phaser Pip story world against a fresh API/PostgreSQL profile:
+
+```sh
+WW_QA_BROWSER_TEST=qa/e2e/story-world.mjs WW_STORY_SOURCE=bank node qa/e2e/run-training-qa.mjs
+WW_QA_BROWSER_TEST=qa/e2e/story-world.mjs WW_STORY_SOURCE=workshop node qa/e2e/run-training-qa.mjs
+```
+
+Run each route separately: each command owns a new disposable cluster and ports
+3002/5180. This enters `/?story=1` through the main adventure’s Missions link, walks to actual Phaser characters and resources,
+and checks dialogue/choices from a schema-valid mock presentation, literal HTML
+text rendering, explicit introduction acknowledgement, both wood sources,
+exchange, lost-response retry after another tab advances the story, failed-refresh recovery without rolling the world back, and bridge repair. It attempts to walk
+across without a server command before and after repair, then verifies Pip follows
+the player across the bridge and appears once on the far bank. Phone layout,
+reload, a nonplayable save-limit response, untouched assessed progress and unchanged guest-save bytes are included.
+Screenshots are written under `/tmp/wonderwilds-story-world-*.png`; no persistent
+demo data is used. The mock changes only initial display prose and a choice label;
+all progress changes use real UI commands and the authoritative server runtime.
+
+All three connected stories against a fresh API/PostgreSQL profile:
+
+```sh
+WW_QA_BROWSER_TEST=qa/e2e/story-series.mjs node qa/e2e/run-training-qa.mjs
+```
+
+This completes the bridge, picnic and lights through world interactions, accepts
+each successor explicitly, checks pause/resume, reloads between stories, and retries
+a committed exchange whose response was lost. It checks both crossing directions,
+persistent picnic/lantern scenery, completed history, mobile layout and the
+inspector, while verifying assessed progress remains untouched. Screenshots are
+written to `/tmp/wonderwilds-story-series-{desktop,mobile}.png`.

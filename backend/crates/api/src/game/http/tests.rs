@@ -50,6 +50,7 @@ fn app() -> (Router, Arc<MemoryRepository>) {
     let state = AppState {
         repository: repo.clone(),
         auth: Arc::new(SyntheticAuth),
+        story_repository: Arc::new(StoryMemory::new()),
         content,
         permits: Arc::new(tokio::sync::Semaphore::new(16)),
         configured: true,
@@ -534,5 +535,244 @@ fn saved_encounters_without_abandonment_field_remain_readable() {
     assert_eq!(
         restored.snapshot(&content).unwrap(),
         aggregate.snapshot(&content).unwrap()
+    );
+}
+
+struct StoryMemory {
+    profiles: Mutex<BTreeMap<String, StoryRecord>>,
+}
+struct StoryRecord {
+    owner: String,
+    state: wonderwilds_domain::story::State,
+    receipts: BTreeMap<String, (Value, Value)>,
+}
+impl StoryMemory {
+    fn new() -> Self {
+        Self {
+            profiles: Mutex::new(BTreeMap::from([(
+                "profile-a".into(),
+                StoryRecord {
+                    owner: "parent-a".into(),
+                    state: wonderwilds_domain::story::State::new(),
+                    receipts: BTreeMap::new(),
+                },
+            )])),
+        }
+    }
+}
+impl crate::story::repository::Repository for StoryMemory {
+    fn read(&self, identity: &Identity) -> Result<Value, Error> {
+        let profiles = self.profiles.lock().map_err(|_| Error::Unavailable)?;
+        let record = profiles
+            .get(&identity.profile_id)
+            .filter(|r| r.owner == identity.parent_id)
+            .ok_or(Error::Forbidden)?;
+        crate::story::snapshot(&record.state)
+    }
+    fn execute(&self, identity: &Identity, request: &Value) -> Result<Value, Error> {
+        wire::validate("StoryCommand", request).map_err(|_| Error::InvalidInput)?;
+        let mut profiles = self.profiles.lock().map_err(|_| Error::Unavailable)?;
+        let record = profiles
+            .get_mut(&identity.profile_id)
+            .filter(|r| r.owner == identity.parent_id)
+            .ok_or(Error::Forbidden)?;
+        let id = request["commandId"].as_str().unwrap();
+        if let Some((previous, response)) = record.receipts.get(id) {
+            return if previous == request {
+                Ok(response.clone())
+            } else {
+                Err(Error::RevisionConflict)
+            };
+        }
+        let (next, response) = crate::story::execute(&record.state, request)?;
+        record.state = next;
+        record
+            .receipts
+            .insert(id.into(), (request.clone(), response.clone()));
+        Ok(response)
+    }
+}
+
+#[tokio::test]
+async fn story_routes_share_auth_csrf_ownership_and_closed_command_boundary() {
+    let (app, _) = app();
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story",
+            None,
+            "none",
+            "profile-a",
+            false
+        )
+        .await
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story",
+            None,
+            "test-parent-b",
+            "profile-a",
+            false
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let (status, initial) = send(
+        app.clone(),
+        "/api/v1/story",
+        None,
+        "test-parent-a",
+        "profile-a",
+        false,
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    wire::validate("StorySnapshot", &initial).unwrap();
+    let accept = cmd(
+        "story-accept",
+        0,
+        json!({"type":"choose","actionId":initial["sceneInput"]["availableActions"][0]["id"]}),
+    );
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story/commands",
+            Some(accept.clone()),
+            "test-parent-a",
+            "profile-a",
+            false
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let untrusted_origin = Request::builder()
+        .uri("/api/v1/story/commands")
+        .method("POST")
+        .header("cookie", "test-parent-a")
+        .header("x-wonderwilds-profile", "profile-a")
+        .header("x-csrf-token", "synthetic-csrf")
+        .header("origin", "https://untrusted.example")
+        .header("content-type", "application/json")
+        .body(Body::from(accept.to_string()))
+        .unwrap();
+    assert_eq!(
+        app.clone()
+            .oneshot(untrusted_origin)
+            .await
+            .unwrap()
+            .status(),
+        StatusCode::FORBIDDEN
+    );
+    let accepted = send(
+        app.clone(),
+        "/api/v1/story/commands",
+        Some(accept.clone()),
+        "test-parent-a",
+        "profile-a",
+        true,
+    )
+    .await;
+    assert_eq!(accepted.0, StatusCode::OK);
+    assert_eq!(accepted.1["revision"], 1);
+    let travel = accepted.1["sceneInput"]["availableActions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|a| a["action"]["type"] == "travel")
+        .unwrap();
+    let request = cmd(
+        "story-travel",
+        1,
+        json!({"type":"choose","actionId":travel["id"]}),
+    );
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story/commands",
+            Some(request),
+            "test-parent-a",
+            "profile-a",
+            true
+        )
+        .await
+        .0,
+        StatusCode::OK
+    );
+    // Retry returns the original revision-one response, not the current snapshot.
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story/commands",
+            Some(accept.clone()),
+            "test-parent-a",
+            "profile-a",
+            true
+        )
+        .await,
+        accepted
+    );
+    let mut wrong = accept.clone();
+    wrong["payload"]["actionId"] = json!("invented");
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story/commands",
+            Some(wrong),
+            "test-parent-a",
+            "profile-a",
+            true
+        )
+        .await
+        .0,
+        StatusCode::CONFLICT
+    );
+    let mut wrong = accept.clone();
+    wrong["commandId"] = json!("stale-new-id");
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story/commands",
+            Some(wrong),
+            "test-parent-a",
+            "profile-a",
+            true
+        )
+        .await
+        .0,
+        StatusCode::CONFLICT
+    );
+    let mut wrong = accept;
+    wrong["profileId"] = json!("profile-b");
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story/commands",
+            Some(wrong),
+            "test-parent-a",
+            "profile-a",
+            true
+        )
+        .await
+        .0,
+        StatusCode::BAD_REQUEST
+    );
+    let (_, game) = send(
+        app,
+        "/api/v1/game",
+        None,
+        "test-parent-a",
+        "profile-a",
+        false,
+    )
+    .await;
+    assert_eq!(
+        game["revision"], 0,
+        "Story writes changed assessed-game progress"
     );
 }

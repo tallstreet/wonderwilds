@@ -1,3 +1,4 @@
+import { connectStoryWorld, type StoryWorld } from './story/world.ts';
 import { connectBackend, completedWorldQuests, type BackendWorld } from './backend-world.ts';
 import type Phaser from 'phaser';
 import type { Activity, Encounter } from './types.ts';
@@ -37,9 +38,12 @@ let { state, available } = readProgress(storage);
 let game: Phaser.Game;
 let session: Activity | null = null;
 let backend: BackendWorld | undefined;
+let story: StoryWorld | undefined;
+const storyRequested = new URLSearchParams(location.search).get('story') === '1';
 let returnFocus: HTMLElement | null = null;
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
 function persist() {
+  if (storyRequested) return;
   if (backend) {
     backend.saveView(state);
     backend.updateHud();
@@ -69,11 +73,26 @@ function render() {
       : `${3 - state.done.length} little missions await`;
   persist();
 }
+function storyAdventureLink() {
+  if (!import.meta.env.DEV || dialog.querySelector('#story-adventure-link')) return;
+  const link = document.createElement('a');
+  link.href = '/?story=1';
+  link.textContent = 'Pip’s story adventures · explore together';
+  link.className = 'secondary';
+  link.style.display = 'block';
+  link.id = 'story-adventure-link';
+  dialog.querySelector('#dialog-title')?.after(link);
+}
 function missions() {
-  if (backend) return backend.missions();
+  if (backend) {
+    backend.missions();
+    storyAdventureLink();
+    return;
+  }
   openDialog(
     `<div class="mission-modal-art" aria-hidden="true"><img src="/assets/hero-squad.png" alt=""/></div><span class="pill">YOUR FIRST ADVENTURE</span><h2 id="dialog-title">Heroes, assemble!</h2><p class="muted">Choose a mission and we’ll walk there together.</p><div class="progress-track"><span style="width:${(state.done.length / 3) * 100}%"></span></div><div class="modal-quests">${activeEncounters.map((e, i) => `<button class="quest ${state.done.includes(e.id) ? 'complete' : ''}" data-visit="${e.id}"><span class="quest-icon">${state.done.includes(e.id) ? '✓' : ['▥', '♥', '✿'][i]}</span><span><strong>${e.short}</strong><small>${state.done.includes(e.id) ? 'Play again' : e.type === 'pattern' && !state.done.includes('meadow-bridge') ? 'First, fix the bridge' : ['Build & count', 'Share & care', 'Notice & grow'][i]}</small></span><span class="quest-arrow">→</span></button>`).join('')}</div>${state.done.length === 3 ? '<button class="celebrate-link" id="celebrate">✦ Celebrate our friendship</button>' : ''}<p class="tiny-note">Every little try is a brave one.</p>`,
   );
+  storyAdventureLink();
 }
 function explore() {
   openDialog(
@@ -316,6 +335,7 @@ document.addEventListener('click', (event) => {
   if (!button) return;
   if (backend?.working) return;
   if (button.classList.contains('close')) return closeDialog();
+  if (story && button.id !== 'fullscreen') return story.handle(button);
   if (button.id === 'explore') return explore();
   if (button.id === 'quest-guide') return backend?.followTracked();
   if (isMapId(button.dataset.place)) {
@@ -459,6 +479,28 @@ async function boot() {
   tools.forEach((button) => {
     button.disabled = true;
   });
+  if (storyRequested) {
+    try {
+      story = await connectStoryWorld({ open: openDialog, close: closeDialog, toast });
+      game = (await story.start())!;
+      tools.forEach((button) => {
+        button.disabled = false;
+      });
+      toast('Open Missions to continue your story and follow a path.');
+    } catch {
+      const wrongLocalAddress = location.hostname === 'localhost';
+      const localAddress = new URL(location.href);
+      localAddress.hostname = '127.0.0.1';
+      $('#save-status').textContent = wrongLocalAddress
+        ? 'The local demo requires the 127.0.0.1 address.'
+        : 'Story startup failed. Reconnect to try again.';
+      openDialog(
+        `<h2 id="dialog-title">Reconnect Pip’s story</h2>${wrongLocalAddress ? `<p>The demo session cannot connect through localhost. Open the same story at 127.0.0.1.</p><p><a class="primary" href="${escape(localAddress.href)}">Open the local story address</a></p>` : '<p>The local session, saved story, or browser storage could not be loaded. Check that the local demo is running, then reconnect.</p>'}<button class="primary" id="reconnect-story">Reconnect</button><p><a href="/">Return to the adventure</a></p>`,
+      );
+      $('#reconnect-story').onclick = () => location.reload();
+    }
+    return;
+  }
   const guestOnly = new URLSearchParams(location.search).get('guest') === '1';
   if (import.meta.env.DEV && !guestOnly) {
     $('#save-status').textContent = 'Connecting to your adventure…';

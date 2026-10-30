@@ -229,10 +229,10 @@
           "meaning": "The player and Pip have completed a shared crossing."
         }
       ],
-      "description": "Help Pip reach the far bank together, repairing the bridge if needed.",
+      "description": "Pip wants to explore the far bank with the player. Help make a way across together.",
       "id": "pips_bridge",
-      "outcome": "The bridge is repaired and the player has crossed it with Pip.",
-      "outcomeId": "bridge_and_crossing"
+      "outcome": "Cross the repaired bridge with Pip and celebrate reaching the far bank.",
+      "outcomeId": "pips_bridge"
     }
   ]
 }

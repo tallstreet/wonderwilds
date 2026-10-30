@@ -79,6 +79,8 @@ mod tests {
                     "StoryMissionPlan" => round_trip!(StoryMissionPlan),
                     "StoryScene" => round_trip!(StoryScene),
                     "StoryPayload" => round_trip!(StoryPayload),
+                    "StoryCommand" => round_trip!(StoryCommand),
+                    "StorySnapshot" => round_trip!(StorySnapshot),
                     "DirectorInput" => round_trip!(DirectorInput),
                     "DirectorProposal" => round_trip!(DirectorProposal),
                     "SkillNode" => round_trip!(SkillNode),

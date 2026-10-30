@@ -10,6 +10,7 @@ wonderwilds-contracts.workspace = true
 wonderwilds-domain.workspace = true
 wonderwilds-learning.workspace = true
 wonderwilds-content.workspace = true
+wonderwilds-director = { path = "../director" }
 serde.workspace = true
 serde_json.workspace = true
 axum.workspace = true

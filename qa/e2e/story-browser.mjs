@@ -1,0 +1,80 @@
+// Run through run-training-qa.mjs; each wood route uses a fresh disposable database.
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
+const source = process.env.WW_STORY_SOURCE ?? 'bank';
+assert.ok(['bank', 'workshop'].includes(source));
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
+const page = await browser.newPage();
+const errors = [];
+page.on('pageerror', error => errors.push(error.message));
+try {
+  await page.goto(`${origin}/story.html`);
+  const ready = () => page.locator('#story-status').filter({ hasText: 'Story saved' }).waitFor();
+  await ready();
+  const bootstrap = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
+  const get = async path => {
+    const response = await page.request.get(`${origin}${path}`, { headers: { 'X-Wonderwilds-Profile': bootstrap.profileId } });
+    assert.equal(response.status(), 200); return response.json();
+  };
+  const snapshot = () => get('/api/v1/story');
+  const originalGame = await get('/api/v1/game');
+  assert.equal((await snapshot()).revision, 0, 'Must use fresh disposable QA database');
+  const action = async (type, suffix = '', keyboard = false) => {
+    const control = page.locator(`[data-story-action="${type}"]${suffix}`);
+    if (keyboard) { await control.focus(); await page.keyboard.press('Enter'); } else await control.click();
+    await ready();
+  };
+  await action('accept_mission', '', true);
+  await action('cancel_mission');
+  await page.locator('[data-mission-status="abandoned"]').waitFor();
+  await page.reload(); await ready(); await action('accept_mission');
+  if (source === 'bank') await action('collect', '[data-source="fallen_wood"]');
+  await action('travel', '[data-destination="workshop"]');
+  const beforeAck = (await snapshot()).revision;
+  await page.getByRole('button', { name: 'Continue', exact: true }).waitFor();
+  await page.reload(); await ready();
+  assert.equal((await snapshot()).revision, beforeAck, 'Rendering must not acknowledge presentation');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click(); await ready();
+  assert.equal((await snapshot()).revision, beforeAck + 1);
+  if (source === 'workshop') await action('collect', '[data-source="spare_wood"]');
+  assert.deepEqual((await snapshot()).sceneInput.context.inventory, [{ itemId: 'wood', quantity: 3 }]);
+  await page.screenshot({ path: '/tmp/wonderwilds-story-desktop.png', fullPage: true });
+  // Commit on the real server then lose the response: reload must keep the exact command.
+  let originalBody;
+  await page.route('**/api/v1/story/commands', async route => {
+    originalBody = route.request().postData();
+    const response = await route.fetch(); assert.equal(response.status(), 200);
+    await route.abort('failed');
+  }, { times: 1 });
+  await page.locator('[data-story-action="exchange"]').click();
+  await page.getByRole('button', { name: 'Retry the same action' }).waitFor();
+  const savedRevision = (await snapshot()).revision;
+  await page.reload();
+  await page.getByRole('button', { name: 'Retry the same action' }).waitFor();
+  assert.equal(await page.locator('[data-story-action]:enabled').count(), 0);
+  const retry = page.waitForRequest(request => request.url().endsWith('/story/commands'));
+  await page.getByRole('button', { name: 'Retry the same action' }).click();
+  assert.equal((await retry).postData(), originalBody);
+  await ready(); assert.equal((await snapshot()).revision, savedRevision);
+  assert.deepEqual((await snapshot()).sceneInput.context.inventory, [{ itemId: 'planks', quantity: 3 }]);
+  await action('travel', '[data-destination="bridge_bank"]');
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.screenshot({ path: '/tmp/wonderwilds-story-mobile.png', fullPage: true });
+  await action('assemble');
+  assert.notEqual((await snapshot()).sceneInput.mission.status, 'completed');
+  await action('accompany', '', true);
+  await page.locator('[data-mission-status="completed"]').waitFor();
+  const final = await snapshot();
+  assert.equal(final.locationId, 'far_bank'); assert.deepEqual(final.sceneInput.context.inventory, []);
+  assert.equal(final.sceneInput.mission.remaining.length, 0);
+  await page.reload(); await ready(); assert.equal((await snapshot()).revision, final.revision);
+  await page.goto(`${origin}/characters.html`);
+  await page.goBack(); await ready();
+  await page.getByRole('button', { name: 'Refresh progress', exact: true }).click(); await ready();
+  assert.equal((await snapshot()).revision, final.revision);
+  assert.deepEqual(await get('/api/v1/game'), originalGame, 'Assessed adventure remains separate');
+  assert.deepEqual(errors, []);
+  console.log(`PASS: ${source} route, explicit ack, pause/resume, exact retry after reload, inventory, keyboard/mobile, shared crossing, separate game state`);
+} finally { await browser.close(); }
