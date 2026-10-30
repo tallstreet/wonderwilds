@@ -31,6 +31,7 @@ export default defineConfig(({ command }) => {
           adventure: fileURLToPath(new URL('./index.html', import.meta.url)),
           characters: fileURLToPath(new URL('./characters.html', import.meta.url)),
           story: fileURLToPath(new URL('./story.html', import.meta.url)),
+          demo: fileURLToPath(new URL('./demo.html', import.meta.url)),
         },
       },
     },

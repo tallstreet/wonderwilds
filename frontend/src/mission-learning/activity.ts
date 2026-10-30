@@ -45,7 +45,8 @@ export function mountMissionActivity(
   const context = document.createElement('p');
   context.className = 'ww-mission-context';
   context.textContent = activity.storyStep?.introduction ?? activity.presentation.context;
-  intro.append(context, objective, lesson);
+  if (activity.storyStep) intro.append(context);
+  else intro.append(objective, lesson, context);
 
   const prompt = document.createElement('p');
   prompt.className = 'ww-mission-prompt';

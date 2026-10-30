@@ -237,3 +237,61 @@ fn exploration_requests_closed_schema_and_validates_model_created_characters_and
     bad["steps"] = json!([]);
     assert!(crate::story::planning::ValidatedPlan::generated(&state, bad, true).is_err());
 }
+
+#[test]
+fn credentials_select_generation_without_feature_flags() {
+    assert!(
+        ModalSceneProvider::with_config(None, None, None)
+            .unwrap()
+            .is_none()
+    );
+    assert!(
+        ModalSceneProvider::with_config(Some(" ".into()), Some("".into()), None)
+            .unwrap()
+            .is_none()
+    );
+    for (id, secret) in [
+        (Some("synthetic".into()), None),
+        (None, Some("secret".into())),
+    ] {
+        assert!(ModalSceneProvider::with_config(id, secret, None).is_err());
+    }
+    let provider =
+        ModalSceneProvider::with_config(Some("synthetic".into()), Some("id".into()), None)
+            .unwrap()
+            .unwrap();
+    assert_eq!(provider.endpoint, ENDPOINT);
+    assert_eq!(provider.authorization, "Bearer synthetic.id");
+}
+
+#[test]
+fn shared_endpoint_override_is_restricted_to_https_or_loopback() {
+    for endpoint in [
+        "http://127.0.0.1:4321/v1/chat/completions",
+        "https://example.com/v1/chat/completions",
+    ] {
+        let provider = ModalSceneProvider::with_config(
+            Some("synthetic".into()),
+            Some("id".into()),
+            Some(endpoint.into()),
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(provider.endpoint, endpoint);
+    }
+    for endpoint in [
+        "http://example.com/",
+        "https://user:secret@example.com/",
+        "https://example.com/?key=secret",
+        "invalid",
+    ] {
+        assert!(
+            ModalSceneProvider::with_config(
+                Some("synthetic".into()),
+                Some("id".into()),
+                Some(endpoint.into())
+            )
+            .is_err()
+        );
+    }
+}

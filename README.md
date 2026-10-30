@@ -1,6 +1,6 @@
 # Wonderwilds development
 
-The existing Phaser guest adventure remains playable in `frontend/`. The Rust
+The Phaser story adventure runs in `frontend/`. The Rust
 workspace adds versioned contracts, pure gameplay and assessment, an experimental
 mastery policy, an authored director, and a PostgreSQL-backed development API.
 The expansion is **not a completed release**. See
@@ -28,8 +28,9 @@ synthetic development database using `sh scripts/migrate-postgres.sh`.
 This starts a private Unix-socket cluster without a TCP listener; it is not
 production database provisioning. Migrations record hashes and reject drift.
 
-Run the guest game from `frontend/` with `npm run dev -- --host 127.0.0.1`.
-In a separate terminal, run the authored API from the repository root:
+Use `sh scripts/local-demo.sh` to run the app with its local authenticated session
+and database. Standalone Vite requires an operator-provided session bridge.
+For separate API development, run from the repository root:
 
 ```sh
 WONDERWILDS_DATABASE_URL='host=/workspace/setup-tools/pgsocket port=55432 user=agent dbname=wonderwilds_dev' \
@@ -39,9 +40,8 @@ WONDERWILDS_DATABASE_URL='host=/workspace/setup-tools/pgsocket port=55432 user=a
 The API listens on local port 3001. `/healthz` reports the development process;
 `/readyz` probes database/schema readiness and explicitly reports that content is
 not release-ready. Gameplay requests without a valid parent session return 401.
-There is no test-login bypass or configured parent identity provider. The main
-world remains in guest mode. An opt-in local backend demo mounts the client and
-activity components (see below); account/import integration remains pending.
+There is no test-login bypass or configured parent identity provider. Both content
+modes use the same authenticated story world, PostgreSQL saves and learning UI.
 
 From the root, `bash scripts/check.sh` runs Rust format/Clippy/tests, shared
 schema and generated-code checks, content validators, frontend checks/build,
@@ -69,8 +69,17 @@ Install PostgreSQL 17 (`brew install postgresql@17`) and locked frontend
 packages, then run `sh scripts/local-demo.sh` from the repository root.
 Open <http://127.0.0.1:5173/> to play the server-backed adventure in the actual world.
 Use that exact address: `localhost:5173` is rejected by the demo session bridge.
-Use <http://127.0.0.1:5173/?guest=1> for the original guest adventure.
-The earlier `/demo.html` remains available as a diagnostic screen.
+There are exactly two content modes, selected automatically at backend startup:
+
+- **Authored:** without Modal credentials, scenes and missions use authored content.
+- **Generated:** with both `MODAL_PROXY_TOKEN_ID` and `MODAL_PROXY_TOKEN_SECRET`,
+  Modal supplies scene dialogue, mission plans and repeatable neighbourhood stories.
+  Invalid or unavailable output uses validated authored fallbacks.
+
+No URL parameter or generation flag is needed. `?guest=1` and `?story=1` no longer
+select modes; `/demo.html` and `/story.html` redirect to `/`. Partial credentials
+produce a configuration error. Restart after changing credentials. Both modes
+require the local backend and database; authored mode needs no model service.
 Both ports 5173 and 3001 must be free. `WONDERWILDS_PG_BIN` can select another
 local PostgreSQL binary directory. Stop the foreground launcher with Ctrl-C;
 the private database stays running. To stop it as well:
@@ -82,6 +91,7 @@ the private database stays running. To stop it as well:
 This explicitly enabled developer bridge creates a synthetic parent/profile and
 24-hour session in an isolated PostgreSQL database under ignored `.local-demo/`.
 Restart the launcher to renew the session. Progress persists across restarts.
+A reset database gets a new profile ID so old browser saves cannot attach to it.
 The database listens only on a private Unix socket; the API and browser bind
 loopback. Vite checks Host, Origin and a random browser CSRF token before
 forwarding commands with the operator-issued session. The Rust API still uses
@@ -90,50 +100,14 @@ secrets never reach the browser and `.local-demo/` is denied by Vite's file serv
 The runtime database role is not a superuser and cannot bypass RLS. Do not expose
 this development bridge through a tunnel or use it with personal data.
 
-The game world mounts the typed client and activity controls for the six Meadow
-story beats and four Meadow friendships. The ten story/friendship encounters are spread in pairs across Clover Meadow,
-Starlight Cove, Peachy Orchard, Fern Hollow and Mossy Clearing; training is in Owl Grove.
-These are browser placements for the Meadow content, not new regional story unlocks.
-Missions tracks a destination; Follow path walks to the next connected exit or
-nearby character. Clicking a character or pressing Space nearby opens dialogue
-before starting an activity. The first exploration quest, “A trail of little
-kindnesses”, links Pip, bridge repair, the Cove picnic, Tansy and the Orchard garden
-before a return to Pip. Its seven-step checklist appears in Missions and Journal. Answers, support, abandonment, rewards,
-companion selection and learning summaries are saved by the real API. Guest
-localStorage is untouched. Server flags repair the bridge, bloom the garden and update the picnic. The
-journal selects a following companion; the selected team survives reloads.
-Friend artwork is provisional. Camera, hero choice and movement remain local
-under a separate profile-specific view key; no guest evidence is imported.
-The journal now presents separate character XP/levels and sixteen authored Meadow
-training milestones, with repeat practice earning no extra XP. The training
-clearing and journal open the same server-assessed activities, including support,
-abandonment and resume. A first-time milestone awards 10 character XP and a
-level-up celebration. Character levels use thresholds 0/10/20/30/40; Explorer XP
-remains separate. Team selection/removal respects existing story-owned capacity,
-and the world can render both followers. The second slot retains its Orchard
-unlock; this does not activate Orchard gameplay.
+The story world uses server-assessed learning inside mission steps. Rust owns
+correctness, progress and supported completion. Older guest and assessed-adventure
+interfaces are no longer app entry points. Curriculum coverage and review gates
+remain as described in [implementation status](docs/IMPLEMENTATION_STATUS.md).
 
-Friendship memory and reversible glow controls are connected in the journal.
-Server-authoritative regional travel, companion exploration roles, personal
-quests, distinct transformation art, director integration, identity-provider
-login, save import and parent lifecycle screens remain outstanding. The 75-map
-exploration library does not establish regional story eligibility. No
-spatial/measurement task is reachable in Meadow. The PostgreSQL API now uses durable receipts and bounded checkpoints for long play;
-see [storage, migration and recovery](docs/LONG_PLAY_STORAGE_PLAN.md).
-Hints currently repeat the authored instruction and suggest helper support;
-worked-example text and narration are not yet supplied by the API.
-
-`qa/e2e/backend-demo.mjs` exercises the full Meadow flow against a **fresh QA
-copy**, not the demo database. Use API port 3002 (`WONDERWILDS_PORT=3002`) and
-Vite port 5180 (`WW_DEMO_PORT=5180 WW_DEMO_API_PORT=3002`) with the local session
-config, and set `CHROMIUM_PATH` to an installed Chromium executable. It verifies
-incorrect/correct answers, support persistence, abandonment, four friendships,
-companion selection, reloads, mobile layout, and local access boundaries.
-
-For the actual world training journey with local PostgreSQL installed, run
-`node qa/e2e/run-training-qa.mjs`. It creates and removes its own synthetic QA
-database and temporary session, using ports 3002/5180 without changing demo
-progress. See [browser checks](qa/e2e/README.md) and [CI scope](docs/CI.md).
+For real browser checks, `node qa/e2e/run-training-qa.mjs` creates and removes a
+fresh synthetic database/session on ports 3002/5180. It never uses demo progress.
+Set `CHROMIUM_PATH` to your installed Chromium executable if needed.
 
 ### Optional spoken answers (Baseten hackathon)
 
@@ -169,8 +143,7 @@ needed to verify hackathon access and transcription quality.
 
 ## Authored story development slice
 
-After starting `sh scripts/local-demo.sh`, open **Missions → Pip’s story adventure**
-in the main game, or [open it directly](http://127.0.0.1:5173/?story=1).
+After starting `sh scripts/local-demo.sh`, [open the app](http://127.0.0.1:5173/).
 This uses the actual Phaser world and authenticated PostgreSQL saves. Seven
 connected stories are playable:
 
@@ -197,21 +170,17 @@ milestones. Click a nearby character or press Space to read the returned dialogu
 Reload restores the server's location/progress. If saving is uncertain, open
 Missions and use **Retry the same action**; the exact command survives reloads.
 
-Story saves are separate from the existing adventure, guest saves and educational
-activities. A deterministic mock provider returns scenes for the seven authored
-missions through the same validated response boundary that a future
-provider can use. Server state controls who is present, available actions and
+Story state and learning evidence are persisted separately. Without credentials,
+a deterministic provider returns authored scenes for the seven missions through
+the same validated response boundary used for Modal generation. Server state controls who is present, available actions and
 bridge/milestone changes. Pixel movement remains local; server commands verify
 coarse location transitions. The woodcutter temporarily uses existing Cleo art,
 distinct from Bramble.
-This mode does not synchronize the old assessed bridge or generate new missions.
-Model generation is disabled by default; the opt-in Modal integration below can
-generate scene prose. The earlier [/story.html inspector](http://127.0.0.1:5173/story.html)
-remains available for checking scenes without walking.
+Modal credentials enable generated prose and missions in this same world.
 
 ### Walking to neighbourhood stories
 
-In `/?story=1`, walk west from the bridge bank to the workshop, then take its
+In the story world, walk west from the bridge bank to the workshop, then take its
 western path to Starlight Cove. Continue east through Fern Hollow, Mossy Clearing,
 Owl Grove and Acorn Trail. Walking onto a labelled route at the map edge commits
 its server-approved travel action. Missions also offers accessible route buttons;
@@ -227,10 +196,9 @@ missions stay completed, and Pip's story is never automatically archived.
 
 ### Repeatable AI-generated neighbourhood stories
 
-With `WONDERWILDS_MODAL_STORY=1`, arrivals now also generate neighbourhood stories.
-`WONDERWILDS_MODAL_EXPLORATION=1` enables these independently; setting it to `0`
-stops new arrival generation while preserving already saved stories. The same
-backend-only Modal credentials are used. Restart the local demo after updating.
+When both Modal proxy credentials are supplied, arrivals generate neighbourhood
+stories automatically. Without them, the five authored neighbourhood missions
+remain available. Restart the local demo after changing credentials.
 
 On entering a neighbourhood without unfinished work, the model invents a name,
 personality, greeting, mission title/premise, one to three sequential investigation
@@ -257,13 +225,13 @@ fallback**. New geography, new image assets and production content approval are
 not supplied by this feature. Existing saves and original command receipts remain
 compatible. No demo-data reset or new SQL migration is needed.
 
-For local mock/provider testing, `WONDERWILDS_MODAL_EXPLORATION_ENDPOINT` selects an
+For local mock/provider testing, `WONDERWILDS_MODAL_ENDPOINT` selects an
 explicit backend endpoint (HTTPS, or loopback HTTP only). It receives the configured
-Modal authorization header; leave it unset for the existing deployed model.
+Modal authorization header; it applies to all three generators. Leave it unset for the deployed model.
 
 ### Curriculum practice in story missions
 
-In `/?story=1`, gathering supplies, workshop jobs, building and investigation
+In the story world, gathering supplies, workshop jobs, building and investigation
 steps open a learning interaction as part of that action. There is no separate
 practice-launch button. Generated neighbourhood steps can provide a short
 `learningBridge` invitation explaining why organising discovery markers helps
@@ -278,8 +246,7 @@ Hints and examples remain available. Closing the panel preserves the task;
 Missions offers resume and exact-save recovery. **Put this task aside** closes
 it without completing the story action. Travel or another tab can invalidate a
 joining point; put that task aside and reopen the current step. Unsupported
-frontiers retain the normal story action. The diagnostic story inspector and
-original direct story commands remain available without an academic gate.
+frontiers retain the normal story action. Original direct story commands remain available without an academic gate.
 
 The combined Foundation/Years 1–6 graph contains 120 draft nodes. This first
 activity slice supports **M01 → M03 → M04/M05/M06**: one-to-one matching,
@@ -299,7 +266,7 @@ for the policy and remaining activity coverage.
 
 ### Optional Modal scene generation
 
-The game HUD and story inspector show the source of the displayed dialogue:
+The game HUD show the source of the displayed dialogue:
 **Preauthored story**, **LLM-generated dialogue**, or **Preauthored story · LLM
 fallback**. This reflects the validated scene returned by the backend, including
 cached LLM scenes, rather than probing a live connection. Mission planning is
@@ -317,13 +284,11 @@ local-demo process with Ctrl-C, then restart it:
 
 ```sh
 # MODAL_PROXY_TOKEN_ID and MODAL_PROXY_TOKEN_SECRET must already be exported.
-export WONDERWILDS_MODAL_STORY=1
 sh scripts/local-demo.sh
 ```
 
-Open [Pip's Story Adventure](http://127.0.0.1:5173/?story=1), or use its main-game
-entry point. This integration applies to that story mode and `/story.html`, not
-the guest adventure or educational activity text. Initial reads and the existing
+Open [Wonderwilds](http://127.0.0.1:5173/). Generated prose applies to the story
+world; assessment remains server-authored. Initial reads and the existing
 post-action refresh request model prose. Credentials are backend-only; never use
 `VITE_` variables for them. The model receives authored scene context and gameplay
 state, not profile/session IDs, account data, learning records or free-form child
@@ -342,22 +307,16 @@ and state are checked again afterward; changed state discards the generated scen
 Commands and persisted retry receipts remain authored and unchanged. All actions,
 rewards and progress still come from Rust. `.local-demo/api.log` contains only
 coarse accepted/fallback messages for this integration, without model text or
-credentials. To disable it, unset `WONDERWILDS_MODAL_STORY` and restart the demo.
+credentials. To return to authored mode, unset both Modal proxy credentials and restart the demo.
 
 ### Optional Modal mission planning
 
-Enable the planner alongside scene generation, with the existing Modal proxy
-credentials exported in the backend shell:
-
-```sh
-export WONDERWILDS_MODAL_PLANNER=1
-export WONDERWILDS_MODAL_STORY=1
-sh scripts/local-demo.sh
-```
+Mission planning is enabled automatically with scene and neighbourhood generation
+when both Modal proxy credentials are present.
 
 Restart the demo after updating; its migration runner applies
 `0004_story_mission_plans.sql` without resetting existing progress. In
-`/?story=1` (or `/story.html`), accepting a **new** mission requests a plan using
+the story world, accepting a **new** mission requests a plan using
 that supported opportunity and the evaluated `dependencies-v1` prompt. The API
 checks its schema, character/condition bindings, outcome coverage and a bounded
 real-domain completion path before saving it atomically with acceptance. The
@@ -375,9 +334,7 @@ with session/CSRF and revision checks before commit.
 The six-second provider timeout, busy/unavailable endpoint, malformed output or
 unproven plan all fall back to the authored mission. Validation search also has a
 500 ms deadline. The planner receives authored world context and story progress, not
-profile/session identifiers or educational records. Both model flags
-are opt-in and independent. Disabling the planner stops future generation while
-already saved plans remain stable. Development content/release gates are unchanged.
+profile/session identifiers or educational records. Removing credentials stops future generation; saved content remains stable. Development content/release gates are unchanged.
 
 Both scene generation and mission planning send strict JSON Schema
 `response_format` constraints from the shared contracts, as well as the schema in

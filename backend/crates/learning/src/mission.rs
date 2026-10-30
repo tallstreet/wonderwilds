@@ -575,9 +575,13 @@ pub fn authored_activity_in_context(
 /// Reuse assessed shapes with a consistent mission prop. IDs, quantities,
 /// representation and canonical fingerprint remain unchanged.
 pub fn discovery_activity(mut activity: MissionActivity) -> MissionActivity {
-    fn markers(items: &mut [NamedItem]) {
+    fn markers(items: &mut [NamedItem], distinct: bool) {
         for (index, item) in items.iter_mut().enumerate() {
-            item.label = format!("Discovery marker {}", index + 1);
+            item.label = if distinct {
+                format!("Discovery marker {}", index + 1)
+            } else {
+                "Discovery marker".to_owned()
+            };
         }
     }
     let prompt = match &mut activity.view.task {
@@ -586,14 +590,14 @@ pub fn discovery_activity(mut activity: MissionActivity) -> MissionActivity {
             recipients,
             ..
         } => {
-            markers(objects);
+            markers(objects, true);
             for (i, item) in recipients.iter_mut().enumerate() {
                 item.label = format!("Discovery spot {}", i + 1);
             }
             "Put one discovery marker at each spot."
         }
         PublicTask::CountCollection { objects, .. } => {
-            markers(objects);
+            markers(objects, false);
             "How many discovery markers are ready?"
         }
         PublicTask::CompareCollections {
@@ -603,7 +607,7 @@ pub fn discovery_activity(mut activity: MissionActivity) -> MissionActivity {
         } => {
             for (i, collection) in collections.iter_mut().enumerate() {
                 collection.label = format!("Marker group {}", i + 1);
-                markers(&mut collection.items);
+                markers(&mut collection.items, false);
                 choices[i].label = collection.label.clone();
             }
             if prompt_mode == "more" {
@@ -1218,6 +1222,22 @@ mod tests {
                     themed.canonical_fingerprint()
                 );
                 assert_eq!(original.view.representation, themed.view.representation);
+                // Counting/comparison must require enumeration, rather than
+                // revealing group size through ordinal object labels.
+                let countable = match &themed.view.task {
+                    PublicTask::CountCollection { objects, .. } => {
+                        objects.iter().collect::<Vec<_>>()
+                    }
+                    PublicTask::CompareCollections { collections, .. } => {
+                        collections.iter().flat_map(|c| &c.items).collect()
+                    }
+                    _ => vec![],
+                };
+                assert!(
+                    countable
+                        .iter()
+                        .all(|item| !item.label.chars().any(|c| c.is_ascii_digit()))
+                );
                 let support = Support {
                     hint_count: 0,
                     worked_example: false,

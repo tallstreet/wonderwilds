@@ -46,5 +46,5 @@ until curl -fsS http://127.0.0.1:3001/readyz >/dev/null; do
 done
 node frontend/node_modules/vite/bin/vite.js frontend --host 127.0.0.1 --port 5173 --strictPort &
 task_vite=$!
-echo 'Play the backend world: http://127.0.0.1:5173/'
+echo 'Play Wonderwilds: http://127.0.0.1:5173/'
 wait "$task_vite"

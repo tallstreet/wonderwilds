@@ -128,7 +128,7 @@ pub struct AppState {
     configured: bool,
 }
 impl AppState {
-    /// Explicit opt-in; credentials remain in the backend process only.
+    /// Credentials select generation for all story providers; keys stay backend-only.
     pub fn with_modal_story(mut self) -> Result<Self, &'static str> {
         self.story_provider =
             crate::story::modal::ModalSceneProvider::from_env()?.map(|provider| {

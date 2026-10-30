@@ -5,5 +5,9 @@ export async function finishInlineStep(page, type) {
   await page.locator('.ww-mission-activity').waitFor();
   await page.getByRole('button', { name: 'Let’s do it together', exact: true }).click();
   await page.getByRole('button', { name: 'Continue the story', exact: true }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  // Completion can return either speech or the next actionable encounter.
+  await page.waitForFunction(() => {
+    const dialog = document.querySelector('dialog[open]');
+    return !dialog || Boolean(dialog.querySelector('[data-story-handle], [data-story-continue]'));
+  });
 }

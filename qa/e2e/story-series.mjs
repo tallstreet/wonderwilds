@@ -41,7 +41,11 @@ try {
     await page.waitForFunction(previous => Number(document.querySelector('#game')?.dataset.storyRevision) > previous, revision, { timeout: 20000 });
     return ready();
   };
-  const act = async (marker, type) => { await visit(marker); return choose(type); };
+  const act = async (marker, type) => {
+    if (type === 'cancel_mission') { await close(); await page.locator('#missions').click(); }
+    else await visit(marker);
+    return choose(type);
+  };
   const travel = destination => act(`route:${destination}`, 'travel');
   const reload = async () => { await close(); await page.reload(); await page.locator('#game canvas').waitFor(); return ready(); };
   const mission = async (id, status) => {
@@ -150,9 +154,11 @@ try {
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await page.screenshot({ path: '/tmp/wonderwilds-story-series-mobile.png', fullPage: true });
   await page.goto(`${origin}/story.html`);
-  await page.locator('[data-mission-status="completed"]').waitFor();
+  await page.locator('#game canvas').waitFor();
+  await page.locator('#missions').click();
+  await page.locator('[data-story-mission-status="completed"]').waitFor();
   await page.getByText(final.sceneInput.mission.goal, { exact: true }).waitFor();
-  assert.ok((await page.locator('.mission-state').innerText()).includes(final.sceneInput.mission.narrative.payoff));
+  assert.ok((await page.locator('dialog').innerText()).includes(final.sceneInput.mission.narrative.payoff));
   assert.deepEqual(await get('/api/v1/game'), originalGame, 'Education/adventure state stays untouched');
   assert.deepEqual(errors, []);
   console.log('PASS: three Phaser stories, persistent world changes/history, explicit next acceptance, reverse Pip crossing, pause/reload, exact replay, mobile inspector, separate education');

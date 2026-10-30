@@ -8,7 +8,10 @@ const server = createServer(async (req, res) => {
   assert.equal(req.headers.authorization, 'Bearer synthetic.id');
   let text = ''; for await (const chunk of req) text += chunk;
   const body = JSON.parse(text);
-  assert.equal(body.response_format.json_schema.name, 'GeneratedNeighbourhood');
+  if (body.response_format.json_schema.name !== 'GeneratedNeighbourhood') {
+    // Exercise authored fallback for scenes/plans through the same provider.
+    res.writeHead(503); res.end(); return;
+  }
   const input = JSON.parse(body.messages[1].content);
   assert.equal(Object.hasOwn(input, 'profileId'), false);
   assert.equal(Object.hasOwn(input, 'sessionId'), false);
@@ -27,9 +30,8 @@ await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 try {
   const child = spawn(process.execPath, ['qa/e2e/run-training-qa.mjs'], {
     stdio: 'inherit', env: { ...process.env, WW_QA_BROWSER_TEST: 'qa/e2e/story-exploration.mjs', WW_GENERATED_STORIES: '1',
-      WONDERWILDS_MODAL_STORY: '0', WONDERWILDS_MODAL_PLANNER: '0', WONDERWILDS_MODAL_EXPLORATION: '1',
       MODAL_PROXY_TOKEN_ID: 'synthetic', MODAL_PROXY_TOKEN_SECRET: 'id',
-      WONDERWILDS_MODAL_EXPLORATION_ENDPOINT: `http://127.0.0.1:${server.address().port}/v1/chat/completions` }
+      WONDERWILDS_MODAL_ENDPOINT: `http://127.0.0.1:${server.address().port}/v1/chat/completions` }
   });
   const [code] = await once(child, 'exit');
   assert.equal(code, 0);

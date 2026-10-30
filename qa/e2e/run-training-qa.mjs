@@ -18,7 +18,9 @@ if (!process.argv.includes('--qa-child')) {
 const pgBin = process.env.WONDERWILDS_PG_BIN;
 const env = { ...process.env };
 const cargo = 'cargo';
-if (env.WW_STORY_COMBINED === '1' && (env.WONDERWILDS_MODAL_PLANNER !== '1' || env.WONDERWILDS_MODAL_STORY !== '1' || env.WW_STORY_EXPECT_PLANS !== '1')) {
+const apiPort = env.WW_QA_API_PORT || '3002';
+const vitePort = env.WW_QA_VITE_PORT || '5180';
+if (env.WW_STORY_COMBINED === '1' && (!env.MODAL_PROXY_TOKEN_ID || !env.MODAL_PROXY_TOKEN_SECRET || env.WW_STORY_EXPECT_PLANS !== '1')) {
   throw new Error('Combined verification requires both Modal providers and saved-plan assertions');
 }
 const database = process.env.WW_QA_DATABASE_URL;
@@ -46,7 +48,7 @@ const waitReady = async (url, child) => {
   throw new Error(`Timed out waiting for ${url}`);
 };
 try {
-  await Promise.all([available(3002), available(5180)]);
+  await Promise.all([available(Number(apiPort)), available(Number(vitePort))]);
   run('sh', ['scripts/migrate-postgres.sh'], { env: { ...env, WONDERWILDS_DATABASE_URL: database } });
   const session = randomBytes(32).toString('hex'), csrf = randomBytes(32).toString('hex');
   const profileId = '10000000-0000-0000-0000-000000000002', parentId = '10000000-0000-0000-0000-000000000001';
@@ -68,21 +70,21 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
     const sessionLog = [];
     sessionLogs.push(sessionLog);
     const child = spawn(join(root, 'target/debug/wonderwilds-api'), [], {
-      cwd: root, env: { ...env, WONDERWILDS_DATABASE_URL: database.replace('user=ww_qa_admin', 'user=ww_demo_runtime'), WONDERWILDS_ORIGIN: 'https://wonderwilds.local', WONDERWILDS_PORT: '3002' }, stdio: ['ignore', 'inherit', 'pipe'],
+      cwd: root, env: { ...env, WONDERWILDS_DATABASE_URL: database.replace('user=ww_qa_admin', 'user=ww_demo_runtime'), WONDERWILDS_ORIGIN: 'https://wonderwilds.local', WONDERWILDS_PORT: apiPort }, stdio: ['ignore', 'inherit', 'pipe'],
     });
     child.stderr.on('data', chunk => { apiLog.push(chunk.toString()); sessionLog.push(chunk.toString()); process.stderr.write(chunk); });
     children.push(child);
     return child;
   };
   let api = startApi();
-  await waitReady('http://127.0.0.1:3002/readyz', api);
-  const vite = spawn(process.execPath, ['frontend/node_modules/vite/bin/vite.js', 'frontend', '--host', '127.0.0.1', '--port', '5180', '--strictPort'], {
-    cwd: root, env: { ...env, WW_LOCAL_DEMO_CONFIG: configPath, WW_DEMO_PORT: '5180', WW_DEMO_API_PORT: '3002' }, stdio: 'inherit',
+  await waitReady(`http://127.0.0.1:${apiPort}/readyz`, api);
+  const vite = spawn(process.execPath, ['frontend/node_modules/vite/bin/vite.js', 'frontend', '--host', '127.0.0.1', '--port', vitePort, '--strictPort'], {
+    cwd: root, env: { ...env, WW_LOCAL_DEMO_CONFIG: configPath, WW_DEMO_PORT: vitePort, WW_DEMO_API_PORT: apiPort }, stdio: 'inherit',
   });
   children.push(vite);
-  await waitReady('http://127.0.0.1:5180/', vite);
+  await waitReady(`http://127.0.0.1:${vitePort}/`, vite);
   // Async child lets this process continue draining the local servers' output.
-  const test = spawn(process.execPath, [process.env.WW_QA_BROWSER_TEST || 'qa/e2e/training-browser.mjs'], { cwd: root, env: { ...env, WW_DEMO_TEST_URL: 'http://127.0.0.1:5180' }, stdio: ['inherit', 'inherit', 'inherit', 'ipc'] });
+  const test = spawn(process.execPath, [process.env.WW_QA_BROWSER_TEST || 'qa/e2e/story-world.mjs'], { cwd: root, env: { ...env, WW_DEMO_TEST_URL: `http://127.0.0.1:${vitePort}` }, stdio: ['inherit', 'inherit', 'inherit', 'ipc'] });
   children.push(test);
   test.on('message', async message => {
     if (message?.type !== 'restart-api' || !(env.WW_STORY_COMBINED === '1' || env.WW_STORY_RETURNING === '1' || env.WW_LONG_PLAY === '1')) return;
@@ -93,7 +95,7 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
       await stopped;
       clearTimeout(timer);
       api = startApi();
-      await waitReady('http://127.0.0.1:3002/readyz', api);
+      await waitReady(`http://127.0.0.1:${apiPort}/readyz`, api);
       test.send({ type: 'api-restarted' });
     } catch { test.send({ type: 'api-restart-failed' }); }
   });

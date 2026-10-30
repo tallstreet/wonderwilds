@@ -131,7 +131,9 @@ pub(crate) fn complete_inline_step(
     learning_command_id: &str,
 ) -> Result<(), Error> {
     let current = inline_step(tx, identity, &step.action_id, step.revision)?;
-    if current != *step {
+    // Copy edits must not invalidate a frozen activity. Recheck mechanical
+    // identity; keep the originally issued label and introduction unchanged.
+    if current.mission_id != step.mission_id || current.location_id != step.location_id {
         return Err(Error::RevisionConflict);
     }
     let state = load(tx, identity)?;

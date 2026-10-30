@@ -2,6 +2,6 @@
   "name": "wonderwilds-browser-checks",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node guest-smoke.mjs" },
+  "scripts": { "test": "node story-source-status.mjs" },
   "devDependencies": { "playwright": "1.58.2" }
 }

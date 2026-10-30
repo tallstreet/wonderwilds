@@ -94,15 +94,27 @@ try {
   const visit = async id => {
     await close(); await page.locator('#missions').click();
     await page.locator(`[data-story-visit="${id}"]`).click();
-    await page.locator('dialog[open] [data-story-action], dialog[open] [data-story-continue]').first().waitFor({ timeout: 20000 });
+    const dialogue = page.locator('dialog[open] [data-story-action], dialog[open] [data-story-continue]').first().waitFor({ timeout: 20000 });
+    if (id.startsWith('route:')) {
+      await Promise.any([dialogue, page.waitForFunction(destination => document.querySelector('#game')?.dataset.storyLocation === destination, id.slice(6), { timeout: 20000 })]);
+      if ((await snapshot()).locationId === id.slice(6)) return;
+    } else await dialogue;
     const marker = JSON.parse(await page.locator('#game').getAttribute('data-story-markers')).find(item => item.id === id);
     const point = await page.locator('#game').evaluate(node => ({ x: Number(node.dataset.storyPlayerX), y: Number(node.dataset.storyPlayerY) }));
     assert.ok(Math.hypot(point.x - marker.x, point.y - marker.y) < 110, `${id} requires actual walking`);
   };
   const act = async (type, fields = {}) => {
     let state = await ready();
+    if (type === 'cancel_mission') {
+      await close();
+      await page.locator('#missions').click();
+      await page.locator(`[data-story-mission-handle="${findAction(state, type, fields).id}"]`).click();
+      await page.waitForFunction(previous => Number(document.querySelector('#game')?.dataset.storyRevision) > previous, state.revision);
+      return ready();
+    }
     const target = markerFor(findAction(state, type, fields).action);
     await visit(target);
+    if (type === 'travel' && (await snapshot()).locationId === fields.destinationId) return ready();
     if (await page.locator('[data-story-continue]').count()) {
       await page.locator('[data-story-continue]').click();
       await page.waitForFunction(previous => Number(document.querySelector('#game')?.dataset.storyRevision) > previous, state.revision);
@@ -216,8 +228,8 @@ try {
   await inspect('humming_hollow'); await inspect('trembling_leaf');
   if (alternate) await inspect('mossy_stump');
   await inspect('hollow_branch');
-  assert.match(await page.locator('[data-story-dialogue]').innerText(), /wind|breeze/i, 'Discovery is shown immediately after inspection');
-  assert.match(await page.locator('[data-story-dialogue]').innerText(), /branch|hum/i);
+  assert.match(await page.locator('[data-story-dialogue]:visible').innerText(), /wind|breeze/i, 'Discovery is shown immediately after inspection');
+  assert.match(await page.locator('[data-story-dialogue]:visible').innerText(), /branch|hum/i);
   const instrumentHome = alternate ? 'gathering' : 'woods';
   await act('choose', { choiceId: 'instrument_home', optionId: instrumentHome });
   assert.ok(!(await visuals()).some(item => item.id === 'wind_instrument'), 'Choosing a home does not teleport the instrument');
@@ -231,7 +243,7 @@ try {
 
   // Choice-dependent design and a reload while paused after one preparation.
   await act('accept_mission'); await talk('pip', 'cosy_preferences');
-  assert.match(await page.locator('[data-story-dialogue]').innerText(), /stream/i, 'Pip’s preference reply remains visible after talking');
+  assert.match(await page.locator('[data-story-dialogue]:visible').innerText(), /stream/i, 'Pip’s preference reply remains visible after talking');
   await inspect('corner_site');
   const cornerStyle = alternate ? 'star_canopy' : 'leafy_nook';
   await act('choose', { choiceId: 'corner_style', optionId: cornerStyle });

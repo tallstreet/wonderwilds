@@ -47,6 +47,7 @@ export class StoryWorld {
   private learningActivity?: ReturnType<typeof mountMissionActivity>;
   private learningBusy = false;
   private storyAfterLearningNeedsRefresh = false;
+  private learningEncounter?: WorldEncounter;
   constructor(
     private client: StoryClient,
     profile: string,
@@ -259,10 +260,14 @@ export class StoryWorld {
           if (!this.practiceDialogOpen()) return;
           this.learningActivity?.destroy();
           this.learningActivity = undefined;
+          const marker = this.learning.snapshot?.lastFeedback?.completed
+            ? this.learningEncounter
+            : undefined;
+          this.learningEncounter = undefined;
           void this.run(async () => {
             await this.commands.refresh();
             await this.refreshLearning();
-          });
+          }, marker);
         },
       },
     );
@@ -337,7 +342,7 @@ export class StoryWorld {
     if (this.crossing) return;
     if (this.snapshot.commandBudgetExhausted) {
       this.hooks.open(
-        '<h2 id="dialog-title">This development story has reached its save limit</h2><p>Your saved progress is preserved. No further story actions are available in this run.</p><p><a href="/">Return to the adventure</a></p>',
+        '<h2 id="dialog-title">This development story has reached its save limit</h2><p>Your saved progress is preserved. No further story actions are available in this run.</p>',
       );
       return;
     }
@@ -353,7 +358,7 @@ export class StoryWorld {
         (!pipPresent && item.action.type === 'accept_mission'),
     );
     this.hooks.open(
-      `<header class="story-journal-heading"><span class="story-journal-icon" aria-hidden="true">✦</span><span class="pill" data-story-missions-panel>PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2></header><p class="story-premise">${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${mission ? `<p data-story-mission-status="${mission.status}">${mission.status === 'completed' ? `Mission complete · ${escape(mission.narrative.payoff)}` : mission.status === 'abandoned' ? 'Mission paused · your progress is saved.' : escape(mission.current ?? '')}</p><ul class="story-checklist">${mission.completed.map((text) => `<li class="is-complete"><span aria-hidden="true">✓</span>${escape(text)}</li>`).join('')}${mission.remaining.map((text) => `<li><span aria-hidden="true">○</span>${escape(text)}</li>`).join('')}</ul>` : ''}${nextStoryLabel(this.snapshot) ? `<p data-story-next>${escape(nextStoryLabel(this.snapshot)!)}</p>` : ''}${input?.context.memory.recentMissions.length ? `<details data-story-history><summary>Our adventures so far</summary><ul>${input.context.memory.recentMissions.map((text) => `<li>${escape(text)}</li>`).join('')}</ul></details>` : ''}${neighboursPanel}<p id="story-world-inventory">Carrying: ${input?.context.inventory.map((item) => `${item.quantity} ${escape(item.itemId)}`).join(', ') || 'an empty bag'}</p><h3 class="story-section-title">Where shall we go?</h3><div class="modal-quests story-destinations">${this.markers.map((marker) => `<button class="quest" data-story-visit="${escape(marker.id)}" ${this.locked() ? 'disabled' : ''}><span class="story-destination-icon" aria-hidden="true">${marker.sprite ? characterPortrait(marker.sprite, 48) : marker.id.startsWith('route:') ? '↗' : '✦'}</span><span><strong>${escape(marker.character)}</strong><small>${marker.id.startsWith('npc:') ? 'Walk over & chat' : 'Follow the path'}</small></span><span class="quest-arrow" aria-hidden="true">→</span></button>`).join('')}</div>${missionControls.map((item) => `<button class="secondary" data-story-action="${item.action.type}" data-story-mission-handle="${escape(item.id)}" ${this.locked() ? 'disabled' : ''}>${escape(this.snapshot.scene?.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}<footer class="story-journal-footer"><p id="story-world-status" role="status">${this.commands.hasPending ? 'A previous save needs confirmation. Retry the same action.' : this.commands.needsRefresh ? 'Refresh before choosing another action.' : this.snapshot.commandBudgetExhausted ? 'This development story reached its save limit.' : 'Your adventure is saved as you go.'}</p><button class="secondary" data-story-refresh>Refresh progress</button>${this.commands.hasPending ? '<button class="primary" data-story-retry>Retry the same action</button>' : ''}<p><a href="/">Return to the main adventure</a></p></footer>`,
+      `<header class="story-journal-heading"><span class="story-journal-icon" aria-hidden="true">✦</span><span class="pill" data-story-missions-panel>PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2></header><p class="story-premise">${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${mission ? `<p data-story-mission-status="${mission.status}">${mission.status === 'completed' ? `Mission complete · ${escape(mission.narrative.payoff)}` : mission.status === 'abandoned' ? 'Mission paused · your progress is saved.' : escape(mission.current ?? '')}</p><ul class="story-checklist">${mission.completed.map((text) => `<li class="is-complete"><span aria-hidden="true">✓</span>${escape(text)}</li>`).join('')}${mission.remaining.map((text) => `<li><span aria-hidden="true">○</span>${escape(text)}</li>`).join('')}</ul>` : ''}${nextStoryLabel(this.snapshot) ? `<p data-story-next>${escape(nextStoryLabel(this.snapshot)!)}</p>` : ''}${input?.context.memory.recentMissions.length ? `<details data-story-history><summary>Our adventures so far</summary><ul>${input.context.memory.recentMissions.map((text) => `<li>${escape(text)}</li>`).join('')}</ul></details>` : ''}${neighboursPanel}<p id="story-world-inventory">Carrying: ${input?.context.inventory.map((item) => `${item.quantity} ${escape(item.itemId)}`).join(', ') || 'an empty bag'}</p><h3 class="story-section-title">Where shall we go?</h3><div class="modal-quests story-destinations">${this.markers.map((marker) => `<button class="quest" data-story-visit="${escape(marker.id)}" ${this.locked() ? 'disabled' : ''}><span class="story-destination-icon" aria-hidden="true">${marker.sprite ? characterPortrait(marker.sprite, 48) : marker.id.startsWith('route:') ? '↗' : '✦'}</span><span><strong>${escape(marker.character)}</strong><small>${marker.id.startsWith('npc:') ? 'Walk over & chat' : 'Follow the path'}</small></span><span class="quest-arrow" aria-hidden="true">→</span></button>`).join('')}</div>${missionControls.map((item) => `<button class="secondary" data-story-action="${item.action.type}" data-story-mission-handle="${escape(item.id)}" ${this.locked() ? 'disabled' : ''}>${escape(this.snapshot.scene?.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}<footer class="story-journal-footer"><p id="story-world-status" role="status">${this.commands.hasPending ? 'A previous save needs confirmation. Retry the same action.' : this.commands.needsRefresh ? 'Refresh before choosing another action.' : this.snapshot.commandBudgetExhausted ? 'This development story reached its save limit.' : 'Your adventure is saved as you go.'}</p><button class="secondary" data-story-refresh>Refresh progress</button>${this.commands.hasPending ? '<button class="primary" data-story-retry>Retry the same action</button>' : ''}</footer>`,
     );
     const learningPanel = this.learningPanel();
     if (learningPanel)
@@ -458,7 +463,7 @@ export class StoryWorld {
     const texts = [...new Set(entries.map((entry) => entry.text))];
     this.game.events.emit('speech', marker, texts);
   }
-  private async beginMissionStep(actionId: string) {
+  private async beginMissionStep(actionId: string, marker?: WorldEncounter) {
     if (this.locked()) return;
     try {
       const learning = await this.refreshLearning();
@@ -478,7 +483,10 @@ export class StoryWorld {
         actionId,
         storyRevision: this.snapshot.revision,
       });
-      if (!this.disposed) this.showLearningActivity(next);
+      if (!this.disposed) {
+        this.learningEncounter = marker;
+        this.showLearningActivity(next);
+      }
     } catch {
       if (!this.disposed) this.missions();
       const status = document.querySelector('#story-world-status');
@@ -505,7 +513,7 @@ export class StoryWorld {
       (activeMission || activeNeighbour) &&
       ['inspect', 'collect', 'exchange', 'assemble'].includes(action.type)
     ) {
-      await this.beginMissionStep(payload.type === 'choose' ? payload.actionId : '');
+      await this.beginMissionStep(payload.type === 'choose' ? payload.actionId : '', marker);
       return;
     }
     if (action?.type === 'travel')

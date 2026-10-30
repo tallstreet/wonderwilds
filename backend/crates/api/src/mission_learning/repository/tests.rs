@@ -630,6 +630,13 @@ fn exercise_inline_steps(admin: &mut Client, restricted: &str, parent: &str) {
         )
     };
     let initial = repo.read(&identity).unwrap();
+    let travel_action = accepted["sceneInput"]["availableActions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|a| a["action"]["type"] == "travel")
+        .unwrap();
+    assert_eq!(repo.execute(&identity, &command("inline-invalid-travel", 0, json!({"type":"begin_step","actionId":travel_action["id"],"storyRevision":accepted["revision"]}))), Err(Error::InvalidInput));
     let begin_request = begin_step(&accepted, &initial, "inline-begin-1");
     let mut stale_begin = begin_request.clone();
     stale_begin["payload"]["storyRevision"] = json!(0);
@@ -703,6 +710,16 @@ fn exercise_inline_steps(admin: &mut Client, restricted: &str, parent: &str) {
     );
     let assisted = repo.execute(&identity, &together).unwrap();
     assert_eq!(assisted["lastFeedback"]["result"], "assisted");
+    let event: Value = admin.query_one("SELECT record FROM wonderwilds.mission_learning_events WHERE profile_id=$1::text::uuid ORDER BY sequence DESC LIMIT 1", &[&profile]).unwrap().get(0);
+    assert_eq!(
+        event["observation"]["evidence"]["eventKind"],
+        "worked_example"
+    );
+    assert_eq!(event["observation"]["evidence"]["result"], "not_assessed");
+    assert_eq!(
+        event["observation"]["evidence"]["support"]["workedExample"],
+        true
+    );
     assert_eq!(
         assisted["skills"][0]["correctChecks"],
         correct["skills"][0]["correctChecks"]

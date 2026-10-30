@@ -1,4 +1,4 @@
-//! Opt-in development-only scene prose and mission plans. No model credentials or identity reach the browser.
+//! Credential-selected development-only scene prose and mission plans. No model credentials or identity reach the browser.
 use serde_json::{Value, json};
 use std::{collections::VecDeque, io::Read, sync::Mutex, time::Duration};
 use wonderwilds_director::story::{Error, SceneProvider};
@@ -22,47 +22,47 @@ fn unavailable() -> Error {
 
 impl ModalSceneProvider {
     pub fn from_env() -> Result<Option<Self>, &'static str> {
-        Self::configured("WONDERWILDS_MODAL_STORY")
+        Self::configured()
     }
     pub fn explorer_from_env() -> Result<Option<Self>, &'static str> {
-        let flag = if std::env::var_os("WONDERWILDS_MODAL_EXPLORATION").is_some() {
-            "WONDERWILDS_MODAL_EXPLORATION"
-        } else {
-            "WONDERWILDS_MODAL_STORY"
-        };
-        let mut provider = Self::configured(flag)?;
-        if let Some(provider) = &mut provider
-            && let Ok(endpoint) = std::env::var("WONDERWILDS_MODAL_EXPLORATION_ENDPOINT")
-        {
-            let url = reqwest::Url::parse(&endpoint).map_err(|_| "Invalid exploration endpoint")?;
-            if !url.username().is_empty()
-                || url.password().is_some()
-                || url.query().is_some()
-                || url.fragment().is_some()
-                || !(url.scheme() == "https"
-                    || url.scheme() == "http"
-                        && matches!(url.host_str(), Some("127.0.0.1" | "[::1]" | "localhost")))
-            {
-                return Err("Exploration endpoint requires HTTPS or loopback HTTP");
-            }
-            provider.endpoint = endpoint;
-        }
-        Ok(provider)
+        Self::configured()
     }
     pub fn planner_from_env() -> Result<Option<Self>, &'static str> {
-        Self::configured("WONDERWILDS_MODAL_PLANNER")
+        Self::configured()
     }
-    fn configured(flag: &str) -> Result<Option<Self>, &'static str> {
-        match std::env::var(flag).as_deref() {
-            Err(_) | Ok("0") => return Ok(None),
-            Ok("1") => {}
-            _ => return Err("Modal generation flags must be 0 or 1"),
+    fn configured() -> Result<Option<Self>, &'static str> {
+        Self::with_config(
+            std::env::var("MODAL_PROXY_TOKEN_ID").ok(),
+            std::env::var("MODAL_PROXY_TOKEN_SECRET").ok(),
+            std::env::var("WONDERWILDS_MODAL_ENDPOINT").ok(),
+        )
+    }
+
+    fn with_config(
+        id: Option<String>,
+        secret: Option<String>,
+        endpoint: Option<String>,
+    ) -> Result<Option<Self>, &'static str> {
+        let id = id.filter(|value| !value.trim().is_empty());
+        let secret = secret.filter(|value| !value.trim().is_empty());
+        let (id, secret) = match (id, secret) {
+            (None, None) => return Ok(None),
+            (Some(id), Some(secret)) => (id, secret),
+            _ => return Err("Supply both Modal proxy token ID and secret, or neither"),
+        };
+        let endpoint = endpoint.unwrap_or_else(|| ENDPOINT.into());
+        let url = reqwest::Url::parse(&endpoint).map_err(|_| "Invalid Modal endpoint")?;
+        if !url.username().is_empty()
+            || url.password().is_some()
+            || url.query().is_some()
+            || url.fragment().is_some()
+            || !(url.scheme() == "https"
+                || url.scheme() == "http"
+                    && matches!(url.host_str(), Some("127.0.0.1" | "[::1]" | "localhost")))
+        {
+            return Err("Modal endpoint requires HTTPS or loopback HTTP");
         }
-        let id =
-            std::env::var("MODAL_PROXY_TOKEN_ID").map_err(|_| "Missing Modal proxy token ID")?;
-        let secret = std::env::var("MODAL_PROXY_TOKEN_SECRET")
-            .map_err(|_| "Missing Modal proxy token secret")?;
-        Self::new(ENDPOINT.into(), id, secret).map(Some)
+        Self::new(endpoint, id, secret).map(Some)
     }
 
     fn new(endpoint: String, id: String, secret: String) -> Result<Self, &'static str> {

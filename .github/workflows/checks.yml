@@ -128,7 +128,7 @@ jobs:
           cd qa/e2e
           npx playwright install --with-deps chromium
           node --input-type=module -e 'import { chromium } from "playwright"; console.log(`CHROMIUM_PATH=${chromium.executablePath()}`)' >> "$GITHUB_ENV"
-      - name: Check guest world and accessible activities
+      - name: Check unified story entry points and accessible activities
         if: matrix.suite == 'browser'
         run: |
           node frontend/node_modules/vite/bin/vite.js frontend --host 127.0.0.1 --port 5173 --strictPort > /tmp/wonderwilds-vite.log 2>&1 &
@@ -141,9 +141,8 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:5173/ > /dev/null
           npm test --prefix qa/e2e
-          WONDERWILDS_TEST_URL=http://127.0.0.1:5173 node qa/e2e/companion-smoke.mjs
           node frontend/src/learning/activity.browser.mjs
-      - name: Check training with real API and disposable PostgreSQL
+      - name: Check default authored world with real API and disposable PostgreSQL
         if: matrix.suite == 'browser'
         run: node qa/e2e/run-training-qa.mjs
       - name: Check curriculum practice inside story missions
@@ -154,13 +153,6 @@ jobs:
       - name: Check local human story review
         if: matrix.suite == 'browser'
         run: node qa/e2e/story-human-review.mjs
-      - name: Check authored story with real API and disposable PostgreSQL
-        if: matrix.suite == 'browser'
-        env:
-          WW_QA_BROWSER_TEST: qa/e2e/story-browser.mjs
-        run: |
-          node qa/e2e/run-training-qa.mjs
-          WW_STORY_SOURCE=workshop node qa/e2e/run-training-qa.mjs
       - name: Check story in the playable world
         if: matrix.suite == 'browser'
         env:

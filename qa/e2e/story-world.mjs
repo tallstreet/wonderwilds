@@ -31,11 +31,6 @@ try {
   }, { times: 1 });
   await page.goto(origin);
   await page.locator('#game canvas').waitFor();
-  await page.getByText(/Local server · progress saved/).waitFor();
-  await page.locator('#missions').click();
-  await page.locator('#story-adventure-link').click();
-  await page.waitForURL('**/?story=1');
-  await page.locator('#game canvas').waitFor();
   await page.waitForFunction(() => document.querySelector('#game')?.dataset.storyRevision === '0');
   const bootstrap = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
   const get = async path => {
@@ -140,10 +135,9 @@ try {
   await ready();
   assert.equal((await snapshot()).revision, advancedRevision);
   assert.deepEqual((await snapshot()).sceneInput.context.inventory, [{ itemId: 'planks', quantity: 3 }]);
-  await page.locator('#missions').click();
-  await page.locator('[data-story-action="accept_mission"]').click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
-  await ready();
+  await visit('npc:pip');
+  await choose('accept_mission');
+  await close();
   if ((await snapshot()).locationId !== 'bridge_bank') { await visit('route:bridge_bank'); await choose('travel'); }
   await page.setViewportSize({ width: 390, height: 844 });
   await visit('object:bridge');

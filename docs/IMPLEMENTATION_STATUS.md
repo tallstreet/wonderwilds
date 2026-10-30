@@ -5,6 +5,43 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Two content modes and a single app entry — 31 October 2026
+
+The app now always opens the Phaser story world at `/`. Guest and older
+assessed-adventure boot paths and mode-switch links have been removed from the
+entry point. Legacy `?guest=1` / `?story=1` parameters have no effect; the old demo
+and inspector HTML pages redirect to `/`. Supporting API/domain modules remain
+for assessment and internal regression coverage, not separate playable modes.
+
+No Modal credentials selects authored scenes and missions. Both proxy credentials
+select generated scenes, mission planning and repeatable neighbourhood stories
+together. Partial credentials fail configuration. Separate story/planner/exploration
+environment switches are retired. `WONDERWILDS_MODAL_ENDPOINT` is the single
+restricted endpoint override for all three providers. Existing validation, timeout,
+authentication and authored fallback boundaries remain. Both modes require the
+backend/database; no standalone guest mode is offered.
+
+At the user's request, this checkout's `wonderwilds_demo` database was dropped,
+recreated, migrated and seeded with a fresh synthetic profile/session. No new
+migration or historical compatibility-removal project was needed for this change.
+The reset also issues a new profile ID so old browser view state and uncertain
+commands cannot attach to the fresh game. Session renewal preserves the new ID.
+Earlier sections below record historical entry points and flags.
+
+Verification: frontend check passed (strict types, lint, formatting, 121 tests and
+production build); API tests passed (38, with four database tests ignored), API
+Clippy and workspace formatting passed. Desktop/phone synthetic checks covered
+all entry URLs and source labels. The real authored Phaser journey passed against
+a disposable database, including inline learning and save recovery. The generated
+neighbourhood journey passed against a loopback mock with six arrival requests,
+repeat generation, malformed output, stable saves and exact retries; startup
+confirmed all three providers enabled without flags. Accessible activity browser
+checks passed. Demo reset/session-renewal checks confirmed a fresh stable profile
+and zero story checkpoints. Screenshots were inspected and `git diff --check`
+passed. Node 26 was available; live Modal inference, hosted CI and the full
+standalone PostgreSQL integration suite were not rerun for this configuration/UI
+change. The existing bundle-size warning remains.
+
 ## Repeatable generated neighbourhood stories — 31 October 2026
 
 Arrival-time generation now invents a character name/personality, greeting, title,
@@ -15,8 +52,7 @@ There is no fixed mission-catalogue limit on repeat visits across the five curre
 neighbourhoods. Unfinished and archived stories remain stable until completed.
 Three open neighbourhood slots continue to reserve Pip's fourth slot.
 
-`WONDERWILDS_MODAL_EXPLORATION` overrides arrival generation; when unset, it follows
-`WONDERWILDS_MODAL_STORY`. Model calls run outside database locks with closed-schema
+Arrival generation now follows the shared Modal credential selection. Model calls run outside database locks with closed-schema
 output, bounded requests, no profile/session/learning context, and authentication
 plus revision checks before commit. Only supported investigation steps are exposed.
 The internal generated-travel command commits content with the arrival receipt;
@@ -1108,8 +1144,11 @@ checkpoints and both receipt logs. **Let’s do it together** reveals a server-a
 solution and completes the action with worked-example / not-assessed evidence,
 never independent success. Putting a task aside records abandonment without story
 progress. Stale bindings conflict rather than silently attaching to another task.
-The browser refreshes authoritative story state after completion and recovery;
-a failed story read retains the confirmed learning receipt and requires refresh.
+Continue returns to the original encounter's discovery reply. Inline screens
+show the narrative invitation and task; teaching explanations remain behind help
+controls. The browser refreshes authoritative story state after completion and
+recovery; a failed story read retains the confirmed learning receipt and requires
+refresh.
 
 The diagnostic inspector and original story commands remain compatible without
 academic gates. No migration, demo reset, new skill coverage, reviewed mastery
@@ -1117,3 +1156,27 @@ claim or release activation is introduced. The reusable marker preparation is an
 initial joining mechanism; narrative fit and frequency still need human playtesting.
 See [joining decisions](adr/mission-learning-joins.md) and the updated
 [curriculum mission plan](CURRICULUM_MISSION_PLAN.md).
+
+
+Validation for this slice: aggregate repository checks passed (149 shared
+fixtures, Rust/content checks, 121 frontend tests/build and legacy fixtures),
+as did the complete disposable PostgreSQL suite and the focused final atomic
+learning/story regression. Browser checks passed for inline independent/wrong/
+supported answers, lost support and atomic-completion responses through reload,
+exact retries, desktop/phone controls, generated multi-step stories and fallback,
+and guest desktop/tablet plus the existing accessible activity controls.
+Desktop and phone task screenshots were inspected. Final frontend checks and
+workspace formatting/Clippy passed. Node 26.12.0 was available rather than Node
+24; the existing bundle-size warning remains. No live model calls, child
+playtesting, hosted CI or production content approval were performed.
+
+
+Inline-learning follow-up verification: the final bridge browser journey passed,
+including old-receipt reconciliation, failed-refresh locking, visible repair and
+shared crossing. All seven authored stories passed on the default branch through
+inline supported tasks, immediate discovery replies, pause/resume, automatic
+travel, Bramble escort, gathering and mobile history. Counting/comparison pieces
+now avoid ordinal labels that reveal collection sizes; the final learning tests
+(32) and learning-crate Clippy passed. Concurrent entry-point and provider
+configuration edits were preserved; the aggregate results above describe the
+learning-integration checkpoint rather than a review of those separate changes.
