@@ -36,8 +36,9 @@ Validation: aggregate repository checks passed, including frontend type/lint/
 format, 123 tests and build; 39 learning tests include all 120 activities finishing
 once without invented mastery, canonical question variation and legacy replay.
 157 shared Rust/TypeScript contract fixtures and generated-code checks passed.
-The focused disposable PostgreSQL learning suite passed completion, new questions,
-exact retry, checkpoint/history replay, ownership, rollback, export and deletion.
+The complete disposable PostgreSQL suite passed, including completion, new
+questions, exact retry, checkpoint/history replay, ownership, rollback, export,
+deletion and migration-drift checks.
 Desktop/phone component checks and the real isolated learning journey passed
 automatic closing, persistent completion, wrong-answer replacement and lost-save
 recovery. The full authored story browser journey passed; its reload-position
