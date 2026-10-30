@@ -1,3 +1,4 @@
+import { characterPortrait } from '../character-art.ts';
 import { sceneSourceLabel } from './source-status.ts';
 import type Phaser from 'phaser';
 import type {
@@ -314,17 +315,18 @@ export class StoryWorld {
     }
     const input = this.snapshot.sceneInput;
     const mission = input?.mission;
-    const missionControls = this.markers.some((marker) => marker.id === 'npc:pip')
-      ? []
-      : (input?.availableActions ?? []).filter((item) =>
-          ['accept_mission', 'cancel_mission'].includes(item.action.type),
-        );
+    const pipPresent = this.markers.some((marker) => marker.id === 'npc:pip');
+    const missionControls = (input?.availableActions ?? []).filter(
+      (item) =>
+        item.action.type === 'cancel_mission' ||
+        (!pipPresent && item.action.type === 'accept_mission'),
+    );
     this.hooks.open(
-      `<span class="pill" data-story-missions-panel>PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2><p>${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${mission ? `<p data-story-mission-status="${mission.status}">${mission.status === 'completed' ? `Mission complete · ${escape(mission.narrative.payoff)}` : mission.status === 'abandoned' ? 'Mission paused · your progress is saved.' : escape(mission.current ?? '')}</p><ul>${mission.completed.map((text) => `<li>✓ ${escape(text)}</li>`).join('')}${mission.remaining.map((text) => `<li>${escape(text)}</li>`).join('')}</ul>` : ''}${nextStoryLabel(this.snapshot) ? `<p data-story-next>${escape(nextStoryLabel(this.snapshot)!)}</p>` : ''}${input?.context.memory.recentMissions.length ? `<section data-story-history><h3>Our adventures so far</h3><ul>${input.context.memory.recentMissions.map((text) => `<li>${escape(text)}</li>`).join('')}</ul></section>` : ''}<p id="story-world-inventory">Carrying: ${input?.context.inventory.map((item) => `${item.quantity} ${escape(item.itemId)}`).join(', ') || 'an empty bag'}</p><div class="modal-quests">${this.markers.map((marker) => `<button class="quest" data-story-visit="${escape(marker.id)}" ${this.locked() ? 'disabled' : ''}><span><strong>${escape(marker.character)}</strong><small>Walk there →</small></span></button>`).join('')}</div>${missionControls.map((item) => `<button class="secondary" data-story-action="${item.action.type}" data-story-mission-handle="${escape(item.id)}" ${this.locked() ? 'disabled' : ''}>${escape(this.snapshot.scene?.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}<p id="story-world-status" role="status">${this.commands.hasPending ? 'A previous save needs confirmation. Retry the same action.' : this.commands.needsRefresh ? 'Refresh before choosing another action.' : this.snapshot.commandBudgetExhausted ? 'This development story reached its save limit.' : 'Your adventure and activities are saved separately.'}</p><button class="secondary" data-story-refresh>Refresh progress</button>${this.commands.hasPending ? '<button class="primary" data-story-retry>Retry the same action</button>' : ''}<p><a href="/">Return to the main adventure</a> · <a href="/story.html">Story inspector</a></p>`,
+      `<header class="story-journal-heading"><span class="story-journal-icon" aria-hidden="true">✦</span><span class="pill" data-story-missions-panel>PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2></header><p class="story-premise">${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${mission ? `<p data-story-mission-status="${mission.status}">${mission.status === 'completed' ? `Mission complete · ${escape(mission.narrative.payoff)}` : mission.status === 'abandoned' ? 'Mission paused · your progress is saved.' : escape(mission.current ?? '')}</p><ul class="story-checklist">${mission.completed.map((text) => `<li class="is-complete"><span aria-hidden="true">✓</span>${escape(text)}</li>`).join('')}${mission.remaining.map((text) => `<li><span aria-hidden="true">○</span>${escape(text)}</li>`).join('')}</ul>` : ''}${nextStoryLabel(this.snapshot) ? `<p data-story-next>${escape(nextStoryLabel(this.snapshot)!)}</p>` : ''}${input?.context.memory.recentMissions.length ? `<details data-story-history><summary>Our adventures so far</summary><ul>${input.context.memory.recentMissions.map((text) => `<li>${escape(text)}</li>`).join('')}</ul></details>` : ''}<p id="story-world-inventory">Carrying: ${input?.context.inventory.map((item) => `${item.quantity} ${escape(item.itemId)}`).join(', ') || 'an empty bag'}</p><h3 class="story-section-title">Where shall we go?</h3><div class="modal-quests story-destinations">${this.markers.map((marker) => `<button class="quest" data-story-visit="${escape(marker.id)}" ${this.locked() ? 'disabled' : ''}><span class="story-destination-icon" aria-hidden="true">${marker.sprite ? characterPortrait(marker.sprite, 48) : marker.id.startsWith('route:') ? '↗' : '✦'}</span><span><strong>${escape(marker.character)}</strong><small>${marker.id.startsWith('npc:') ? 'Walk over & chat' : 'Follow the path'}</small></span><span class="quest-arrow" aria-hidden="true">→</span></button>`).join('')}</div>${missionControls.map((item) => `<button class="secondary" data-story-action="${item.action.type}" data-story-mission-handle="${escape(item.id)}" ${this.locked() ? 'disabled' : ''}>${escape(this.snapshot.scene?.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}<footer class="story-journal-footer"><p id="story-world-status" role="status">${this.commands.hasPending ? 'A previous save needs confirmation. Retry the same action.' : this.commands.needsRefresh ? 'Refresh before choosing another action.' : this.snapshot.commandBudgetExhausted ? 'This development story reached its save limit.' : 'Your adventure is saved as you go.'}</p><button class="secondary" data-story-refresh>Refresh progress</button>${this.commands.hasPending ? '<button class="primary" data-story-retry>Retry the same action</button>' : ''}<p><a href="/">Return to the main adventure</a></p></footer>`,
     );
     const learningPanel = this.learningPanel();
     if (learningPanel)
-      document.querySelector('#dialog')?.insertAdjacentHTML('afterbegin', learningPanel);
+      document.querySelector('#dialog')?.insertAdjacentHTML('beforeend', learningPanel);
     document.querySelector<HTMLButtonElement>('[data-story-refresh]')!.onclick = () =>
       void this.run(async () => {
         await this.commands.refresh();
@@ -404,8 +406,17 @@ export class StoryWorld {
           Number(a.action.type === 'cancel_mission') - Number(b.action.type === 'cancel_mission'),
       );
     const ack = characterId === 'woodcutter' ? this.snapshot.acknowledgeableEntryIds[0] : undefined;
+    if (!ack && actions.every((item) => item.action.type === 'cancel_mission')) {
+      this.hooks.close();
+      this.game.events.emit(
+        'speech',
+        marker,
+        entries.map((entry) => entry.text),
+      );
+      return;
+    }
     this.hooks.open(
-      `<span class="pill">${escape(storyPlaces[this.snapshot.locationId].name)}</span><h2 id="dialog-title">${escape(marker.character)}</h2><div data-story-dialogue>${entries.map((entry) => `<p>${escape(entry.text)}</p>`).join('')}</div><div class="grownup-actions">${ack ? '<button class="primary" data-story-continue>Continue</button>' : actions.map((item) => `<button class="${item.action.type === 'cancel_mission' ? 'secondary' : 'primary'}" data-story-action="${item.action.type}" data-story-handle="${escape(item.id)}">${escape(scene.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}</div><p id="story-world-status" role="status"></p>`,
+      `<header class="story-conversation-heading">${marker.sprite ? characterPortrait(marker.sprite, 88) : '<span class="story-object-icon" aria-hidden="true">✦</span>'}<div><span class="pill">${escape(storyPlaces[this.snapshot.locationId].name)}</span><h2 id="dialog-title">${escape(marker.character)}</h2></div></header><div data-story-dialogue>${entries.map((entry) => `<p>${escape(entry.text)}</p>`).join('')}</div><div class="grownup-actions">${ack ? '<button class="primary" data-story-continue>Continue</button>' : actions.map((item) => `<button class="${item.action.type === 'cancel_mission' ? 'secondary' : 'primary'}" data-story-action="${item.action.type}" data-story-handle="${escape(item.id)}">${escape(scene.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}</div><p id="story-world-status" role="status"></p>`,
     );
     const next = document.querySelector<HTMLButtonElement>('[data-story-continue]');
     if (next && ack)
@@ -426,11 +437,7 @@ export class StoryWorld {
       (entry) => entry.type === 'narration' || present.has(entry.speakerId),
     );
     const texts = [...new Set(entries.map((entry) => entry.text))];
-    this.hooks.open(
-      `<span class="pill">${escape(storyPlaces[this.snapshot.locationId].name)}</span><h2 id="dialog-title">${escape(marker.character)}</h2><div data-story-dialogue data-story-outcome>${texts.map((text) => `<p>${escape(text)}</p>`).join('')}</div><button class="primary" data-story-outcome-close>Continue exploring</button>`,
-    );
-    document.querySelector<HTMLButtonElement>('[data-story-outcome-close]')!.onclick = () =>
-      this.hooks.close();
+    this.game.events.emit('speech', marker, texts);
   }
   private async choose(payload: StoryPayload, marker?: WorldEncounter) {
     const action =

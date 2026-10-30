@@ -1,3 +1,4 @@
+import { SpeechBubble } from './speech-bubble.ts';
 import type {
   Progress,
   WorldEncounter,
@@ -57,6 +58,7 @@ export function createWorld(
     you!: Phaser.GameObjects.Text;
     prompt!: Phaser.GameObjects.Text;
     lastSave = 0;
+    speech!: SpeechBubble;
     paintedRegion = '';
     exitArmed = true;
     arrival?: () => void;
@@ -89,6 +91,14 @@ export function createWorld(
       this.keys = keyboard.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,SPACE') as Island['keys'];
       keyboard.addCapture(['UP', 'DOWN', 'LEFT', 'RIGHT', 'SPACE']);
       this.paint();
+      this.speech = new SpeechBubble(document.getElementById(parent)!);
+      const speak = (marker: WorldEncounter, texts: string[]) =>
+        this.speech.show(marker, texts, this.player);
+      this.game.events.on('speech', speak);
+      this.events.once('shutdown', () => {
+        this.game.events.off('speech', speak);
+        this.speech.destroy();
+      });
       this.scale.on('resize', () => this.fitCamera());
       this.input.on(
         'pointerdown',
@@ -566,6 +576,18 @@ export function createWorld(
     }
     update(t: number, delta: number) {
       if (!this.player) return;
+      this.speech.update(this.player, getState().region, (point) => {
+        const camera = this.cameras.main;
+        const rect = this.game.canvas.getBoundingClientRect();
+        return {
+          x:
+            rect.left +
+            ((point.x - camera.worldView.x) * camera.zoom * rect.width) / this.scale.width,
+          y:
+            rect.top +
+            ((point.y - camera.worldView.y) * camera.zoom * rect.height) / this.scale.height,
+        };
+      });
       if (document.querySelector('dialog[open]') || (backend?.inputLocked?.() && !this.arrival)) {
         // Do not leave a bunny suspended above its shadow while a modal is open.
         this.poseActor(this.player, 0, 0, 0);

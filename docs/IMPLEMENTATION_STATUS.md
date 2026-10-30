@@ -993,3 +993,23 @@ ignored), shared contract fixtures/generated checks, synthetic desktop/phone
 source-status browser checks for both views, and desktop/tablet guest smoke checks.
 Node 26 was used; live provider connectivity and database integration were not
 exercised for this display change.
+
+### Mission journal and in-world replies — 31 October 2026
+
+The playable story's Missions panel now emphasizes the current objective, a
+progress checklist, inventory and illustrated destinations. Optional practice
+follows the story content. Choice dialogs use character portraits and a warm
+paper/forest palette. Text-only character encounters and post-action replies
+without a further choice use anchored, non-modal speech bubbles. Main-adventure
+characters without an available activity also use bubbles. Escape, the dismiss
+button, walking away or opening a dialog clears speech; reading has no timer.
+Required presentation acknowledgements remain explicit actions, and pausing is
+always available in Missions even when Pip has only a casual reply.
+
+Validation: frontend type/lint/format, 119 unit/API tests and production build;
+desktop/tablet guest browser smoke; synthetic desktop/phone dialogue checks for
+required acknowledgements, post-action and repeat text-only speech, escaping,
+keyboard/dismissal, viewport bounds and no implicit progress writes. Desktop and
+phone screenshots were inspected. No server/domain/persistence change was made;
+real database story journeys and live generated prose were not rerun. Local Node
+26 was used; the existing bundle-size warning remains.

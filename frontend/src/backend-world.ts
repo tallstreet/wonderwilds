@@ -56,6 +56,7 @@ type Hooks = {
   apply(snapshot: GameSnapshot): void;
   visit(quest: WorldEncounter): void;
   toast(message: string): void;
+  speech(marker: WorldEncounter, texts: string[]): void;
 };
 export class BackendWorld {
   private activity?: ReturnType<typeof mountActivity>;
@@ -301,6 +302,11 @@ export class BackendWorld {
       !this.trail.returned &&
       trailReadyToReturn(this.snapshot);
     const ready = questReady(this.snapshot, quest.id);
+    if (!offer && !returning && !ready) {
+      this.hooks.close();
+      this.hooks.speech({ ...quest, character: dialogue.speaker }, [dialogue.text]);
+      return;
+    }
     this.open(
       `<div class="quest-dialogue"><span class="pill">${quest.id.startsWith('befriend-') ? 'A CREATURE TO BEFRIEND' : 'LET’S TALK'}</span><h2 id="dialog-title">${escape(dialogue.speaker)}</h2><p>${escape(dialogue.text)}</p>${offer ? '<p>Follow our trail through Clover Meadow, Starlight Cove and Peachy Orchard. Help our neighbours, meet Tansy, then come back and tell me about it.</p><button class="primary" id="trail-accept">Let’s help our neighbours</button>' : returning ? '<button class="primary" id="trail-finish">Tell Pip about our adventure</button>' : ready ? `<button class="primary" id="encounter-help">${escape(dialogue.actionLabel)}</button>` : '<p>Open Missions to see your next step. You can come back and chat any time.</p>'}<button class="secondary" id="encounter-later">Keep exploring</button></div>`,
     );

@@ -6,6 +6,7 @@ import './style.css';
 import './redesign.css';
 import './fullscreen.css';
 import './exploration.css';
+import './dialogue.css';
 import { mapImageUrl } from './mapImages.ts';
 import { createWorld } from './world.ts';
 import { heroes, heroPortrait } from './art.ts';
@@ -512,6 +513,7 @@ async function boot() {
         close: closeDialog,
         toast,
         visit: (quest) => game.events.emit('guide', quest),
+        speech: (marker, texts) => game.events.emit('speech', marker, texts),
         apply: (snapshot) => {
           state.done = completedWorldQuests(snapshot);
           render();

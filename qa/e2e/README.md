@@ -204,3 +204,9 @@ Story source display regression (synthetic API responses, no database/provider):
 start Vite, then run `WONDERWILDS_TEST_URL=http://127.0.0.1:5173 node qa/e2e/story-source-status.mjs`
 from the root, with `CHROMIUM_PATH` when needed. Covers authored, generated,
 fallback and missing metadata at desktop/phone sizes in the world and inspector.
+
+`WONDERWILDS_TEST_URL=http://127.0.0.1:5189 node qa/e2e/dialogue-polish.mjs`
+checks the mission journal and non-modal speech on desktop/phone with synthetic
+story responses. Start Vite on that port and set `CHROMIUM_PATH` if needed. It
+uses no database or provider and checks that only explicit acknowledgement
+submits a command; reading and dismissing speech do not write progress.

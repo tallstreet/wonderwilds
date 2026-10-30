@@ -1,0 +1,294 @@
+/* Warm paper, forest ink, and generous spacing keep the world close at hand. */
+#dialog:has([data-story-missions-panel]),
+#dialog:has([data-story-dialogue]),
+#dialog:has(.quest-dialogue) {
+  width: min(620px, calc(100vw - 28px));
+  padding: 30px;
+  border: 1px solid #e3dccb;
+  border-radius: 26px;
+  background: #fffdf6;
+  color: #3e5149;
+  box-shadow:
+    0 24px 90px #182c3452,
+    inset 0 0 0 6px #f5efdf;
+}
+#dialog:has([data-story-missions-panel])::backdrop,
+#dialog:has([data-story-dialogue])::backdrop,
+#dialog:has(.quest-dialogue)::backdrop {
+  background: #203b414d;
+  backdrop-filter: blur(3px);
+}
+#dialog:has([data-story-missions-panel]) h2,
+.story-conversation-heading h2,
+.quest-dialogue h2 {
+  color: #304f46;
+  font-size: clamp(25px, 4vw, 34px);
+  line-height: 1.15;
+  margin: 10px 0 12px;
+  text-wrap: balance;
+}
+#dialog:has([data-story-missions-panel]) .pill,
+.story-conversation-heading .pill,
+.quest-dialogue .pill {
+  color: #537668;
+  background: transparent;
+  padding: 0;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+#dialog:has([data-story-missions-panel]) .close,
+#dialog:has([data-story-dialogue]) .close,
+#dialog:has(.quest-dialogue) .close {
+  background: #eeeadd;
+  color: #526b60;
+  width: 44px;
+  height: 44px;
+  z-index: 1;
+}
+.story-journal-heading {
+  padding-right: 28px;
+}
+.story-journal-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-right: 10px;
+  border-radius: 12px;
+  background: #f7e8bb;
+  color: #99723c;
+}
+.story-premise {
+  line-height: 1.65;
+  color: #637269;
+}
+[data-story-mission-status] {
+  background: #eaf1e4;
+  border-left: 3px solid #7e9d72;
+  padding: 14px 16px;
+  border-radius: 0 12px 12px 0;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.story-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 24px;
+}
+.story-checklist li {
+  display: flex;
+  gap: 12px;
+  padding: 9px 4px;
+  line-height: 1.5;
+}
+.story-checklist li > span {
+  color: #6b8b61;
+  flex-shrink: 0;
+}
+.story-checklist .is-complete {
+  color: #748076;
+}
+.story-section-title {
+  font-size: 15px;
+  margin: 22px 0 12px;
+}
+.story-destinations {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.story-destinations .quest {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #e2e6d8;
+  border-radius: 16px;
+  background: #f5f6ed;
+  box-shadow: 0 3px 0 #dde3d4;
+  text-align: left;
+  min-width: 0;
+}
+.story-destinations .quest:hover:not(:disabled) {
+  background: #ecf0e2;
+  border-color: #98ae89;
+}
+.story-destinations .quest strong {
+  color: #3c5c4b;
+  font-size: 14px;
+}
+.story-destinations .quest small {
+  color: #697c6e;
+  font-size: 11px;
+  margin-top: 4px;
+}
+.story-destinations .quest-arrow {
+  margin-left: auto;
+  color: #698661;
+}
+.story-destination-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  color: #9d8452;
+  font-size: 28px;
+}
+#story-world-inventory {
+  font-size: 13px;
+  padding: 12px 16px;
+  background: #f3eee1;
+  border-radius: 12px;
+}
+[data-story-history] {
+  margin: 18px 0;
+  font-size: 14px;
+}
+[data-story-history] summary {
+  cursor: pointer;
+  padding: 10px 0;
+}
+.story-journal-footer {
+  border-top: 1px solid #e6e4d8;
+  margin-top: 24px;
+  padding-top: 12px;
+  font-size: 12px;
+  color: #6c7b70;
+}
+.story-journal-footer .secondary {
+  font-size: 12px;
+  padding: 10px 14px;
+  min-height: 44px;
+}
+#dialog .story-learning-panel {
+  margin: 24px 0 0;
+}
+.story-conversation-heading {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-right: 24px;
+}
+.story-conversation-heading > .friend-portrait {
+  flex-shrink: 0;
+}
+.story-object-icon {
+  font-size: 42px;
+  color: #b38d51;
+}
+[data-story-dialogue] {
+  font-size: 17px;
+  line-height: 1.7;
+  padding: 8px 0 16px;
+}
+[data-story-dialogue] p {
+  margin: 12px 0;
+}
+#dialog:has([data-story-dialogue]) .grownup-actions {
+  display: grid;
+  gap: 10px;
+}
+#dialog:has([data-story-dialogue]) .primary,
+#dialog:has([data-story-missions-panel]) .primary,
+#dialog:has(.quest-dialogue) .primary {
+  background: #537b60;
+  border-color: #43674e;
+  color: #fffef5;
+  box-shadow: 0 4px 0 #375940;
+  min-height: 48px;
+}
+.world-speech {
+  position: fixed;
+  z-index: 15;
+  width: min(330px, calc(100vw - 24px));
+  box-sizing: border-box;
+  border: 2px solid #dfd9bf;
+  border-radius: 22px;
+  background: #fffdf4;
+  box-shadow: 0 8px 25px #263c3633;
+  padding: 18px 48px 18px 20px;
+  color: #3c5348;
+  font-size: 15px;
+  line-height: 1.55;
+  pointer-events: auto;
+}
+.world-speech[hidden] {
+  display: none;
+}
+.world-speech::after {
+  content: '';
+  position: absolute;
+  left: var(--speech-tail, 50%);
+  bottom: -9px;
+  width: 15px;
+  height: 15px;
+  background: #fffdf4;
+  border-right: 2px solid #dfd9bf;
+  border-bottom: 2px solid #dfd9bf;
+  transform: rotate(45deg);
+}
+.world-speech > div {
+  max-height: min(38vh, 300px);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+.world-speech strong {
+  display: block;
+  color: #6b814e;
+  font-size: 13px;
+}
+.world-speech p {
+  margin: 8px 0 0;
+}
+.speech-dismiss {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: #748172;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+}
+.world-speech button:focus-visible {
+  outline: 3px solid #537b60;
+  outline-offset: -4px;
+}
+@media (max-width: 560px) {
+  #dialog:has([data-story-missions-panel]),
+  #dialog:has([data-story-dialogue]),
+  #dialog:has(.quest-dialogue) {
+    padding: 24px 20px;
+  }
+  .story-destinations {
+    grid-template-columns: 1fr;
+  }
+  .story-conversation-heading {
+    gap: 10px;
+  }
+  .story-conversation-heading .pill {
+    letter-spacing: 0.5px;
+  }
+  [data-story-dialogue] {
+    font-size: 16px;
+  }
+}
+
+#dialog:has([data-story-missions-panel]) .secondary,
+#dialog:has([data-story-dialogue]) .secondary {
+  background: #eeeedd;
+  color: #52674e;
+  border-color: #d8ddc8;
+  box-shadow: none;
+}
+.world-speech [data-story-dialogue] {
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+.world-speech [data-story-dialogue] p {
+  margin: 8px 0 0;
+}
