@@ -112,8 +112,6 @@ export function mountMissionActivity(
   let destroyed = false;
   let retryAvailable = false;
   let refreshAvailable = false;
-  let staleBinding = false;
-  let currentRevision = initialSnapshot.revision;
   const retry = document.createElement('button');
   retry.type = 'button';
   retry.className = 'primary';
@@ -129,8 +127,7 @@ export function mountMissionActivity(
   const inputs: (HTMLInputElement | HTMLButtonElement | HTMLTextAreaElement)[] = [];
   let recording = false;
   let voice: ReturnType<typeof voiceEntry> | undefined;
-  const editable = () =>
-    !busy && !complete && !staleBinding && !destroyed && !callbacks.hasPending();
+  const editable = () => !busy && !complete && !destroyed && !callbacks.hasPending();
   const drag = pointerMoves(root, () => editable() && !recording);
   const gestureHelp = document.createElement('p');
   gestureHelp.className = 'ww-mission-gesture-help';
@@ -170,30 +167,18 @@ export function mountMissionActivity(
     if (destroyed) return;
     const answer = selectedAnswer();
     const pending = callbacks.hasPending();
-    check.disabled = busy || recording || complete || staleBinding || pending || !answer;
+    check.disabled = busy || recording || complete || pending || !answer;
     hint.disabled =
-      busy ||
-      recording ||
-      complete ||
-      staleBinding ||
-      pending ||
-      currentActivity.support.hintCount >= 20;
+      busy || recording || complete || pending || currentActivity.support.hintCount >= 20;
     example.disabled =
-      busy ||
-      recording ||
-      complete ||
-      staleBinding ||
-      pending ||
-      currentActivity.support.workedExample;
+      busy || recording || complete || pending || currentActivity.support.workedExample;
     abandon.disabled = busy || recording || complete || pending;
-    together.disabled = busy || recording || complete || staleBinding || pending;
+    together.disabled = busy || recording || complete || pending;
     retry.hidden = !retryAvailable;
     retry.disabled = busy || !retryAvailable;
     refresh.hidden = !refreshAvailable;
     refresh.disabled = busy || !refreshAvailable;
-    inputs.forEach(
-      (input) => (input.disabled = busy || recording || complete || staleBinding || pending),
-    );
+    inputs.forEach((input) => (input.disabled = busy || recording || complete || pending));
     voice?.update();
     if (busy || complete || pending) drag.cancel();
     root.setAttribute('aria-busy', String(busy));
@@ -584,7 +569,13 @@ export function mountMissionActivity(
 
   function showSnapshot(snapshot: MissionLearningSnapshot) {
     if (destroyed) return;
-    currentRevision = snapshot.revision;
+    if (
+      snapshot.activeActivity?.id !== activity.id &&
+      snapshot.skills.some((skill) => skill.skillId === activity.skillId && skill.activityCompleted)
+    ) {
+      finish();
+      return;
+    }
     if (
       snapshot.activeActivity &&
       (snapshot.activeActivity.id !== activity.id ||
@@ -616,7 +607,7 @@ export function mountMissionActivity(
     update();
   }
 
-  async function recover(error: unknown) {
+  async function recover(error: unknown, operation?: () => Promise<MissionLearningSnapshot>) {
     if (destroyed) return;
     retryAvailable = callbacks.hasPending();
     if (retryAvailable) {
@@ -630,9 +621,8 @@ export function mountMissionActivity(
       return;
     }
     status.textContent = 'Checking your saved progress…';
-    const previousRevision = currentRevision;
     try {
-      // A definite conflict permits a read, never an automatic replacement write.
+      // A definite rejection permits reconciliation; uncertain writes keep their exact command.
       const snapshot = await callbacks.onRefresh();
       if (destroyed) return;
       const completed = snapshot.skills.some(
@@ -647,14 +637,10 @@ export function mountMissionActivity(
         }
         return;
       }
-      const sameQuestion = snapshot.activeActivity.variantId === activity.variantId;
-      showSnapshot(snapshot);
-      if (destroyed || complete) return;
-      staleBinding = sameQuestion && snapshot.revision === previousRevision;
+      // Keep the existing controls and answer until the retried operation has
+      // resolved. The session includes the frozen variant when sending answers.
+      showSnapshot(operation ? await operation() : snapshot);
       refreshAvailable = false;
-      status.textContent = staleBinding
-        ? 'The story has moved on since this task opened. Put this task aside, then open the current mission step.'
-        : 'Your progress is up to date. Your answer is still here; check it again when you are ready.';
     } catch {
       refreshAvailable = true;
       status.textContent = 'Saved progress could not be loaded. Refresh progress to reconnect.';
@@ -669,7 +655,7 @@ export function mountMissionActivity(
     try {
       showSnapshot(await operation());
     } catch (error) {
-      await recover(error);
+      await recover(error, operation);
     } finally {
       busy = false;
       update();

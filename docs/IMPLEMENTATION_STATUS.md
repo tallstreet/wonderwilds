@@ -5,6 +5,30 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Reconcile activity conflicts before showing recovery — 31 October 2026
+
+The activity's former generic “Progress changed” message conflated stale
+revisions, read/write contention and connection failures. Definite 409 responses
+now trigger a read-only reconciliation: confirmed completed activities close;
+a newer same-question snapshot preserves the answer for an explicit new check;
+an unchanged question/revision conflict disables obsolete task completion and
+instructs the player to put it aside and reopen the current mission step. No
+answer is automatically resubmitted or rebound to another story action. Uncertain
+writes retain their exact prepared command and original retry behavior.
+
+Mission-learning progress reads are coalesced, and command preparation waits for
+reads to settle. A read still cannot race an in-flight write or overwrite its
+confirmed response. This removes a frontend read-contention failure without
+weakening backend revision or frozen story-binding checks.
+
+Validation: frontend checks, 125 unit/API tests and production build passed.
+Desktop/phone component tests passed completed/stale/newer/offline/pending recovery
+cases and verified that reconciliation never sends an extra answer. The
+isolated real API/browser journey verifies completion recovery after a simulated
+409, as well as a real story-revision conflict that remains unmarked until the
+old task is put aside and the current step is reopened. Existing bundle-size
+warnings remain. No backend, wire contract or persistence format changed.
+
 ## Complete once, vary wrong answers, return to the world — 31 October 2026
 
 Confirmed correct answers and explicit together-completions now close the learning
@@ -1242,7 +1266,8 @@ bound story action in the same profile-locked transaction as learning evidence,
 checkpoints and both receipt logs. **Let’s do it together** reveals a server-authored
 solution and completes the action with worked-example / not-assessed evidence,
 never independent success. Putting a task aside records abandonment without story
-progress. Stale bindings conflict rather than silently attaching to another task.
+progress. The conflict-handling update below supersedes the original stale-binding
+rejection: correct learning now completes independently of an expired story step.
 Continue returns to the original encounter's discovery reply. Inline screens
 show the narrative invitation and task; teaching explanations remain behind help
 controls. The browser refreshes authoritative story state after completion and
@@ -1294,3 +1319,28 @@ synthetic desktop/phone bag checks for quantities after reload, empty state,
 keyboard dismissal/focus restoration, Missions access and no progress writes.
 Desktop and phone screenshots were inspected. Node 26 was used; no real database
 journey or live provider call was needed for this display change.
+
+### Automatic activity conflict recovery — 31 October 2026
+
+Answers and supported completions carry the issued question variant. Rust merges
+these over stale learning revisions under the profile lock and recovers older
+issued variants from owned, validated receipts, preserving support and first-check
+history. A correct answer completes and closes the activity. The browser handles
+definite conflicts with a background read and bounded resubmission of the same
+answer/variant, and recognizes already completed activities. Pending commands
+survive a failed reconciliation read; uncertain writes retain exact bytes and IDs.
+
+New frozen story bindings retain semantic actions. After a revision change, the
+server applies only the same still-legal action in the original mission/generation
+and location. Moved-away, already performed, expired or budget-exhausted steps
+complete learning without further story effects. Older saved bindings remain
+readable and skip story effects if their revision changed. No migration or demo
+reset is needed; release and content review gates remain pending.
+
+Validation: aggregate repository checks passed (including 163 contract fixtures
+and 129 frontend tests), the complete disposable PostgreSQL suite passed, and the
+final learning database regression passed after the stale-incorrect-answer check
+was added. Real API/browser tests passed for automatic closure and travel-away /
+return reconciliation; component and standard browser suites passed at desktop
+and phone sizes, including keyboard/touch controls, preserved answers and mocked
+STT. No live provider calls or persistent demo data changes were made.

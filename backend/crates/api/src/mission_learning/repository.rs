@@ -479,6 +479,49 @@ impl PostgresRepository {
         Ok(())
     }
 
+    /// Choice IDs are reused across variants. Recover only a question actually
+    /// issued to this profile and encounter, never reinterpret an old answer.
+    fn issued_question(
+        tx: &mut Transaction<'_>,
+        profile: &str,
+        active: &ActiveActivity,
+        variant: &str,
+    ) -> Result<MissionActivity, Error> {
+        let (current, _) = Self::active_activity(active)?;
+        if current.view.variant_id == variant {
+            return Ok(current);
+        }
+        let row = tx.query_opt(
+            "SELECT request,response,digest FROM wonderwilds.mission_learning_command_receipts WHERE profile_id=$1::text::uuid AND response #>> '{activeActivity,id}'=$2 AND response #>> '{activeActivity,variantId}'=$3 ORDER BY revision DESC LIMIT 1",
+            &[&profile, &active.id, &variant],
+        ).map_err(|_| Error::Unavailable)?.ok_or(Error::RevisionConflict)?;
+        let request: Value = row.get(0);
+        let response: Value = row.get(1);
+        let digest: String = row.get(2);
+        if digest != persistence::digest(&json!([request, response])) {
+            return Err(Error::Unavailable);
+        }
+        validate("MissionLearningSnapshot", &response).map_err(|_| Error::Unavailable)?;
+        let view = &response["activeActivity"];
+        let seed = variant
+            .rsplit('-')
+            .next()
+            .and_then(|n| n.parse::<u64>().ok())
+            .ok_or(Error::RevisionConflict)?;
+        let mut frozen = active.clone();
+        frozen.seed = seed;
+        frozen.modern_tasks = view["contentVersion"] == "mission-practice-draft-3";
+        let (question, _) = Self::active_activity(&frozen)?;
+        if question.view.variant_id != variant
+            || question.view.skill_id != active.skill_id
+            || serde_json::to_value(&question.view.task).map_err(|_| Error::Unavailable)?
+                != view["task"]
+        {
+            return Err(Error::RevisionConflict);
+        }
+        Ok(question)
+    }
+
     fn retry(
         tx: &mut Transaction<'_>,
         profile: &str,
@@ -535,7 +578,14 @@ impl Repository for PostgresRepository {
         let expected = request["expectedRevision"]
             .as_u64()
             .ok_or(Error::InvalidInput)?;
-        if expected != state.revision {
+        let payload = &request["payload"];
+        let variant = payload["variantId"].as_str();
+        let targeted_completion =
+            matches!(payload["type"].as_str(), Some("answer" | "finish_together"))
+                && variant.is_some();
+        // The profile lock still serializes writes. A frozen issued question can
+        // merge over unrelated progress without replacing any newer state.
+        if expected > state.revision || (expected != state.revision && !targeted_completion) {
             return Err(Error::RevisionConflict);
         }
         persistence::take_budget(&mut tx, &identity.profile_id, "mission_learning")?;
@@ -609,7 +659,11 @@ impl Repository for PostgresRepository {
                 if payload["encounterId"].as_str() != Some(active.id.as_str()) {
                     return Err(Error::NotFound);
                 }
-                let (activity, _) = Self::active_activity(active)?;
+                let activity = if let Some(variant) = variant {
+                    Self::issued_question(&mut tx, &identity.profile_id, active, variant)?
+                } else {
+                    Self::active_activity(active)?.0
+                };
                 let answer: MissionAnswer = serde_json::from_value(payload["answer"].clone())
                     .map_err(|_| Error::InvalidInput)?;
                 let support = Support {
@@ -769,7 +823,11 @@ impl Repository for PostgresRepository {
                         )?;
                     }
                 }
-                let (activity, _) = Self::active_activity(&active)?;
+                let activity = if let Some(variant) = variant {
+                    Self::issued_question(&mut tx, &identity.profile_id, &active, variant)?
+                } else {
+                    Self::active_activity(&active)?.0
+                };
                 let sequence = state.policy.last_sequence.saturating_add(1);
                 let evidence = Self::evidence(
                     identity,

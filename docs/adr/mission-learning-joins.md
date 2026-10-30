@@ -21,14 +21,27 @@ The activity is persisted before presentation. Existing standalone begin command
 and saved activities remain readable for compatibility; the world no longer
 advertises a separate practice launch.
 
-A correct answer executes the bound story action inside the learning transaction.
+A correct answer completes learning and, while still eligible, executes the bound
+story action inside the learning transaction.
 The transaction saves the story checkpoint and its ordinary replayable domain
 receipt, learning checkpoint, evidence and original-response learning receipt.
 No new database table or applied-migration change is required. Learning-command
 receipt lookup precedes revision checks, so uncertain retries cannot duplicate
-story effects. Any failure rolls both streams back. Story changes after issuance
-make completion conflict; the child may put the stale activity aside and reopen
-the current action. Bindings are not silently moved onto a new generated story.
+story effects. Any persistence failure rolls both streams back. A new optional
+semantic action permits re-resolving an older story revision only when the same
+action remains legal for the original mission/generation and location. Expired
+steps, already performed actions and exhausted story budgets skip story effects
+while saving correct learning completion. Legacy bindings without the action skip
+story effects on changed revisions. No binding moves onto a replacement mission.
+
+Optional answer/completion `variantId` identifies the issued question. With the
+profile locked, an older learning revision may merge over newer progress. Old
+question variants are recovered only from owned, validated, digest-checked
+receipts; reused choice IDs are assessed against that original question. Cumulative
+support/checks remain intact. Unknown variants and future revisions are rejected.
+A definite rejection permits a background read and bounded retry preserving the
+answer and variant; uncertain writes retry the exact prepared command. Confirmed
+completion closes automatically, including when another tab completed it first.
 
 An explicit finish_together command reveals a server-authored solution and runs
 the same bound action. Its event is worked_example / not_assessed with support

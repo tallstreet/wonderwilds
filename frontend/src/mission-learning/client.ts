@@ -201,7 +201,49 @@ export class MissionLearningSession {
     return this.retry();
   }
 
-  async retry() {
+  async retry(): Promise<MissionLearningSnapshot> {
+    if (this.active || !this.pending)
+      throw new Error('There is no practice action ready to retry.');
+    // Freeze the intent, including the issued question. Only a definitive
+    // rejection permits preparing a replacement command at a newer revision.
+    const original = JSON.parse(this.pending) as MissionLearningCommand;
+    const payload = original.payload;
+    const targeted =
+      (payload.type === 'answer' || payload.type === 'finish_together') && payload.variantId;
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        return await this.sendPending();
+      } catch (error) {
+        if (
+          !targeted ||
+          !(error instanceof ApiFailure) ||
+          (error.code !== 'REVISION_CONFLICT' && error.code !== 'NOT_FOUND') ||
+          attempt >= 2
+        )
+          throw error;
+        const snapshot = await this.refresh();
+        const completed = snapshot.skills.some(
+          (skill) => payload.variantId?.startsWith(`${skill.skillId}-`) && skill.activityCompleted,
+        );
+        if (completed && snapshot.activeActivity?.id !== payload.encounterId) {
+          this.storage.removeItem(this.storageKey);
+          this.pending = undefined;
+          return snapshot;
+        }
+        if (snapshot.activeActivity?.id !== payload.encounterId) throw error;
+        const command: MissionLearningCommand = {
+          ...original,
+          commandId: this.commandId(),
+          expectedRevision: snapshot.revision,
+        };
+        const body = JSON.stringify(command);
+        this.storage.setItem(this.storageKey, body);
+        this.pending = body;
+      }
+    }
+  }
+
+  private async sendPending() {
     if (this.active || !this.pending)
       throw new Error('There is no practice action ready to retry.');
     this.active = true;
@@ -214,8 +256,13 @@ export class MissionLearningSession {
       return result;
     } catch (error) {
       if (error instanceof ApiFailure && error.code === 'REVISION_CONFLICT') {
-        this.storage.removeItem(this.storageKey);
-        this.pending = undefined;
+        const payload = (JSON.parse(this.pending!) as MissionLearningCommand).payload;
+        if (
+          !((payload.type === 'answer' || payload.type === 'finish_together') && payload.variantId)
+        ) {
+          this.storage.removeItem(this.storageKey);
+          this.pending = undefined;
+        }
         this.reconcile = true;
       }
       throw error;

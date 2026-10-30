@@ -388,34 +388,27 @@ try {
   await page.locator('.ww-mission-activity').waitFor();
   const third=(await learningSnapshot()).activeActivity;
   assert.ok(!['M01','M03'].includes(third.skillId));
-  // A real story-revision conflict must not be mistaken for completed learning.
+  // Travel changes story revisions while the original step remains legal.
+  // A correct answer must finish the activity and apply that same action once.
   let moved = await storySnapshot();
   const away = moved.sceneInput.availableActions.find(a=>a.action.type==='travel' && a.action.destinationId==='workshop');
   moved = await sendStory(moved,{type:'choose',actionId:away.id},'stale-task-away');
   const back = moved.sceneInput.availableActions.find(a=>a.action.type==='travel' && a.action.destinationId==='bridge_bank');
   moved = await sendStory(moved,{type:'choose',actionId:back.id},'stale-task-back');
-  await page.getByRole('button',{name:'Let’s do it together',exact:true}).click();
-  await page.getByText('The story has moved on since this task opened. Put this task aside, then open the current mission step.',{exact:true}).waitFor();
-  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).activityCompleted,false);
-  assert.equal((await storySnapshot()).revision,moved.revision);
-  assert.equal(await page.getByRole('button',{name:'Let’s do it together',exact:true}).isDisabled(),true);
-  await page.getByRole('button',{name:'Put this task aside',exact:true}).click();
+  const target = third.task.promptMode === 'more'
+    ? Math.max(...third.task.collections.map(c=>c.items.length))
+    : Math.min(...third.task.collections.map(c=>c.items.length));
+  const group = third.task.collections.find(c=>c.items.length===target);
+  await page.locator(`input[value="${group.id}"]`).check();
+  await page.getByRole('button',{name:'Check my idea',exact:true}).click();
   await page.locator('dialog').waitFor({state:'hidden'});
-  await page.waitForFunction(revision=>Number(document.querySelector('#game')?.dataset.storyRevision)===revision,moved.revision);
-  await page.locator('#missions').click();
-  await page.locator('[data-story-visit="object:bridge"]').click();
-  await page.locator('[data-story-action="assemble"]').click();
-  await page.locator('.ww-mission-activity').waitFor();
-  const reopened=(await learningSnapshot()).activeActivity;
-  assert.notEqual(reopened.id,third.id);
-  await page.getByRole('button',{name:'Let’s do it together',exact:true}).click();
-  await page.locator('dialog').waitFor({state:'hidden'});
-  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===reopened.skillId).activityCompleted,true);
+  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).activityCompleted,true);
+  assert.equal((await storySnapshot()).revision,moved.revision+1);
   assert.equal(await page.locator('#game').getAttribute('data-story-bridge'),'repaired');
   await page.reload(); await page.locator('#game canvas').waitFor();
   const restored=await learningSnapshot();
   assert.equal(restored.activeActivity,undefined);
-  assert.ok(!['M01','M03',reopened.skillId].includes(restored.frontierSkillId));
+  assert.ok(!['M01','M03',third.skillId].includes(restored.frontierSkillId));
   assert.deepEqual(await get('/api/v1/game'),originalGame);
   assert.equal(await page.evaluate(()=>localStorage.getItem('starwhisker.meadow.v1')),guestSave);
   assert.deepEqual(errors,[]);

@@ -256,8 +256,8 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     );
     let supported_answer = command(
         "supported-answer",
-        2,
-        json!({"type":"answer","encounterId":activity["id"],"answer":answer_for(&activity)}),
+        1, // Another tab added the hint after this answer was prepared.
+        json!({"type":"answer","encounterId":activity["id"],"variantId":activity["variantId"],"answer":answer_for(&activity)}),
     );
     let completed = repo.execute(&identity_a, &supported_answer).unwrap();
     assert_eq!(completed["lastFeedback"]["result"], "correct");
@@ -314,6 +314,16 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         repo.read(&identity_a).unwrap()["activeActivity"],
         incorrect["activeActivity"]
     );
+    // Another tab still displays the old question. Its wrong answer must be
+    // checked against that question, then receive a different variation.
+    let old_wrong = command(
+        "old-variant-wrong",
+        second_begun["revision"].as_u64().unwrap(),
+        json!({"type":"answer","encounterId":second_activity["id"],"variantId":second_activity["variantId"],"answer":wrong}),
+    );
+    let incorrect = repo.execute(&identity_a, &old_wrong).unwrap();
+    assert_eq!(incorrect["lastFeedback"]["result"], "incorrect");
+    assert_ne!(incorrect["activeActivity"]["task"], second_activity["task"]);
     let hint = command(
         "hint-second",
         incorrect["revision"].as_u64().unwrap(),
@@ -326,10 +336,20 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
             .unwrap()
             .contains("object")
     );
+    let forged = command(
+        "unissued-question",
+        second_begun["revision"].as_u64().unwrap(),
+        json!({"type":"answer","encounterId":second_activity["id"],"variantId":"M03-invented-00","answer":answer_for(&second_activity)}),
+    );
+    assert_eq!(
+        repo.execute(&identity_a, &forged),
+        Err(Error::RevisionConflict)
+    );
+    assert_eq!(repo.read(&identity_a).unwrap(), hinted);
     let retry_correct = command(
         "retry-correct",
-        hinted["revision"].as_u64().unwrap(),
-        json!({"type":"answer","encounterId":second_activity["id"],"answer":answer_for(&hinted["activeActivity"])}),
+        second_begun["revision"].as_u64().unwrap(),
+        json!({"type":"answer","encounterId":second_activity["id"],"variantId":second_activity["variantId"],"answer":answer_for(&second_activity)}),
     );
     let second_completed = repo.execute(&identity_a, &retry_correct).unwrap();
     assert_eq!(second_completed["lastFeedback"]["result"], "correct");
@@ -751,29 +771,66 @@ fn exercise_inline_steps(admin: &mut Client, restricted: &str, parent: &str) {
     let stale_finish = command(
         "inline-stale-finish",
         third["revision"].as_u64().unwrap(),
-        json!({"type":"finish_together","encounterId":third["activeActivity"]["id"]}),
+        json!({"type":"answer","encounterId":third["activeActivity"]["id"],"variantId":third["activeActivity"]["variantId"],"answer":answer_for(&third["activeActivity"])}),
     );
-    assert_eq!(
-        repo.execute(&identity, &stale_finish),
-        Err(Error::RevisionConflict)
-    );
+    // The child moved elsewhere: save the correct academic answer and close,
+    // without performing an action at the old location or granting its reward.
+    let completed = repo.execute(&identity, &stale_finish).unwrap();
+    assert!(completed.get("activeActivity").is_none());
+    assert_eq!(completed["lastFeedback"]["result"], "correct");
     assert_eq!(story.read(&identity).unwrap(), moved);
-    assert_eq!(
-        repo.read(&identity).unwrap()["activeActivity"],
-        third["activeActivity"]
+    assert_eq!(repo.execute(&identity, &stale_finish).unwrap(), completed);
+    assert_eq!(story.read(&identity).unwrap(), moved);
+    story.verify_history(&identity).unwrap();
+    // The story action was completed elsewhere before the child saved: finish
+    // learning without repeating that action, its inventory effect or rewards.
+    let returned = travel(
+        &story,
+        &identity,
+        third_story["locationId"].as_str().unwrap(),
     );
-    let abandoned = repo
+    let fourth = repo
+        .execute(
+            &identity,
+            &begin_step(&returned, &completed, "inline-begin-4"),
+        )
+        .unwrap();
+    let external = returned["sceneInput"]["availableActions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|a| {
+            matches!(
+                a["action"]["type"].as_str(),
+                Some("inspect" | "collect" | "exchange" | "assemble")
+            )
+        })
+        .unwrap();
+    let externally_done = story
         .execute(
             &identity,
             &command(
-                "inline-put-aside",
-                third["revision"].as_u64().unwrap(),
-                json!({"type":"abandon","encounterId":third["activeActivity"]["id"]}),
+                "inline-completed-elsewhere",
+                returned["revision"].as_u64().unwrap(),
+                json!({"type":"choose","actionId":external["id"]}),
             ),
         )
         .unwrap();
-    assert!(abandoned.get("activeActivity").is_none());
-    assert_eq!(story.read(&identity).unwrap(), moved);
+    let later_answer = command(
+        "inline-answer-after-external-completion",
+        fourth["revision"].as_u64().unwrap(),
+        json!({"type":"answer","encounterId":fourth["activeActivity"]["id"],"variantId":fourth["activeActivity"]["variantId"],"answer":answer_for(&fourth["activeActivity"])}),
+    );
+    let later_completed = repo.execute(&identity, &later_answer).unwrap();
+    assert_eq!(later_completed["lastFeedback"]["result"], "correct");
+    assert!(later_completed.get("activeActivity").is_none());
+    assert_eq!(story.read(&identity).unwrap(), externally_done);
+    assert_eq!(
+        repo.execute(&identity, &later_answer).unwrap(),
+        later_completed
+    );
+    assert_eq!(story.read(&identity).unwrap(), externally_done);
+    story.verify_history(&identity).unwrap();
     let mut client = Client::connect(restricted, NoTls).unwrap();
     let mut tx = client.transaction().unwrap();
     PostgresRepository::own_profile(&mut tx, &identity).unwrap();

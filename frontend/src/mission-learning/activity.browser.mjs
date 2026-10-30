@@ -76,7 +76,7 @@ try {
         window.refreshes = 0;
         window.cancelCount = 0;
         window.pending = false;
-        const snapshot = { revision: 1, activeActivity: activity };
+        const snapshot = { revision: 1, activeActivity: activity, skills: [] };
         window.component = mountMissionActivity(
           document.querySelector('main'),
           activity,
@@ -85,11 +85,18 @@ try {
             hasPending: () => window.pending,
             onAttempt: async (answer) => {
               window.calls.push(answer);
-              if (recovery) {
+              if (recovery && window.calls.length === 1) {
                 if (recovery === 'pending') window.pending = true;
                 throw new ApiFailure('REVISION_CONFLICT', 409);
               }
-              return snapshot;
+              return recovery
+                ? {
+                    ...snapshot,
+                    activeActivity: undefined,
+                    skills: [{ skillId: activity.skillId, activityCompleted: true }],
+                    lastFeedback: { result: 'correct', message: 'Saved.', completed: true },
+                  }
+                : snapshot;
             },
             onSupport: async (kind) => ({
               ...snapshot,
@@ -103,11 +110,14 @@ try {
             onRefresh: async () => {
               window.refreshes++;
               if (recovery === 'offline') throw new Error('Unavailable');
-              if (recovery === 'completed')
+              if (recovery === 'completed' || recovery === 'completed-other')
                 return {
                   ...snapshot,
                   revision: 2,
-                  activeActivity: undefined,
+                  activeActivity:
+                    recovery === 'completed-other'
+                      ? { ...activity, id: 'another-question' }
+                      : undefined,
                   skills: [{ skillId: activity.skillId, activityCompleted: true }],
                   lastFeedback: { result: 'correct', message: 'Saved.', completed: true },
                 };
@@ -119,6 +129,8 @@ try {
             onFinishTogether: async () => {
               window.calls.push('together');
               return {
+                ...snapshot,
+                activeActivity: undefined,
                 lastFeedback: {
                   result: 'assisted',
                   message: 'We explored together.',
@@ -279,35 +291,24 @@ try {
       0,
       'Transcription cannot substitute for spelling',
     );
-    // A conflict is reconciled by reading saved state, never by replaying a new write.
-    for (const recovery of ['completed', 'stale', 'newer', 'offline', 'pending']) {
+    // Definite conflicts reconcile and automatically retry the preserved answer.
+    for (const recovery of [
+      'completed',
+      'completed-other',
+      'stale',
+      'newer',
+      'offline',
+      'pending',
+    ]) {
       await page.evaluate(([task, mode]) => window.mount(task, false, mode), [cards(), recovery]);
       await page.locator('input[value="a"]').check();
       await check().click();
-      assert.equal(
-        await page.evaluate(() => window.calls.length),
-        1,
-        'Conflict recovery never submits another answer',
-      );
-      if (recovery === 'completed') {
-        assert.equal(await page.locator('.ww-mission-activity').isVisible(), false);
+      if (['completed', 'completed-other', 'stale', 'newer'].includes(recovery)) {
+        await page.locator('.ww-mission-activity').waitFor({ state: 'hidden' });
         assert.equal(await page.evaluate(() => window.continued), 1);
-      } else if (recovery === 'stale') {
-        await page
-          .getByText(
-            'The story has moved on since this task opened. Put this task aside, then open the current mission step.',
-            { exact: true },
-          )
-          .waitFor();
-        assert.equal(await check().isDisabled(), true);
-        assert.equal(
-          await page.getByRole('button', { name: 'Leave practice', exact: true }).isEnabled(),
-          true,
-        );
-      } else if (recovery === 'newer') {
-        assert.equal(await page.locator('input[value="a"]').isChecked(), true);
-        assert.equal(await check().isEnabled(), true);
-        assert.equal(await page.evaluate(() => window.continued), 0);
+        const answers = await page.evaluate(() => window.calls);
+        assert.equal(answers.length, recovery.startsWith('completed') ? 1 : 2);
+        if (answers.length === 2) assert.deepEqual(answers[0], answers[1]);
       } else if (recovery === 'pending') {
         assert.equal(
           await page.evaluate(() => window.refreshes),

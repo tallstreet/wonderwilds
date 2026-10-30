@@ -58,3 +58,29 @@ check history remain cumulative, so a corrected answer cannot become a fresh
 independent first check. Exact lost-response retries return the already issued
 variation instead of generating another. Legacy active tasks retain their frozen
 factory; newly issued tasks use `mission-practice-draft-3`.
+
+## Revision-conflict recovery
+
+Answers and supported completions include the frozen `variantId`. Under the
+profile lock, Rust can merge these over a stale learning revision while preserving
+newer support/check history. If another check changed the question, Rust recovers
+the original issued question from this profile's validated receipt, so reused
+choice IDs cannot change the meaning of the answer. Unknown variants fail closed.
+
+A definite conflict triggers a background read and bounded automatic retry of
+the same answer and variant. Already confirmed completion closes immediately,
+even if another activity has since opened. The controls retain the answer during
+reconciliation; children do not need to refresh, check again or put the task aside.
+The rejected command is retained until the read succeeds and a replacement is
+prepared. Uncertain writes keep the exact body/ID/revision, including across reload.
+
+Story changes do not reject correct learning completion. New inline bindings
+retain their semantic action. It is re-resolved at the latest revision only when
+still legal for the original mission/generation and location. An expired or
+already performed step adds no story effect; the learning activity still completes
+and closes. Old bindings without semantic actions remain readable and complete
+learning safely, but a changed revision skips their story effect.
+
+Concurrent reads share a request, and preparing an answer waits for them. Reads
+remain forbidden during a submitted command. Transport failures retain the exact
+pending command and its retry UI, rather than preparing another write.

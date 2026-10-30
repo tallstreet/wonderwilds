@@ -35,6 +35,8 @@ pub(crate) fn mission_learning_context(
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct InlineStep {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action: Option<wonderwilds_domain::story::Action>,
     pub action_id: String,
     pub revision: u64,
     pub mission_id: String,
@@ -110,6 +112,7 @@ pub(crate) fn inline_step(
             .to_owned()
         });
     Ok(InlineStep {
+        action: Some(action),
         action_id: action_id.to_owned(),
         revision,
         mission_id: neighbour.map_or_else(
@@ -122,26 +125,54 @@ pub(crate) fn inline_step(
     })
 }
 
-/// Commit the bound story action in the caller's learning transaction. A stale
-/// joining point cannot become a different task, even after travel or regeneration.
+/// Complete learning even when its original story step has expired. Only apply
+/// the story effect if the same semantic action is still legal for that mission
+/// (including neighbour generation) and location, under the profile lock.
 pub(crate) fn complete_inline_step(
     tx: &mut Transaction<'_>,
     identity: &Identity,
     step: &InlineStep,
     learning_command_id: &str,
 ) -> Result<(), Error> {
-    let current = inline_step(tx, identity, &step.action_id, step.revision)?;
-    // Copy edits must not invalidate a frozen activity. Recheck mechanical
-    // identity; keep the originally issued label and introduction unchanged.
-    if current.mission_id != step.mission_id || current.location_id != step.location_id {
-        return Err(Error::RevisionConflict);
-    }
     let state = load(tx, identity)?;
+    if state.command_budget_exhausted() {
+        return Ok(());
+    }
+    let action_id = if state.revision() == step.revision {
+        step.action_id.clone()
+    } else {
+        let Some(action) = &step.action else {
+            return Ok(());
+        };
+        let scene = wonderwilds_director::story::build_scene_input(&state)
+            .map_err(|_| Error::Unavailable)?;
+        let encoded = serde_json::to_value(action).map_err(|_| Error::Unavailable)?;
+        let Some(candidate) = scene["availableActions"]
+            .as_array()
+            .ok_or(Error::Unavailable)?
+            .iter()
+            .find(|candidate| candidate["action"] == encoded)
+        else {
+            return Ok(());
+        };
+        candidate["id"]
+            .as_str()
+            .ok_or(Error::Unavailable)?
+            .to_owned()
+    };
+    let current = match inline_step(tx, identity, &action_id, state.revision()) {
+        Ok(current) => current,
+        Err(Error::RevisionConflict) => return Ok(()),
+        Err(error) => return Err(error),
+    };
+    if current.mission_id != step.mission_id || current.location_id != step.location_id {
+        return Ok(());
+    }
     let id = format!(
         "learning-step-{}",
         crate::persistence::digest(&serde_json::json!(learning_command_id))
     );
-    let request = serde_json::json!({"schemaVersion":"1.0","commandId":id,"expectedRevision":step.revision,"payload":{"type":"choose","actionId":step.action_id}});
+    let request = serde_json::json!({"schemaVersion":"1.0","commandId":id,"expectedRevision":state.revision(),"payload":{"type":"choose","actionId":action_id}});
     crate::persistence::take_budget(tx, &identity.profile_id, "story")?;
     let (next, _) = super::execute(&state, &request)?;
     let response = saved_snapshot(tx, identity, &next)?;

@@ -704,7 +704,8 @@
           "type": "object",
           "properties": {
             "type": { "const": "finish_together", "type": "string" },
-            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 }
+            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "variantId": { "type": "string", "minLength": 1, "maxLength": 120 }
           },
           "required": ["type", "encounterId"], "additionalProperties": false
         },
@@ -719,6 +720,7 @@
           "properties": {
             "type": { "const": "answer", "type": "string" },
             "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "variantId": { "type": "string", "minLength": 1, "maxLength": 120 },
             "answer": { "$ref": "#/$defs/MissionLearningAnswer" }
           },
           "required": ["type", "encounterId", "answer"],

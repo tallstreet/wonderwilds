@@ -843,6 +843,8 @@ pub struct MissionLearningPayloadVariant1 {
 pub struct MissionLearningPayloadVariant2 {
     pub r#type: MissionLearningPayloadVariant2Type,
     pub encounter_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variant_id: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -856,6 +858,8 @@ pub struct MissionLearningPayloadVariant3 {
 pub struct MissionLearningPayloadVariant4 {
     pub r#type: MissionLearningPayloadVariant4Type,
     pub encounter_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variant_id: Option<String>,
     pub answer: MissionLearningAnswer,
 }
 

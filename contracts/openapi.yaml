@@ -795,7 +795,7 @@
     "/api/v1/mission-learning/commands": {
       "post": {
         "operationId": "executeMissionLearningCommand",
-        "description": "begin_step binds a supported story actionId and storyRevision. Correct answers or finish_together atomically commit learning evidence and that story action. Assisted completion is not a correct independent answer. Stale story bindings conflict; abandon puts the task aside without story progress. Exact retries return the original response.",
+        "description": "begin_step binds a supported story actionId and storyRevision. Correct answers or finish_together commit learning evidence. Optional variantId identifies an issued question and allows merging completion over an older learning revision. Answer IDs are assessed against that frozen question. The same story action is committed atomically only while still legal for the original mission/generation and location; expired story bindings do not block learning completion. Assisted completion is not a correct independent answer. Exact retries return the original response.",
         "responses": {
           "200": {
             "description": "Successful response. A repeated exact command returns its original snapshot.",

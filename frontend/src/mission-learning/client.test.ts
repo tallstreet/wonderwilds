@@ -117,7 +117,7 @@ test('uncertain mission-learning write reloads and retries the exact command byt
   assert.equal(store.values.size, 0);
 });
 
-test('revision conflict clears uncertain command and requires an explicit refresh', async () => {
+test('legacy begin conflicts stay strict and require an explicit refresh', async () => {
   const store = storage();
   let sent = 0;
   const session = new MissionLearningSession(
@@ -220,4 +220,187 @@ test('a progress read cannot race a submitted command or replace its confirmed r
   finish(snapshot(2));
   await write;
   assert.equal(session.snapshot?.revision, 2);
+});
+
+function issuedSnapshot(
+  revision: number,
+  variantId = 'M03-practice-v3-00',
+): MissionLearningSnapshot {
+  return {
+    ...snapshot(revision),
+    activeActivity: {
+      schemaVersion: '1.0',
+      id: 'issued-question',
+      skillId: 'M03',
+      contentVersion: 'mission-practice-draft-3',
+      variantId,
+      contextId: 'counting',
+      representation: 'collection',
+      presentation: {
+        representation: 'collection',
+        title: 'Count',
+        objective: 'Count objects',
+        lessonText: 'Count each once.',
+        prompt: 'How many?',
+        context: 'A picnic',
+      },
+      task: {
+        kind: 'count_collection',
+        layout: 'scattered',
+        objects: [{ id: 'one', label: 'apple' }],
+        choices: [
+          { id: 'a', label: '1', value: 1 },
+          { id: 'b', label: '2', value: 2 },
+        ],
+      },
+      support: { hintCount: 0, workedExample: false, readAloud: false },
+    },
+  };
+}
+
+test('a definite conflict automatically saves the original answer and variant at the latest revision', async () => {
+  const bodies: string[] = [];
+  let reads = 0;
+  let ids = 0;
+  const store = storage();
+  const session = new MissionLearningSession(
+    {
+      snapshot: async () =>
+        ++reads === 1 ? issuedSnapshot(3) : issuedSnapshot(5, 'M03-practice-v3-01'),
+      send: async (body) => {
+        bodies.push(body);
+        if (bodies.length === 1) throw new ApiFailure('REVISION_CONFLICT', 409);
+        return {
+          ...snapshot(6),
+          lastFeedback: { result: 'correct', message: 'That works!', completed: true },
+        };
+      },
+    },
+    'profile-auto',
+    store,
+    () => `auto-${++ids}`,
+  );
+  await session.refresh();
+  const payload = {
+    type: 'answer',
+    encounterId: 'issued-question',
+    variantId: 'M03-practice-v3-00',
+    answer: { kind: 'choice', choiceId: 'a' },
+  } as const;
+  const result = await session.choose(payload);
+  assert.equal(result.lastFeedback?.completed, true);
+  const first = JSON.parse(bodies[0]!);
+  const second = JSON.parse(bodies[1]!);
+  assert.notEqual(first.commandId, second.commandId);
+  assert.equal(second.expectedRevision, 5);
+  assert.deepEqual(first.payload, second.payload);
+  assert.equal(store.values.size, 0);
+});
+
+test('uncertain recovery preserves the replacement command exactly across reload', async () => {
+  const store = storage();
+  const bodies: string[] = [];
+  let ids = 0;
+  const client = {
+    snapshot: async () => issuedSnapshot(7),
+    send: async (body: string) => {
+      bodies.push(body);
+      if (bodies.length === 1) throw new ApiFailure('REVISION_CONFLICT', 409);
+      if (bodies.length === 2) throw new ApiFailure('UNAVAILABLE', 0);
+      return snapshot(8);
+    },
+  };
+  const original = new MissionLearningSession(client, 'profile-lost', store, () => `lost-${++ids}`);
+  await original.refresh();
+  await assert.rejects(
+    original.choose({
+      type: 'answer',
+      encounterId: 'issued-question',
+      variantId: 'M03-practice-v3-00',
+      answer: { kind: 'choice', choiceId: 'a' },
+    }),
+  );
+  assert.equal(original.hasPending, true);
+  const resumed = new MissionLearningSession(client, 'profile-lost', store);
+  await resumed.refresh();
+  await resumed.retry();
+  assert.equal(bodies[1], bodies[2]);
+  assert.equal(store.values.size, 0);
+});
+
+test('already completed activities reconcile without resending an answer or reopening another activity', async () => {
+  const store = storage();
+  let reads = 0;
+  let sends = 0;
+  const finished = {
+    ...issuedSnapshot(6),
+    activeActivity: { ...issuedSnapshot(6).activeActivity!, id: 'another-question' },
+  };
+  finished.skills[0]!.activityCompleted = true;
+  const session = new MissionLearningSession(
+    {
+      snapshot: async () => (++reads === 1 ? issuedSnapshot(3) : finished),
+      send: async () => {
+        sends++;
+        throw new ApiFailure('REVISION_CONFLICT', 409);
+      },
+    },
+    'profile-finished',
+    store,
+  );
+  await session.refresh();
+  const result = await session.choose({
+    type: 'answer',
+    encounterId: 'issued-question',
+    variantId: 'M03-practice-v3-00',
+    answer: { kind: 'choice', choiceId: 'a' },
+  });
+  assert.equal(result, finished);
+  assert.equal(sends, 1);
+  assert.equal(store.values.size, 0);
+});
+
+test('a failed conflict reconciliation read preserves the answer across reload', async () => {
+  const store = storage();
+  const bodies: string[] = [];
+  let reads = 0;
+  const client = {
+    snapshot: async () => {
+      if (++reads === 2) throw new ApiFailure('UNAVAILABLE', 0);
+      return issuedSnapshot(reads === 1 ? 3 : 5);
+    },
+    send: async (body: string) => {
+      bodies.push(body);
+      if (bodies.length <= 2) throw new ApiFailure('REVISION_CONFLICT', 409);
+      return snapshot(6);
+    },
+  };
+  const original = new MissionLearningSession(
+    client,
+    'profile-read-failed',
+    store,
+    () => 'original-answer',
+  );
+  await original.refresh();
+  await assert.rejects(
+    original.choose({
+      type: 'answer',
+      encounterId: 'issued-question',
+      variantId: 'M03-practice-v3-00',
+      answer: { kind: 'choice', choiceId: 'a' },
+    }),
+  );
+  assert.equal(original.hasPending, true);
+  assert.equal([...store.values.values()][0], bodies[0]);
+  const resumed = new MissionLearningSession(
+    client,
+    'profile-read-failed',
+    store,
+    () => 'reconciled-answer',
+  );
+  await resumed.refresh();
+  await resumed.retry();
+  assert.equal(bodies[0], bodies[1]);
+  assert.deepEqual(JSON.parse(bodies[0]!).payload, JSON.parse(bodies[2]!).payload);
+  assert.equal(store.values.size, 0);
 });

@@ -12998,5 +12998,107 @@
       }
     ]
   }
-}
+},
+  {
+    "name": "MissionLearningCommand answer frozen variant valid",
+    "contract": "MissionLearningCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "frozen-answer",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "answer",
+        "encounterId": "issued-task",
+        "variantId": "M03-practice-v3-00",
+        "answer": {
+          "kind": "choice",
+          "choiceId": "a"
+        }
+      }
+    }
+  },
+  {
+    "name": "MissionLearningCommand answer frozen variant rejects empty",
+    "contract": "MissionLearningCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "frozen-answer",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "answer",
+        "encounterId": "issued-task",
+        "variantId": "",
+        "answer": {
+          "kind": "choice",
+          "choiceId": "a"
+        }
+      }
+    }
+  },
+  {
+    "name": "MissionLearningCommand answer frozen variant rejects oversized",
+    "contract": "MissionLearningCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "frozen-answer",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "answer",
+        "encounterId": "issued-task",
+        "variantId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "answer": {
+          "kind": "choice",
+          "choiceId": "a"
+        }
+      }
+    }
+  },
+  {
+    "name": "MissionLearningCommand finish_together frozen variant valid",
+    "contract": "MissionLearningCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "frozen-answer",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "finish_together",
+        "encounterId": "issued-task",
+        "variantId": "M03-practice-v3-00"
+      }
+    }
+  },
+  {
+    "name": "MissionLearningCommand finish_together frozen variant rejects empty",
+    "contract": "MissionLearningCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "frozen-answer",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "finish_together",
+        "encounterId": "issued-task",
+        "variantId": ""
+      }
+    }
+  },
+  {
+    "name": "MissionLearningCommand finish_together frozen variant rejects oversized",
+    "contract": "MissionLearningCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "frozen-answer",
+      "expectedRevision": 2,
+      "payload": {
+        "type": "finish_together",
+        "encounterId": "issued-task",
+        "variantId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    }
+  }
 ]

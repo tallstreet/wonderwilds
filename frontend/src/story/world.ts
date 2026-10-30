@@ -249,6 +249,7 @@ export class StoryWorld {
           this.missionLearningCommand({
             type: 'answer',
             encounterId: activity.id,
+            variantId: activity.variantId,
             answer,
           }),
         onSupport: (kind) =>
@@ -264,7 +265,12 @@ export class StoryWorld {
           await this.missionLearningCommand({ type: 'abandon', encounterId: activity.id });
         },
         onFinishTogether: activity.storyStep
-          ? () => this.missionLearningCommand({ type: 'finish_together', encounterId: activity.id })
+          ? () =>
+              this.missionLearningCommand({
+                type: 'finish_together',
+                encounterId: activity.id,
+                variantId: activity.variantId,
+              })
           : undefined,
         onContinue: () => {
           if (!this.practiceDialogOpen()) return;
