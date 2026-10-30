@@ -168,7 +168,7 @@ needed to verify hackathon access and transcription quality.
 
 After starting `sh scripts/local-demo.sh`, open **Missions → Pip’s story adventure**
 in the main game, or [open it directly](http://127.0.0.1:5173/?story=1).
-This uses the actual Phaser world and authenticated PostgreSQL saves. Three
+This uses the actual Phaser world and authenticated PostgreSQL saves. Seven
 connected stories are playable:
 
 1. **Pip’s bridge:** collect wood, prepare planks, repair the visible bridge and
@@ -176,6 +176,14 @@ connected stories are playable:
 2. **Pip’s picnic:** gather berries, pack a basket at the workshop, lay out the
    picnic and bring Pip back across to share it.
 3. **Welcome lights:** gather glow pebbles, make lanterns and light both banks.
+4. **The humming hollow:** follow clues, rule out a false lead, discover the sound
+   and choose where to place the wind instrument before telling Pip.
+5. **A cosy corner for Pip:** hear Pip’s preferences, choose a leafy nook or star
+   canopy, build it and enjoy the finished place together.
+6. **Bramble’s first visit:** learn Bramble’s wish, check and clear the workshop
+   path, confirm readiness, walk together and welcome Bramble at the bridge bank.
+7. **A moonlight gathering:** choose either bank, invite both friends and prepare
+   seats and a humming circle in either order, then welcome everyone.
 
 Talk to Pip after each completion to accept the next story. Earlier world changes
 remain visible, and Missions remembers the completed stories. Restart an already
@@ -187,11 +195,12 @@ Reload restores the server's location/progress. If saving is uncertain, open
 Missions and use **Retry the same action**; the exact command survives reloads.
 
 Story saves are separate from the existing adventure, guest saves and educational
-activities. A deterministic mock provider returns scenes for the three authored
+activities. A deterministic mock provider returns scenes for the seven authored
 missions through the same validated response boundary that a future
 provider can use. Server state controls who is present, available actions and
 bridge/milestone changes. Pixel movement remains local; server commands verify
-coarse location transitions. The woodcutter temporarily uses existing Bramble art.
+coarse location transitions. The woodcutter temporarily uses existing Cleo art,
+distinct from Bramble.
 This mode does not synchronize the old assessed bridge or generate new missions.
 Model generation is disabled. The earlier [/story.html inspector](http://127.0.0.1:5173/story.html)
 remains available for checking scenes without walking.
@@ -233,7 +242,7 @@ stages. Content review gates are unchanged.
 See the [payload builder notes](backend/crates/director/src/story/README.md) for
 field sources, contracts and implementation limits.
 
-An [offline story-evaluation harness](qa/story-eval/README.md) captures 137 real
+An [offline story-evaluation harness](qa/story-eval/README.md) captures real
 synthetic runtime situations, prepares candidate/judge requests, checks candidate
 scenes with the game engine and exports human-approved examples with a held-out
 split. Start without a model or database:
@@ -256,9 +265,16 @@ training examples.
 The [versioned scene dataset](qa/story-eval/datasets/pilot-2026-10-30/README.md)
 preserves all 411 generated candidates and independent quality judgments for future
 iterations. Run `python3 qa/story-eval/dataset.py verify` to check its integrity, or
-`python3 qa/story-eval/dataset.py review --out qa/story-eval/experiments/pilot-review`
+`python3 qa/story-eval/dataset.py review --archived --out qa/story-eval/experiments/pilot-review`
 to regenerate the report and training/evaluation shortlists. Training remains a
 separate step after human review.
+
+The [broader input pack](qa/story-eval/datasets/broader-2026-10-30-inputs/README.md)
+adds 607 reachable situations and 1,821 generation requests across all seven
+missions and eight combinations of lasting choices. Its authored references pass
+mechanical checks; new model candidates and quality reviews are still pending.
+The older pilot uses archived checks because its content version differs; its
+reviewed candidates and subsequent user approvals remain unchanged.
 
 Start the human review screen with `python3 qa/story-eval/review_server.py`, then
 open [http://127.0.0.1:5182/](http://127.0.0.1:5182/). Approve, request revision or
@@ -274,6 +290,8 @@ WW_STORY_SOURCE=workshop WW_QA_BROWSER_TEST=qa/e2e/story-browser.mjs node qa/e2e
 WW_QA_BROWSER_TEST=qa/e2e/story-world.mjs node qa/e2e/run-training-qa.mjs
 WW_STORY_SOURCE=workshop WW_QA_BROWSER_TEST=qa/e2e/story-world.mjs node qa/e2e/run-training-qa.mjs
 WW_QA_BROWSER_TEST=qa/e2e/story-series.mjs node qa/e2e/run-training-qa.mjs
+WW_QA_BROWSER_TEST=qa/e2e/story-broader.mjs node qa/e2e/run-training-qa.mjs
+WW_STORY_BRANCHES=alternate WW_QA_BROWSER_TEST=qa/e2e/story-broader.mjs node qa/e2e/run-training-qa.mjs
 ```
 
 Set `CHROMIUM_PATH` to your Chromium executable if required. Persistence checks run

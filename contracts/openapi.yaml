@@ -603,7 +603,7 @@
             }
           }
         },
-        "description": "Read the separate authored three-story sequence for the owned profile. Current content uses pip-stories-2; original pip-bridge-1 receipts remain readable. Coarse location transitions do not verify browser walking."
+        "description": "Read the separate authored seven-story sequence for the owned profile. Current content uses pip-stories-3; original pip-bridge-1 and pip-stories-2 receipts remain readable. Coarse location transitions do not verify browser walking."
       }
     },
     "/api/v1/story/commands": {
@@ -769,6 +769,9 @@
       },
       "StorySnapshot": {
         "$ref": "./schemas/v1.json#/$defs/StorySnapshot"
+      },
+      "StoryAction": {
+        "$ref": "./schemas/v1.json#/$defs/StoryAction"
       }
     },
     "securitySchemes": {

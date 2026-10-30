@@ -4,6 +4,22 @@ export interface Point {
   x: number;
   y: number;
 }
+export type StoryShape =
+  | 'stones'
+  | 'lantern'
+  | 'hollow'
+  | 'leaf'
+  | 'instrument'
+  | 'music'
+  | 'corner-leaves'
+  | 'corner-stars'
+  | 'seating'
+  | 'bunting'
+  | 'trail';
+export interface WorldDecoration extends Point {
+  id: string;
+  kind: 'picnic' | StoryShape;
+}
 /** A world interaction location; assessment parameters belong to the API. */
 export interface WorldEncounter extends Point {
   id: string;
@@ -12,7 +28,7 @@ export interface WorldEncounter extends Point {
   character: string;
   sprite?: string;
   prop?: string;
-  shape?: 'stones' | 'lantern';
+  shape?: StoryShape;
 }
 export type Blocked = (x: number, y: number) => boolean;
 export type Rect = [number, number, number, number];

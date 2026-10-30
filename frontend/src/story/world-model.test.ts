@@ -25,9 +25,7 @@ function snapshot(locationId: StorySnapshot['locationId']): StorySnapshot {
 test('story art registry renders only present NPCs and legal resource/route handles', () => {
   const value = snapshot('workshop');
   const markers = storyMarkers(value);
-  assert.ok(
-    markers.some((marker) => marker.id === 'npc:woodcutter' && marker.sprite === 'bramble'),
-  );
+  assert.ok(markers.some((marker) => marker.id === 'npc:woodcutter' && marker.sprite === 'cleo'));
   assert.ok(!markers.some((marker) => marker.id === 'npc:pip'));
   assert.ok(
     markers.some((marker) => marker.id === 'resource:spare_wood' && marker.prop === 'plank'),
@@ -243,4 +241,187 @@ test('picnic prepares the existing meadow blanket and only confirmed readiness a
     workshop.context.inventory,
     'Scenery projection does not consume or invent resources',
   );
+});
+
+test('new mission actions bind supported targets and Bramble has distinct art', () => {
+  assert.equal(
+    actionTarget({ type: 'inspect', objectId: 'humming_hollow' }),
+    'object:humming_hollow',
+  );
+  assert.equal(
+    actionTarget({ type: 'choose', choiceId: 'instrument_home', optionId: 'woods' }),
+    'object:instrument_home',
+  );
+  assert.equal(
+    actionTarget({ type: 'talk', characterId: 'bramble', topicId: 'visit_wish' }),
+    'npc:bramble',
+  );
+  assert.equal(actionTarget({ type: 'invite', characterId: 'pip' }), 'npc:pip');
+  const value = snapshot('workshop');
+  value.sceneInput!.here.characters.push({ id: 'bramble', description: '', relationship: '' });
+  const markers = storyMarkers(value);
+  assert.equal(markers.find((marker) => marker.id === 'npc:bramble')!.sprite, 'bramble');
+  assert.notEqual(markers.find((marker) => marker.id === 'npc:woodcutter')!.sprite, 'bramble');
+});
+
+test('clue, choice, preparation and gathering markers are reachable at both gathering locations', () => {
+  const places = {
+    bridge_bank: [
+      'corner_site',
+      'corner_style',
+      'corner_frame',
+      'corner_cushions',
+      'gathering_place',
+    ],
+    far_bank: [
+      'humming_hollow',
+      'trembling_leaf',
+      'mossy_stump',
+      'hollow_branch',
+      'instrument_home',
+    ],
+    workshop: ['workshop_path'],
+  } as const;
+  for (const location of ['bridge_bank', 'far_bank', 'workshop'] as const) {
+    const value = snapshot(location);
+    value.sceneInput!.here.characters = [{ id: 'bramble', description: '', relationship: '' }];
+    value.sceneInput!.context.memory.facts.push(`The gathering is at ${location}.`);
+    const objects = [
+      ...places[location],
+      ...(location === 'workshop' ? [] : ['gathering_seats', 'gathering_music']),
+    ];
+    value.sceneInput!.availableActions = objects.map((objectId, i) => ({
+      id: `action-${i}`,
+      description: '',
+      action: { type: 'assemble', objectId, recipeId: 'test' },
+    }));
+    const markers = storyMarkers(value);
+    assert.equal(markers.length, objects.length + 1);
+    for (const marker of markers) {
+      const route = findRoute(
+        storyPlaces[location].spawn,
+        { x: marker.x - 30, y: marker.y + 25 },
+        true,
+        storyPlaces[location].region,
+        storyBounds(location),
+      );
+      assert.ok(route.length, marker.id);
+      assert.ok(
+        Math.hypot(route.at(-1)!.x - marker.x, route.at(-1)!.y - marker.y) < 110,
+        marker.id,
+      );
+      assert.ok(
+        route.every((point) => !storyBounds(location)(point.x, point.y)),
+        marker.id,
+      );
+    }
+  }
+});
+
+test('persistent story choices render distinct outcomes and preparation stays at its selected bank', async () => {
+  const { storyDecorations } = await import('./world-model.ts');
+  for (const [instrument, style, gathering] of [
+    ['far_bank', 'leafy_nook', 'bridge_bank'],
+    ['bridge_bank', 'star_canopy', 'far_bank'],
+  ] as const) {
+    const value = snapshot('bridge_bank');
+    value.sceneInput!.context.memory.facts = [
+      `The wind instrument is at ${instrument}.`,
+      `Pip's cosy corner uses ${style}.`,
+      `The gathering is at ${gathering}.`,
+      'Gathering seats are ready.',
+      'Gathering music is ready.',
+      'The moonlight gathering has begun.',
+    ];
+    const decorations = storyDecorations(value);
+    assert.equal(
+      decorations.find((d) => d.id === 'wind_instrument')!.x > 780,
+      instrument === 'far_bank',
+    );
+    assert.equal(
+      decorations.find((d) => d.id === 'cosy_corner')!.kind,
+      style === 'leafy_nook' ? 'corner-leaves' : 'corner-stars',
+    );
+    assert.ok(
+      decorations
+        .filter((d) => d.id.startsWith('gathering_') || d.id === 'moonlight_gathering')
+        .every((d) => d.x > 780 === (gathering === 'far_bank')),
+    );
+    value.locationId = 'far_bank';
+    assert.deepEqual(
+      storyDecorations(value),
+      decorations,
+      'Persistent outcomes remain visible across the shared meadow',
+    );
+  }
+  const unfinished = snapshot('bridge_bank');
+  unfinished.sceneInput!.context.memory.facts = ['The gathering is at far_bank.'];
+  assert.deepEqual(
+    storyDecorations(unfinished),
+    [],
+    'Choosing a place does not claim setup is finished',
+  );
+});
+
+test('Bramble arrives from the workshop on a reachable near-bank route', async () => {
+  const { crossingRoute } = await import('./world-model.ts');
+  const route = crossingRoute('workshop', 'bridge_bank')!;
+  assert.ok(route);
+  const points = findRoute(
+    route.start,
+    route.end,
+    true,
+    'meadow',
+    storyBounds('bridge_bank', true),
+  );
+  assert.ok(points.length);
+  assert.ok(points.every((point) => !isBlocked(point.x, point.y, true, 'meadow')));
+  assert.equal(storyBounds('bridge_bank')(route.end.x, route.end.y), false);
+  assert.equal(route.followerOffset, -40);
+});
+
+test('the instrument must be carried to its chosen home before its lasting decoration appears', async () => {
+  const { storyDecorations } = await import('./world-model.ts');
+  for (const location of ['bridge_bank', 'far_bank'] as const) {
+    const value = snapshot(location);
+    value.sceneInput!.here.characters = [];
+    value.sceneInput!.context.memory.facts = [`The chosen wind instrument home is ${location}.`];
+    value.sceneInput!.availableActions = [
+      {
+        id: 'place',
+        description: '',
+        action: {
+          type: 'assemble',
+          objectId: 'wind_instrument',
+          recipeId: 'place_instrument',
+        },
+      },
+    ];
+    const marker = storyMarkers(value)[0];
+    assert.equal(marker.id, 'object:wind_instrument');
+    assert.equal(marker.x > 780, location === 'far_bank');
+    assert.deepEqual(storyDecorations(value), []);
+    value.sceneInput!.context.memory.facts.push(`The wind instrument is at ${location}.`);
+    assert.equal(storyDecorations(value)[0].id, 'wind_instrument');
+  }
+});
+
+test('both cosy corner construction markers retain the selected design', () => {
+  for (const style of ['leafy_nook', 'star_canopy']) {
+    const value = snapshot('bridge_bank');
+    value.sceneInput!.here.characters = [];
+    value.sceneInput!.context.memory.facts = [`The chosen cosy corner design is ${style}.`];
+    value.sceneInput!.availableActions = ['corner_frame', 'corner_cushions'].map((objectId) => ({
+      id: objectId,
+      description: '',
+      action: { type: 'assemble', objectId, recipeId: 'test' },
+    }));
+    const markers = storyMarkers(value);
+    assert.equal(markers.length, 2);
+    assert.ok(
+      markers.every(
+        (marker) => marker.shape === (style === 'leafy_nook' ? 'corner-leaves' : 'corner-stars'),
+      ),
+    );
+  }
 });

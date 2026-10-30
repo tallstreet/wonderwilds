@@ -1951,6 +1951,94 @@
             "type"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "inspect"
+            },
+            "objectId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "type",
+            "objectId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "talk"
+            },
+            "characterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "topicId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "type",
+            "characterId",
+            "topicId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "choose"
+            },
+            "choiceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "optionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "type",
+            "choiceId",
+            "optionId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "invite"
+            },
+            "characterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "type",
+            "characterId"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -2049,7 +2137,7 @@
                 "maxLength": 200
               },
               "minItems": 0,
-              "maxItems": 12
+              "maxItems": 32
             },
             "recentEvents": {
               "type": "array",
@@ -2069,7 +2157,7 @@
                 "maxLength": 200
               },
               "minItems": 0,
-              "maxItems": 3
+              "maxItems": 7
             }
           },
           "required": [
@@ -2542,7 +2630,11 @@
               "enum": [
                 "pips_bridge",
                 "pips_picnic",
-                "welcome_lights"
+                "welcome_lights",
+                "humming_hollow",
+                "cosy_corner",
+                "brambles_visit",
+                "moonlight_gathering"
               ]
             }
           },
@@ -2727,7 +2819,8 @@
           "type": "string",
           "enum": [
             "pip-bridge-1",
-            "pip-stories-2"
+            "pip-stories-2",
+            "pip-stories-3"
           ]
         }
       },
@@ -2825,7 +2918,8 @@
           "type": "string",
           "enum": [
             "pip-bridge-1",
-            "pip-stories-2"
+            "pip-stories-2",
+            "pip-stories-3"
           ]
         },
         "revision": {

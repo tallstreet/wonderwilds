@@ -20,6 +20,46 @@ FILES = (
     "quality-review.md", "generation-provenance.json",
     "recommended-train-candidates.jsonl", "recommended-eval-candidates.jsonl",
 )
+INPUT_FILES = ("run/corpus.jsonl", "run/generation-requests.jsonl", "run/manifest.json",
+               "run/reference-candidates.jsonl", "reference-hard-results.jsonl")
+
+
+def verify_inputs(path):
+    """Verify a sealed input-only pack; no generation, judging or new engine proof."""
+    pack = workflow.read_json(path / "input-pack.json")
+    hashes = {name: hashlib.sha256((path / name).read_bytes()).hexdigest() for name in INPUT_FILES}
+    if pack.get("format") != "story-input-pack-1" or pack.get("files") != hashes:
+        raise ValueError("Input pack changed; create a new version rather than edit a sealed pack")
+    manifest, corpus, requests = workflow.load_run(path / "run")
+    references = workflow.rows(path / "run/reference-candidates.jsonl")
+    ref_map = workflow.candidate_map(references, corpus)
+    hard = workflow.indexed(workflow.rows(path / "reference-hard-results.jsonl"),
+                            ("scenarioId", "candidateId"))
+    if set(ref_map) != set(hard) or len(ref_map) != len(corpus):
+        raise ValueError("Reference checks must cover every input exactly once")
+    by_scenario = {row["scenarioId"]: row for row in corpus}
+    for key, row in ref_map.items():
+        if row["output"] != by_scenario[key[0]]["reference"] or hard[key].get("passed") is not True:
+            raise ValueError("Input pack references must match captured authored outputs and pass archived hard checks")
+    counts = {"scenarios": len(corpus), "generationRequests": len(requests),
+              "referenceHardPasses": len(hard), "modelCandidates": 0,
+              "qualityJudgments": 0, "humanApprovals": 0}
+    if pack.get("counts") != counts or pack.get("parentDataset") != manifest.get("parentDataset"):
+        raise ValueError("Input pack counts or parent linkage differ from contents")
+    outcomes = set()
+    for row in corpus:
+        state = row["checkpoint"]["state"]
+        if len(state["completedMissions"]) == 7:
+            broad = state["broader"]
+            outcomes.add((broad["instrumentHome"], broad["cornerStyle"], broad["gatheringPlace"]))
+    coverage = {
+        "missionStates": dict(collections.Counter((row["input"].get("mission") or {}).get("missionId", "not_accepted") for row in corpus)),
+        "journeyFamilies": sorted({row["familyId"] for row in corpus}),
+        "lastingChoiceCombinations": len(outcomes),
+    }
+    if pack.get("coverage") != coverage:
+        raise ValueError("Input pack coverage differs from its captured states")
+    return counts
 
 
 def checksums(dataset):
@@ -115,8 +155,10 @@ def snapshot(args):
 def review(args):
     summary, selected, recommendations = verify(args.dataset)
     workflow.grade(SimpleNamespace(run=args.dataset / "run", candidates=args.dataset / "candidates.jsonl",
-                                   judgments=args.dataset / "judgments.jsonl", out=args.out))
-    # Re-run the current engine, rather than interpreting archived hard grades as current proof.
+                                   judgments=args.dataset / "judgments.jsonl", out=args.out,
+                                   archived_hard=(args.dataset / "hard-results.jsonl")
+                                   if getattr(args, "archived", False) else None))
+    # Current checks or explicitly archived evidence must retain recommendation consistency.
     current = workflow.indexed(workflow.rows(args.out / "hard-results.jsonl"), ("scenarioId", "candidateId"))
     for values in selected.values():
         if any(not current[(r["scenarioId"], r["candidateId"])]["passed"] for r in values):
@@ -148,7 +190,7 @@ def review(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("verify", "snapshot", "review"):
+    for name in ("verify", "verify-inputs", "snapshot", "review"):
         command = commands.add_parser(name)
         command.add_argument("--dataset", type=Path, default=DEFAULT)
         if name == "snapshot":
@@ -156,10 +198,14 @@ def main():
             command.add_argument("--notes", required=True)
         if name == "review":
             command.add_argument("--out", required=True, type=Path)
+            command.add_argument("--archived", action="store_true",
+                                 help="Show checksum-verified historical checks without rerunning the current engine")
     args = parser.parse_args()
     try:
         if args.command == "verify":
             print(json.dumps(verify(args.dataset)[0], indent=2))
+        elif args.command == "verify-inputs":
+            print(json.dumps(verify_inputs(args.dataset), indent=2))
         elif args.command == "snapshot":
             snapshot(args)
         else:

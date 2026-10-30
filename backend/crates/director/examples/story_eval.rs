@@ -13,7 +13,7 @@ use wonderwilds_director::story::evaluation::{
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 const MAX_BYTES: u64 = 32 * 1024 * 1024;
-const MAX_ROWS: usize = 2000;
+const MAX_ROWS: usize = 5000;
 
 fn read_rows<T: DeserializeOwned>(path: &str) -> Result<Vec<T>> {
     let mut bytes = vec![];
@@ -30,7 +30,7 @@ fn read_rows<T: DeserializeOwned>(path: &str) -> Result<Vec<T>> {
             return Err(format!("Line {} exceeds 256 KiB", index + 1).into());
         }
         if rows.len() >= MAX_ROWS {
-            return Err("Input exceeds 2000 rows".into());
+            return Err("Input exceeds 5000 rows".into());
         }
         rows.push(serde_json::from_str(line).map_err(|e| format!("Line {}: {e}", index + 1))?);
     }
@@ -71,7 +71,7 @@ fn main() -> Result<()> {
         "export" if options.is_empty() => {
             let rows = corpus()?;
             write_rows(Path::new(&output), &rows)?;
-            eprintln!("Exported {} synthetic scenarios (four related journey families).", rows.len());
+            eprintln!("Exported {} synthetic scenarios (eight related journey families).", rows.len());
         }
         "grade" => {
             let corpus_path = options.remove("--corpus").ok_or("--corpus FILE is required")?;

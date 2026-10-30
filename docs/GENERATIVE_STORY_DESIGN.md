@@ -1,13 +1,16 @@
 # Mission-led generative storytelling
 
-Status: authored runtime, payload builder, persistence and playable mock-driven world slice implemented; broader missions/model integration pending. Revised: 30 October 2026.
+Status: authored runtime, payload builder, persistence and playable mock-driven world slice implemented; seven authored missions implemented; model integration pending. Revised: 30 October 2026.
 
 Implementation update: the [story implementation plan](STORY_IMPLEMENTATION_PLAN.md)
 now delivers authored Rust mechanics, deterministic planning/scene payloads,
 authenticated PostgreSQL story saves, an opt-in `/?story=1` Phaser adventure and a
 `/story.html` scene inspector. A deterministic mock provider supplies varied scene
-responses across three connected missions—Pip’s bridge, Pip’s picnic and Welcome
-lights—with binding validation and authored fallback. Completed history and world
+responses across seven connected missions: Pip’s bridge, Pip’s picnic, Welcome
+lights, Humming hollow, Cosy corner, Bramble’s first visit and Moonlight gathering.
+Binding validation and authored fallback keep scenes executable. Reusable inspect,
+talk, choose, invite, assemble and accompany actions support discoveries, lasting
+choices, an escort and parallel gathering preparations. Completed history and world
 changes persist between missions; each next mission is explicitly accepted.
 The broader design below remains a proposal for integration. The
 [builder notes](../backend/crates/director/src/story/README.md) record implemented

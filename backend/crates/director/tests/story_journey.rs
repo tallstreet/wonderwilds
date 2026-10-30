@@ -238,11 +238,9 @@ fn three_connected_stories_keep_history_and_current_bindings_through_reload() {
             .iter()
             .all(|a| *a != Action::AcceptMission)
     );
-    assert!(
-        build_plan_input(&state).unwrap()["opportunities"]
-            .as_array()
-            .unwrap()
-            .is_empty()
+    assert_eq!(
+        build_plan_input(&state).unwrap()["opportunities"][0]["id"],
+        "humming_hollow"
     );
     let input = build_scene_input(&state).unwrap();
     let facts = input["context"]["memory"]["facts"].as_array().unwrap();

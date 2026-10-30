@@ -102,6 +102,14 @@ def training_overlap(corpus, splits):
 
 
 def prepare(args):
+    parent = getattr(args, "parent_dataset", None)
+    lineage = None
+    if parent is not None:
+        import dataset
+        dataset.verify(parent)
+        lineage = {"datasetId": parent.name,
+                   "snapshotSha256": hashlib.sha256((parent / "snapshot.json").read_bytes()).hexdigest(),
+                   "approvalsTransferred": False}
     args.out.mkdir(parents=True, exist_ok=False)
     rust("export", "--output", args.out / "corpus.jsonl")
     corpus = rows(args.out / "corpus.jsonl")
@@ -123,11 +131,14 @@ def prepare(args):
                                "promptVersion": "authored-reference"}})
     write_rows(args.out / "generation-requests.jsonl", requests)
     write_rows(args.out / "reference-candidates.jsonl", references)
-    write_json(args.out / "manifest.json", {
+    metadata = {
         "version": PROMPT_VERSION, "corpusSha256": digest(corpus), "splits": splits,
         "requestsSha256": digest(requests), "schemaSha256": digest(schema),
         "editorialBrief": args.brief, "scenarioCount": len(corpus),
-        "warning": "Synthetic authored pilot; held-out journeys are not unseen mission families."})
+        "warning": "Synthetic authored scenarios; held-out journeys are not unseen mission families."}
+    if lineage is not None:
+        metadata["parentDataset"] = lineage
+    write_json(args.out / "manifest.json", metadata)
     print(f"Prepared {len(corpus)} scenarios and {len(requests)} requests in {args.out}")
 
 
@@ -190,8 +201,14 @@ def grade(args):
     judgments = checked_judgments(rows(args.judgments), by_key) if args.judgments else {}
     args.out.mkdir(parents=True, exist_ok=False)
     write_rows(args.out / "candidates.jsonl", candidates)
-    rust("grade", "--corpus", args.run / "corpus.jsonl", "--candidates",
-         args.out / "candidates.jsonl", "--output", args.out / "hard-results.jsonl")
+    archived = getattr(args, "archived_hard", None)
+    if archived is None:
+        rust("grade", "--corpus", args.run / "corpus.jsonl", "--candidates",
+             args.out / "candidates.jsonl", "--output", args.out / "hard-results.jsonl")
+    else:
+        # Only the checksum-verified dataset review command supplies this argument.
+        # It preserves historical evidence; it is not current-runtime validation.
+        write_rows(args.out / "hard-results.jsonl", rows(archived))
     hard = rows(args.out / "hard-results.jsonl")
     hard_map = indexed(hard, ("scenarioId", "candidateId"))
     if set(hard_map) != set(by_key):
@@ -237,6 +254,7 @@ def grade(args):
         "candidatesSha256": digest(candidates), "hardSha256": digest(hard),
         "judgmentsSha256": digest(list(judgments.values())),
         "candidateCount": len(candidates), "hardPassed": passed,
+        "validationMode": "archived" if archived else "current-runtime",
         "qualityJudged": len(judgments), "rubricVersion": RUBRIC_VERSION})
     with (args.out / "review.html").open("x") as target:
         target.write('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width">'
@@ -244,6 +262,7 @@ def grade(args):
                      '<title>Story evaluation review</title><style>body{max-width:1000px;margin:2rem auto;padding:1rem;'
                      'font:16px system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere}details{padding:1rem;border:1px solid #aaa}</style>'
                      f'<h1>Story evaluation</h1><p>{passed}/{len(candidates)} pass hard checks. '
+                     + ('Archived engine results: not rerun under the current runtime. ' if archived else '') +
                      'Valid structure does not establish truthful, safe or enjoyable prose. '
                      'Edit a copy of reviews-template.jsonl after reviewing. Approval requires reviewer and notes.</p>'
                      + "\n".join(sections))
@@ -308,6 +327,8 @@ def main():
     prepare_parser.add_argument("--out", type=Path, required=True)
     prepare_parser.add_argument("--candidates", type=int, choices=range(1, 6), default=3)
     prepare_parser.add_argument("--brief", required=True, help="Explicit target age/style editorial brief")
+    prepare_parser.add_argument("--parent-dataset", type=Path,
+                                help="Verify and link a frozen earlier dataset without copying its approvals")
     grade_parser = commands.add_parser("grade")
     grade_parser.add_argument("--run", type=Path, required=True)
     grade_parser.add_argument("--candidates", type=Path, required=True)

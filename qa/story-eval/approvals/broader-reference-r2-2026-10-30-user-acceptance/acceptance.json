@@ -1,0 +1,18 @@
+{
+  "format": "user-authorized-batch-acceptance-1",
+  "datasetId": "broader-reference-quality-2026-10-30-r2",
+  "datasetPath": "qa/story-eval/experiments/broader-reference-quality-2026-10-30-r2",
+  "datasetSha256": "53e0b8469366dbcaf5968437571f04b4bec2f0f4978993bc7d525a1cc1856618",
+  "snapshotFileSha256": "738f671274d5ed48f5087d5506b5d785d2ae3d2da207dffeebfac06a56c8c64d",
+  "authorization": "Please go through and approve them all I am happy as well",
+  "recordedAt": "2026-10-30T04:54:18.813031+00:00",
+  "approved": 607,
+  "newOrUpdatedDecisions": 604,
+  "priorDecisions": 3,
+  "independentBlindHumanJudgments": false,
+  "trainingPerformed": false,
+  "files": {
+    "human-reviews.jsonl": "c03544710debc033ed301493569c2c5cdd144f7ff5b1d0555cb6f99983b2d4d5",
+    "prior-decisions.jsonl": "5e585ce7f86c366d8833799bcb540d4d4ea8d231740dc112f849da4075b3a7de"
+  }
+}

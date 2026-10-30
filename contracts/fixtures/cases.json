@@ -4812,5 +4812,663 @@
       }
     },
     "valid": false
+  },
+  {
+    "name": "StoryAction broader inspect valid",
+    "contract": "StoryAction",
+    "valid": true,
+    "value": {
+      "type": "inspect",
+      "objectId": "humming_hollow"
+    }
+  },
+  {
+    "name": "StoryAction broader inspect rejects invented grant",
+    "contract": "StoryAction",
+    "valid": false,
+    "value": {
+      "type": "inspect",
+      "objectId": "humming_hollow",
+      "grant": {
+        "wood": 3
+      }
+    }
+  },
+  {
+    "name": "StoryAction broader talk valid",
+    "contract": "StoryAction",
+    "valid": true,
+    "value": {
+      "type": "talk",
+      "characterId": "pip",
+      "topicId": "cosy_preferences"
+    }
+  },
+  {
+    "name": "StoryAction broader talk rejects invented grant",
+    "contract": "StoryAction",
+    "valid": false,
+    "value": {
+      "type": "talk",
+      "characterId": "pip",
+      "topicId": "cosy_preferences",
+      "grant": {
+        "wood": 3
+      }
+    }
+  },
+  {
+    "name": "StoryAction broader choose valid",
+    "contract": "StoryAction",
+    "valid": true,
+    "value": {
+      "type": "choose",
+      "choiceId": "corner_style",
+      "optionId": "leafy_nook"
+    }
+  },
+  {
+    "name": "StoryAction broader choose rejects invented grant",
+    "contract": "StoryAction",
+    "valid": false,
+    "value": {
+      "type": "choose",
+      "choiceId": "corner_style",
+      "optionId": "leafy_nook",
+      "grant": {
+        "wood": 3
+      }
+    }
+  },
+  {
+    "name": "StoryAction broader invite valid",
+    "contract": "StoryAction",
+    "valid": true,
+    "value": {
+      "type": "invite",
+      "characterId": "bramble"
+    }
+  },
+  {
+    "name": "StoryAction broader invite rejects invented grant",
+    "contract": "StoryAction",
+    "valid": false,
+    "value": {
+      "type": "invite",
+      "characterId": "bramble",
+      "grant": {
+        "wood": 3
+      }
+    }
+  },
+  {
+    "name": "StorySceneInput completed humming_hollow",
+    "contract": "StorySceneInput",
+    "valid": true,
+    "value": {
+      "availableActions": [
+        {
+          "action": {
+            "type": "accept_mission"
+          },
+          "description": "Make a cosy corner that Pip will enjoy.",
+          "id": "story-v3-50-0"
+        },
+        {
+          "action": {
+            "destinationId": "workshop",
+            "type": "travel"
+          },
+          "description": "Walk to the workshop.",
+          "id": "story-v3-50-1"
+        },
+        {
+          "action": {
+            "destinationId": "far_bank",
+            "type": "travel"
+          },
+          "description": "Walk to the far bank.",
+          "id": "story-v3-50-2"
+        }
+      ],
+      "context": {
+        "inventory": [],
+        "locationId": "bridge_bank",
+        "memory": {
+          "facts": [
+            "The bridge is repaired.",
+            "Pip is at bridge_bank.",
+            "The game has presented the woodcutter's introduction.",
+            "The player and Pip crossed the bridge together.",
+            "The picnic table is ready.",
+            "The player and Pip shared a picnic.",
+            "Two lanterns light the near bank.",
+            "One lantern lights the far bank.",
+            "Bramble is at workshop.",
+            "Pip told the player about a hum on the far bank.",
+            "The player listened at the humming hollow.",
+            "A trembling leaf led the player to the hollow branch.",
+            "The mossy stump is not the source of the hum.",
+            "Wind passing through the hollow branch makes the humming sound.",
+            "The player shared the discovery with Pip.",
+            "The chosen wind instrument home is far_bank.",
+            "The wind instrument is at far_bank."
+          ],
+          "recentEvents": [
+            "The player accepted the mission to discover the humming hollow.",
+            "The player discovered that wind passing through the hollow branch makes the humming sound.",
+            "The player chose to keep the wind instrument in the woods on the far bank.",
+            "The player set the wind instrument in its chosen home.",
+            "The player arrived at bridge_bank.",
+            "The player shared the hollow branch discovery with Pip, keeping the instrument in its chosen place."
+          ],
+          "recentMissions": [
+            "Help Pip cross the stream. Completed.",
+            "Prepare a picnic and share it with Pip. Completed.",
+            "Light both banks to welcome friends. Completed.",
+            "Discover the humming sound and share it with Pip. Completed."
+          ]
+        },
+        "player": {
+          "avoid": [],
+          "interests": [],
+          "language": "short_simple"
+        },
+        "trigger": "The player shared the hollow branch discovery with Pip, keeping the instrument in its chosen place."
+      },
+      "here": {
+        "characters": [
+          {
+            "description": "A curious and patient friend.",
+            "id": "pip",
+            "relationship": "The player and Pip crossed the bridge and shared a picnic together."
+          }
+        ],
+        "description": "A bridge beside a quiet stream, with a path to the workshop.",
+        "objects": [
+          {
+            "id": "bridge",
+            "state": "repaired"
+          },
+          {
+            "id": "fallen_wood",
+            "state": "0 wood available"
+          },
+          {
+            "id": "picnic_table",
+            "state": "ready"
+          },
+          {
+            "id": "near_lanterns",
+            "state": "lit"
+          }
+        ]
+      },
+      "mission": {
+        "completed": [
+          "Ask Pip about the humming sound.",
+          "Listen at the hollow.",
+          "Look for the trembling leaf.",
+          "Discover what makes the sound.",
+          "Choose a home for the wind instrument.",
+          "Set the wind instrument in its chosen home.",
+          "Share the discovery with Pip."
+        ],
+        "current": null,
+        "goal": "Discover the humming sound and share it with Pip.",
+        "missionId": "humming_hollow",
+        "narrative": {
+          "participantIds": [
+            "pip"
+          ],
+          "payoff": "Share the discovery with Pip; the wind instrument remains where you chose.",
+          "premise": "Pip heard a hum across the stream. Follow its clues and decide where the woodland instrument should stay."
+        },
+        "remaining": [],
+        "status": "completed"
+      },
+      "mode": "continue_story"
+    }
+  },
+  {
+    "name": "StorySceneInput completed cosy_corner",
+    "contract": "StorySceneInput",
+    "valid": true,
+    "value": {
+      "availableActions": [
+        {
+          "action": {
+            "type": "accept_mission"
+          },
+          "description": "Help Bramble visit the bridge bank.",
+          "id": "story-v3-59-0"
+        },
+        {
+          "action": {
+            "destinationId": "workshop",
+            "type": "travel"
+          },
+          "description": "Walk to the workshop.",
+          "id": "story-v3-59-1"
+        },
+        {
+          "action": {
+            "destinationId": "far_bank",
+            "type": "travel"
+          },
+          "description": "Walk to the far bank.",
+          "id": "story-v3-59-2"
+        }
+      ],
+      "context": {
+        "inventory": [],
+        "locationId": "bridge_bank",
+        "memory": {
+          "facts": [
+            "The bridge is repaired.",
+            "Pip is at bridge_bank.",
+            "The game has presented the woodcutter's introduction.",
+            "The player and Pip crossed the bridge together.",
+            "The picnic table is ready.",
+            "The player and Pip shared a picnic.",
+            "Two lanterns light the near bank.",
+            "One lantern lights the far bank.",
+            "Bramble is at workshop.",
+            "Wind passing through the hollow branch makes the humming sound.",
+            "The player shared the discovery with Pip.",
+            "Pip likes a quiet place to watch the stream.",
+            "Pip and the player enjoyed the cosy corner.",
+            "The chosen wind instrument home is far_bank.",
+            "The wind instrument is at far_bank.",
+            "The chosen cosy corner design is leafy_nook.",
+            "Pip's cosy corner uses leafy_nook."
+          ],
+          "recentEvents": [
+            "The player chose a leafy nook for Pip's cosy corner.",
+            "The player put together the cosy corner frame in the chosen design.",
+            "The player paused the mission; discoveries, choices and preparations were preserved.",
+            "The player accepted the mission to make a cosy corner for Pip.",
+            "The player arranged cushions in Pip's cosy corner.",
+            "Pip and the player enjoyed the cosy corner in its chosen design."
+          ],
+          "recentMissions": [
+            "Help Pip cross the stream. Completed.",
+            "Prepare a picnic and share it with Pip. Completed.",
+            "Light both banks to welcome friends. Completed.",
+            "Discover the humming sound and share it with Pip. Completed.",
+            "Make a cosy corner that Pip will enjoy. Completed."
+          ]
+        },
+        "player": {
+          "avoid": [],
+          "interests": [],
+          "language": "short_simple"
+        },
+        "trigger": "Pip and the player enjoyed the cosy corner in its chosen design."
+      },
+      "here": {
+        "characters": [
+          {
+            "description": "A curious and patient friend.",
+            "id": "pip",
+            "relationship": "The player and Pip crossed the bridge and shared a picnic together."
+          }
+        ],
+        "description": "A bridge beside a quiet stream, with a path to the workshop.",
+        "objects": [
+          {
+            "id": "bridge",
+            "state": "repaired"
+          },
+          {
+            "id": "fallen_wood",
+            "state": "0 wood available"
+          },
+          {
+            "id": "picnic_table",
+            "state": "ready"
+          },
+          {
+            "id": "near_lanterns",
+            "state": "lit"
+          },
+          {
+            "id": "corner_site",
+            "state": "checked"
+          },
+          {
+            "id": "corner_frame",
+            "state": "ready"
+          },
+          {
+            "id": "corner_cushions",
+            "state": "arranged"
+          },
+          {
+            "id": "cosy_corner",
+            "state": "leafy_nook"
+          }
+        ]
+      },
+      "mission": {
+        "completed": [
+          "Ask Pip what feels cosy.",
+          "Check the quiet corner.",
+          "Choose a leafy nook or star canopy.",
+          "Put together the corner frame.",
+          "Arrange the cushions.",
+          "Enjoy the corner with Pip."
+        ],
+        "current": null,
+        "goal": "Make a cosy corner that Pip will enjoy.",
+        "missionId": "cosy_corner",
+        "narrative": {
+          "participantIds": [
+            "pip"
+          ],
+          "payoff": "Enjoy the finished leafy nook or star canopy with Pip beside the stream.",
+          "premise": "Pip would like a quiet place to watch the stream. Listen to Pip, choose a design and make the corner together."
+        },
+        "remaining": [],
+        "status": "completed"
+      },
+      "mode": "continue_story"
+    }
+  },
+  {
+    "name": "StorySceneInput completed brambles_visit",
+    "contract": "StorySceneInput",
+    "valid": true,
+    "value": {
+      "availableActions": [
+        {
+          "action": {
+            "type": "accept_mission"
+          },
+          "description": "Bring friends together for a moonlight gathering.",
+          "id": "story-v3-67-0"
+        },
+        {
+          "action": {
+            "destinationId": "workshop",
+            "type": "travel"
+          },
+          "description": "Walk to the workshop.",
+          "id": "story-v3-67-1"
+        },
+        {
+          "action": {
+            "destinationId": "far_bank",
+            "type": "travel"
+          },
+          "description": "Walk to the far bank.",
+          "id": "story-v3-67-2"
+        }
+      ],
+      "context": {
+        "inventory": [],
+        "locationId": "bridge_bank",
+        "memory": {
+          "facts": [
+            "The bridge is repaired.",
+            "Pip is at bridge_bank.",
+            "The game has presented the woodcutter's introduction.",
+            "The player and Pip crossed the bridge together.",
+            "The picnic table is ready.",
+            "The player and Pip shared a picnic.",
+            "Two lanterns light the near bank.",
+            "One lantern lights the far bank.",
+            "Bramble is at bridge_bank.",
+            "Wind passing through the hollow branch makes the humming sound.",
+            "The player shared the discovery with Pip.",
+            "Pip likes a quiet place to watch the stream.",
+            "Pip and the player enjoyed the cosy corner.",
+            "The workshop path is clear.",
+            "Bramble is ready for the visit.",
+            "The player and Bramble walked to the bridge bank together.",
+            "The chosen wind instrument home is far_bank.",
+            "The wind instrument is at far_bank.",
+            "The chosen cosy corner design is leafy_nook.",
+            "Pip's cosy corner uses leafy_nook."
+          ],
+          "recentEvents": [
+            "Bramble said they would like to visit the bridge bank together.",
+            "The player checked the workshop path and found loose branches to move aside.",
+            "The player moved the loose branches aside, clearing the workshop path.",
+            "With the path clear, Bramble is ready to walk to the bridge bank with the player.",
+            "The player and Bramble walked together from the workshop to the bridge bank.",
+            "The player welcomed Bramble after their walk together to the bridge bank."
+          ],
+          "recentMissions": [
+            "Help Pip cross the stream. Completed.",
+            "Prepare a picnic and share it with Pip. Completed.",
+            "Light both banks to welcome friends. Completed.",
+            "Discover the humming sound and share it with Pip. Completed.",
+            "Make a cosy corner that Pip will enjoy. Completed.",
+            "Help Bramble visit the bridge bank. Completed."
+          ]
+        },
+        "player": {
+          "avoid": [],
+          "interests": [],
+          "language": "short_simple"
+        },
+        "trigger": "The player welcomed Bramble after their walk together to the bridge bank."
+      },
+      "here": {
+        "characters": [
+          {
+            "description": "A curious and patient friend.",
+            "id": "pip",
+            "relationship": "The player and Pip crossed the bridge and shared a picnic together."
+          },
+          {
+            "description": "A thoughtful friend who enjoys visiting new places at a gentle pace.",
+            "id": "bramble",
+            "relationship": "The player helped Bramble visit the bridge bank."
+          }
+        ],
+        "description": "A bridge beside a quiet stream, with a path to the workshop.",
+        "objects": [
+          {
+            "id": "bridge",
+            "state": "repaired"
+          },
+          {
+            "id": "fallen_wood",
+            "state": "0 wood available"
+          },
+          {
+            "id": "picnic_table",
+            "state": "ready"
+          },
+          {
+            "id": "near_lanterns",
+            "state": "lit"
+          },
+          {
+            "id": "cosy_corner",
+            "state": "leafy_nook"
+          }
+        ]
+      },
+      "mission": {
+        "completed": [
+          "Ask Bramble about the visit.",
+          "Check the workshop path.",
+          "Clear the loose branches.",
+          "Check that Bramble is ready.",
+          "Walk to the bridge bank with Bramble.",
+          "Welcome Bramble to the bridge bank."
+        ],
+        "current": null,
+        "goal": "Help Bramble visit the bridge bank.",
+        "missionId": "brambles_visit",
+        "narrative": {
+          "participantIds": [
+            "pip",
+            "bramble"
+          ],
+          "payoff": "Welcome Bramble to the bridge bank after walking there together.",
+          "premise": "Bramble would like to visit the bridge bank. Check the workshop path, clear it and walk there together."
+        },
+        "remaining": [],
+        "status": "completed"
+      },
+      "mode": "continue_story"
+    }
+  },
+  {
+    "name": "StorySceneInput completed moonlight_gathering",
+    "contract": "StorySceneInput",
+    "valid": true,
+    "value": {
+      "availableActions": [
+        {
+          "action": {
+            "destinationId": "workshop",
+            "type": "travel"
+          },
+          "description": "Walk to the workshop.",
+          "id": "story-v3-76-0"
+        },
+        {
+          "action": {
+            "destinationId": "far_bank",
+            "type": "travel"
+          },
+          "description": "Walk to the far bank.",
+          "id": "story-v3-76-1"
+        }
+      ],
+      "context": {
+        "inventory": [],
+        "locationId": "bridge_bank",
+        "memory": {
+          "facts": [
+            "The bridge is repaired.",
+            "Pip is at bridge_bank.",
+            "The game has presented the woodcutter's introduction.",
+            "The player and Pip crossed the bridge together.",
+            "The picnic table is ready.",
+            "The player and Pip shared a picnic.",
+            "Two lanterns light the near bank.",
+            "One lantern lights the far bank.",
+            "Bramble is at bridge_bank.",
+            "Wind passing through the hollow branch makes the humming sound.",
+            "The player shared the discovery with Pip.",
+            "Pip likes a quiet place to watch the stream.",
+            "Pip and the player enjoyed the cosy corner.",
+            "The workshop path is clear.",
+            "Bramble is ready for the visit.",
+            "The player and Bramble walked to the bridge bank together.",
+            "Pip has joined the chosen gathering place.",
+            "Bramble has joined the chosen gathering place.",
+            "Gathering seats are ready.",
+            "Gathering music is ready.",
+            "The moonlight gathering has begun.",
+            "The chosen wind instrument home is far_bank.",
+            "The wind instrument is at far_bank.",
+            "The chosen cosy corner design is leafy_nook.",
+            "Pip's cosy corner uses leafy_nook.",
+            "The gathering is at bridge_bank.",
+            "Friends may be invited and seats and music prepared in any order after choosing the place.",
+            "The gathering music is a humming circle; the wind instrument stays in its chosen home."
+          ],
+          "recentEvents": [
+            "The player paused the mission; discoveries, choices and preparations were preserved.",
+            "The player accepted the mission to prepare a moonlight gathering.",
+            "Bramble accepted the invitation and went to the gathering at bridge_bank.",
+            "The player arranged seats at the chosen gathering place.",
+            "The player prepared a humming circle for friends, leaving the wind instrument in its chosen home.",
+            "Pip, Bramble and the player gathered at the chosen meeting place with seats and a humming circle ready."
+          ],
+          "recentMissions": [
+            "Help Pip cross the stream. Completed.",
+            "Prepare a picnic and share it with Pip. Completed.",
+            "Light both banks to welcome friends. Completed.",
+            "Discover the humming sound and share it with Pip. Completed.",
+            "Make a cosy corner that Pip will enjoy. Completed.",
+            "Help Bramble visit the bridge bank. Completed.",
+            "Bring friends together for a moonlight gathering. Completed."
+          ]
+        },
+        "player": {
+          "avoid": [],
+          "interests": [],
+          "language": "short_simple"
+        },
+        "trigger": "Pip, Bramble and the player gathered at the chosen meeting place with seats and a humming circle ready."
+      },
+      "here": {
+        "characters": [
+          {
+            "description": "A curious and patient friend.",
+            "id": "pip",
+            "relationship": "The player and Pip crossed the bridge and shared a picnic together."
+          },
+          {
+            "description": "A thoughtful friend who enjoys visiting new places at a gentle pace.",
+            "id": "bramble",
+            "relationship": "The player helped Bramble visit the bridge bank."
+          }
+        ],
+        "description": "A bridge beside a quiet stream, with a path to the workshop.",
+        "objects": [
+          {
+            "id": "bridge",
+            "state": "repaired"
+          },
+          {
+            "id": "fallen_wood",
+            "state": "0 wood available"
+          },
+          {
+            "id": "picnic_table",
+            "state": "ready"
+          },
+          {
+            "id": "near_lanterns",
+            "state": "lit"
+          },
+          {
+            "id": "cosy_corner",
+            "state": "leafy_nook"
+          },
+          {
+            "id": "gathering_seats",
+            "state": "ready"
+          },
+          {
+            "id": "gathering_music",
+            "state": "humming circle ready"
+          }
+        ]
+      },
+      "mission": {
+        "completed": [
+          "Choose the gathering place.",
+          "Invite Pip.",
+          "Invite Bramble.",
+          "Arrange seats at the gathering place.",
+          "Prepare a humming circle.",
+          "Welcome the friends together."
+        ],
+        "current": null,
+        "goal": "Bring friends together for a moonlight gathering.",
+        "missionId": "moonlight_gathering",
+        "narrative": {
+          "participantIds": [
+            "pip",
+            "bramble"
+          ],
+          "payoff": "See Pip and Bramble gathered at your chosen place, with seats and a humming circle ready.",
+          "premise": "Choose a place for friends to meet. Invite Pip and Bramble, arrange seats and prepare a humming circle in any order."
+        },
+        "remaining": [],
+        "status": "completed"
+      },
+      "mode": "continue_story"
+    }
   }
 ]

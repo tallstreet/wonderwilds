@@ -77,6 +77,13 @@ fn scenario(state: &State, family: &str) -> Result<Scenario> {
 /// Replay validates consistency, not authenticity. Never import these synthetic
 /// checkpoints into authenticated game progress.
 pub fn validate_scenario(value: &Scenario) -> Result<State> {
+    if value.content_version != wonderwilds_domain::story::CONTENT_VERSION {
+        return Err(format!(
+            "Corpus content version {} differs from current {}. Use archived dataset review for historical evidence, or prepare a new corpus; do not transfer old approvals to changed inputs.",
+            value.content_version,
+            wonderwilds_domain::story::CONTENT_VERSION
+        ));
+    }
     if !id_valid(&value.scenario_id) || !id_valid(&value.family_id) {
         return Err("Invalid scenario/family identifier".into());
     }
@@ -220,7 +227,133 @@ impl Journey {
             destination_id: to.into(),
         })
     }
-    fn play(mut self, workshop_source: bool, far_first: bool) -> Result<Vec<Scenario>> {
+    fn talk(&mut self, who: &str, topic: &str) -> Result<()> {
+        self.step(Action::Talk {
+            character_id: who.into(),
+            topic_id: topic.into(),
+        })
+    }
+    fn inspect(&mut self, object: &str) -> Result<()> {
+        self.step(Action::Inspect {
+            object_id: object.into(),
+        })
+    }
+    fn choose(&mut self, choice: &str, option: &str) -> Result<()> {
+        self.step(Action::Choose {
+            choice_id: choice.into(),
+            option_id: option.into(),
+        })
+    }
+    fn pause_resume(&mut self) -> Result<()> {
+        self.step(Action::CancelMission)?;
+        self.step(Action::AcceptMission)
+    }
+    fn broader(&mut self, variant: usize) -> Result<()> {
+        // Choices vary independently: all eight combinations appear in the corpus.
+        let instrument_gathering = variant & 1 != 0;
+        let star_corner = variant & 2 != 0;
+        let far_gathering = variant & 4 != 0;
+        self.travel("bridge_bank")?;
+        self.step(Action::AcceptMission)?;
+        self.talk("pip", "humming_hollow")?;
+        self.travel("far_bank")?;
+        self.inspect("humming_hollow")?;
+        if variant.is_multiple_of(2) {
+            self.inspect("mossy_stump")?;
+        }
+        self.inspect("trembling_leaf")?;
+        self.pause_resume()?;
+        self.inspect("hollow_branch")?;
+        self.choose(
+            "instrument_home",
+            if instrument_gathering {
+                "gathering"
+            } else {
+                "woods"
+            },
+        )?;
+        if instrument_gathering {
+            self.travel("bridge_bank")?;
+        }
+        self.assemble("wind_instrument", "place_instrument")?;
+        self.travel("bridge_bank")?;
+        self.talk("pip", "share_discovery")?;
+
+        self.step(Action::AcceptMission)?;
+        self.talk("pip", "cosy_preferences")?;
+        self.inspect("corner_site")?;
+        self.choose(
+            "corner_style",
+            if star_corner {
+                "star_canopy"
+            } else {
+                "leafy_nook"
+            },
+        )?;
+        self.assemble("corner_frame", "build_corner_frame")?;
+        self.pause_resume()?;
+        self.assemble("corner_cushions", "arrange_cushions")?;
+        self.talk("pip", "enjoy_corner")?;
+
+        self.step(Action::AcceptMission)?;
+        self.travel("workshop")?;
+        self.talk("bramble", "visit_wish")?;
+        self.inspect("workshop_path")?;
+        self.assemble("workshop_path", "clear_path")?;
+        self.talk("bramble", "ready_to_visit")?;
+        self.step(Action::Accompany {
+            character_id: "bramble".into(),
+            destination_id: "bridge_bank".into(),
+        })?;
+        self.talk("bramble", "visit_arrival")?;
+
+        self.step(Action::AcceptMission)?;
+        self.choose(
+            "gathering_place",
+            if far_gathering {
+                "far_bank"
+            } else {
+                "near_bank"
+            },
+        )?;
+        let friends = if variant.is_multiple_of(2) {
+            ["pip", "bramble"]
+        } else {
+            ["bramble", "pip"]
+        };
+        self.step(Action::Invite {
+            character_id: friends[0].into(),
+        })?;
+        self.pause_resume()?;
+        self.step(Action::Invite {
+            character_id: friends[1].into(),
+        })?;
+        if far_gathering {
+            self.travel("far_bank")?;
+        }
+        let preparations = if star_corner {
+            [
+                ("gathering_music", "prepare_music"),
+                ("gathering_seats", "arrange_seats"),
+            ]
+        } else {
+            [
+                ("gathering_seats", "arrange_seats"),
+                ("gathering_music", "prepare_music"),
+            ]
+        };
+        for (object, recipe) in preparations {
+            self.assemble(object, recipe)?;
+        }
+        self.talk("pip", "welcome_friends")?;
+        Ok(())
+    }
+    fn play(
+        mut self,
+        workshop_source: bool,
+        far_first: bool,
+        variant: usize,
+    ) -> Result<Vec<Scenario>> {
         if workshop_source {
             self.travel("workshop")?;
             self.travel("bridge_bank")?;
@@ -272,15 +405,16 @@ impl Journey {
             self.travel("far_bank")?;
             self.assemble("far_lantern", "light_far_bank")?;
         }
+        self.broader(variant)?;
         Ok(self.rows)
     }
 }
 
-/// Small reproducible pilot corpus; four related authored journeys, not a broad
-/// benchmark for generated missions. No random sampling of impossible states.
+/// Reproducible seven-mission corpus with eight combinations of lasting choices.
+/// These are authored journeys, not a benchmark for arbitrary generated missions.
 pub fn corpus() -> Result<Vec<Scenario>> {
     let mut rows = vec![];
-    for (family, initial, workshop, far_first) in [
+    for (variant, (family, initial, workshop, far_first)) in [
         ("bank-series", InitialConditions::default(), false, false),
         ("workshop-series", InitialConditions::default(), true, true),
         (
@@ -301,8 +435,35 @@ pub fn corpus() -> Result<Vec<Scenario>> {
             false,
             false,
         ),
-    ] {
-        rows.extend(Journey::new(family, initial)?.play(workshop, far_first)?);
+        (
+            "far-gathering-woods-leafy",
+            InitialConditions::default(),
+            false,
+            true,
+        ),
+        (
+            "far-gathering-instrument-leafy",
+            InitialConditions::default(),
+            true,
+            false,
+        ),
+        (
+            "far-gathering-woods-stars",
+            InitialConditions::default(),
+            false,
+            false,
+        ),
+        (
+            "far-gathering-instrument-stars",
+            InitialConditions::default(),
+            true,
+            true,
+        ),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        rows.extend(Journey::new(family, initial)?.play(workshop, far_first, variant)?);
     }
     Ok(rows)
 }

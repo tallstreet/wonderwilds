@@ -27,6 +27,7 @@ export class StoryWorld {
   private game!: Phaser.Game;
   private commands: StorySession;
   private crossing = false;
+  private escort?: { id: string; sprite: string; name: string; offsetX: number };
   private location?: StorySnapshot['locationId'];
   private disposed = false;
   private applied?: StorySnapshot;
@@ -51,7 +52,7 @@ export class StoryWorld {
   }
   get markers() {
     return storyMarkers(this.snapshot).filter(
-      (marker) => !this.crossing || marker.id !== 'npc:pip',
+      (marker) => !this.crossing || marker.id !== `npc:${this.escort?.id}`,
     );
   }
   async start() {
@@ -74,16 +75,7 @@ export class StoryWorld {
       undefined,
       {
         encounters: () => this.markers,
-        companions: () =>
-          this.crossing
-            ? [
-                {
-                  sprite: 'pip',
-                  name: 'Pip',
-                  offsetX: this.snapshot.locationId === 'bridge_bank' ? 40 : -40,
-                },
-              ]
-            : [],
+        companions: () => (this.crossing && this.escort ? [this.escort] : []),
         decorations: () => storyDecorations(this.snapshot),
         allowExits: false,
         blocked: (x, y) => storyBounds(this.snapshot.locationId, this.crossing)(x, y),
@@ -248,6 +240,22 @@ export class StoryWorld {
         void this.choose({ type: 'choose', actionId: button.dataset.storyHandle! }, marker);
     });
   }
+  private outcome(marker: WorldEncounter) {
+    if (this.snapshot.commandBudgetExhausted) return this.missions();
+    if (this.markers.some((item) => item.id === marker.id)) return this.encounter(marker);
+    const present = new Set(
+      this.snapshot.sceneInput!.here.characters.map((character) => character.id),
+    );
+    const entries = this.snapshot.scene!.presentation.filter(
+      (entry) => entry.type === 'narration' || present.has(entry.speakerId),
+    );
+    const texts = [...new Set(entries.map((entry) => entry.text))];
+    this.hooks.open(
+      `<span class="pill">${escape(storyPlaces[this.snapshot.locationId].name)}</span><h2 id="dialog-title">${escape(marker.character)}</h2><div data-story-dialogue data-story-outcome>${texts.map((text) => `<p>${escape(text)}</p>`).join('')}</div><button class="primary" data-story-outcome-close>Continue exploring</button>`,
+    );
+    document.querySelector<HTMLButtonElement>('[data-story-outcome-close]')!.onclick = () =>
+      this.hooks.close();
+  }
   private async choose(payload: StoryPayload, marker?: WorldEncounter) {
     const action =
       payload.type === 'choose'
@@ -272,21 +280,35 @@ export class StoryWorld {
         if (route && !next.commandBudgetExhausted) {
           this.applied = next;
           this.crossing = true;
+          this.escort = {
+            id: action!.type === 'accompany' ? action.characterId : 'pip',
+            sprite:
+              action!.type === 'accompany' && action.characterId === 'bramble' ? 'bramble' : 'pip',
+            name:
+              action!.type === 'accompany' && action.characterId === 'bramble' ? 'Bramble' : 'Pip',
+            offsetX: route.followerOffset,
+          };
           this.location = next.locationId;
+          this.state.region = storyPlaces[next.locationId].region;
           this.state.done = storySceneryFlags(next);
           this.state.position = { ...route.start };
           this.hooks.close();
           this.game.events.emit('authoritative-position');
           this.hud();
           this.game.events.emit('scripted-walk', route.end, () => {
+            const name = this.escort?.name ?? 'Pip';
             this.crossing = false;
+            this.escort = undefined;
             this.state.position = { ...route.end };
             this.apply();
-            this.hooks.toast(completion ?? 'You and Pip arrived together.');
+            this.hooks.toast(completion ?? `You and ${name} arrived together.`);
           });
         } else if (completion) this.hooks.toast(completion);
       },
-      payload.type === 'acknowledge' ? marker : undefined,
+      payload.type === 'acknowledge' ||
+        (action && ['talk', 'inspect', 'choose'].includes(action.type))
+        ? marker
+        : undefined,
     );
   }
   private async run(work: () => Promise<void>, reopen?: WorldEncounter) {
@@ -299,7 +321,7 @@ export class StoryWorld {
       if (this.disposed || this.crossing) return;
       this.hooks.close();
       this.apply();
-      if (reopen) this.encounter(reopen);
+      if (reopen) this.outcome(reopen);
     } catch {
       if (this.disposed) return;
       this.hud();

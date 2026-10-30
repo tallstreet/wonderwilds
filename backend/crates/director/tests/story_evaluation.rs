@@ -5,20 +5,23 @@ use wonderwilds_director::story::evaluation::{
 };
 
 #[test]
-fn corpus_is_reproducible_replayable_and_covers_three_missions_and_detours() {
+fn corpus_is_reproducible_replayable_and_covers_seven_missions_and_choices() {
     let rows = corpus().unwrap();
     assert_eq!(
         serde_json::to_value(&rows).unwrap(),
         serde_json::to_value(corpus().unwrap()).unwrap()
     );
-    assert!((100..=200).contains(&rows.len()), "{} rows", rows.len());
+    assert!((500..=800).contains(&rows.len()), "{} rows", rows.len());
     let mut ids = BTreeSet::new();
     let mut missions = BTreeSet::new();
     let mut families = BTreeSet::new();
     let mut partial = false;
     let mut paused = false;
     let mut required_intro = false;
-    let mut three_completed = false;
+    let mut seven_completed = false;
+    let mut outcomes = BTreeSet::new();
+    let mut optional_clue = false;
+    let mut paused_with_invitation = false;
     for row in &rows {
         assert!(ids.insert(row.scenario_id.clone()));
         families.insert(row.family_id.clone());
@@ -30,7 +33,22 @@ fn corpus_is_reproducible_replayable_and_covers_three_missions_and_detours() {
             .as_array()
             .unwrap()
             .is_empty();
-        three_completed |= state.completed_missions().len() == 3;
+        seven_completed |= state.completed_missions().len() == 7;
+        optional_clue |= state.has_story_flag("mossy_stump_checked");
+        paused_with_invitation |= row.input["mission"]["status"] == "abandoned"
+            && (state.has_story_flag("pip_invited") || state.has_story_flag("bramble_invited"));
+        if state.completed_missions().len() == 7 {
+            outcomes.insert((
+                state.instrument_home().unwrap().as_str(),
+                state.corner_style().unwrap().to_owned(),
+                state.gathering_place().unwrap().as_str(),
+            ));
+        }
+        for action in row.input["availableActions"].as_array().unwrap() {
+            if action["action"]["type"] == "cancel_mission" {
+                assert_eq!(action["description"], "Take a break from this mission.");
+            }
+        }
         let grade = grade_candidate(
             row,
             &Candidate {
@@ -47,12 +65,32 @@ fn corpus_is_reproducible_replayable_and_covers_three_missions_and_detours() {
             row.input["availableActions"].as_array().unwrap().len()
         );
     }
-    assert_eq!(families.len(), 4);
+    assert_eq!(families.len(), 8);
+    assert_eq!(
+        outcomes.len(),
+        8,
+        "All lasting-choice combinations are captured"
+    );
     assert_eq!(
         missions,
-        BTreeSet::from(["pips_bridge", "pips_picnic", "welcome_lights"])
+        BTreeSet::from([
+            "pips_bridge",
+            "pips_picnic",
+            "welcome_lights",
+            "humming_hollow",
+            "cosy_corner",
+            "brambles_visit",
+            "moonlight_gathering"
+        ])
     );
-    assert!(partial && paused && required_intro && three_completed);
+    assert!(
+        partial
+            && paused
+            && required_intro
+            && seven_completed
+            && optional_clue
+            && paused_with_invitation
+    );
 }
 
 #[test]

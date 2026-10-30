@@ -6,6 +6,7 @@ use serde_json::{Value, json};
 use wonderwilds_contracts::validate;
 use wonderwilds_domain::story::{Action, Location, Mission, MissionStatus, State};
 
+mod broader;
 pub mod evaluation;
 mod mock;
 pub use mock::{MockSceneProvider, SceneProvider, scene_with_provider, validate_scene};
@@ -59,6 +60,9 @@ fn character(state: &State, id: &str) -> Value {
         "pip" => {
             json!({"id":"pip","description":"A curious and patient friend.","relationship":if state.picnic_shared(){"The player and Pip crossed the bridge and shared a picnic together."}else if state.crossed_with_pip(){"The player and Pip crossed the bridge together."}else if !state.milestones().is_empty(){"The player accepted a mission to cross the stream with Pip."}else{"No prior shared mission is recorded."}})
         }
+        "bramble" => {
+            json!({"id":"bramble","description":"A thoughtful friend who enjoys visiting new places at a gentle pace.","relationship":if state.has_story_flag("bramble_arrived"){"The player helped Bramble visit the bridge bank."}else{"Bramble is getting to know the player."}})
+        }
         _ => {
             json!({"id":"woodcutter","description":"A patient neighbour who shapes wood.","relationship":if state.met_woodcutter() {"The game has presented the woodcutter's introduction."} else {"No recorded presentation of the woodcutter's introduction."}})
         }
@@ -95,6 +99,7 @@ fn context(state: &State) -> Value {
             facts.push(fact.into());
         }
     }
+    facts.extend(broader::facts(state));
     let events = state.events();
     let recent: Vec<_> = events
         .iter()
@@ -147,6 +152,7 @@ fn mission_conditions(mission: Mission) -> Vec<(&'static str, &'static str)> {
             ("near_bank_lit", "Place two lanterns on the near bank."),
             ("far_bank_lit", "Place one lantern on the far bank."),
         ],
+        other => broader::conditions(other),
     }
 }
 
@@ -189,6 +195,11 @@ pub fn build_plan_input(state: &State) -> Result<Value, Error> {
     ] {
         let mut c = character(state, id);
         c["locationId"] = json!(loc.as_str());
+        characters.push(c);
+    }
+    if broader::visible(state) {
+        let mut c = character(state, "bramble");
+        c["locationId"] = json!(state.bramble_location().as_str());
         characters.push(c);
     }
     let opportunity = if state.mission_status() == MissionStatus::Completed {
@@ -281,6 +292,7 @@ fn capabilities(state: &State, mission: Mission) -> Vec<Value> {
             }
         }
     }
+    result.extend(broader::capabilities(state, mission));
     result
 }
 
@@ -294,11 +306,12 @@ fn action_description(state: &State, action: &Action) -> String {
                 Mission::Bridge => "Keep helping Pip with the bridge.",
                 Mission::Picnic => "Keep preparing Pip's picnic.",
                 Mission::WelcomeLights => "Keep lighting the banks.",
+                _ => return format!("Continue: {}", state.mission().goal()),
             }
             .into()
         }
         Action::AcceptMission => state.mission().goal().into(),
-        Action::CancelMission => "Take a break from helping Pip.".into(),
+        Action::CancelMission => "Take a break from this mission.".into(),
         Action::Travel { destination_id } => {
             let destination = match destination_id.as_str() {
                 "bridge_bank" => "the bridge bank",
@@ -331,6 +344,12 @@ fn action_description(state: &State, action: &Action) -> String {
             _ => "Ask the woodcutter to turn 3 pieces of wood into 3 planks.",
         }
         .into(),
+        Action::Assemble {
+            object_id,
+            recipe_id,
+        } if broader::is_broader(state.mission()) => {
+            broader::assemble_description(object_id, recipe_id).into()
+        }
         Action::Assemble { object_id, .. } => match object_id.as_str() {
             "picnic_table" => "Set out the picnic basket on the table.",
             "near_lanterns" => "Place two lanterns on the near bank.",
@@ -338,15 +357,19 @@ fn action_description(state: &State, action: &Action) -> String {
             _ => "Use 3 planks to repair the bridge.",
         }
         .into(),
+        Action::Accompany { character_id, .. } if character_id == "bramble" => {
+            "Walk with Bramble to the bridge bank.".into()
+        }
         Action::Accompany { destination_id, .. } if destination_id == "bridge_bank" => {
             "Bring Pip back across the bridge to share the picnic.".into()
         }
         Action::Accompany { .. } => "Cross the repaired bridge together with Pip.".into(),
         Action::Acknowledge { .. } => "Continue.".into(),
+        other => broader::action_description(other),
     }
 }
 fn action_handle(state: &State, index: usize) -> String {
-    format!("story-v2-{}-{index}", state.revision())
+    format!("story-v3-{}-{index}", state.revision())
 }
 
 /// Exact equality with the current eligible list rejects stale or invented handles.
@@ -369,6 +392,9 @@ pub fn build_scene_input(state: &State) -> Result<Value, Error> {
     }
     if state.location() == Location::Workshop {
         characters.push(character(state, "woodcutter"));
+    }
+    if broader::visible(state) && state.bramble_location() == state.location() {
+        characters.push(character(state, "bramble"));
     }
     let mut objects = match state.location() {
         Location::BridgeBank => vec![
@@ -398,6 +424,7 @@ pub fn build_scene_input(state: &State) -> Result<Value, Error> {
         }
         Location::Workshop => {}
     }
+    objects.extend(broader::objects(state));
     let mission = if matches!(
         state.mission_status(),
         MissionStatus::Active | MissionStatus::Abandoned | MissionStatus::Completed

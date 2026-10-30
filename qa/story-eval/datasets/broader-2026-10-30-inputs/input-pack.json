@@ -1,0 +1,49 @@
+{
+  "format": "story-input-pack-1",
+  "packId": "broader-2026-10-30-inputs",
+  "contentVersion": "pip-stories-3",
+  "parentDataset": {
+    "datasetId": "pilot-2026-10-30",
+    "snapshotSha256": "c7f6d26d9158726607e88a2335799049ed3bcf987d44b94176fb05b7b91e88ed",
+    "approvalsTransferred": false
+  },
+  "counts": {
+    "scenarios": 607,
+    "generationRequests": 1821,
+    "referenceHardPasses": 607,
+    "modelCandidates": 0,
+    "qualityJudgments": 0,
+    "humanApprovals": 0
+  },
+  "coverage": {
+    "missionStates": {
+      "not_accepted": 17,
+      "pips_bridge": 68,
+      "pips_picnic": 98,
+      "welcome_lights": 112,
+      "humming_hollow": 100,
+      "cosy_corner": 72,
+      "brambles_visit": 64,
+      "moonlight_gathering": 76
+    },
+    "journeyFamilies": [
+      "bank-series",
+      "far-gathering-instrument-leafy",
+      "far-gathering-instrument-stars",
+      "far-gathering-woods-leafy",
+      "far-gathering-woods-stars",
+      "repaired-series",
+      "supplied-series",
+      "workshop-series"
+    ],
+    "lastingChoiceCombinations": 8
+  },
+  "files": {
+    "run/corpus.jsonl": "06d3d3469dde78094423e5b378f86aeb11b2a45e439c10b13f6000ad3128b57a",
+    "run/generation-requests.jsonl": "cf33e3192605eca0ff78fa155a0748e08c4837b48f9d7808dce3d2aae0e36170",
+    "run/manifest.json": "145ba01a4d01deada7d8f75cd1c2c12951c1e6cb2375dcc42072aad26f8f7905",
+    "run/reference-candidates.jsonl": "cb6ea45113d9d00064481225c5edce20a2f28b082bb844e7add54d8255e821af",
+    "reference-hard-results.jsonl": "8c4d084c2424b90cef4fe224f7fabcf475929ed6111ef05bc356b198cc7a1e1a"
+  },
+  "note": "Input-only expansion with authored mock references. Old reviewed candidates and user approvals are not copied. New model generations and independent quality judgments remain pending. Held-out journeys share the authored mission catalogue."
+}

@@ -436,7 +436,7 @@ fn three_connected_missions_require_explicit_acceptance_and_preserve_all_outcome
     }
     assert_eq!(state.mission(), Mission::WelcomeLights);
     assert_eq!(state.mission_status(), MissionStatus::Completed);
-    assert_eq!(state.next_mission(), None);
+    assert_eq!(state.next_mission(), Some(Mission::HummingHollow));
     assert_eq!(
         state.completed_missions(),
         &[Mission::Bridge, Mission::Picnic, Mission::WelcomeLights]
@@ -588,7 +588,7 @@ fn literal_legacy_completed_checkpoint_migrates_without_reset_and_can_continue()
     assert!(state.bridge_repaired() && state.crossed_with_pip());
     assert_eq!(state.completed_missions(), &[Mission::Bridge]);
     assert_eq!(state.legacy_checkpoint(), legacy);
-    assert_eq!(state.checkpoint()["version"], "pip-stories-2");
+    assert_eq!(state.checkpoint()["version"], "pip-stories-3");
     assert_eq!(
         State::from_checkpoint(&state.checkpoint()),
         Ok(state.clone())
@@ -633,4 +633,300 @@ fn legacy_reader_rejects_new_semantics_and_tampered_legacy_receipts() {
         State::from_checkpoint(&bad),
         Err(Rejection::InvalidCheckpoint)
     );
+}
+
+fn inspect(object: &str) -> Action {
+    Action::Inspect {
+        object_id: object.into(),
+    }
+}
+fn talk(character: &str, topic: &str) -> Action {
+    Action::Talk {
+        character_id: character.into(),
+        topic_id: topic.into(),
+    }
+}
+fn choose(choice: &str, option: &str) -> Action {
+    Action::Choose {
+        choice_id: choice.into(),
+        option_id: option.into(),
+    }
+}
+fn invite(character: &str) -> Action {
+    Action::Invite {
+        character_id: character.into(),
+    }
+}
+fn finish_lights_v2() -> State {
+    let legacy: Value =
+        serde_json::from_str(include_str!("fixtures/lights-completed-v2.json")).unwrap();
+    State::from_checkpoint(&legacy).unwrap()
+}
+fn replay_step(state: &mut State, action: Action) {
+    let command = command(state, action);
+    let receipt = state.apply(&command).unwrap();
+    let after = state.clone();
+    assert_eq!(state.apply(&command), Ok(receipt));
+    assert_eq!(*state, after);
+    *state = State::from_checkpoint(&state.checkpoint()).unwrap();
+    assert!(state.available_actions().len() <= 12);
+}
+fn humming_actions(home: &str) -> Vec<Action> {
+    let mut actions = vec![
+        travel("bridge_bank"),
+        Action::AcceptMission,
+        talk("pip", "humming_hollow"),
+        travel("far_bank"),
+        inspect("humming_hollow"),
+        inspect("mossy_stump"),
+        inspect("trembling_leaf"),
+        inspect("hollow_branch"),
+        choose("instrument_home", home),
+    ];
+    if home == "gathering" {
+        actions.push(travel("bridge_bank"));
+    }
+    actions.push(build("wind_instrument", "place_instrument"));
+    if home == "woods" {
+        actions.push(travel("bridge_bank"));
+    }
+    actions.push(talk("pip", "share_discovery"));
+    actions
+}
+
+fn corner_actions(style: &str) -> Vec<Action> {
+    vec![
+        Action::AcceptMission,
+        talk("pip", "cosy_preferences"),
+        inspect("corner_site"),
+        choose("corner_style", style),
+        build("corner_frame", "build_corner_frame"),
+        build("corner_cushions", "arrange_cushions"),
+        talk("pip", "enjoy_corner"),
+    ]
+}
+fn visit_actions() -> Vec<Action> {
+    vec![
+        Action::AcceptMission,
+        travel("workshop"),
+        talk("bramble", "visit_wish"),
+        inspect("workshop_path"),
+        build("workshop_path", "clear_path"),
+        talk("bramble", "ready_to_visit"),
+        Action::Accompany {
+            character_id: "bramble".into(),
+            destination_id: "bridge_bank".into(),
+        },
+        talk("bramble", "visit_arrival"),
+    ]
+}
+
+#[test]
+fn all_four_broader_missions_replay_choices_orders_and_distinct_outcomes() {
+    for home in ["woods", "gathering"] {
+        for style in ["leafy_nook", "star_canopy"] {
+            for venue in ["near_bank", "far_bank"] {
+                for reverse in [false, true] {
+                    let mut state = finish_lights_v2();
+                    for action in humming_actions(home) {
+                        replay_step(&mut state, action);
+                    }
+                    assert_eq!(state.mission(), Mission::HummingHollow);
+                    assert_eq!(state.mission_status(), MissionStatus::Completed);
+                    let instrument = state.instrument_home();
+                    assert_eq!(
+                        instrument,
+                        Some(if home == "woods" {
+                            Location::FarBank
+                        } else {
+                            Location::BridgeBank
+                        })
+                    );
+                    for action in corner_actions(style) {
+                        replay_step(&mut state, action);
+                    }
+                    assert_eq!(state.corner_style(), Some(style));
+                    assert!(state.has_story_flag("corner_shared"));
+                    for action in visit_actions() {
+                        replay_step(&mut state, action);
+                    }
+                    assert_eq!(state.bramble_location(), Location::BridgeBank);
+                    assert!(state.has_story_flag("bramble_visit_shared"));
+                    replay_step(&mut state, Action::AcceptMission);
+                    replay_step(&mut state, choose("gathering_place", venue));
+                    let order = if reverse {
+                        ["bramble", "pip"]
+                    } else {
+                        ["pip", "bramble"]
+                    };
+                    for character in order {
+                        replay_step(&mut state, invite(character));
+                    }
+                    if venue == "far_bank" {
+                        replay_step(&mut state, travel("far_bank"));
+                    }
+                    let preparations = if reverse {
+                        [
+                            ("gathering_music", "prepare_music"),
+                            ("gathering_seats", "arrange_seats"),
+                        ]
+                    } else {
+                        [
+                            ("gathering_seats", "arrange_seats"),
+                            ("gathering_music", "prepare_music"),
+                        ]
+                    };
+                    for (object, recipe) in preparations {
+                        replay_step(&mut state, build(object, recipe));
+                    }
+                    assert_eq!(state.mission_status(), MissionStatus::Active);
+                    replay_step(&mut state, talk("pip", "welcome_friends"));
+                    assert_eq!(state.completed_missions().len(), 7);
+                    assert_eq!(state.next_mission(), None);
+                    assert_eq!(state.mission_status(), MissionStatus::Completed);
+                    assert!(state.milestones().iter().all(|m| m.complete));
+                    assert_eq!(
+                        state.instrument_home(),
+                        instrument,
+                        "Gathering music must not move the chosen woodland instrument"
+                    );
+                    assert_eq!(state.corner_style(), Some(style));
+                    assert_eq!(state.pip_location(), state.location());
+                    assert_eq!(state.bramble_location(), state.location());
+                    assert!(state.near_lit() && state.far_lit() && state.picnic_shared());
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn broader_prerequisites_pause_and_immutable_choices_fail_atomically() {
+    let mut state = finish_lights_v2();
+    replay_step(&mut state, travel("bridge_bank"));
+    replay_step(&mut state, Action::AcceptMission);
+    let reject = |state: &mut State, action| {
+        let before = state.clone();
+        assert!(state.apply(&command(state, action)).is_err());
+        assert_eq!(*state, before);
+    };
+    reject(&mut state, talk("pip", "share_discovery"));
+    reject(&mut state, choose("instrument_home", "woods"));
+    reject(&mut state, talk("woodcutter", "humming_hollow"));
+    replay_step(&mut state, talk("pip", "humming_hollow"));
+    replay_step(&mut state, travel("far_bank"));
+    reject(&mut state, inspect("hollow_branch"));
+    replay_step(&mut state, inspect("humming_hollow"));
+    replay_step(&mut state, Action::CancelMission);
+    reject(&mut state, inspect("trembling_leaf"));
+    replay_step(&mut state, Action::AcceptMission);
+    assert!(state.has_story_flag("hollow_listened"));
+    replay_step(&mut state, inspect("trembling_leaf"));
+    replay_step(&mut state, inspect("hollow_branch"));
+    reject(&mut state, choose("instrument_home", "unknown"));
+    replay_step(&mut state, choose("instrument_home", "woods"));
+    reject(&mut state, choose("instrument_home", "gathering"));
+    replay_step(&mut state, build("wind_instrument", "place_instrument"));
+    replay_step(&mut state, travel("bridge_bank"));
+    replay_step(&mut state, talk("pip", "share_discovery"));
+    for action in corner_actions("leafy_nook") {
+        replay_step(&mut state, action);
+    }
+    replay_step(&mut state, Action::AcceptMission);
+    replay_step(&mut state, travel("workshop"));
+    reject(&mut state, talk("bramble", "ready_to_visit"));
+    reject(
+        &mut state,
+        Action::Accompany {
+            character_id: "bramble".into(),
+            destination_id: "bridge_bank".into(),
+        },
+    );
+    for action in visit_actions().into_iter().skip(2) {
+        replay_step(&mut state, action);
+    }
+    replay_step(&mut state, Action::AcceptMission);
+    reject(&mut state, invite("pip"));
+    replay_step(&mut state, choose("gathering_place", "far_bank"));
+    replay_step(&mut state, invite("pip"));
+    reject(&mut state, invite("pip"));
+    replay_step(&mut state, Action::CancelMission);
+    reject(&mut state, invite("bramble"));
+    replay_step(&mut state, Action::AcceptMission);
+    assert!(state.has_story_flag("pip_invited"));
+    assert_eq!(state.pip_location(), Location::FarBank);
+    replay_step(&mut state, travel("far_bank"));
+    reject(&mut state, talk("pip", "welcome_friends"));
+    reject(&mut state, invite("bramble"));
+    replay_step(&mut state, build("gathering_seats", "arrange_seats"));
+    replay_step(&mut state, build("gathering_music", "prepare_music"));
+    reject(&mut state, talk("pip", "welcome_friends"));
+    replay_step(&mut state, travel("bridge_bank"));
+    replay_step(&mut state, invite("bramble"));
+    replay_step(&mut state, travel("far_bank"));
+    replay_step(&mut state, talk("pip", "welcome_friends"));
+    assert_eq!(state.mission_status(), MissionStatus::Completed);
+}
+
+#[test]
+fn literal_v2_lights_save_upgrades_preserving_receipts_and_rejects_new_commands_as_v2() {
+    let legacy: Value =
+        serde_json::from_str(include_str!("fixtures/lights-completed-v2.json")).unwrap();
+    assert_eq!(legacy["version"], "pip-stories-2");
+    let mut state = State::from_checkpoint(&legacy).unwrap();
+    assert_eq!(
+        state.revision(),
+        legacy["state"]["revision"].as_u64().unwrap()
+    );
+    let original: Command = serde_json::from_value(legacy["commands"][0].clone()).unwrap();
+    assert_eq!(
+        serde_json::to_value(state.apply(&original).unwrap()).unwrap(),
+        legacy["receipts"][&original.command_id]
+    );
+    assert_eq!(state.completed_missions().len(), 3);
+    assert_eq!(state.checkpoint()["version"], "pip-stories-3");
+    replay_step(&mut state, travel("bridge_bank"));
+    replay_step(&mut state, Action::AcceptMission);
+    assert_eq!(state.mission(), Mission::HummingHollow);
+    assert_eq!(
+        State::from_checkpoint(&state.v2_checkpoint()),
+        Err(Rejection::InvalidCheckpoint)
+    );
+    let mut corrupt = legacy.clone();
+    corrupt["state"]["farLit"] = json!(false);
+    assert_eq!(
+        State::from_checkpoint(&corrupt),
+        Err(Rejection::InvalidCheckpoint)
+    );
+}
+
+#[test]
+fn instrument_transport_requires_arrival_and_placement_before_sharing() {
+    let mut state = finish_lights_v2();
+    for action in humming_actions("gathering").into_iter().take(9) {
+        replay_step(&mut state, action);
+    }
+    assert_eq!(state.location(), Location::FarBank);
+    assert_eq!(state.instrument_home(), Some(Location::BridgeBank));
+    assert_eq!(state.quantity("wind_instrument"), 1);
+    assert!(!state.has_story_flag("instrument_placed"));
+    let before = state.clone();
+    assert_eq!(
+        state.apply(&command(
+            &state,
+            build("wind_instrument", "place_instrument")
+        )),
+        Err(Rejection::NotAvailable)
+    );
+    assert_eq!(state, before);
+    replay_step(&mut state, travel("bridge_bank"));
+    assert_eq!(
+        state.apply(&command(&state, talk("pip", "share_discovery"))),
+        Err(Rejection::NotAvailable)
+    );
+    replay_step(&mut state, build("wind_instrument", "place_instrument"));
+    assert_eq!(state.quantity("wind_instrument"), 0);
+    assert!(state.has_story_flag("instrument_placed"));
+    replay_step(&mut state, talk("pip", "share_discovery"));
+    assert_eq!(state.mission_status(), MissionStatus::Completed);
 }

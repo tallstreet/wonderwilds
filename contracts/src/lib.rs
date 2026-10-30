@@ -75,6 +75,7 @@ mod tests {
                     "DomainEvent" => round_trip!(DomainEvent),
                     "ContentManifest" => round_trip!(ContentManifest),
                     "StoryPlanInput" => round_trip!(StoryPlanInput),
+                    "StoryAction" => round_trip!(StoryAction),
                     "StorySceneInput" => round_trip!(StorySceneInput),
                     "StoryMissionPlan" => round_trip!(StoryMissionPlan),
                     "StoryScene" => round_trip!(StoryScene),

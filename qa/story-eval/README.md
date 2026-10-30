@@ -15,6 +15,19 @@ The user's subsequent [acceptance of the pilot recommendations](approvals/pilot-
 approves the 386 keep candidates and leaves 25 revisions unapproved. That acceptance
 is recorded separately from the original model judgments and frozen snapshot.
 
+The current [broader input pack](datasets/broader-2026-10-30-inputs/README.md)
+contains 607 reachable states, 1,821 generation requests, and 607 mechanically
+checked authored references across seven missions and eight lasting-choice
+combinations. It contains no new model candidates, quality grades or approvals.
+Verify it with `python3 qa/story-eval/dataset.py verify-inputs --dataset
+qa/story-eval/datasets/broader-2026-10-30-inputs`.
+
+For the older content version, use `dataset.py review --archived --out PATH`.
+This verifies the frozen snapshot and reuses its recorded mechanical evidence;
+it does not claim compatibility with the current engine. Default review reruns
+current-engine checks and rejects outdated inputs. `prepare --parent-dataset PATH`
+records a verified parent snapshot without transferring candidates or approvals.
+
 ## Run the local workflow
 
 From the repository root, choose new output directories (existing outputs are
@@ -150,8 +163,8 @@ from approving a subsequently changed response. These are integrity checks for
 local artifacts, not an authenticity/security boundary against malicious editors.
 
 Whole scenario journeys are assigned to stable training/evaluation groups before
-generation. Never train on `eval.jsonl`. All families still use the same three
-authored missions. Training examples with exactly the same input and presentation
+generation. Never train on `eval.jsonl`. All current families use the same seven
+authored missions (the historical pilot used three). Training examples with exactly the same input and presentation
 metadata as any held-out scenario are excluded at export and flagged in review.
 Near-duplicate semantic situations still exist: this pilot cannot
 establish generalization to unseen mission structures. Build a separate held-out

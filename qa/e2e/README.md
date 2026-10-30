@@ -95,3 +95,23 @@ a committed exchange whose response was lost. It checks both crossing directions
 persistent picnic/lantern scenery, completed history, mobile layout and the
 inspector, while verifying assessed progress remains untouched. Screenshots are
 written to `/tmp/wonderwilds-story-series-{desktop,mobile}.png`.
+
+Seven connected stories, including the four broader mission patterns:
+
+```sh
+WW_QA_BROWSER_TEST=qa/e2e/story-broader.mjs node qa/e2e/run-training-qa.mjs
+WW_STORY_BRANCHES=alternate WW_QA_BROWSER_TEST=qa/e2e/story-broader.mjs node qa/e2e/run-training-qa.mjs
+```
+
+Run each command separately against its own disposable cluster. Both start with
+the bridge, picnic and lights, then play the humming mystery, Pip's cosy corner,
+Bramble's visit and the moonlight gathering. The routes choose different lasting
+instrument homes, corner designs and gathering banks, and prepare seats/music in
+opposite orders. The instrument is physically placed at its chosen bank; choosing
+a destination alone must not render a finished decoration. The test also checks
+immediate visible discovery/preference replies, paused corner progress and reload,
+Bramble following the player from the workshop into the meadow without a duplicate
+stationary character, present friends at the gathering, all seven completed goals,
+persistent scenery, mobile layout and unchanged educational progress. The woodcutter
+uses existing Cleo art so Bramble remains visually distinct. Screenshots are written
+to `/tmp/wonderwilds-story-broader-{default,alternate}-{desktop,mobile}.png`.

@@ -1,4 +1,11 @@
-import type { Progress, WorldEncounter, Point, Actor } from './types.ts';
+import type {
+  Progress,
+  WorldEncounter,
+  Point,
+  Actor,
+  StoryShape,
+  WorldDecoration,
+} from './types.ts';
 import { paintScenery } from './scenery.ts';
 import Phaser from 'phaser';
 import { maps, mapExit, exitPoint, type MapId } from './maps.ts';
@@ -28,7 +35,7 @@ export function createWorld(
   backend?: {
     encounters(): WorldEncounter[];
     companions(): { sprite: string; name: string; offsetX?: number }[];
-    decorations?(): { id: string; kind: 'picnic' | 'lantern'; x: number; y: number }[];
+    decorations?(): WorldDecoration[];
     allowExits?: boolean;
     blocked?(x: number, y: number): boolean;
     inputLocked?(): boolean;
@@ -153,8 +160,8 @@ export function createWorld(
             .setDisplaySize(160, 100)
             .setOrigin(0.5, 0.9)
             .setDepth(decoration.y);
-        else if (decoration.kind === 'lantern')
-          this.storyShape(decoration.x, decoration.y, 'lantern', true);
+        else if (decoration.kind !== 'picnic')
+          this.storyShape(decoration.x, decoration.y, decoration.kind, true);
       }
       if (s.region === 'meadow' && backend?.allowExits !== false)
         this.add
@@ -282,7 +289,7 @@ export function createWorld(
       this.prompt.setVisible(false);
       this.fitCamera();
     }
-    storyShape(x: number, y: number, kind: 'stones' | 'lantern', lit: boolean) {
+    storyShape(x: number, y: number, kind: StoryShape, lit: boolean) {
       const shape = this.add.graphics({ x, y }).setDepth(y);
       if (kind === 'stones') {
         shape.fillStyle(0xffee8b, 0.25).fillEllipse(0, -10, 76, 44);
@@ -294,12 +301,72 @@ export function createWorld(
           shape.fillStyle(0xc2dad0).fillEllipse(dx, dy, 25, 21);
           shape.fillStyle(0xfff3a3).fillCircle(dx - 3, dy - 4, 6);
         }
-      } else {
+      } else if (kind === 'lantern') {
         if (lit) shape.fillStyle(0xffdf70, 0.2).fillCircle(0, -55, 48);
         shape.lineStyle(6, 0x76543b).lineBetween(0, 0, 0, -90).lineBetween(0, -90, 18, -90);
         shape.fillStyle(lit ? 0xffe382 : 0x8c9d8c).fillRoundedRect(5, -83, 28, 38, 6);
         shape.lineStyle(2, 0x76543b).strokeRoundedRect(5, -83, 28, 38, 6);
         if (lit) shape.fillStyle(0xfffae1).fillCircle(19, -64, 7);
+      } else if (kind === 'leaf') {
+        shape.fillStyle(0x7eaf54).fillEllipse(0, -18, 43, 24);
+        shape.lineStyle(2, 0x416a38).lineBetween(-23, -14, 17, -20);
+        shape.lineBetween(-4, -17, -11, -26).lineBetween(5, -19, 12, -10);
+      } else if (kind === 'hollow' || kind === 'instrument') {
+        shape.fillStyle(0x96643f).fillRoundedRect(-40, -30, 80, 30, 12);
+        shape.fillStyle(0x4e3527).fillEllipse(-30, -16, 18, 21);
+        if (kind === 'instrument') {
+          shape.lineStyle(4, 0xd8ba79).lineBetween(-28, -44, 28, -44);
+          for (const [i, height] of [22, 32, 28, 19].entries()) {
+            shape.lineStyle(2, 0xe8d1a6).lineBetween(-22 + i * 15, -44, -22 + i * 15, -35);
+            shape.fillStyle(0xebbd68).fillRoundedRect(-25 + i * 15, -35, 7, height, 3);
+          }
+        }
+      } else if (kind === 'corner-leaves' || kind === 'corner-stars') {
+        shape.fillStyle(0x9a794d).fillRoundedRect(-50, -20, 100, 20, 8);
+        shape.lineStyle(5, 0x785837).lineBetween(-43, 0, -43, -75).lineBetween(43, 0, 43, -75);
+        if (kind === 'corner-leaves') {
+          for (const [dx, dy] of [
+            [-30, -65],
+            [0, -78],
+            [30, -65],
+          ])
+            shape.fillStyle(0x85bc63).fillEllipse(dx, dy, 62, 32);
+        } else {
+          shape.fillStyle(0x9e7cc9).fillTriangle(-50, -67, 0, -90, 50, -67);
+          for (const dx of [-27, 0, 27]) {
+            shape.lineStyle(1, 0xf6de8b).lineBetween(dx, -65, dx, -48);
+            shape.fillStyle(0xffedac).fillCircle(dx, -45, 4);
+          }
+        }
+        shape.fillStyle(0xf0b4b4).fillRoundedRect(-28, -26, 56, 14, 6);
+      } else if (kind === 'music') {
+        for (const [dx, dy] of [
+          [-20, 0],
+          [15, -14],
+        ]) {
+          shape.lineStyle(4, 0x8862b0).lineBetween(dx + 7, dy - 7, dx + 7, dy - 47);
+          shape.fillStyle(0x8862b0).fillEllipse(dx, dy - 5, 19, 12);
+          shape.lineStyle(5, 0x8862b0).lineBetween(dx + 7, dy - 47, dx + 22, dy - 39);
+        }
+      } else if (kind === 'seating') {
+        for (const dx of [-30, 30]) {
+          shape.fillStyle(0x765339).fillRoundedRect(dx - 15, -23, 30, 23, 5);
+          shape.fillStyle(0xcfb178).fillEllipse(dx, -23, 32, 14);
+        }
+      } else if (kind === 'bunting') {
+        shape.lineStyle(4, 0x88633f).lineBetween(-50, 0, -50, -80).lineBetween(50, 0, 50, -80);
+        shape.lineStyle(2, 0xffedb6).lineBetween(-50, -72, 50, -72);
+        for (const [i, colour] of [0xf5a6bd, 0x9ccdb1, 0xc8b0ed, 0xf2d38b].entries())
+          shape
+            .fillStyle(colour)
+            .fillTriangle(-43 + i * 23, -71, -23 + i * 23, -71, -33 + i * 23, -49);
+      } else if (kind === 'trail') {
+        for (const [dx, dy] of [
+          [-30, -5],
+          [-5, -15],
+          [23, -27],
+        ])
+          shape.fillStyle(lit ? 0xd6bd8e : 0x9d7653).fillEllipse(dx, dy, 24, 12);
       }
       return shape;
     }

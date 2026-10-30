@@ -8,6 +8,39 @@ input builder. It does not replace the current assessed bridge, modify guest
 saves or expose a model/provider. API/database and browser integration follow
 explicitly after this foundation is verified.
 
+## Sixth delivery: broader authored missions and evaluation inputs
+
+Implemented with three subagents owning domain mechanics, director/contracts/API,
+and browser rendering/QA; the integration owner expanded evaluation and reviewed
+all three scopes against these acceptance criteria:
+
+- Humming hollow: inspect clues, choose an instrument home, carry and place it,
+  then share the discovery. The instrument remains where it was placed.
+- Cosy corner: hear Pip’s preferences, choose a leafy nook or star canopy,
+  assemble it and enjoy the resulting corner.
+- Bramble’s first visit: prepare the path, invite Bramble to travel, escort the
+  actual character and acknowledge arrival.
+- Moonlight gathering: choose a bank, invite both friends and prepare seats and
+  music in flexible order, then welcome everyone.
+- Existing outcomes persist; missions pause/resume, choices survive reload, and
+  educational progress remains separate. Authored rules decide all progress.
+- Capture reachable inputs across every mission and all eight lasting-choice
+  combinations; preserve the reviewed pilot and its separate approvals unchanged.
+
+Review corrected premature instrument placement, gathering music that could
+contradict the instrument’s chosen home, delayed discovery dialogue, optional
+clues obscuring required progress, and corner previews inconsistent with choices.
+The browser journeys exercise both choices at each branch, real travel, escort,
+parallel preparations, reloads, mobile UI and all seven completed missions.
+
+The [input pack](../qa/story-eval/datasets/broader-2026-10-30-inputs/README.md)
+contains 607 states and 1,821 requests; all 607 authored references pass the
+mechanical grader. New model generation and independent quality review are still
+pending. These inputs evaluate scenes within authored missions, not the ability
+to invent arbitrary playable missions. Versioned v1/v2 checkpoints upgrade by
+replay while preserving old command receipts. Historical dataset reviews must
+explicitly use archived evidence; approvals never transfer to new inputs.
+
 ## Fifth delivery: offline scene evaluation
 
 Follow-up: [the versioned pilot](../qa/story-eval/datasets/pilot-2026-10-30/README.md)

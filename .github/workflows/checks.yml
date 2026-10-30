@@ -168,3 +168,10 @@ jobs:
         env:
           WW_QA_BROWSER_TEST: qa/e2e/story-series.mjs
         run: node qa/e2e/run-training-qa.mjs
+      - name: Check broader story choices and outcomes
+        if: matrix.suite == 'browser'
+        env:
+          WW_QA_BROWSER_TEST: qa/e2e/story-broader.mjs
+        run: |
+          node qa/e2e/run-training-qa.mjs
+          WW_STORY_BRANCHES=alternate node qa/e2e/run-training-qa.mjs

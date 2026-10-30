@@ -10,3 +10,9 @@ The compatibility test replays it, checks its original receipts and projection,
 then continues into the picnic mission. Keep this fixture unchanged when changing
 new checkpoint output; it protects saved development progress from silent resets.
 No profile, identity or real child data is present.
+
+`lights-completed-v2.json` is copied without alteration from the reviewed
+`pilot-2026-10-30` corpus (`bank-series-036`) before the v3 runtime expansion.
+It preserves the literal v2 completed-lantern projection and original receipts.
+The compatibility test verifies replay, exact retries and continuing into the
+humming-hollow mission; relabelling new actions as v2 must fail.

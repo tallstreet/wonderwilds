@@ -219,6 +219,7 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
     );
 
     legacy_series_upgrade(&mut admin, &repo, &other);
+    v2_series_upgrade(&mut admin, &repo, &other);
 
     let mut lifecycle = PostgresIdentity::new(Client::connect(&restricted, NoTls).unwrap());
     let verified = VerifiedContext {
@@ -319,7 +320,7 @@ fn legacy_series_upgrade(admin: &mut Client, repo: &PostgresRepository, identity
         originals.push((request, response));
     }
     let mut current = repo.read(identity).unwrap();
-    assert_eq!(current["contentVersion"], "pip-stories-2");
+    assert_eq!(current["contentVersion"], "pip-stories-3");
     assert_eq!(current["sceneInput"]["mission"]["status"], "completed");
     let stale = command(
         "old-handle-new-command",
@@ -371,6 +372,153 @@ fn legacy_series_upgrade(admin: &mut Client, repo: &PostgresRepository, identity
             .unwrap()
             .len(),
         3
+    );
+    for (request, response) in originals {
+        assert_eq!(repo.execute(identity, &request).unwrap(), response);
+    }
+}
+
+fn v2_series_upgrade(admin: &mut Client, repo: &PostgresRepository, identity: &Identity) {
+    // Reuse only this disposable test profile after the separate v1 assertions.
+    let profile = &identity.profile_id;
+    admin
+        .execute(
+            "DELETE FROM wonderwilds.story_command_receipts WHERE profile_id::text=$1",
+            &[profile],
+        )
+        .unwrap();
+    admin
+        .execute(
+            "DELETE FROM wonderwilds.story_progress WHERE profile_id::text=$1",
+            &[profile],
+        )
+        .unwrap();
+    let legacy: Value = serde_json::from_str(include_str!(
+        "../../../../domain/src/story/fixtures/lights-completed-v2.json"
+    ))
+    .unwrap();
+    let mut state = State::new();
+    let mut originals = Vec::new();
+    let mut skip_reaccept = false;
+    for saved in legacy["commands"].as_array().unwrap() {
+        let mut command: wonderwilds_domain::story::Command =
+            serde_json::from_value(saved.clone()).unwrap();
+        use wonderwilds_domain::story::Action;
+        // The domain fixture exercises partial collections and cancellation. Build
+        // a publicly playable v2 history instead, with the advertised full collect
+        // actions and a receipt for every committed revision.
+        match &command.action {
+            Action::Collect { quantity: 1, .. } => continue,
+            Action::CancelMission => {
+                skip_reaccept = true;
+                continue;
+            }
+            Action::AcceptMission if skip_reaccept => {
+                skip_reaccept = false;
+                continue;
+            }
+            Action::Collect { source_id, .. } => {
+                command.action = state.available_actions().into_iter().find(|action| {
+                    matches!(action, Action::Collect { source_id: offered, .. } if offered == source_id)
+                }).unwrap();
+            }
+            Action::Acknowledge { entry_id, .. } => {
+                command.action = Action::Acknowledge {
+                    scene_id: format!("pip-bridge-scene-{}", state.revision()),
+                    entry_id: entry_id.clone(),
+                };
+            }
+            _ => {}
+        }
+        command.expected_revision = state.revision();
+        let payload = if let wonderwilds_domain::story::Action::Acknowledge { scene_id, entry_id } =
+            &command.action
+        {
+            json!({"type":"acknowledge","sceneId":scene_id,"entryId":entry_id})
+        } else {
+            let index = state
+                .available_actions()
+                .iter()
+                .position(|a| a == &command.action)
+                .unwrap();
+            json!({"type":"choose","actionId":format!("story-v2-{}-{index}",state.revision())})
+        };
+        let request = self::command(&command.command_id, command.expected_revision, payload);
+        state.apply(&command).unwrap();
+        // Synthetic old-format receipts accompany this derived public v2 history.
+        let mut response = super::super::snapshot(&state).unwrap();
+        response["contentVersion"] = json!("pip-stories-2");
+        let actions = response["sceneInput"]["availableActions"]
+            .as_array_mut()
+            .unwrap();
+        if state.mission_id() == "welcome_lights"
+            && state.mission_status() == wonderwilds_domain::story::MissionStatus::Completed
+        {
+            actions.retain(|a| a["action"]["type"] != "accept_mission");
+        }
+        for (index, a) in actions.iter_mut().enumerate() {
+            a["id"] = json!(format!("story-v2-{}-{index}", state.revision()));
+        }
+        response["scene"]["choices"] = json!(
+            actions
+                .iter()
+                .map(|a| json!({"label":a["description"],"actionId":a["id"]}))
+                .collect::<Vec<_>>()
+        );
+        validate("StorySnapshot", &response).unwrap();
+        let revision = state.revision() as i64;
+        admin.execute("INSERT INTO wonderwilds.story_command_receipts(profile_id,command_id,request,response,revision) VALUES($1::text::uuid,$2,$3,$4,$5)", &[profile,&command.command_id,&request,&response,&revision]).unwrap();
+        originals.push((request, response));
+    }
+    let mut checkpoint = state.checkpoint();
+    checkpoint["version"] = json!("pip-stories-2");
+    checkpoint["state"]
+        .as_object_mut()
+        .unwrap()
+        .remove("broader");
+    assert!(State::from_checkpoint(&checkpoint).is_ok());
+    let revision = state.revision() as i64;
+    assert_eq!(originals.len() as i64, revision);
+    admin.execute("INSERT INTO wonderwilds.story_progress(profile_id,revision,checkpoint) VALUES($1::text::uuid,$2,$3)", &[profile,&revision,&checkpoint]).unwrap();
+    let mut current = repo.read(identity).unwrap();
+    assert_eq!(current["contentVersion"], "pip-stories-3");
+    assert_eq!(current["revision"], revision);
+    let stale = command(
+        "v2-handle-after-upgrade",
+        revision as u64,
+        json!({"type":"choose","actionId":format!("story-v2-{revision}-0")}),
+    );
+    assert_eq!(repo.execute(identity, &stale), Err(Error::RevisionConflict));
+    for (request, response) in &originals {
+        assert_eq!(repo.execute(identity, request).unwrap(), *response);
+    }
+    for (kind, destination) in [
+        ("travel", Some("bridge_bank")),
+        ("accept_mission", None),
+        ("talk", None),
+        ("travel", Some("far_bank")),
+        ("inspect", None),
+    ] {
+        let request = choose(
+            &current,
+            &format!("broader-{}", current["revision"]),
+            kind,
+            destination,
+        );
+        let response = repo.execute(identity, &request).unwrap();
+        assert_eq!(repo.execute(identity, &request).unwrap(), response);
+        current = repo.read(identity).unwrap();
+        assert_eq!(current, response);
+    }
+    assert_eq!(
+        current["sceneInput"]["mission"]["missionId"],
+        "humming_hollow"
+    );
+    assert!(
+        current["sceneInput"]["context"]["memory"]["facts"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("The player listened at the humming hollow."))
     );
     for (request, response) in originals {
         assert_eq!(repo.execute(identity, &request).unwrap(), response);

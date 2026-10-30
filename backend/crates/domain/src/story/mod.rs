@@ -6,10 +6,13 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
 
+mod broader;
 mod missions;
+use broader::BroaderProgress;
 pub use missions::Mission;
 
-pub const CONTENT_VERSION: &str = "pip-stories-2";
+pub const CONTENT_VERSION: &str = "pip-stories-3";
+const SERIES_V2: &str = "pip-stories-2";
 const LEGACY_CONTENT_VERSION: &str = "pip-bridge-1";
 pub const MAX_COMMANDS: usize = 256;
 const MAX_CHECKPOINT_BYTES: usize = 256 * 1024;
@@ -67,6 +70,20 @@ impl MissionStatus {
 )]
 pub enum Action {
     AcceptMission,
+    Inspect {
+        object_id: String,
+    },
+    Talk {
+        character_id: String,
+        topic_id: String,
+    },
+    Choose {
+        choice_id: String,
+        option_id: String,
+    },
+    Invite {
+        character_id: String,
+    },
     CancelMission,
     Collect {
         source_id: String,
@@ -190,6 +207,7 @@ pub struct State {
     picnic_shared: bool,
     near_lit: bool,
     far_lit: bool,
+    broader: BroaderProgress,
     events: Vec<Event>,
     history: Vec<Command>,
     receipts: BTreeMap<String, Receipt>,
@@ -237,6 +255,7 @@ impl State {
             picnic_shared: false,
             near_lit: false,
             far_lit: false,
+            broader: BroaderProgress::default(),
             events: Vec::new(),
             history: Vec::new(),
             receipts: BTreeMap::new(),
@@ -327,6 +346,10 @@ impl State {
             "picnic_basket" => self.picnic_basket,
             "glow_pebbles" => self.glow_pebbles,
             "lanterns" => self.lanterns,
+            "wind_instrument" => u32::from(
+                self.instrument_home() == Some(Location::BridgeBank)
+                    && !self.has_story_flag("instrument_placed"),
+            ),
             _ => 0,
         }
     }
@@ -338,6 +361,7 @@ impl State {
             "picnic_basket",
             "glow_pebbles",
             "lanterns",
+            "wind_instrument",
         ]
         .into_iter()
         .filter_map(|id| {
@@ -420,16 +444,29 @@ impl State {
                     Mission::WelcomeLights => {
                         "The player accepted the mission to light both banks with welcome lanterns."
                     }
+                    Mission::HummingHollow => {
+                        "The player accepted the mission to discover the humming hollow."
+                    }
+                    Mission::CosyCorner => {
+                        "The player accepted the mission to make a cosy corner for Pip."
+                    }
+                    Mission::BramblesVisit => {
+                        "The player accepted the mission to help Bramble visit the bridge bank."
+                    }
+                    Mission::MoonlightGathering => {
+                        "The player accepted the mission to prepare a moonlight gathering."
+                    }
                 }
                 .into())
             }
             Action::CancelMission => {
                 self.require_active()?;
                 self.mission_status = MissionStatus::Abandoned;
-                Ok(
+                Ok(if matches!(self.mission, Mission::Bridge | Mission::Picnic | Mission::WelcomeLights) {
                     "The player paused Pip's mission; items and world changes were preserved."
-                        .into(),
-                )
+                } else {
+                    "The player paused the mission; discoveries, choices and preparations were preserved."
+                }.into())
             }
             Action::Travel { destination_id } => {
                 let destination = Location::parse(destination_id)?;
@@ -473,6 +510,7 @@ impl State {
                     Mission::Bridge => self.wood += quantity,
                     Mission::Picnic => self.berries += quantity,
                     Mission::WelcomeLights => self.glow_pebbles += quantity,
+                    _ => return Err(Rejection::InvalidAction),
                 }
                 Ok(format!(
                     "The player collected {quantity} {item} from {source_id}."
@@ -591,7 +629,7 @@ impl State {
                         self.far_lit = true;
                         Ok("The player placed a welcome lantern on the far bank.".into())
                     }
-                    _ => Err(Rejection::InvalidAction),
+                    _ => self.broader_transition(action),
                 }
             }
             Action::Accompany {
@@ -599,6 +637,9 @@ impl State {
                 destination_id,
             } => {
                 self.require_active()?;
+                if character_id == "bramble" {
+                    return self.broader_transition(action);
+                }
                 if character_id != "pip"
                     || !matches!(destination_id.as_str(), "bridge_bank" | "far_bank")
                 {
@@ -630,6 +671,10 @@ impl State {
                     _ => Err(Rejection::NotAvailable),
                 }
             }
+            Action::Inspect { .. }
+            | Action::Talk { .. }
+            | Action::Choose { .. }
+            | Action::Invite { .. } => self.broader_transition(action),
             Action::Acknowledge { scene_id, entry_id } => {
                 let scene = self.presentation();
                 if scene.scene_id != *scene_id {
@@ -691,6 +736,10 @@ impl State {
                 ("near_bank_lit", "Place two lanterns on the near bank."),
                 ("far_bank_lit", "Place a lantern on the far bank."),
             ]),
+            Mission::HummingHollow
+            | Mission::CosyCorner
+            | Mission::BramblesVisit
+            | Mission::MoonlightGathering => definitions.extend(self.broader_milestones()),
             Mission::Bridge => {
                 if !self.bridge_repaired {
                     if self.planks < 3 {
@@ -731,13 +780,20 @@ impl State {
                 "lanterns_ready" => self.lanterns >= 3,
                 "near_bank_lit" => self.near_lit,
                 "far_bank_lit" => self.far_lit,
-                _ => false,
+                "instrument_home_chosen" => self.broader.instrument_home.is_some(),
+                "corner_style_chosen" => self.broader.corner_style.is_some(),
+                "gathering_place_chosen" => self.broader.gathering_place.is_some(),
+                id => self.broader.flags.contains(id),
             };
         }
         let outcome = match self.mission {
             Mission::Bridge => self.bridge_repaired && self.crossed_with_pip,
             Mission::Picnic => self.picnic_ready && self.picnic_shared,
             Mission::WelcomeLights => self.near_lit && self.far_lit,
+            Mission::HummingHollow => self.has_story_flag("hollow_shared"),
+            Mission::CosyCorner => self.has_story_flag("corner_shared"),
+            Mission::BramblesVisit => self.has_story_flag("bramble_visit_shared"),
+            Mission::MoonlightGathering => self.has_story_flag("gathering_shared"),
         };
         if outcome {
             self.mission_status = MissionStatus::Completed;
@@ -750,7 +806,15 @@ impl State {
     /// Canonical authored lines. Acknowledgements are bound to this revision and entry.
     /// Calling this read-only method does not establish a meeting or any progress.
     pub fn presentation(&self) -> Presentation {
-        let (speaker, text) = if self.mission != Mission::Bridge {
+        let (speaker, text) = if matches!(
+            self.mission,
+            Mission::HummingHollow
+                | Mission::CosyCorner
+                | Mission::BramblesVisit
+                | Mission::MoonlightGathering
+        ) {
+            self.broader_presentation()
+        } else if self.mission != Mission::Bridge {
             self.series_presentation()
         } else {
             match self.location {
@@ -945,6 +1009,7 @@ impl State {
                 destination_id: "bridge_bank".into(),
             },
         ]);
+        candidates.extend(self.broader_actions());
         candidates
             .into_iter()
             .filter(|action| self.clone().transition(action).is_ok())
@@ -975,7 +1040,8 @@ impl State {
         let checkpoint: Checkpoint =
             serde_json::from_value(value.clone()).map_err(|_| Rejection::InvalidCheckpoint)?;
         let legacy = checkpoint.version == LEGACY_CONTENT_VERSION;
-        if (!legacy && checkpoint.version != CONTENT_VERSION)
+        let legacy_v2 = checkpoint.version == SERIES_V2;
+        if (!legacy && !legacy_v2 && checkpoint.version != CONTENT_VERSION)
             || checkpoint.commands.len() > MAX_COMMANDS
             || checkpoint.receipts.len() != checkpoint.commands.len()
         {
@@ -985,9 +1051,17 @@ impl State {
         for command in checkpoint.commands {
             // v1 had no transition from a completed bridge into another mission.
             // Do not reinterpret a forged legacy log using expanded v2 semantics.
-            if legacy
-                && state.mission_status == MissionStatus::Completed
-                && command.action == Action::AcceptMission
+            if ((legacy || legacy_v2)
+                && matches!(
+                    command.action,
+                    Action::Inspect { .. }
+                        | Action::Talk { .. }
+                        | Action::Choose { .. }
+                        | Action::Invite { .. }
+                ))
+                || ((legacy || legacy_v2 && state.mission == Mission::WelcomeLights)
+                    && state.mission_status == MissionStatus::Completed
+                    && command.action == Action::AcceptMission)
             {
                 return Err(Rejection::InvalidCheckpoint);
             }
@@ -1000,6 +1074,8 @@ impl State {
         }
         let expected = if legacy {
             state.legacy_checkpoint()
+        } else if legacy_v2 {
+            state.v2_checkpoint()
         } else {
             state.checkpoint()
         };
@@ -1013,7 +1089,12 @@ impl State {
     }
     fn projection(&self) -> Value {
         json!({"revision":self.revision,"location":self.location,"wood":self.wood,"planks":self.planks,"sources":self.sources,"bridgeRepaired":self.bridge_repaired,"crossedWithPip":self.crossed_with_pip,"pipLocation":self.pip_location,"missionStatus":self.mission_status,"milestones":self.milestones,"metWoodcutter":self.met_woodcutter,"events":self.events,
-        "mission":self.mission,"completedMissions":self.completed_missions,"berries":self.berries,"picnicBasket":self.picnic_basket,"glowPebbles":self.glow_pebbles,"lanterns":self.lanterns,"picnicReady":self.picnic_ready,"picnicShared":self.picnic_shared,"nearLit":self.near_lit,"farLit":self.far_lit})
+        "mission":self.mission,"completedMissions":self.completed_missions,"berries":self.berries,"picnicBasket":self.picnic_basket,"glowPebbles":self.glow_pebbles,"lanterns":self.lanterns,"picnicReady":self.picnic_ready,"picnicShared":self.picnic_shared,"nearLit":self.near_lit,"farLit":self.far_lit,"broader":self.broader})
+    }
+    fn v2_checkpoint(&self) -> Value {
+        let mut state = self.projection();
+        state.as_object_mut().unwrap().remove("broader");
+        json!({"version":SERIES_V2,"initial":self.initial,"commands":self.history,"receipts":self.receipts,"state":state})
     }
     fn legacy_checkpoint(&self) -> Value {
         let sources: BTreeMap<_, _> = self

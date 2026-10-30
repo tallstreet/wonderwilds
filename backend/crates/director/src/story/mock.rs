@@ -22,7 +22,7 @@ fn count(input: &Value, item: &str) -> u64 {
 /// The compact v1 input carries introduction evidence as an authored memory fact,
 /// not a dedicated flag. Keep this exact mapping in one place and test it against
 /// the builder; scene prose and relationship descriptions are not evidence.
-fn needs_introduction(input: &Value) -> bool {
+pub(super) fn needs_introduction(input: &Value) -> bool {
     input["context"]["locationId"] == "workshop"
         && input["here"]["characters"]
             .as_array()
@@ -46,11 +46,33 @@ impl SceneProvider for MockSceneProvider {
         ) {
             return sequel_scene(input, canonical);
         }
+        if matches!(
+            input["mission"]["missionId"].as_str(),
+            Some("humming_hollow" | "cosy_corner" | "brambles_visit" | "moonlight_gathering")
+        ) {
+            return super::broader::scene(input, canonical);
+        }
         let actions = input["availableActions"].as_array().unwrap();
         let has = |kind: &str| actions.iter().any(|a| a["action"]["type"] == kind);
         let location = input["context"]["locationId"].as_str().unwrap();
         let status = input["mission"]["status"].as_str();
         let introduction = needs_introduction(input);
+        let bridge_ready = input["context"]["memory"]["facts"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|fact| fact == "The bridge is repaired.");
+        let wood = count(input, "wood");
+        let wood_prompt = if wood == 0 {
+            "Let's look for loose wood nearby. We need three pieces to make planks for the bridge."
+                .to_owned()
+        } else {
+            format!(
+                "You have {wood} {} of wood. Find {} more nearby to make the bridge planks.",
+                if wood == 1 { "piece" } else { "pieces" },
+                3_u64.saturating_sub(wood)
+            )
+        };
         let (stage, text) = if introduction {
             (
                 "workshop_intro",
@@ -69,7 +91,11 @@ impl SceneProvider for MockSceneProvider {
         } else if input["mission"].is_null() {
             (
                 "bridge_offer",
-                "Pip wants to explore across the stream. You can help make a way across together.",
+                if bridge_ready {
+                    "The bridge is already repaired. Pip would like to cross it with you."
+                } else {
+                    "Pip wants to explore across the stream. You can help make a way across together."
+                },
             )
         } else if has("accompany") {
             (
@@ -97,10 +123,7 @@ impl SceneProvider for MockSceneProvider {
                 "You have enough wood for the bridge. Take it to the woodcutter at the workshop.",
             )
         } else if has("collect") {
-            (
-                "gather",
-                "Look for loose wood nearby. Three pieces can become the planks for Pip's bridge.",
-            )
+            ("gather", wood_prompt.as_str())
         } else {
             (
                 "explore",
@@ -114,20 +137,26 @@ impl SceneProvider for MockSceneProvider {
         let dialogue = match stage {
             "bridge_offer" if pip_here => Some((
                 "pip",
-                "I'd love to explore across the stream. Will you help me make a way across?",
+                if bridge_ready {
+                    "The bridge is ready! Will you cross the stream with me?"
+                } else {
+                    "I'd love to explore across the stream. Will you help me make a way across?"
+                },
             )),
             "gather" if pip_here && count(input, "wood") >= 3 => Some((
                 "pip",
                 "You found enough wood! Take it to the woodcutter at the workshop to make planks.",
             )),
-            "gather" if pip_here => Some((
-                "pip",
-                "Let's look for loose wood nearby. We need three pieces to make planks for the bridge.",
-            )),
-            "gather" if woodcutter_here => Some((
+            "bridge_offer" if woodcutter_here => Some((
                 "woodcutter",
-                "Bring me three pieces of wood, and I can shape them into sturdy planks.",
+                if bridge_ready {
+                    "The bridge is ready for crossing. Pip is waiting at the bridge bank."
+                } else {
+                    "Pip is waiting at the bridge bank. You can help him cross the stream."
+                },
             )),
+            "gather" if pip_here => Some(("pip", wood_prompt.as_str())),
+            "gather" if woodcutter_here => Some(("woodcutter", wood_prompt.as_str())),
             "repair" if pip_here => Some((
                 "pip",
                 "The planks are here! Let's fit them into place to make a safe way across.",
@@ -142,6 +171,10 @@ impl SceneProvider for MockSceneProvider {
             "paused" if pip_here => Some((
                 "pip",
                 "Take your time exploring. I'll be here when you want to help again.",
+            )),
+            "paused" if woodcutter_here => Some((
+                "woodcutter",
+                "Enjoy exploring. Your supplies will be ready when you want to help Pip again.",
             )),
             "exchange" if woodcutter_here => Some((
                 "woodcutter",
@@ -175,6 +208,27 @@ fn sequel_scene(input: &Value, canonical: &Value) -> Result<Value, Error> {
     let actions = input["availableActions"].as_array().unwrap();
     let has = |kind: &str| actions.iter().any(|a| a["action"]["type"] == kind);
     let facts = input["context"]["memory"]["facts"].as_array().unwrap();
+    let berries = count(input, "berries");
+    let berry_prompt = if berries == 0 {
+        "Find three berries on the far bank, then take them to the workshop for our picnic."
+            .to_owned()
+    } else {
+        format!(
+            "You have {berries} {}. Find {} more on the far bank, then take them to the workshop for our picnic.",
+            if berries == 1 { "berry" } else { "berries" },
+            3_u64.saturating_sub(berries)
+        )
+    };
+    let pebbles = count(input, "glow_pebbles");
+    let pebble_prompt = if pebbles == 0 {
+        "Find three glow pebbles on the far bank so we can make welcoming lanterns.".to_owned()
+    } else {
+        format!(
+            "You have {pebbles} glow {}. Find {} more on the far bank so we can make welcoming lanterns.",
+            if pebbles == 1 { "pebble" } else { "pebbles" },
+            3_u64.saturating_sub(pebbles)
+        )
+    };
     let (stage, text) = if status == "completed" {
         if picnic {
             (
@@ -219,15 +273,24 @@ fn sequel_scene(input: &Value, canonical: &Value) -> Result<Value, Error> {
                 "These berries are ready for the picnic. The woodcutter can pack them into a basket at the workshop.",
             )
         } else {
-            (
-                "picnic_gather",
-                "Find three berries on the far bank, then take them to the workshop for our picnic.",
-            )
+            ("picnic_gather", berry_prompt.as_str())
         }
     } else if has("assemble") {
         (
             "lights_install",
-            "Place the lanterns here to make the path welcoming. Both banks need their lights.",
+            if facts
+                .iter()
+                .any(|f| f == "Two lanterns light the near bank.")
+            {
+                "The near bank is already lit. Place the last lantern here on the far bank."
+            } else if facts
+                .iter()
+                .any(|f| f == "One lantern lights the far bank.")
+            {
+                "The far bank is already lit. Place the remaining two lanterns here on the near bank."
+            } else {
+                "Place the lanterns here to make the path welcoming. Both banks need their lights."
+            },
         )
     } else if count(input, "lanterns") > 0 {
         let message = if facts
@@ -250,10 +313,7 @@ fn sequel_scene(input: &Value, canonical: &Value) -> Result<Value, Error> {
             "Take these glow pebbles to the workshop. The woodcutter can make three lanterns.",
         )
     } else {
-        (
-            "lights_gather",
-            "Find three glow pebbles on the far bank so we can make welcoming lanterns.",
-        )
+        ("lights_gather", pebble_prompt.as_str())
     };
     let mut response = canonical.clone();
     let present = input["here"]["characters"].as_array().unwrap();
@@ -269,15 +329,11 @@ fn sequel_scene(input: &Value, canonical: &Value) -> Result<Value, Error> {
             ("picnic_pack", "woodcutter") => {
                 "You have three berries. I can pack them into a picnic basket."
             }
-            ("picnic_gather", "woodcutter") => {
-                "Bring me three berries from the far bank and I can pack a picnic basket."
-            }
+            ("picnic_gather", "woodcutter") => berry_prompt.as_str(),
             ("lights_make", "woodcutter") => {
                 "I can turn your three glow pebbles into three welcoming lanterns."
             }
-            ("lights_gather", "woodcutter") => {
-                "Bring me three glow pebbles from the far bank to make lanterns."
-            }
+            ("lights_gather", "woodcutter") => pebble_prompt.as_str(),
             _ => text,
         };
         entries.push(json!({"type":"dialogue","entryId":format!("{stage}-{}",character["id"].as_str().unwrap()),"speakerId":character["id"],"text":line}));

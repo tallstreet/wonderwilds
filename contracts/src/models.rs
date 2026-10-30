@@ -339,6 +339,10 @@ pub enum StoryAction {
     Variant6(StoryActionVariant6),
     Variant7(StoryActionVariant7),
     Variant8(StoryActionVariant8),
+    Variant9(StoryActionVariant9),
+    Variant10(StoryActionVariant10),
+    Variant11(StoryActionVariant11),
+    Variant12(StoryActionVariant12),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -901,6 +905,36 @@ pub struct StoryActionVariant8 {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant9 {
+    pub r#type: StoryActionVariant9Type,
+    pub object_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant10 {
+    pub r#type: StoryActionVariant10Type,
+    pub character_id: String,
+    pub topic_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant11 {
+    pub r#type: StoryActionVariant11Type,
+    pub choice_id: String,
+    pub option_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StoryActionVariant12 {
+    pub r#type: StoryActionVariant12Type,
+    pub character_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum StoryPreferencesLanguage {
     #[serde(rename = "short_simple")]
     ShortSimple,
@@ -1049,6 +1083,8 @@ pub enum StoryPayloadContentVersion {
     PipBridge1,
     #[serde(rename = "pip-stories-2")]
     PipStories2,
+    #[serde(rename = "pip-stories-3")]
+    PipStories3,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1076,6 +1112,8 @@ pub enum StorySnapshotContentVersion {
     PipBridge1,
     #[serde(rename = "pip-stories-2")]
     PipStories2,
+    #[serde(rename = "pip-stories-3")]
+    PipStories3,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1255,6 +1293,30 @@ pub enum StoryActionVariant8Type {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant9Type {
+    #[serde(rename = "inspect")]
+    Inspect,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant10Type {
+    #[serde(rename = "talk")]
+    Talk,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant11Type {
+    #[serde(rename = "choose")]
+    Choose,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StoryActionVariant12Type {
+    #[serde(rename = "invite")]
+    Invite,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct StoryPlanInputAreaLocationsItem {
     pub id: String,
@@ -1318,6 +1380,14 @@ pub enum StorySceneInputMissionMissionId {
     PipsPicnic,
     #[serde(rename = "welcome_lights")]
     WelcomeLights,
+    #[serde(rename = "humming_hollow")]
+    HummingHollow,
+    #[serde(rename = "cosy_corner")]
+    CosyCorner,
+    #[serde(rename = "brambles_visit")]
+    BramblesVisit,
+    #[serde(rename = "moonlight_gathering")]
+    MoonlightGathering,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

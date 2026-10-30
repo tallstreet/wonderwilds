@@ -16,7 +16,7 @@ Public functions return schema-validated JSON:
   validated against the current input with a canonical authored fallback.
 - `scene_with_provider(&State, &impl SceneProvider)`: builds input and canonical
   presentation metadata, calls the provider, then validates or falls back.
-- `MockSceneProvider`: local scene responses for the connected bridge, picnic and lights stories; no
+- `MockSceneProvider`: local scene responses for the seven connected authored stories; no
   network, provider SDK, random output or model credentials.
 - `resolve_action(&State, handle)`: resolves only an exact current revision/index
   handle to its bound domain action. Execute with the same expected revision and
@@ -34,7 +34,7 @@ The runtime owns mechanics; descriptions explain its fixed bound recipes. Golden
 fixtures and journey tests verify these projections against real state transitions.
 No claim is made that the current small catalogue supports arbitrary mission planning.
 
-The series has fixed default preferences and three authored opportunities. Existing
+The series has fixed default preferences and seven authored opportunities. Existing
 planks and an already-repaired bridge reduce the authored milestone list; the neutral
 goal is to help Pip cross rather than claiming the player repaired an existing bridge.
 A paused mission retains its narrative/progress with explicit `status: abandoned`.
@@ -99,7 +99,7 @@ invalid bindings/grants/introduction edits, and canonical fallback.
 
 ## Connected stories and upgrades
 
-The current registry is `pips_bridge -> pips_picnic -> welcome_lights`. Completion
+The current registry is `pips_bridge -> pips_picnic -> welcome_lights -> humming_hollow -> cosy_corner -> brambles_visit -> moonlight_gathering`. Completion
 keeps the current mission visible until the child explicitly accepts its successor
 beside Pip. Scene `missionId` is optional in the wire schema for old responses and
 always emitted by the new builder. Goal, narrative and milestones describe the
@@ -108,11 +108,55 @@ Completed goals persist in `context.memory.recentMissions`. Inventory and object
 come only from runtime state; the bridge, shared picnic and lit banks survive later
 stories. Each source capability uses its remaining quantity, including partial picks.
 
-New payloads use `pip-stories-2`; contracts still accept `pip-bridge-1` receipts.
-New action handles have the `story-v2-` prefix. Old index handles cannot be reused
+New payloads use `pip-stories-3`; contracts still accept `pip-bridge-1` and `pip-stories-2` receipts.
+New action handles have the `story-v3-` prefix. Old index handles cannot be reused
 as new commands because adding a successor could otherwise reinterpret an old
 travel handle as mission acceptance. Exact stored command retries still return their
 original response through the repository. Tests cover the legacy checkpoint upgrade,
 full successor sequence and reload after every step. The exhaustive bridge exploration
 remains bounded to the first mission; targeted sequel coverage avoids a state-space
 explosion while testing every new action and shared outcome.
+
+
+## Broader authored mechanics
+
+The four successors add inspection/clues, a lasting instrument-home choice, two
+cosy-corner designs, a distinct Bramble escort, and a gathering with independent
+invitations and preparations. Inspect/talk/choose/invite are bounded wire action
+variants; all mechanics remain authoritative domain actions. The instrument choice
+selects its home; the player carries it when moving it, then places it explicitly.
+The gathering uses a humming circle so it does not silently move that instrument.
+
+`broader.rs` projects known flags, character locations, options and outcomes into
+compact facts and local objects. Old investigation details are dropped from later
+mission context while lasting outcomes remain. Completed goals are bounded to the
+seven authored stories. Explicit facts explain flexible lantern/gathering ordering,
+so scene writers do not have to infer future rules from a current action list.
+
+Bramble is distinct from the woodcutter and appears only when the broader series
+starts. Every present character has dialogue. The mock records a child's confirmed
+inspection/conversation result in the next response before showing a next-step
+hint; optional stump exploration never overrides a remaining required action.
+Conversation results use a fixed map of authored runtime events, not arbitrary
+user text. Mandatory woodcutter introductions remain intact. Returned presentation
+still does not acknowledge an introduction automatically.
+
+The broader journey regression checks both instrument homes, both corner designs,
+both gathering sites, different invitation/preparation orders, all seven completed
+goals, reply visibility, physical instrument placement and conversations after
+leaving a finished scene. Historical v2 checkpoints upgrade through strict domain
+replay; database tests preserve exact v2 public receipts while new writes use v3.
+Frozen reviewed v2 evaluation artifacts are not silently relabeled or rewritten;
+new evaluation runs use current v3 projections and separate review provenance.
+
+## Quality-review corrections
+
+Authored dialogue now states carried quantities and remaining supplies, names the
+remaining lantern bank, and acknowledges discoveries and the selected corner
+design. Instrument pickup labels distinguish choosing/carrying from walking to
+its home. Route hints name a reachable destination; pause labels refer to the
+current mission. Workshop lines preserve the required first introduction without
+repeating it after acknowledgement. Corpus regressions cover these distinctions.
+
+Earlier sealed inputs and reviews remain historical snapshots. Prepare a fresh
+run after changing authored prose; do not copy approvals onto revised candidates.

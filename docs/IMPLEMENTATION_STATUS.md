@@ -5,6 +5,60 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Authored story quality corrections — 30 October 2026
+
+The first model quality review of 607 authored references recommended 460 keeps
+and 147 revisions despite all scenes passing mechanical checks. Two implementation
+subagents corrected the underlying mock prose and labels; a separate reviewer
+reassessed the freshly captured set: 607 keep, zero revise/reject, with all 147
+previous revisions resolved. These remain model recommendations, not approvals. Changes acknowledge partial inventory,
+remaining lantern placement, completed discoveries and corner designs, distinguish
+instrument pickup from travel, name reachable destinations and use a neutral
+mission-pause label. Workshop dialogue avoids repeating an acknowledged introduction.
+These changes do not alter mission mechanics or educational progress.
+
+All 147 previously flagged outputs change in the new capture; shared wording
+changes affect 491 outputs overall. Existing sealed inputs, reviewed snapshots and
+human decisions remain unchanged. The revised capture contains the same 607
+reachable situations and 1,821 generation requests with explicit parent lineage.
+Fresh human decisions belong to a new review progress file. Only 102 distinct
+presentation sequences span the set; deduplication and genuinely generated
+alternatives remain necessary before treating it as diverse training material.
+
+Director and contract suites, all-target director Clippy, 28 evaluation Python
+tests, formatting and diff checks pass. The real-database seven-story browser
+journey also passes, including reload, mobile history and separate education.
+
+## Broader story delivery — 30 October 2026
+
+The opt-in story adventure now has seven authored missions. The four additions
+cover clue discovery and instrument placement, a choice of cosy corner designs,
+Bramble’s actual escort, and a gathering with flexible invitation/preparation
+order. Reusable actions, stage-specific dialogue and persistent scenery keep the
+stories connected. Education and assessed progress remain separate.
+
+Three subagents implemented domain, director/API/contracts and browser scopes;
+the integration review checked cross-layer consistency and corrected premature
+placement, misleading hints, delayed dialogue and inconsistent choice previews.
+Both seven-mission browser journeys pass with opposite lasting choices, reloads,
+real escort, mobile layout and unchanged educational progress. Existing desktop/
+tablet guest smoke and real-database training browser regressions also pass.
+The aggregate repository check passes, including Rust, contracts (119 fixtures),
+content validators and frontend (113 tests); the final evaluation Python suite
+passes 28 tests. The disposable PostgreSQL suite passes all three integration
+tests and migration guards, including v2 save upgrade, exact old-response retries
+and new-mission persistence. Local tooling used Node 26.12; CI remains pinned to
+Node 24.
+
+The [new input pack](../qa/story-eval/datasets/broader-2026-10-30-inputs/README.md)
+contains 607 reachable states and 1,821 generation requests. All 607 authored
+reference scenes pass current mechanical grading. All 21 existing frozen pilot
+and approval files retain their original hashes; archived review reproduces the
+accepted export of 269 training and 114 held-out examples. Historical evidence is
+explicitly marked archived, not revalidated against the new content version.
+New model candidates, independent quality judgments and human approvals remain
+pending. Shared mission families do not establish unseen-mission generalization.
+
 | Plan work | Current implementation | Remaining gate |
 | --- | --- | --- |
 | WW-01 | Baseline ADR, asset hashes/provenance inventory, synthetic save fixtures, desktop/tablet smoke | Independent rights review and child usability research |
@@ -20,11 +74,11 @@ No release, deployment, curriculum approval or learning-efficacy claim is made.
 | WW-11 | Six accessible DOM renderers, authored presentation binding, keyboard/touch controls, support-before-narration | Entrypoint/account integration, human screen-reader/accessibility review and complete browser journeys |
 | WW-12 | Meadow world, character journal, training entry point, team controls/two followers; 75-destination exploration library | Server regional/discovery/story integration, optional roles and full playable ending |
 | WW-13 | Bounded proposal validation, authored-only director/fallback, exact task binding and deterministic replay | API commit integration and approved content activation |
-| WW-14–16 | Offline synthetic scene evaluation pilot; authored game has no model dependency | Live provider adapter, human grader calibration, broader evaluation corpus and gated training experiment |
+| WW-14–16 | Offline scene evaluation with reviewed pilot and seven-mission input expansion; authored game has no model dependency | New candidate generation/review, live provider adapter, human grader calibration and gated training experiment |
 | WW-17 | Existing guest parent view preserved; Rust summaries/client foundation available | New parent learning view, approved pack workflow and coverage dashboard |
 | WW-18 | Local reproducible install/start/migration/check helpers and GitHub Actions configuration | Hosted CI execution, database/browser CI, deployment, observability, backup restore and rollback drills, operational owner |
 | WW-19–20 | Automated foundations and synthetic checks only | Integrated QA/security review, consented pilot, educator audit and measured curriculum expansion |
-| Authored story slice | Three connected missions, compatible authenticated saves, mock scenes and Phaser `/?story=1` adventure; `/story.html` inspector | Broader catalogue/preferences, shared-adventure integration, model adapter/evaluation and human usability review |
+| Authored story slice | Seven connected missions, discovery/choices/escort/gathering mechanics, compatible saves, mock scenes and Phaser `/?story=1`; expanded evaluation inputs | Broader catalogue/preferences, shared-adventure integration, model adapter/evaluation and human usability review |
 
 Design-only update, 30 October 2026: the [generative story design](GENERATIVE_STORY_DESIGN.md)
 proposes separate mission-planning and scene-continuation protocols, with reusable

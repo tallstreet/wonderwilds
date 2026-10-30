@@ -1,0 +1,24 @@
+{
+  "version": "story-scene-eval-1",
+  "corpusSha256": "1c5d450856f14dbfc07182da5fdf9a3082141f03027eb70695e4e47e0c8953c3",
+  "splits": {
+    "far-gathering-instrument-leafy": "eval",
+    "workshop-series": "train",
+    "bank-series": "train",
+    "far-gathering-instrument-stars": "train",
+    "far-gathering-woods-leafy": "train",
+    "repaired-series": "train",
+    "far-gathering-woods-stars": "train",
+    "supplied-series": "train"
+  },
+  "requestsSha256": "7f9272a06ca2e756b140d8025dab3d10a29b35e75affa5de20faafb54b55cf00",
+  "schemaSha256": "64a414f2e56ffaf174762f38348ae205f66e57e02b8e8015130994962567b193",
+  "editorialBrief": "Ages 6–8; short, warm sentences; concrete next steps; no frightening or manipulative content.",
+  "scenarioCount": 607,
+  "warning": "Synthetic authored scenarios; held-out journeys are not unseen mission families.",
+  "parentDataset": {
+    "datasetId": "pilot-2026-10-30",
+    "snapshotSha256": "c7f6d26d9158726607e88a2335799049ed3bcf987d44b94176fb05b7b91e88ed",
+    "approvalsTransferred": false
+  }
+}
