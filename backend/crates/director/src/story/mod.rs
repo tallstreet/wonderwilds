@@ -9,6 +9,7 @@ use wonderwilds_domain::story::{Action, Location, Mission, MissionStatus, State}
 mod broader;
 pub mod evaluation;
 mod mock;
+pub mod planning_evaluation;
 pub use mock::{MockSceneProvider, SceneProvider, scene_with_provider, validate_scene};
 
 pub const PROTOCOL: &str = "story-proposal-1";

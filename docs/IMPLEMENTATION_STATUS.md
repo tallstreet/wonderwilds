@@ -5,6 +5,37 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Mission planning evaluation — 31 October 2026
+
+The separate [offline planning harness](../qa/story-eval/planning/README.md)
+exports 18 distinct replay-checked situations across seven authored mission
+families, including partial progress, existing planks, repaired bridge and
+contrasting lasting history. Shared-schema/binding checks and bounded Rust domain
+search verify ordered milestone completion and replay successful witnesses.
+Model requests exclude reference answers and checkpoints; raw responses, timing,
+coverage, hashes, failures and escaped review reports are preserved locally.
+
+The current deployed `wonderwilds` alias passed 18/18 ordinary cases and 17/18
+paired reversed-condition cases. The failure asks Bramble to become ready before
+clearing a path that readiness requires. These are 18 situations in two prompt
+variants, not 36 independent missions. All 36 responses had valid schemas; initial
+503 availability failures are separately preserved and excluded from quality
+measurements. [Detailed results](../qa/story-eval/planning/RESULTS_2026-10-31.md)
+record settings, hashes, limitations and assistant prose-review observations.
+
+The ordinary outputs copied 81/84 supplied milestone labels. This establishes
+useful constrained planning behavior, not novel mission creativity, independent
+narrative approval or generalization beyond scene-training-related families.
+Prompt/context improvements and broader independent evaluation should precede a
+training decision. No fine-tuning, model deployment, accepted-plan runtime,
+persistence or gameplay behavior changed.
+
+Validation: full director suite, focused planning regressions, all-target director
+Clippy, 50 Python evaluation tests, Rust formatting, 18/18 authored completion
+witnesses and diff checks pass. Database/browser checks were not needed for this
+offline-only change. The endpoint exposes an alias, not a verified immutable
+weight revision; future comparisons must preserve this limitation.
+
 ## Modal baseline and adapter evaluation — 30 October 2026
 
 The [evaluation runner](../qa/story-eval/modal/EVALUATION.md) selects the verified

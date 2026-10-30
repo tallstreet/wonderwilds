@@ -303,6 +303,12 @@ bindings and immediate action executability, not prose quality or new-mission
 playability. The authored references are smoke-test candidates, not approved
 training examples.
 
+The separate [mission planning evaluator](qa/story-eval/planning/README.md)
+prepares 18 distinct runtime-derived planning cases and checks proposed milestone
+orders with executable completion witnesses. It can explicitly call the current
+Modal model without training or changing gameplay. It covers the existing authored
+opportunities, not unrestricted mission invention.
+
 The [versioned scene dataset](qa/story-eval/datasets/pilot-2026-10-30/README.md)
 preserves all 411 generated candidates and independent quality judgments for future
 iterations. Run `python3 qa/story-eval/dataset.py verify` to check its integrity, or
