@@ -64,6 +64,21 @@ to Pip and verifies the saved checklist and phone layout. Conversation acceptanc
 and return are local presentation state; the test verifies that neither issues
 server rewards. Assessment steps and creature ownership come from the real API.
 
+Curriculum practice inside the story world:
+
+```sh
+WW_QA_BROWSER_TEST=qa/e2e/mission-learning.mjs node qa/e2e/run-training-qa.mjs
+```
+
+This uses the same fresh synthetic cluster and ports. It accepts a story mission,
+opens its practice invitation, submits a wrong one-to-one assignment, records
+help, retries an uncertain save after reload and checks continued story access
+and separate guest/assessed-adventure saves. The mission practice client tests
+cover exact retry and stale-revision recovery; learning-engine tests cover the
+five supported skills, evidence diversity and graph progression. This is not
+full 120-skill activity coverage or educator approval. Keep model providers
+disabled for these assessment/persistence checks.
+
 Phaser Pip story world against a fresh API/PostgreSQL profile:
 
 ```sh

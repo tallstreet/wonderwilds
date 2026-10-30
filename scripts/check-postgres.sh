@@ -20,10 +20,12 @@ export WONDERWILDS_DATABASE_URL=$WW_QA_DATABASE_URL
 export WW_IDENTITY_TEST_DATABASE_URL=$WONDERWILDS_DATABASE_URL
 export WW_GAME_TEST_DATABASE_URL=$WONDERWILDS_DATABASE_URL
 export WW_STORY_TEST_DATABASE_URL=$WONDERWILDS_DATABASE_URL
+export WW_MISSION_LEARNING_TEST_DATABASE_URL=$WONDERWILDS_DATABASE_URL
 cd "$task_root"
 cargo test -p wonderwilds-api --locked postgres_identity_ownership_export_revocation_and_delete -- --ignored --nocapture
 cargo test -p wonderwilds-api --locked postgres_atomic_rollback_races_unique_grants_and_profile_ownership -- --ignored --nocapture
 cargo test -p wonderwilds-api --locked postgres_story_atomicity_retry_ownership_export_and_delete -- --ignored --nocapture
+cargo test -p wonderwilds-api --locked postgres_mission_learning_atomicity_retry_ownership_export_and_delete -- --ignored --nocapture
 # Prove recorded-history drift fails closed without touching repository files.
 "$task_bin/psql" --dbname="$WONDERWILDS_DATABASE_URL" --no-psqlrc --set ON_ERROR_STOP=1 \
     --command "UPDATE public.wonderwilds_schema_history SET sha256=repeat('0',64) WHERE version='0001_parent_profiles.sql'" >/dev/null

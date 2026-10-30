@@ -65,6 +65,166 @@ pub struct GameCommand {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum MissionLearningPayload {
+    Variant1(MissionLearningPayloadVariant1),
+    Variant2(MissionLearningPayloadVariant2),
+    Variant3(MissionLearningPayloadVariant3),
+    Variant4(MissionLearningPayloadVariant4),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningCommand {
+    pub schema_version: MissionLearningCommandSchemaVersion,
+    pub command_id: String,
+    pub expected_revision: u64,
+    pub payload: MissionLearningPayload,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum MissionLearningAnswer {
+    Variant1(MissionLearningAnswerVariant1),
+    Variant2(MissionLearningAnswerVariant2),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionPairingAssignment {
+    pub object_id: String,
+    pub recipient_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionChoice {
+    pub id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionObject {
+    pub id: String,
+    pub label: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionCollection {
+    pub id: String,
+    pub label: String,
+    pub items: Vec<MissionObject>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum MissionTask {
+    Variant1(MissionTaskVariant1),
+    Variant2(MissionTaskVariant2),
+    Variant3(MissionTaskVariant3),
+    Variant4(MissionTaskVariant4),
+    Variant5(MissionTaskVariant5),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionPresentation {
+    pub title: String,
+    pub objective: String,
+    pub lesson_text: String,
+    pub prompt: String,
+    pub context: String,
+    pub representation: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionSupportContent {
+    pub kind: MissionSupportContentKind,
+    pub text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionInvitation {
+    pub title: String,
+    pub relation: String,
+    pub message: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningFeedback {
+    pub result: MissionLearningFeedbackResult,
+    pub message: String,
+    pub completed: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionActivity {
+    pub schema_version: MissionActivitySchemaVersion,
+    pub id: String,
+    pub skill_id: String,
+    pub content_version: String,
+    pub variant_id: String,
+    pub context_id: String,
+    pub representation: String,
+    pub presentation: MissionPresentation,
+    pub task: MissionTask,
+    pub support: SupportState,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revealed_support: Option<MissionSupportContent>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionSkillProgress {
+    pub skill_id: String,
+    pub objective: String,
+    pub prerequisites: Vec<String>,
+    pub status: MissionSkillProgressStatus,
+    pub supported_by_mission: bool,
+    pub eligible_checks: u64,
+    pub correct_checks: u64,
+    pub distinct_variants: u64,
+    pub distinct_contexts: u64,
+    pub distinct_representations: u64,
+    pub distinct_sessions: u64,
+    pub blockers: Vec<String>,
+    pub next_step: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningSnapshot {
+    pub schema_version: MissionLearningSnapshotSchemaVersion,
+    pub content_version: String,
+    pub policy_version: String,
+    pub policy_explanation: String,
+    pub revision: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mission_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_id: Option<String>,
+    pub available: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invitation: Option<MissionInvitation>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_activity: Option<MissionActivity>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_feedback: Option<MissionLearningFeedback>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub frontier_skill_id: Option<String>,
+    pub skills: Vec<MissionSkillProgress>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct InventoryEntry {
     pub item_id: String,
@@ -429,6 +589,8 @@ pub struct StoryCommand {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct StorySnapshot {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scene_source: Option<StorySnapshotSceneSource>,
     pub schema_version: StorySnapshotSchemaVersion,
     pub content_version: StorySnapshotContentVersion,
     pub revision: u64,
@@ -605,6 +767,142 @@ pub struct CommandPayloadVariant8 {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GameCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningPayloadVariant1 {
+    pub r#type: MissionLearningPayloadVariant1Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningPayloadVariant2 {
+    pub r#type: MissionLearningPayloadVariant2Type,
+    pub encounter_id: String,
+    pub answer: MissionLearningAnswer,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningPayloadVariant3 {
+    pub r#type: MissionLearningPayloadVariant3Type,
+    pub encounter_id: String,
+    pub kind: MissionLearningPayloadVariant3Kind,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningPayloadVariant4 {
+    pub r#type: MissionLearningPayloadVariant4Type,
+    pub encounter_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningAnswerVariant1 {
+    pub kind: MissionLearningAnswerVariant1Kind,
+    pub assignments: Vec<MissionPairingAssignment>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningAnswerVariant2 {
+    pub kind: MissionLearningAnswerVariant2Kind,
+    pub choice_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionTaskVariant1 {
+    pub kind: MissionTaskVariant1Kind,
+    pub layout: MissionTaskVariant1Layout,
+    pub objects: Vec<MissionObject>,
+    pub recipients: Vec<MissionObject>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionTaskVariant2 {
+    pub kind: MissionTaskVariant2Kind,
+    pub layout: String,
+    pub objects: Vec<MissionObject>,
+    pub choices: Vec<MissionChoice>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionTaskVariant3 {
+    pub kind: MissionTaskVariant3Kind,
+    pub collections: Vec<MissionCollection>,
+    pub prompt_mode: MissionTaskVariant3PromptMode,
+    pub choices: Vec<MissionChoice>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionTaskVariant4 {
+    pub kind: MissionTaskVariant4Kind,
+    pub shown: Vec<u64>,
+    pub choices: Vec<MissionChoice>,
+    pub direction: MissionTaskVariant4Direction,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionTaskVariant5 {
+    pub kind: MissionTaskVariant5Kind,
+    pub whole: u64,
+    pub shown_part: u64,
+    pub choices: Vec<MissionChoice>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionSupportContentKind {
+    #[serde(rename = "hint")]
+    Hint,
+    #[serde(rename = "worked_example")]
+    WorkedExample,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningFeedbackResult {
+    #[serde(rename = "correct")]
+    Correct,
+    #[serde(rename = "incorrect")]
+    Incorrect,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionActivitySchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionSkillProgressStatus {
+    #[serde(rename = "locked")]
+    Locked,
+    #[serde(rename = "available")]
+    Available,
+    #[serde(rename = "practising")]
+    Practising,
+    #[serde(rename = "ready_for_next")]
+    ReadyForNext,
+    #[serde(rename = "unavailable")]
+    Unavailable,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningSnapshotSchemaVersion {
     #[serde(rename = "1.0")]
     V10,
 }
@@ -1113,6 +1411,16 @@ pub enum StoryCommandPayload {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StorySnapshotSceneSource {
+    #[serde(rename = "authored")]
+    Authored,
+    #[serde(rename = "llm")]
+    Llm,
+    #[serde(rename = "authored_fallback")]
+    AuthoredFallback,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum StorySnapshotSchemaVersion {
     #[serde(rename = "1.0")]
     V10,
@@ -1236,6 +1544,104 @@ pub enum CommandPayloadVariant7Type {
 pub enum CommandPayloadVariant8Type {
     #[serde(rename = "select_team")]
     SelectTeam,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningPayloadVariant1Type {
+    #[serde(rename = "begin")]
+    Begin,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningPayloadVariant2Type {
+    #[serde(rename = "answer")]
+    Answer,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningPayloadVariant3Type {
+    #[serde(rename = "support")]
+    Support,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningPayloadVariant3Kind {
+    #[serde(rename = "hint")]
+    Hint,
+    #[serde(rename = "worked_example")]
+    WorkedExample,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningPayloadVariant4Type {
+    #[serde(rename = "abandon")]
+    Abandon,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningAnswerVariant1Kind {
+    #[serde(rename = "pairing")]
+    Pairing,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningAnswerVariant2Kind {
+    #[serde(rename = "choice")]
+    Choice,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant1Kind {
+    #[serde(rename = "pairing")]
+    Pairing,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant1Layout {
+    #[serde(rename = "object_cards")]
+    ObjectCards,
+    #[serde(rename = "recipient_slots")]
+    RecipientSlots,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant2Kind {
+    #[serde(rename = "count_collection")]
+    CountCollection,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant3Kind {
+    #[serde(rename = "compare_collections")]
+    CompareCollections,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant3PromptMode {
+    #[serde(rename = "more")]
+    More,
+    #[serde(rename = "fewer")]
+    Fewer,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant4Kind {
+    #[serde(rename = "number_path")]
+    NumberPath,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant4Direction {
+    #[serde(rename = "forward")]
+    Forward,
+    #[serde(rename = "backward")]
+    Backward,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant5Kind {
+    #[serde(rename = "part_whole")]
+    PartWhole,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -1,10 +1,18 @@
+import { sceneSourceLabel } from './source-status.ts';
 import type Phaser from 'phaser';
-import type { StorySnapshot } from '../../../contracts/generated/contracts.ts';
+import type {
+  MissionLearningAnswer,
+  MissionLearningSnapshot,
+  StorySnapshot,
+} from '../../../contracts/generated/contracts.ts';
 import type { WorldEncounter } from '../types.ts';
 import { isRecord } from '../types.ts';
 import { freshState } from '../progress.ts';
 import { createWorld } from '../world.ts';
 import { StoryClient, StorySession, type StoryPayload } from './client.ts';
+import { MissionLearningClient, MissionLearningSession } from '../mission-learning/client.ts';
+import { mountMissionActivity } from '../mission-learning/activity.ts';
+import '../mission-learning/world.css';
 import {
   storyPlaces,
   storyBounds,
@@ -31,17 +39,24 @@ export class StoryWorld {
   private location?: StorySnapshot['locationId'];
   private disposed = false;
   private applied?: StorySnapshot;
+  private learning: MissionLearningSession;
+  private learningAvailable = false;
+  private learningActivity?: ReturnType<typeof mountMissionActivity>;
+  private learningBusy = false;
   constructor(
     private client: StoryClient,
     profile: string,
     private hooks: Hooks,
+    learningClient: MissionLearningClient,
   ) {
     this.commands = new StorySession(client, profile, sessionStorage);
+    this.learning = new MissionLearningSession(learningClient, profile, sessionStorage);
     this.state.hero = 'rose';
     document.querySelector<HTMLElement>('.hud-stars')!.style.display = 'none';
     window.addEventListener('pagehide', () => {
       this.disposed = true;
       this.client.destroy();
+      learningClient.destroy();
     });
     window.addEventListener('pageshow', (event) => {
       if (event.persisted) location.reload();
@@ -57,6 +72,7 @@ export class StoryWorld {
   }
   async start() {
     await this.commands.refresh();
+    void this.refreshLearning().catch(() => undefined);
     if (this.disposed) throw new Error('Story page is no longer active');
     this.apply();
     if (this.snapshot.commandBudgetExhausted) {
@@ -116,6 +132,7 @@ export class StoryWorld {
   }
   private hud() {
     const snapshot = this.snapshot;
+    document.querySelector('#story-source-status')!.textContent = sceneSourceLabel(snapshot);
     document.querySelector('.location-badge h1')!.textContent =
       storyPlaces[snapshot.locationId].name;
     document.querySelector('#star-count')!.textContent = 'Story';
@@ -145,6 +162,120 @@ export class StoryWorld {
       'aria-label',
       `${storyPlaces[snapshot.locationId].name}. Tap to walk or use arrow keys. Space talks to a nearby friend. Open Missions to follow a path.`,
     );
+  }
+  private async refreshLearning() {
+    const snapshot = await this.learning.refresh();
+    this.learningAvailable = true;
+    return snapshot;
+  }
+  private async missionLearningCommand(
+    payload: Parameters<MissionLearningSession['choose']>[0],
+  ): Promise<MissionLearningSnapshot> {
+    if (this.learningBusy) throw new Error('Practice is already saving.');
+    this.learningBusy = true;
+    try {
+      if (this.learning.needsRefresh && !this.learning.hasPending) await this.refreshLearning();
+      const result = await this.learning.choose(payload);
+      this.learningAvailable = true;
+      return result;
+    } finally {
+      this.learningBusy = false;
+    }
+  }
+  private async retryMissionLearning(): Promise<MissionLearningSnapshot> {
+    if (this.learningBusy) throw new Error('Practice is already saving.');
+    this.learningBusy = true;
+    try {
+      const result = await this.learning.retry();
+      this.learningAvailable = true;
+      try {
+        return await this.refreshLearning();
+      } catch {
+        return result;
+      }
+    } finally {
+      this.learningBusy = false;
+    }
+  }
+  private showLearningActivity(snapshot = this.learning.snapshot) {
+    const activity = snapshot?.activeActivity;
+    if (!activity) return this.missions();
+    this.learningActivity?.destroy();
+    this.hooks.open(
+      `<span class="pill">PRACTICE FOR THIS STORY</span><div id="mission-practice"></div>`,
+    );
+    this.learningActivity = mountMissionActivity(
+      document.querySelector<HTMLElement>('#mission-practice')!,
+      activity,
+      snapshot,
+      {
+        onAttempt: (answer: MissionLearningAnswer) =>
+          this.missionLearningCommand({
+            type: 'answer',
+            encounterId: activity.id,
+            answer,
+          }),
+        onSupport: (kind) =>
+          this.missionLearningCommand({
+            type: 'support',
+            encounterId: activity.id,
+            kind,
+          }),
+        onRetry: () => this.retryMissionLearning(),
+        onRefresh: () => this.refreshLearning(),
+        hasPending: () => this.learning.hasPending,
+        onAbandon: async () => {
+          await this.missionLearningCommand({ type: 'abandon', encounterId: activity.id });
+        },
+        onContinue: () => {
+          if (!this.practiceDialogOpen()) return;
+          this.learningActivity?.destroy();
+          this.learningActivity = undefined;
+          this.hooks.close();
+        },
+      },
+    );
+    this.learningActivity.focus();
+  }
+  private practiceDialogOpen() {
+    return Boolean(document.querySelector('#dialog[open] #mission-practice'));
+  }
+  private missionPanelOpen() {
+    return Boolean(document.querySelector('#dialog[open] [data-story-missions-panel]'));
+  }
+  private learningPanel() {
+    const snapshot = this.learning.snapshot;
+    if (!this.learningAvailable || !snapshot) {
+      if (!this.learning.hasPending && !this.learning.needsRefresh) return '';
+      return `<section class="story-learning-panel" aria-labelledby="story-learning-title"><span class="pill">PRACTICE SAVE</span><h3 id="story-learning-title">${this.learning.hasPending ? 'One practice action needs confirmation' : 'Refresh practice progress'}</h3><p>Your story can continue while practice reconnects.</p>${this.learning.hasPending ? '<button class="primary" data-learning-retry>Retry the same practice save</button>' : '<button class="secondary" data-learning-refresh>Refresh practice progress</button>'}</section>`;
+    }
+    const invitation = snapshot.available ? snapshot.invitation : undefined;
+    const active = snapshot.activeActivity;
+    const skills = snapshot.skills
+      .filter((skill) => skill.supportedByMission)
+      .map((skill) => {
+        const status = {
+          locked: 'Coming later',
+          available: 'Ready to try',
+          practising: 'Practising',
+          ready_for_next: 'Ready for another skill',
+          unavailable: 'Not available in this story',
+        }[skill.status];
+        return `<li><strong>${escape(skill.objective)} · ${status}</strong><span>${skill.correctChecks} of ${skill.eligibleChecks} independent checks · ${escape(skill.nextStep)}</span></li>`;
+      })
+      .join('');
+    const callToAction = this.learning.hasPending
+      ? '<button class="primary" data-learning-retry>Retry the same practice save</button>'
+      : this.learning.needsRefresh
+        ? '<button class="secondary" data-learning-refresh>Refresh practice progress</button>'
+        : active
+          ? '<button class="primary" data-learning-resume>Resume practice</button>'
+          : invitation && snapshot.available
+            ? '<button class="primary" data-learning-begin>Practice this story skill</button>'
+            : '';
+    const frontier = snapshot.skills.find((skill) => skill.skillId === snapshot.frontierSkillId);
+    const unavailable = !snapshot.available && !active && !this.learning.hasPending;
+    return `<section class="story-learning-panel" aria-labelledby="story-learning-title"><span class="pill">PRACTISE WHEN YOU LIKE</span><h3 id="story-learning-title">${escape(invitation?.title ?? active?.presentation.title ?? frontier?.objective ?? 'Your practice path')}</h3>${invitation ? `<p class="story-learning-relation">${escape(invitation.relation)}</p><p>${escape(invitation.message)}</p>` : active ? `<p>${escape(active.presentation.objective)}</p>` : unavailable ? '<p>Practice is taking a little break. You can keep going with the story.</p>' : '<p>Your next practice will appear with a story where it fits.</p>'}${frontier ? `<p class="story-learning-frontier">Next: ${escape(frontier.objective)}</p>` : ''}${callToAction}<details class="story-learning-progress"><summary>See practice progress</summary><ul>${skills}</ul><p>Practice progress is a guide for what to try next. It is not a mastery score.</p></details></section>`;
   }
   private locked() {
     return (
@@ -189,8 +320,11 @@ export class StoryWorld {
           ['accept_mission', 'cancel_mission'].includes(item.action.type),
         );
     this.hooks.open(
-      `<span class="pill">PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2><p>${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${mission ? `<p data-story-mission-status="${mission.status}">${mission.status === 'completed' ? `Mission complete · ${escape(mission.narrative.payoff)}` : mission.status === 'abandoned' ? 'Mission paused · your progress is saved.' : escape(mission.current ?? '')}</p><ul>${mission.completed.map((text) => `<li>✓ ${escape(text)}</li>`).join('')}${mission.remaining.map((text) => `<li>${escape(text)}</li>`).join('')}</ul>` : ''}${nextStoryLabel(this.snapshot) ? `<p data-story-next>${escape(nextStoryLabel(this.snapshot)!)}</p>` : ''}${input?.context.memory.recentMissions.length ? `<section data-story-history><h3>Our adventures so far</h3><ul>${input.context.memory.recentMissions.map((text) => `<li>${escape(text)}</li>`).join('')}</ul></section>` : ''}<p id="story-world-inventory">Carrying: ${input?.context.inventory.map((item) => `${item.quantity} ${escape(item.itemId)}`).join(', ') || 'an empty bag'}</p><div class="modal-quests">${this.markers.map((marker) => `<button class="quest" data-story-visit="${escape(marker.id)}" ${this.locked() ? 'disabled' : ''}><span><strong>${escape(marker.character)}</strong><small>Walk there →</small></span></button>`).join('')}</div>${missionControls.map((item) => `<button class="secondary" data-story-action="${item.action.type}" data-story-mission-handle="${escape(item.id)}" ${this.locked() ? 'disabled' : ''}>${escape(this.snapshot.scene?.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}<p id="story-world-status" role="status">${this.commands.hasPending ? 'A previous save needs confirmation. Retry the same action.' : this.commands.needsRefresh ? 'Refresh before choosing another action.' : this.snapshot.commandBudgetExhausted ? 'This development story reached its save limit.' : 'Your adventure and activities are saved separately.'}</p><button class="secondary" data-story-refresh>Refresh progress</button>${this.commands.hasPending ? '<button class="primary" data-story-retry>Retry the same action</button>' : ''}<p><a href="/">Return to the main adventure</a> · <a href="/story.html">Story inspector</a></p>`,
+      `<span class="pill" data-story-missions-panel>PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2><p>${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${mission ? `<p data-story-mission-status="${mission.status}">${mission.status === 'completed' ? `Mission complete · ${escape(mission.narrative.payoff)}` : mission.status === 'abandoned' ? 'Mission paused · your progress is saved.' : escape(mission.current ?? '')}</p><ul>${mission.completed.map((text) => `<li>✓ ${escape(text)}</li>`).join('')}${mission.remaining.map((text) => `<li>${escape(text)}</li>`).join('')}</ul>` : ''}${nextStoryLabel(this.snapshot) ? `<p data-story-next>${escape(nextStoryLabel(this.snapshot)!)}</p>` : ''}${input?.context.memory.recentMissions.length ? `<section data-story-history><h3>Our adventures so far</h3><ul>${input.context.memory.recentMissions.map((text) => `<li>${escape(text)}</li>`).join('')}</ul></section>` : ''}<p id="story-world-inventory">Carrying: ${input?.context.inventory.map((item) => `${item.quantity} ${escape(item.itemId)}`).join(', ') || 'an empty bag'}</p><div class="modal-quests">${this.markers.map((marker) => `<button class="quest" data-story-visit="${escape(marker.id)}" ${this.locked() ? 'disabled' : ''}><span><strong>${escape(marker.character)}</strong><small>Walk there →</small></span></button>`).join('')}</div>${missionControls.map((item) => `<button class="secondary" data-story-action="${item.action.type}" data-story-mission-handle="${escape(item.id)}" ${this.locked() ? 'disabled' : ''}>${escape(this.snapshot.scene?.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}<p id="story-world-status" role="status">${this.commands.hasPending ? 'A previous save needs confirmation. Retry the same action.' : this.commands.needsRefresh ? 'Refresh before choosing another action.' : this.snapshot.commandBudgetExhausted ? 'This development story reached its save limit.' : 'Your adventure and activities are saved separately.'}</p><button class="secondary" data-story-refresh>Refresh progress</button>${this.commands.hasPending ? '<button class="primary" data-story-retry>Retry the same action</button>' : ''}<p><a href="/">Return to the main adventure</a> · <a href="/story.html">Story inspector</a></p>`,
     );
+    const learningPanel = this.learningPanel();
+    if (learningPanel)
+      document.querySelector('#dialog')?.insertAdjacentHTML('afterbegin', learningPanel);
     document.querySelector<HTMLButtonElement>('[data-story-refresh]')!.onclick = () =>
       void this.run(async () => {
         await this.commands.refresh();
@@ -208,6 +342,48 @@ export class StoryWorld {
           await this.commands.retry();
           await this.commands.refresh();
         });
+    const begin = document.querySelector<HTMLButtonElement>('[data-learning-begin]');
+    if (begin)
+      begin.onclick = () =>
+        void this.missionLearningCommand({ type: 'begin' })
+          .then((snapshot) => {
+            if (!this.missionPanelOpen()) return;
+            if (snapshot.activeActivity) this.showLearningActivity(snapshot);
+            else this.missions();
+          })
+          .catch(() => {
+            if (this.missionPanelOpen()) this.missions();
+          });
+    const resume = document.querySelector<HTMLButtonElement>('[data-learning-resume]');
+    if (resume) resume.onclick = () => this.showLearningActivity();
+    const practiceRetry = document.querySelector<HTMLButtonElement>('[data-learning-retry]');
+    if (practiceRetry)
+      practiceRetry.onclick = () =>
+        void this.retryMissionLearning()
+          .then((snapshot) => {
+            if (!this.missionPanelOpen()) return;
+            if (snapshot.activeActivity) this.showLearningActivity(snapshot);
+            else this.missions();
+          })
+          .catch(() => {
+            if (this.missionPanelOpen()) this.missions();
+          });
+    const learningRefresh = document.querySelector<HTMLButtonElement>('[data-learning-refresh]');
+    if (learningRefresh)
+      learningRefresh.onclick = () =>
+        void this.refreshLearning()
+          .then(() => {
+            if (this.missionPanelOpen()) this.missions();
+          })
+          .catch(() => {
+            if (this.missionPanelOpen()) this.missions();
+          });
+    if (!this.learning.snapshot && !this.learningBusy)
+      void this.refreshLearning()
+        .then(() => {
+          if (this.missionPanelOpen()) this.missions();
+        })
+        .catch(() => {});
   }
   encounter(marker: WorldEncounter) {
     if (this.disposed || this.crossing || !this.markers.some((item) => item.id === marker.id))
@@ -268,6 +444,7 @@ export class StoryWorld {
       async () => {
         await this.commands.choose(payload);
         await this.commands.refresh();
+        void this.refreshLearning().catch(() => undefined);
         const next = this.commands.snapshot!;
         const route =
           action?.type === 'accompany'
@@ -348,5 +525,10 @@ export async function connectStoryWorld(hooks: Hooks) {
     throw new Error('Invalid local session');
   if (lifecycle.signal.aborted) throw new Error('Story page is no longer active');
   window.removeEventListener('pagehide', leave);
-  return new StoryWorld(new StoryClient(value.profileId, value.csrf), value.profileId, hooks);
+  return new StoryWorld(
+    new StoryClient(value.profileId, value.csrf),
+    value.profileId,
+    hooks,
+    new MissionLearningClient(value.profileId, value.csrf),
+  );
 }

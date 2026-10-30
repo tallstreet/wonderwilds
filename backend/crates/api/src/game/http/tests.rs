@@ -51,6 +51,7 @@ fn app() -> (Router, Arc<MemoryRepository>) {
         repository: repo.clone(),
         auth: Arc::new(SyntheticAuth),
         story_repository: Arc::new(StoryMemory::new()),
+        mission_learning_repository: Arc::new(DisabledMissionLearningRepository),
         story_provider: None,
         story_planner: None,
         content,
@@ -399,6 +400,69 @@ async fn configured_but_unavailable_database_is_not_ready() {
         ),
         Err(Error::InvalidInput)
     ));
+}
+
+#[tokio::test]
+async fn mission_learning_routes_require_the_existing_session_and_csrf_boundary() {
+    let (app, _) = app();
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/mission-learning",
+            None,
+            "none",
+            "profile-a",
+            false,
+        )
+        .await
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/mission-learning",
+            None,
+            "test-parent-a",
+            "profile-a",
+            false,
+        )
+        .await
+        .0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    let begin = json!({
+        "schemaVersion":"1.0",
+        "commandId":"mission-auth-check",
+        "expectedRevision":0,
+        "payload":{"type":"begin"}
+    });
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/mission-learning/commands",
+            Some(begin.clone()),
+            "test-parent-a",
+            "profile-a",
+            false,
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    assert_eq!(
+        send(
+            app,
+            "/api/v1/mission-learning/commands",
+            Some(begin),
+            "test-parent-a",
+            "profile-a",
+            true,
+        )
+        .await
+        .0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
 }
 
 #[tokio::test]
@@ -917,6 +981,7 @@ async fn generated_reads_require_auth_and_preserve_command_receipts() {
         scene["scene"]["presentation"][0]["text"],
         "A generated scene."
     );
+    assert_eq!(scene["sceneSource"], "llm");
     let command = cmd(
         "model-choice",
         0,
@@ -963,6 +1028,7 @@ async fn invalid_failed_and_stale_generations_fall_back_to_current_authored_scen
             scene["scene"]["presentation"][0]["text"],
             "A generated scene."
         );
+        assert_eq!(scene["sceneSource"], "authored_fallback");
         assert_eq!(scene["revision"], if behavior == 3 { 1 } else { 0 });
         wire::validate("StorySnapshot", &scene).unwrap();
     }
@@ -1120,19 +1186,18 @@ async fn planner_acceptance_persists_retries_falls_back_and_rejects_races() {
             response.1["sceneInput"]["mission"]["goal"] == "A planned crossing with Pip",
             behavior == 0
         );
-        assert_eq!(
-            send(
-                app.clone(),
-                "/api/v1/story",
-                None,
-                "test-parent-a",
-                "profile-a",
-                false
-            )
-            .await
-            .1,
-            response.1
-        );
+        let (_, mut read) = send(
+            app.clone(),
+            "/api/v1/story",
+            None,
+            "test-parent-a",
+            "profile-a",
+            false,
+        )
+        .await;
+        assert_eq!(read["sceneSource"], "authored");
+        read.as_object_mut().unwrap().remove("sceneSource");
+        assert_eq!(read, response.1);
         assert_eq!(
             send(
                 app.clone(),

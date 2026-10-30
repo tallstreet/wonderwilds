@@ -1,3 +1,4 @@
+import { sceneSourceLabel } from './source-status.ts';
 import { nextStoryLabel } from './world-model.ts';
 import type { StorySnapshot } from '../../../contracts/generated/contracts.ts';
 import { ApiFailure } from '../api/client.ts';
@@ -24,15 +25,18 @@ header.append(home);
 const status = element('p', 'Connecting to your story…', 'story-status');
 status.id = 'story-status';
 status.setAttribute('role', 'status');
+const sourceStatus = element('p', 'Checking story source…', 'story-note');
+sourceStatus.id = 'story-source-status';
+sourceStatus.setAttribute('role', 'status');
 const controls = element('nav', '', 'story-toolbar');
 controls.setAttribute('aria-label', 'Story connection');
 const content = element('div');
 const footer = element(
   'p',
-  'Local development story · saved separately from your adventure and activities · authored, with no model generation.',
+  'Local development story · saved separately from your adventure and activities.',
   'story-note',
 );
-root.append(header, status, controls, content, footer);
+root.append(header, status, sourceStatus, controls, content, footer);
 let session: StorySession | undefined;
 let client: StoryClient | undefined;
 let destroyed = false;
@@ -46,6 +50,7 @@ function button(text: string, action: () => Promise<unknown>, disabled = false) 
 }
 function showError(error: unknown) {
   if (destroyed) return;
+  if (!session?.snapshot) sourceStatus.textContent = 'Story source unavailable';
   status.textContent =
     error instanceof ApiFailure && error.code === 'REVISION_CONFLICT'
       ? 'The story changed in another tab. Refresh progress before choosing again.'
@@ -103,6 +108,7 @@ function render() {
   renderControls();
   const snapshot = session?.snapshot;
   if (!snapshot) return;
+  sourceStatus.textContent = sceneSourceLabel(snapshot);
   content.replaceChildren();
   if (snapshot.commandBudgetExhausted || !snapshot.sceneInput || !snapshot.scene) {
     const terminal = element('section', '', 'story-card');

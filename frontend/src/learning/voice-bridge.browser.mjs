@@ -9,11 +9,36 @@ const directory = await mkdtemp(join(tmpdir(), 'ww-voice-'));
 const originalFetch = globalThis.fetch;
 let authenticated = true;
 const api = httpServer((req, res) => {
-  assert.equal(req.url, '/api/v1/game');
   assert.equal(req.headers.cookie, 'wonderwilds_session=synthetic-session');
   assert.equal(req.headers['x-wonderwilds-profile'], 'synthetic-profile');
-  res.statusCode = authenticated ? 200 : 401;
-  res.end('{}');
+  if (req.url === '/api/v1/game') {
+    res.statusCode = authenticated ? 200 : 401;
+    return res.end('{}');
+  }
+  if (req.url === '/api/v1/mission-learning') {
+    assert.equal(req.method, 'GET');
+    assert.equal(req.headers['x-csrf-token'], 'synthetic-api-csrf');
+    res.statusCode = 200;
+    return res.end(
+      '{"schemaVersion":"1.0","contentVersion":"draft","policyVersion":"frontier-v1","policyExplanation":"Practice is a guide.","revision":0,"available":true,"skills":[]}',
+    );
+  }
+  if (req.url === '/api/v1/mission-learning/commands') {
+    assert.equal(req.method, 'POST');
+    assert.equal(req.headers['x-csrf-token'], 'synthetic-api-csrf');
+    let body = '';
+    req.setEncoding('utf8');
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      res.statusCode = 200;
+      res.end(body);
+    });
+    return;
+  }
+  res.statusCode = 404;
+  res.end();
 });
 await new Promise((resolve) => api.listen(0, '127.0.0.1', resolve));
 process.env.WW_DEMO_API_PORT = String(api.address().port);
@@ -25,6 +50,7 @@ await writeFile(
   JSON.stringify({
     profileId: 'synthetic-profile',
     browserToken: 'synthetic-csrf',
+    csrf: 'synthetic-api-csrf',
     session: 'synthetic-session',
   }),
 );
@@ -50,6 +76,58 @@ try {
   const bootstrap = await originalFetch(`${origin}/__demo/bootstrap`).then((r) => r.json());
   assert.equal(bootstrap.voiceInput, true);
   assert.equal(JSON.stringify(bootstrap).includes('provider-key'), false);
+  const learner = await originalFetch(`${origin}/api/v1/mission-learning`, {
+    headers: { 'X-Wonderwilds-Profile': 'synthetic-profile' },
+  });
+  assert.equal(learner.status, 200, 'development bridge forwards the scoped learning snapshot');
+  assert.equal(learner.headers.get('cache-control'), 'no-store');
+  assert.equal((await learner.json()).policyVersion, 'frontier-v1');
+  const commandBody = JSON.stringify({
+    schemaVersion: '1.0',
+    commandId: 'synthetic',
+    expectedRevision: 0,
+    payload: { type: 'begin' },
+  });
+  const learningCommand = await originalFetch(`${origin}/api/v1/mission-learning/commands`, {
+    method: 'POST',
+    headers: {
+      Origin: origin,
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': 'synthetic-csrf',
+      'X-Wonderwilds-Profile': 'synthetic-profile',
+    },
+    body: commandBody,
+  });
+  assert.equal(
+    learningCommand.status,
+    200,
+    'development bridge forwards protected learning commands',
+  );
+  assert.equal(await learningCommand.text(), commandBody);
+  assert.equal(
+    (
+      await originalFetch(`${origin}/api/v1/mission-learning/commands`, {
+        method: 'POST',
+        headers: {
+          Origin: 'https://other.invalid',
+          'X-CSRF-Token': 'synthetic-csrf',
+          'X-Wonderwilds-Profile': 'synthetic-profile',
+        },
+        body: commandBody,
+      })
+    ).status,
+    403,
+    'development bridge rejects cross-origin learning commands',
+  );
+  assert.equal(
+    (
+      await originalFetch(`${origin}/api/v1/mission-learning`, {
+        headers: { 'X-Wonderwilds-Profile': 'other-profile' },
+      })
+    ).status,
+    403,
+    'development bridge rejects another profile',
+  );
   const headers = {
     Origin: origin,
     'Content-Type': 'audio/wav',

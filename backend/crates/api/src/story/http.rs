@@ -90,9 +90,10 @@ async fn run(
                     {
                         return Err(Error::Forbidden);
                     }
-                    let fresh = state.story_repository.read(&current_identity)?;
+                    let mut fresh = state.story_repository.read(&current_identity)?;
                     if fresh != snapshot {
                         eprintln!("Modal story: state changed; using current authored scene");
+                        fresh["sceneSource"] = serde_json::json!("authored_fallback");
                         return Ok(Json(fresh));
                     }
                     if let Ok(scene) = proposal
@@ -104,10 +105,15 @@ async fn run(
                         .is_ok()
                     {
                         snapshot["scene"] = scene;
+                        snapshot["sceneSource"] = serde_json::json!("llm");
                         eprintln!("Modal story: validated scene accepted");
                     } else {
+                        snapshot["sceneSource"] = serde_json::json!("authored_fallback");
                         eprintln!("Modal story: unavailable or invalid; using authored scene");
                     }
+                }
+                if snapshot.get("sceneSource").is_none() {
+                    snapshot["sceneSource"] = serde_json::json!("authored");
                 }
                 wonderwilds_contracts::validate("StorySnapshot", &snapshot)
                     .map_err(|_| Error::Unavailable)?;

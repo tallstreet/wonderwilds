@@ -100,6 +100,18 @@ impl crate::story::repository::Repository for DisabledStoryRepository {
         Err(Error::Unavailable)
     }
 }
+struct DisabledMissionLearningRepository;
+impl crate::mission_learning::repository::Repository for DisabledMissionLearningRepository {
+    fn readiness(&self) -> Result<(), Error> {
+        Err(Error::Unavailable)
+    }
+    fn read(&self, _: &Identity) -> Result<Value, Error> {
+        Err(Error::Unavailable)
+    }
+    fn execute(&self, _: &Identity, _: &Value) -> Result<Value, Error> {
+        Err(Error::Unavailable)
+    }
+}
 #[derive(Clone)]
 pub struct AppState {
     repository: Arc<dyn Repository>,
@@ -108,6 +120,8 @@ pub struct AppState {
         Option<Arc<dyn wonderwilds_director::story::SceneProvider + Send + Sync>>,
     pub(crate) story_planner: Option<Arc<dyn crate::story::planning::PlanProvider>>,
     pub(crate) story_repository: Arc<dyn crate::story::repository::Repository>,
+    pub(crate) mission_learning_repository:
+        Arc<dyn crate::mission_learning::repository::Repository>,
     content: Content,
     pub(crate) permits: Arc<tokio::sync::Semaphore>,
     configured: bool,
@@ -141,6 +155,13 @@ impl AppState {
             )),
             None => Arc::new(DisabledStoryRepository),
         };
+        let mission_learning_repository: Arc<dyn crate::mission_learning::repository::Repository> =
+            match &connection {
+                Some(value) => Arc::new(
+                    crate::mission_learning::repository::PostgresRepository::new(value.clone()),
+                ),
+                None => Arc::new(DisabledMissionLearningRepository),
+            };
         let (repository, auth, configured): (Arc<dyn Repository>, Arc<dyn Authenticator>, bool) =
             if let Some(connection) = connection {
                 let config: postgres::Config =
@@ -166,6 +187,7 @@ impl AppState {
             repository,
             auth,
             story_repository,
+            mission_learning_repository,
             story_provider: None,
             story_planner: None,
             content,
@@ -198,6 +220,14 @@ pub fn router(state: AppState) -> Router {
         .route("/readyz", get(ready))
         .route("/api/v1/story", get(crate::story::http::snapshot))
         .route("/api/v1/story/commands", post(crate::story::http::command))
+        .route(
+            "/api/v1/mission-learning",
+            get(crate::mission_learning::http::snapshot),
+        )
+        .route(
+            "/api/v1/mission-learning/commands",
+            post(crate::mission_learning::http::command),
+        )
         .route("/api/v1/game", get(snapshot))
         .route("/api/v1/commands", post(command))
         .route("/api/v1/encounters/{id}", get(encounter))
@@ -216,7 +246,7 @@ async fn ready(App(state): App<AppState>) -> Result<Json<Value>, Error> {
         .clone()
         .try_acquire_owned()
         .map_err(|_| Error::RateLimited)?;
-    tokio::task::spawn_blocking(move||{let _permit=permit;state.repository.readiness()?;state.story_repository.readiness()?;Ok(Json(json!({"status":"ready","mode":"authored-development","releaseReady":false,"contentReview":"pending"}))) }).await.map_err(|_|Error::Unavailable)?
+    tokio::task::spawn_blocking(move||{let _permit=permit;state.repository.readiness()?;state.story_repository.readiness()?;state.mission_learning_repository.readiness()?;Ok(Json(json!({"status":"ready","mode":"authored-development","releaseReady":false,"contentReview":"pending"}))) }).await.map_err(|_|Error::Unavailable)?
 }
 fn now() -> Result<u64, Error> {
     std::time::SystemTime::now()

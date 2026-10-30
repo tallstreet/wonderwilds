@@ -57,7 +57,7 @@ function persist() {
 $('#app').innerHTML =
   `<main class="game-shell"><div id="game" role="application" aria-label="Clover Meadow. Tap to walk or use arrow keys and WASD. Press Space near a friend. Open Missions to find an activity."></div>
 <header class="game-hud"><div class="location-badge"><img class="app-logo" src="/assets/starwhisker-logo-v1.png" width="64" height="64" alt=""/><div><small>STARWHISKER ISLAND</small><h1>Clover Meadow</h1></div></div><nav aria-label="Game tools"><div class="hud-stars" aria-label="Hero stars"><span>✦</span><strong id="star-count">0 / 3</strong></div><button class="hud-button" id="explore" aria-label="Explore 75 places">◎<span>Explore</span></button><button class="hud-button" id="journal" aria-label="My journal" title="My journal">▧<span>Journal</span></button><button class="hud-button" id="grownup" aria-label="For grown-ups" title="For grown-ups">⚙<span>Grown-ups</span></button><button class="hud-button fullscreen-button" id="fullscreen" aria-label="Enter full screen" title="Enter full screen">⛶</button></nav></header>
-<footer class="game-dock"><button class="mission-button" id="missions"><span class="mission-symbol">✦</span><span><small>YOUR ADVENTURE</small><strong id="mission-status">Three ways to be a hero</strong></span><span class="mission-open">Missions ↗</span></button><div class="game-guidance"><span id="quest-direction" role="status"></span><button id="quest-guide" class="secondary" hidden>Follow path</button><span>Tap to explore <b>·</b> Arrows to walk <b>·</b> Space to chat</span><small id="save-status" role="status"></small></div></footer></main><dialog id="dialog" aria-labelledby="dialog-title"></dialog><div id="toast" role="status"></div>`;
+<footer class="game-dock"><button class="mission-button" id="missions"><span class="mission-symbol">✦</span><span><small>YOUR ADVENTURE</small><strong id="mission-status">Three ways to be a hero</strong></span><span class="mission-open">Missions ↗</span></button><div class="game-guidance"><span id="quest-direction" role="status"></span><button id="quest-guide" class="secondary" hidden>Follow path</button><span>Tap to explore <b>·</b> Arrows to walk <b>·</b> Space to chat</span><small id="story-source-status" role="status">Preauthored story</small><small id="save-status" role="status"></small></div></footer></main><dialog id="dialog" aria-labelledby="dialog-title"></dialog><div id="toast" role="status"></div>`;
 const dialog = $<HTMLDialogElement>('#dialog');
 function render() {
   const mapName = maps[state.region as MapId].name;
@@ -481,6 +481,7 @@ async function boot() {
   });
   if (storyRequested) {
     try {
+      $('#story-source-status').textContent = 'Checking story source…';
       story = await connectStoryWorld({ open: openDialog, close: closeDialog, toast });
       game = (await story.start())!;
       tools.forEach((button) => {
@@ -488,6 +489,7 @@ async function boot() {
       });
       toast('Open Missions to continue your story and follow a path.');
     } catch {
+      $('#story-source-status').textContent = 'Story source unavailable';
       const wrongLocalAddress = location.hostname === 'localhost';
       const localAddress = new URL(location.href);
       localAddress.hostname = '127.0.0.1';

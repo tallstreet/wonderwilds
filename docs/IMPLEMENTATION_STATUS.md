@@ -1,9 +1,63 @@
 # Wonderwilds implementation evidence
 
-Foundation evidence recorded 28 October 2026; integration updates dated below. Broader roadmap: [Wonderwilds implementation plan](WONDERWILDS_IMPLEMENTATION_PLAN.md) v1.2. Active gameplay sequence: [Companion progression plan](COMPANION_PROGRESSION_PLAN.md). Validation counts in earlier sections describe their original delivery, not the latest checkout.
+Foundation evidence recorded 28 October 2026; integration updates dated below. Broader roadmap: [Wonderwilds implementation plan](WONDERWILDS_IMPLEMENTATION_PLAN.md) v1.2. Active delivery sequence: [Implementation plan](IMPLEMENTATION_PLAN.md), with [curriculum mission integration](CURRICULUM_MISSION_PLAN.md) implemented for the first five-skill path. Validation counts in earlier sections describe their original delivery, not the latest checkout.
 Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
+
+## Curriculum practice inside missions — 31 October 2026
+
+The story Missions panel now offers profile-owned curriculum practice bound to
+the actual active mission and location. Rust loads all 120 Foundation/Years 1–6
+graph nodes, selects a prerequisite-ready supported skill, assesses answers and
+advances the practice frontier. The first path covers M01 one-to-one matching,
+M03 counting, M04 comparison, M05 one-step sequences and M06 part–whole tasks,
+with two representations per skill. The remaining 115 nodes are explicitly
+unavailable until their activities are authored. English remains in the graph.
+
+Migration `0006_mission_learning.sql` persists resumable activities, immutable
+evidence, bounded current projections and exact original-response receipts with
+profile locking, forced RLS, export and deletion. Reload preserves uncertain
+commands for exact retry. Hints/examples appear only after support is committed.
+Story completion and resources, assessed-adventure progress, and guest saves
+remain separate. Learner history is not sent to the story provider.
+
+The separate `provisional-mission-v1` policy requires eight distinct independent
+first checks (seven correct, latest three correct), varied variants/representations,
+two contexts and two verified server sessions. It represents readiness for more
+practice, not validated mastery. Canonical-item replacement allows later-session
+review without increasing the distinct-item count. Existing transfer-based mastery
+is unchanged. Activities use original content informed by public IXL catalogue and
+teaching patterns; the [integration plan](CURRICULUM_MISSION_PLAN.md) records sources
+and the limits of that research.
+
+Three lower-tier implementation subagents handled learning, API/contracts and UI;
+the integration owner reviewed their work and added an independent full-path
+assessment/replay regression. The aggregate `bash scripts/check.sh` passed,
+including 130 shared contract fixtures, 118 frontend tests, the production build,
+curriculum/story validators and guest-save compatibility. Guest desktop/tablet,
+existing accessible-activity browser checks and the bridge routing/security check
+passed. The new disposable-database browser journey passed wrong/correct pairing,
+committed support, lost-response reload/exact retry, independent progress, phone
+layout and continuing story actions without altering guest/game state. Existing
+companion training and the default seven-story browser journey also passed.
+The targeted real-PostgreSQL mission test passed all five skills across two
+verified sessions and two story locations, with exact retry, rollback, races, RLS,
+full evidence replay, unchanged assessed-adventure state, export and deletion.
+The wire regression validates and assesses answers for all 60 authored variants,
+including the corrected camelCase numeric-choice field. The final combined
+`sh scripts/check-postgres.sh` run passed all four database integration tests,
+repeat migration application and deliberate migration-hash drift rejection.
+The final browser rerun also verified the ten-frame’s five-column/two-row layout.
+All temporary QA clusters and servers were shut down.
+
+Remaining work: expand the other 115 activities in prerequisite order, calibrate
+learning/transfer policy, improve mission-specific placement through playtesting,
+and add production identity/session renewal, retention and operator recovery.
+The existing persistence CLI does not cover this new practice journal; full replay
+is currently exercised by integration tests. Node 26.12.0 was used rather than the
+documented Node 24. No live provider-quality claim, educator approval or release
+approval is added, and the persistent `.local-demo` database was not migrated.
 
 ## Long-play persistence — 31 October 2026
 

@@ -585,6 +585,275 @@
       ],
       "additionalProperties": false
     },
+    "MissionLearningPayload": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": { "type": { "const": "begin", "type": "string" } },
+          "required": ["type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "answer", "type": "string" },
+            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "answer": { "$ref": "#/$defs/MissionLearningAnswer" }
+          },
+          "required": ["type", "encounterId", "answer"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "support", "type": "string" },
+            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "kind": { "type": "string", "enum": ["hint", "worked_example"] }
+          },
+          "required": ["type", "encounterId", "kind"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "abandon", "type": "string" },
+            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 }
+          },
+          "required": ["type", "encounterId"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "MissionLearningCommand": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "const": "1.0", "type": "string" },
+        "commandId": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "expectedRevision": { "type": "integer", "minimum": 0, "maximum": 1000000000 },
+        "payload": { "$ref": "#/$defs/MissionLearningPayload" }
+      },
+      "required": ["schemaVersion", "commandId", "expectedRevision", "payload"],
+      "additionalProperties": false
+    },
+    "MissionLearningAnswer": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "pairing", "type": "string" },
+            "assignments": { "type": "array", "items": { "$ref": "#/$defs/MissionPairingAssignment" }, "minItems": 1, "maxItems": 12 }
+          },
+          "required": ["kind", "assignments"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": { "kind": { "const": "choice", "type": "string" }, "choiceId": { "type": "string", "minLength": 1, "maxLength": 80 } },
+          "required": ["kind", "choiceId"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "MissionPairingAssignment": {
+      "type": "object",
+      "properties": {
+        "objectId": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "recipientId": { "type": "string", "minLength": 1, "maxLength": 80 }
+      },
+      "required": ["objectId", "recipientId"],
+      "additionalProperties": false
+    },
+    "MissionChoice": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "label": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "value": { "type": "integer", "minimum": 0, "maximum": 100 }
+      },
+      "required": ["id"],
+      "allOf": [
+        {
+          "anyOf": [
+            { "properties": { "label": {} }, "required": ["label"] },
+            { "properties": { "value": {} }, "required": ["value"] }
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "MissionObject": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "label": { "type": "string", "minLength": 1, "maxLength": 120 }
+      },
+      "required": ["id", "label"],
+      "additionalProperties": false
+    },
+    "MissionCollection": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "label": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "minItems": 1, "maxItems": 12 }
+      },
+      "required": ["id", "label", "items"],
+      "additionalProperties": false
+    },
+    "MissionTask": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "pairing", "type": "string" },
+            "layout": { "type": "string", "enum": ["object_cards", "recipient_slots"] },
+            "objects": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "minItems": 1, "maxItems": 12 },
+            "recipients": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "minItems": 1, "maxItems": 12 }
+          },
+          "required": ["kind", "layout", "objects", "recipients"], "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "count_collection", "type": "string" },
+            "layout": { "type": "string", "minLength": 1, "maxLength": 80 },
+            "objects": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "minItems": 1, "maxItems": 20 },
+            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionChoice" }, "minItems": 2, "maxItems": 5 }
+          },
+            "required": ["kind", "layout", "objects", "choices"], "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "compare_collections", "type": "string" },
+            "collections": { "type": "array", "items": { "$ref": "#/$defs/MissionCollection" }, "minItems": 2, "maxItems": 3 },
+            "promptMode": { "type": "string", "enum": ["more", "fewer"] },
+            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionChoice" }, "minItems": 2, "maxItems": 3 }
+          },
+          "required": ["kind", "collections", "promptMode", "choices"], "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "number_path", "type": "string" },
+            "shown": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 20 }, "minItems": 2, "maxItems": 8 },
+            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionChoice" }, "minItems": 2, "maxItems": 5 },
+            "direction": { "type": "string", "enum": ["forward", "backward"] }
+          },
+          "required": ["kind", "shown", "choices", "direction"], "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "part_whole", "type": "string" },
+            "whole": { "type": "integer", "minimum": 1, "maximum": 20 },
+            "shownPart": { "type": "integer", "minimum": 0, "maximum": 20 },
+            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionChoice" }, "minItems": 2, "maxItems": 5 }
+          },
+          "required": ["kind", "whole", "shownPart", "choices"], "additionalProperties": false
+        }
+      ]
+    },
+    "MissionPresentation": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "objective": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "lessonText": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "prompt": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "context": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "representation": { "type": "string", "minLength": 1, "maxLength": 80 }
+      },
+      "required": ["title", "objective", "lessonText", "prompt", "context", "representation"],
+      "additionalProperties": false
+    },
+    "MissionSupportContent": {
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string", "enum": ["hint", "worked_example"] },
+        "text": { "type": "string", "minLength": 1, "maxLength": 500 }
+      },
+      "required": ["kind", "text"],
+      "additionalProperties": false
+    },
+    "MissionInvitation": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "relation": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "message": { "type": "string", "minLength": 1, "maxLength": 300 }
+      },
+      "required": ["title", "relation", "message"],
+      "additionalProperties": false
+    },
+    "MissionLearningFeedback": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "string", "enum": ["correct", "incorrect"] },
+        "message": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "completed": { "type": "boolean" }
+      },
+      "required": ["result", "message", "completed"],
+      "additionalProperties": false
+    },
+    "MissionActivity": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "const": "1.0", "type": "string" },
+        "id": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "skillId": { "type": "string", "minLength": 1, "maxLength": 10 },
+        "contentVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "variantId": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "contextId": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "representation": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "presentation": { "$ref": "#/$defs/MissionPresentation" },
+        "task": { "$ref": "#/$defs/MissionTask" },
+        "support": { "$ref": "#/$defs/SupportState" },
+        "revealedSupport": { "$ref": "#/$defs/MissionSupportContent" }
+      },
+      "required": ["schemaVersion", "id", "skillId", "contentVersion", "variantId", "contextId", "representation", "presentation", "task", "support"],
+      "additionalProperties": false
+    },
+    "MissionSkillProgress": {
+      "type": "object",
+      "properties": {
+        "skillId": { "type": "string", "minLength": 1, "maxLength": 10 },
+        "objective": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "prerequisites": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 10 }, "maxItems": 20, "uniqueItems": true },
+        "status": { "type": "string", "enum": ["locked", "available", "practising", "ready_for_next", "unavailable"] },
+        "supportedByMission": { "type": "boolean" },
+        "eligibleChecks": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "correctChecks": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "distinctVariants": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "distinctContexts": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "distinctRepresentations": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "distinctSessions": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "blockers": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 160 }, "maxItems": 10 },
+        "nextStep": { "type": "string", "minLength": 1, "maxLength": 300 }
+      },
+      "required": ["skillId", "objective", "prerequisites", "status", "supportedByMission", "eligibleChecks", "correctChecks", "distinctVariants", "distinctContexts", "distinctRepresentations", "distinctSessions", "blockers", "nextStep"],
+      "additionalProperties": false
+    },
+    "MissionLearningSnapshot": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "const": "1.0", "type": "string" },
+        "contentVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "policyVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "policyExplanation": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "revision": { "type": "integer", "minimum": 0, "maximum": 1000000000 },
+        "missionId": { "type": "string", "maxLength": 120 },
+        "locationId": { "type": "string", "maxLength": 120 },
+        "available": { "type": "boolean" },
+        "invitation": { "$ref": "#/$defs/MissionInvitation" },
+        "activeActivity": { "$ref": "#/$defs/MissionActivity" },
+        "lastFeedback": { "$ref": "#/$defs/MissionLearningFeedback" },
+        "frontierSkillId": { "type": "string", "maxLength": 10 },
+        "skills": { "type": "array", "items": { "$ref": "#/$defs/MissionSkillProgress" }, "maxItems": 120 }
+      },
+      "required": ["schemaVersion", "contentVersion", "policyVersion", "policyExplanation", "revision", "available", "skills"],
+      "additionalProperties": false
+    },
     "InventoryEntry": {
       "type": "object",
       "properties": {
@@ -2916,6 +3185,11 @@
     "StorySnapshot": {
       "type": "object",
       "properties": {
+        "sceneSource": {
+          "type": "string",
+          "enum": ["authored", "llm", "authored_fallback"],
+          "description": "Source of the displayed scene on this read, not a live connection probe. Optional for historical command receipts."
+        },
         "schemaVersion": {
           "type": "string",
           "const": "1.0"

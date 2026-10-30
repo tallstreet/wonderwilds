@@ -703,6 +703,192 @@
         },
         "description": "Execute one revision-bound story choice or presentation acknowledgement. Same command ID and body returns the original response, including after later progress."
       }
+    },
+    "/api/v1/mission-learning": {
+      "get": {
+        "operationId": "getMissionLearning",
+        "responses": {
+          "200": {
+            "description": "Mission-bound learning snapshot for the authenticated profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MissionLearningSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "INVALID_INPUT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "REVISION_CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Read graph frontier and durable activity state. Mission and location context come from the authenticated profile's active story save. Reading does not issue or alter an activity."
+      }
+    },
+    "/api/v1/mission-learning/commands": {
+      "post": {
+        "operationId": "executeMissionLearningCommand",
+        "responses": {
+          "200": {
+            "description": "Successful response. A repeated exact command returns its original snapshot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MissionLearningSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "INVALID_INPUT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "REVISION_CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MissionLearningCommand"
+              }
+            }
+          }
+        },
+        "description": "Begin a server-selected activity, submit a server-assessed answer, request support, or abandon the issued activity. The client cannot choose a skill, mission, location, correctness, evidence, or mastery."
+      }
     }
   },
   "components": {
@@ -768,10 +954,41 @@
         "$ref": "./schemas/v1.json#/$defs/StoryCommand"
       },
       "StorySnapshot": {
+        "description": "Story reads include sceneSource for displayed prose; historical command receipts may omit it.",
         "$ref": "./schemas/v1.json#/$defs/StorySnapshot"
       },
       "StoryAction": {
         "$ref": "./schemas/v1.json#/$defs/StoryAction"
+      },
+      "MissionLearningCommand": {
+        "$ref": "./schemas/v1.json#/$defs/MissionLearningCommand"
+      },
+      "MissionLearningSnapshot": {
+        "$ref": "./schemas/v1.json#/$defs/MissionLearningSnapshot"
+      },
+      "MissionActivity": {
+        "$ref": "./schemas/v1.json#/$defs/MissionActivity"
+      },
+      "MissionTask": {
+        "$ref": "./schemas/v1.json#/$defs/MissionTask"
+      },
+      "MissionLearningAnswer": {
+        "$ref": "./schemas/v1.json#/$defs/MissionLearningAnswer"
+      },
+      "MissionInvitation": {
+        "$ref": "./schemas/v1.json#/$defs/MissionInvitation"
+      },
+      "MissionLearningFeedback": {
+        "$ref": "./schemas/v1.json#/$defs/MissionLearningFeedback"
+      },
+      "MissionSkillProgress": {
+        "$ref": "./schemas/v1.json#/$defs/MissionSkillProgress"
+      },
+      "MissionPresentation": {
+        "$ref": "./schemas/v1.json#/$defs/MissionPresentation"
+      },
+      "MissionSupportContent": {
+        "$ref": "./schemas/v1.json#/$defs/MissionSupportContent"
       }
     },
     "securitySchemes": {

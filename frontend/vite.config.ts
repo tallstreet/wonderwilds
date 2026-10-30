@@ -76,7 +76,7 @@ export default defineConfig(({ command }) => {
                   return;
                 }
                 if (
-                  !/^\/api\/v1\/(game|commands|story|story\/commands|encounters\/[a-zA-Z0-9-]+)$/.test(
+                  !/^\/api\/v1\/(game|commands|story|story\/commands|mission-learning|mission-learning\/commands|encounters\/[a-zA-Z0-9-]+)$/.test(
                     path,
                   )
                 )

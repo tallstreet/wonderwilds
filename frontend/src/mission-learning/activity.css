@@ -1,0 +1,348 @@
+.ww-mission-activity {
+  color: #35403a;
+  display: grid;
+  gap: 12px;
+  line-height: 1.45;
+  padding: 4px 0 12px;
+}
+
+.ww-mission-activity h2,
+.ww-mission-activity h3,
+.ww-mission-activity p {
+  margin: 0;
+}
+
+.ww-mission-intro {
+  background: #f0f6eb;
+  border: 1px solid #d8e8ce;
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+
+.ww-mission-intro p + p {
+  margin-top: 7px;
+}
+
+.ww-mission-objective {
+  color: #375c3f;
+  font-weight: 750;
+}
+
+.ww-mission-context {
+  color: #65716b;
+  font-size: 0.9rem;
+}
+
+.ww-mission-prompt {
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.ww-mission-task {
+  display: grid;
+  gap: 12px;
+}
+
+.ww-mission-pairing,
+.ww-mission-collections {
+  display: grid;
+  gap: 10px;
+}
+
+.ww-mission-pair-row {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dbe4dc;
+  border-radius: 13px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(130px, 1fr) minmax(150px, 1fr);
+  padding: 10px 12px;
+}
+
+.ww-mission-pair-row select {
+  border: 1px solid #9aa99c;
+  border-radius: 10px;
+  color: inherit;
+  font: inherit;
+  min-height: 44px;
+  padding: 8px;
+}
+
+.ww-mission-objects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ww-mission-object {
+  background: #fff9e9;
+  border: 1px solid #ead8a9;
+  border-radius: 999px;
+  padding: 7px 12px;
+}
+
+.ww-mission-collection {
+  background: #f7faf7;
+  border: 1px solid #dbe4dc;
+  border-radius: 14px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.ww-mission-collection h3 {
+  font-size: 1rem;
+}
+
+.ww-mission-aligned-collections {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ww-mission-aligned-items {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(5, minmax(34px, auto));
+}
+
+.ww-mission-ten-frames {
+  display: grid;
+  gap: 6px;
+}
+
+.ww-mission-ten-row {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(5, minmax(36px, 1fr));
+}
+
+.ww-mission-ten-cell {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #c8d5c9;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  min-height: 42px;
+  text-align: center;
+}
+
+.ww-mission-ten-cell.is-filled {
+  background: #e8f4df;
+  border-color: #87ae78;
+  font-weight: 700;
+}
+
+.ww-mission-movable-source,
+.ww-mission-movable-count {
+  background: #f6faf6;
+  border: 1px dashed #9eaf9e;
+  border-radius: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 54px;
+  padding: 10px;
+}
+
+.ww-mission-movable-object,
+.ww-mission-path-number,
+.ww-mission-flower,
+.ww-mission-plank {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dbe4dc;
+  border-radius: 10px;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 42px;
+  min-width: 42px;
+  padding: 7px;
+}
+
+.ww-mission-movable-object[aria-pressed='true'] {
+  background: #e3f1dd;
+  border-color: #52864d;
+}
+
+.ww-mission-number-path,
+.ww-mission-flower-path {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.ww-mission-flower {
+  background: #fff6fe;
+  border-color: #ebcbe5;
+  color: #9a4c8c;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.ww-mission-flower-group {
+  align-items: center;
+  background: #fff6fe;
+  border: 1px solid #ebcbe5;
+  border-radius: 10px;
+  color: #9a4c8c;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: center;
+  min-height: 42px;
+  min-width: 42px;
+  padding: 7px;
+}
+
+.ww-mission-flower-count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-inline-start: 3px;
+}
+
+.ww-mission-plank-part {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(5, minmax(38px, 1fr));
+}
+
+.ww-mission-plank {
+  background: #fff9eb;
+  border-color: #d9c58d;
+  color: #8e753a;
+  font-size: 1.2rem;
+}
+
+.ww-mission-plank.is-ready {
+  background: #e5f0d9;
+  border-color: #a2bc86;
+}
+
+.ww-mission-options {
+  border: 0;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.ww-mission-options legend {
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+.ww-mission-choice {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dbe4dc;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 12px;
+}
+
+.ww-mission-choice input {
+  accent-color: #438353;
+  height: 20px;
+  width: 20px;
+}
+
+.ww-mission-number-path,
+.ww-mission-equation,
+.ww-mission-part-equation {
+  background: #f5f3ff;
+  border-radius: 13px;
+  font-size: 1.2rem;
+  font-weight: 750;
+  padding: 16px;
+  text-align: center;
+}
+
+.ww-mission-part-equation {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.ww-mission-whole-group {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dbe4dc;
+  border-radius: 10px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+  min-height: 42px;
+  min-width: 42px;
+  padding: 7px;
+}
+
+.ww-mission-part-object {
+  color: #52864d;
+  font-size: 1.05rem;
+}
+
+.ww-mission-part-object.is-total {
+  color: #9375c2;
+}
+
+.ww-mission-part-missing,
+.ww-mission-part-symbol {
+  font-size: 1.2rem;
+  font-weight: 750;
+}
+
+.ww-mission-status {
+  min-height: 1.5em;
+}
+
+.ww-mission-help:empty {
+  display: none;
+}
+
+.ww-mission-support-text {
+  background: #fff8e5;
+  border-left: 4px solid #e5be59;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.ww-mission-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ww-mission-actions button {
+  min-height: 44px;
+}
+
+.ww-mission-activity button:focus-visible,
+.ww-mission-activity select:focus-visible,
+.ww-mission-activity input:focus-visible + span {
+  outline: 3px solid #3272bf;
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .ww-mission-pair-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ww-mission-aligned-collections {
+    grid-template-columns: 1fr;
+  }
+}

@@ -146,6 +146,11 @@ jobs:
       - name: Check training with real API and disposable PostgreSQL
         if: matrix.suite == 'browser'
         run: node qa/e2e/run-training-qa.mjs
+      - name: Check curriculum practice inside story missions
+        if: matrix.suite == 'browser'
+        env:
+          WW_QA_BROWSER_TEST: qa/e2e/mission-learning.mjs
+        run: node qa/e2e/run-training-qa.mjs
       - name: Check local human story review
         if: matrix.suite == 'browser'
         run: node qa/e2e/story-human-review.mjs

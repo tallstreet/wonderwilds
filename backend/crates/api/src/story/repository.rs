@@ -6,6 +6,31 @@ use serde_json::Value;
 use wonderwilds_contracts::validate;
 use wonderwilds_domain::story::{CONTENT_VERSION, State};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct MissionLearningContext {
+    pub mission_id: String,
+    pub location_id: String,
+    pub story_revision: u64,
+}
+
+/// Read the verified active story context inside a caller-owned transaction.
+/// Mission-learning commands call this after locking the same profile row used
+/// by story writers, so the issued activity cannot bind to stale client state.
+pub(crate) fn mission_learning_context(
+    tx: &mut Transaction<'_>,
+    identity: &Identity,
+) -> Result<Option<MissionLearningContext>, Error> {
+    let state = load(tx, identity)?;
+    if state.mission_status() != wonderwilds_domain::story::MissionStatus::Active {
+        return Ok(None);
+    }
+    Ok(Some(MissionLearningContext {
+        mission_id: state.mission_id().to_owned(),
+        location_id: state.location().as_str().to_owned(),
+        story_revision: state.revision(),
+    }))
+}
+
 pub trait Repository: Send + Sync {
     fn readiness(&self) -> Result<(), Error> {
         Err(Error::Unavailable)

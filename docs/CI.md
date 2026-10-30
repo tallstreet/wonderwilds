@@ -14,7 +14,9 @@ The integration matrix adds separate database and browser jobs. Both install
 PostgreSQL 17; the browser job also installs Playwright Chromium. Database checks
 exercise migrations, RLS/ownership/deletion, rollback, races and migration hash
 drift. Browser checks cover the guest world, activity controls and server-backed
-training journey. These jobs are configured; hosted execution must pass before
+training journey, story missions and the separate mission-curriculum practice
+journey (including task representations and exact practice-save recovery).
+These jobs are configured; hosted execution must pass before
 claiming hosted-runner validation.
 
 ## Disposable local integration checks

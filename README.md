@@ -5,8 +5,11 @@ workspace adds versioned contracts, pure gameplay and assessment, an experimenta
 mastery policy, an authored director, and a PostgreSQL-backed development API.
 The expansion is **not a completed release**. See
 [implementation status](docs/IMPLEMENTATION_STATUS.md) for integration and review gates.
-The next gameplay work follows the [companion progression plan](docs/COMPANION_PROGRESSION_PLAN.md);
-[planning navigation](docs/IMPLEMENTATION_PLAN.md) links the broader roadmap and earlier milestone evidence.
+The active work follows the [implementation plan](docs/IMPLEMENTATION_PLAN.md) and
+[curriculum mission integration](docs/CURRICULUM_MISSION_PLAN.md): profile-owned
+practice through the existing curriculum graph inside story missions. The
+[companion progression plan](docs/COMPANION_PROGRESSION_PLAN.md) remains the
+supporting specification for creature expansion.
 
 Use this existing isolated checkout; do not create a worktree unless requested.
 Node 24 is available in the prepared environment. Rust is pinned by
@@ -205,6 +208,31 @@ This mode does not synchronize the old assessed bridge or generate new missions.
 Model generation is disabled by default; the opt-in Modal integration below can
 generate scene prose. The earlier [/story.html inspector](http://127.0.0.1:5173/story.html)
 remains available for checking scenes without walking.
+
+### Curriculum practice in story missions
+
+In `/?story=1`, accept a mission and open **Missions → Practice this story skill**.
+The server selects practice from the profile's prerequisite-ready skills and
+binds it to the active story. Instructions, hints and worked examples are authored;
+Rust checks answers. Leave practice to continue the story at any time, or close
+the panel and resume the saved activity later.
+
+The combined Foundation/Years 1–6 graph contains 120 draft nodes. This first
+activity slice supports **M01 → M03 → M04/M05/M06**: one-to-one matching,
+counting, comparisons, sequences and part–whole quantities. Other graph nodes
+have explicit unavailable-activity status. New profile-owned practice progress
+and exact retry receipts persist separately from story and assessed-adventure
+progress. Migration `0006_mission_learning.sql` is applied by the local launcher
+on restart; disposable QA must use its own database.
+
+“Ready for another skill” is experimental practice progression, not the existing
+transfer-based secure-mastery assessment. It requires varied independent first
+checks across two story contexts and two authenticated server sessions; reloading
+a page alone is not a new session. Restarting the local demo launcher issues a
+new synthetic server session while preserving the profile. Helpers remain available without blocking
+story progress. Original activities use public IXL patterns as references; content
+review and release gates remain pending. See the [integration plan](docs/CURRICULUM_MISSION_PLAN.md)
+for the policy and remaining activity coverage.
 
 ### Optional Modal scene generation
 

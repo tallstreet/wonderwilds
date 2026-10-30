@@ -2,7 +2,7 @@
 
 Version: 1.2 · Updated: 29 October 2026 · Status: broader architecture and release roadmap
 
-The [companion progression plan](COMPANION_PROGRESSION_PLAN.md) governs the next gameplay implementation sequence and supersedes earlier collection/progression sequencing here. Use [implementation status](IMPLEMENTATION_STATUS.md) for delivered work. Existing WW task IDs remain reference scopes, not a queue to rebuild completed foundations. Live AI and fine-tuning are deferred and do not block the authored companion expansion.
+The [active implementation plan](IMPLEMENTATION_PLAN.md) governs current delivery order and supersedes older sequencing here. Curriculum-guided mission practice is the active priority; the [companion progression plan](COMPANION_PROGRESSION_PLAN.md) remains the supporting creature specification. Use [implementation status](IMPLEMENTATION_STATUS.md) for delivered work. Existing WW task IDs remain reference scopes, not a queue to rebuild completed foundations. Model integration and development long-play persistence are delivered; historical future-work descriptions below do not undo that baseline.
 
 ## 1. Outcome and non-negotiable decisions
 
