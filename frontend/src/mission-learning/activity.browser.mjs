@@ -68,10 +68,12 @@ try {
     await page.goto(`${origin}/__mission_play_test`);
     await page.evaluate(async () => {
       const { mountMissionActivity } = await import('/src/mission-learning/activity.ts');
-      window.mount = (activity, voice = false) => {
+      const { ApiFailure } = await import('/src/api/client.ts');
+      window.mount = (activity, voice = false, recovery) => {
         window.component?.destroy();
         window.calls = [];
         window.continued = 0;
+        window.refreshes = 0;
         window.cancelCount = 0;
         window.pending = false;
         const snapshot = { revision: 1, activeActivity: activity };
@@ -83,6 +85,10 @@ try {
             hasPending: () => window.pending,
             onAttempt: async (answer) => {
               window.calls.push(answer);
+              if (recovery) {
+                if (recovery === 'pending') window.pending = true;
+                throw new ApiFailure('REVISION_CONFLICT', 409);
+              }
               return snapshot;
             },
             onSupport: async (kind) => ({
@@ -94,7 +100,19 @@ try {
             }),
             onAbandon: async () => {},
             onRetry: async () => snapshot,
-            onRefresh: async () => snapshot,
+            onRefresh: async () => {
+              window.refreshes++;
+              if (recovery === 'offline') throw new Error('Unavailable');
+              if (recovery === 'completed')
+                return {
+                  ...snapshot,
+                  revision: 2,
+                  activeActivity: undefined,
+                  skills: [{ skillId: activity.skillId, activityCompleted: true }],
+                  lastFeedback: { result: 'correct', message: 'Saved.', completed: true },
+                };
+              return { ...snapshot, revision: recovery === 'newer' ? 2 : 1, skills: [] };
+            },
             onContinue: () => {
               window.continued++;
             },
@@ -261,6 +279,57 @@ try {
       0,
       'Transcription cannot substitute for spelling',
     );
+    // A conflict is reconciled by reading saved state, never by replaying a new write.
+    for (const recovery of ['completed', 'stale', 'newer', 'offline', 'pending']) {
+      await page.evaluate(([task, mode]) => window.mount(task, false, mode), [cards(), recovery]);
+      await page.locator('input[value="a"]').check();
+      await check().click();
+      assert.equal(
+        await page.evaluate(() => window.calls.length),
+        1,
+        'Conflict recovery never submits another answer',
+      );
+      if (recovery === 'completed') {
+        assert.equal(await page.locator('.ww-mission-activity').isVisible(), false);
+        assert.equal(await page.evaluate(() => window.continued), 1);
+      } else if (recovery === 'stale') {
+        await page
+          .getByText(
+            'The story has moved on since this task opened. Put this task aside, then open the current mission step.',
+            { exact: true },
+          )
+          .waitFor();
+        assert.equal(await check().isDisabled(), true);
+        assert.equal(
+          await page.getByRole('button', { name: 'Leave practice', exact: true }).isEnabled(),
+          true,
+        );
+      } else if (recovery === 'newer') {
+        assert.equal(await page.locator('input[value="a"]').isChecked(), true);
+        assert.equal(await check().isEnabled(), true);
+        assert.equal(await page.evaluate(() => window.continued), 0);
+      } else if (recovery === 'pending') {
+        assert.equal(
+          await page.evaluate(() => window.refreshes),
+          0,
+          'An uncertain write must keep its exact command',
+        );
+        assert.equal(
+          await page
+            .getByRole('button', { name: 'Retry the same saved action', exact: true })
+            .isVisible(),
+          true,
+        );
+      } else {
+        assert.equal(
+          await page
+            .getByRole('button', { name: 'Refresh practice progress', exact: true })
+            .isVisible(),
+          true,
+        );
+        assert.equal(await page.evaluate(() => window.continued), 0);
+      }
+    }
     const unsafe = cards();
     unsafe.task.stimulus = '<img src=x onerror="window.injected=true">';
     unsafe.task.choices[0].label = 'x'.repeat(120);

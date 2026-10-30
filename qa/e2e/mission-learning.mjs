@@ -310,8 +310,18 @@ try {
     await page.locator('.ww-mission-piece').nth(index).click();
     await page.locator('.ww-mission-pair-row').nth(index).click();
   }
+  let conflictAttempts = 0;
+  await page.route('**/api/v1/mission-learning/commands', async route => {
+    conflictAttempts++;
+    const saved = await route.fetch();
+    assert.equal(saved.status(), 200);
+    // Model another writer having already completed the activity when this client sees a 409.
+    await route.fulfill({status:409,json:{code:'REVISION_CONFLICT',schemaVersion:'1.0',correlationId:'synthetic-conflict'}});
+  }, {times:1});
   await page.getByRole('button', {name:'Check my idea',exact:true}).click();
   await page.locator('dialog').waitFor({state:'hidden'});
+  assert.equal(conflictAttempts,1);
+  assert.equal((await learningSnapshot()).revision,2,'Read-only conflict recovery must not add another command');
   assert.equal(await page.getByRole('button',{name:'Continue the story',exact:true}).count(),0);
   const firstCorrect = await learningSnapshot();
   assert.equal(firstCorrect.activeActivity,undefined);
@@ -378,14 +388,34 @@ try {
   await page.locator('.ww-mission-activity').waitFor();
   const third=(await learningSnapshot()).activeActivity;
   assert.ok(!['M01','M03'].includes(third.skillId));
+  // A real story-revision conflict must not be mistaken for completed learning.
+  let moved = await storySnapshot();
+  const away = moved.sceneInput.availableActions.find(a=>a.action.type==='travel' && a.action.destinationId==='workshop');
+  moved = await sendStory(moved,{type:'choose',actionId:away.id},'stale-task-away');
+  const back = moved.sceneInput.availableActions.find(a=>a.action.type==='travel' && a.action.destinationId==='bridge_bank');
+  moved = await sendStory(moved,{type:'choose',actionId:back.id},'stale-task-back');
+  await page.getByRole('button',{name:'Let’s do it together',exact:true}).click();
+  await page.getByText('The story has moved on since this task opened. Put this task aside, then open the current mission step.',{exact:true}).waitFor();
+  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).activityCompleted,false);
+  assert.equal((await storySnapshot()).revision,moved.revision);
+  assert.equal(await page.getByRole('button',{name:'Let’s do it together',exact:true}).isDisabled(),true);
+  await page.getByRole('button',{name:'Put this task aside',exact:true}).click();
+  await page.locator('dialog').waitFor({state:'hidden'});
+  await page.waitForFunction(revision=>Number(document.querySelector('#game')?.dataset.storyRevision)===revision,moved.revision);
+  await page.locator('#missions').click();
+  await page.locator('[data-story-visit="object:bridge"]').click();
+  await page.locator('[data-story-action="assemble"]').click();
+  await page.locator('.ww-mission-activity').waitFor();
+  const reopened=(await learningSnapshot()).activeActivity;
+  assert.notEqual(reopened.id,third.id);
   await page.getByRole('button',{name:'Let’s do it together',exact:true}).click();
   await page.locator('dialog').waitFor({state:'hidden'});
-  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).activityCompleted,true);
+  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===reopened.skillId).activityCompleted,true);
   assert.equal(await page.locator('#game').getAttribute('data-story-bridge'),'repaired');
   await page.reload(); await page.locator('#game canvas').waitFor();
   const restored=await learningSnapshot();
   assert.equal(restored.activeActivity,undefined);
-  assert.ok(!['M01','M03',third.skillId].includes(restored.frontierSkillId));
+  assert.ok(!['M01','M03',reopened.skillId].includes(restored.frontierSkillId));
   assert.deepEqual(await get('/api/v1/game'),originalGame);
   assert.equal(await page.evaluate(()=>localStorage.getItem('starwhisker.meadow.v1')),guestSave);
   assert.deepEqual(errors,[]);

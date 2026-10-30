@@ -123,6 +123,7 @@ export class MissionLearningSession {
   private pending?: string;
   private active = false;
   private reconcile = false;
+  private reading?: Promise<MissionLearningSnapshot>;
   readonly storageKey: string;
 
   constructor(
@@ -164,18 +165,27 @@ export class MissionLearningSession {
   }
 
   async refresh() {
+    // Background reads and an activity's preflight read may overlap. Share the
+    // read, while still forbidding reads from racing an in-flight command.
+    if (this.reading) return this.reading;
     if (this.active) throw new Error('A practice action is still running.');
     this.active = true;
-    try {
-      this.current = await this.client.snapshot();
-      this.reconcile = false;
-      return this.current;
-    } finally {
-      this.active = false;
-    }
+    this.reading = Promise.resolve()
+      .then(() => this.client.snapshot())
+      .then((snapshot) => {
+        this.current = snapshot;
+        this.reconcile = false;
+        return snapshot;
+      })
+      .finally(() => {
+        this.active = false;
+        this.reading = undefined;
+      });
+    return this.reading;
   }
 
   async choose(payload: MissionLearningCommand['payload']) {
+    while (this.reading) await this.reading;
     if (this.active || this.pending || this.reconcile || !this.current)
       throw new Error('Refresh practice progress before choosing another action.');
     const command: MissionLearningCommand = {

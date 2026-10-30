@@ -162,3 +162,62 @@ test('blocked storage fails before send and corrupt pending command fails closed
   corrupted.values.set('wonderwilds.mission-learning.pending.v1:profile-1', '{bad');
   assert.throws(() => new MissionLearningSession(client, 'profile-1', corrupted));
 });
+
+test('overlapping progress reads share one request and an answer waits for its latest revision', async () => {
+  let resolveRead!: (value: MissionLearningSnapshot) => void;
+  let reads = 0;
+  const bodies: string[] = [];
+  const session = new MissionLearningSession(
+    {
+      snapshot: () => {
+        reads++;
+        return new Promise((resolve) => {
+          resolveRead = resolve;
+        });
+      },
+      send: async (body) => {
+        bodies.push(body);
+        return snapshot(10);
+      },
+    },
+    'profile-read-race',
+    storage(),
+    () => 'after-read',
+  );
+  const first = session.refresh();
+  const second = session.refresh();
+  const answer = session.choose({
+    type: 'answer',
+    encounterId: 'active-task',
+    answer: { kind: 'choice', choiceId: 'number-2' },
+  });
+  await Promise.resolve();
+  assert.equal(reads, 1);
+  assert.equal(bodies.length, 0);
+  resolveRead(snapshot(9));
+  await Promise.all([first, second, answer]);
+  assert.equal(JSON.parse(bodies[0]!).expectedRevision, 9);
+  assert.equal(session.snapshot?.revision, 10);
+});
+
+test('a progress read cannot race a submitted command or replace its confirmed response', async () => {
+  let finish!: (value: MissionLearningSnapshot) => void;
+  const session = new MissionLearningSession(
+    {
+      snapshot: async () => snapshot(1),
+      send: () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    },
+    'profile-write-race',
+    storage(),
+    () => 'in-flight',
+  );
+  await session.refresh();
+  const write = session.choose({ type: 'begin' });
+  await assert.rejects(session.refresh(), /still running/);
+  finish(snapshot(2));
+  await write;
+  assert.equal(session.snapshot?.revision, 2);
+});

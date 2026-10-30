@@ -9,6 +9,7 @@ import { pointerMoves } from '../learning/drag.ts';
 import type { AnswerRecorder } from '../learning/voice.ts';
 import { voiceEntry } from './voice.ts';
 import { art, picture } from '../learning/visuals.ts';
+import { ApiFailure } from '../api/client.ts';
 
 export type MissionLearningActivityCallbacks = {
   recorder?: AnswerRecorder;
@@ -111,6 +112,8 @@ export function mountMissionActivity(
   let destroyed = false;
   let retryAvailable = false;
   let refreshAvailable = false;
+  let staleBinding = false;
+  let currentRevision = initialSnapshot.revision;
   const retry = document.createElement('button');
   retry.type = 'button';
   retry.className = 'primary';
@@ -126,7 +129,8 @@ export function mountMissionActivity(
   const inputs: (HTMLInputElement | HTMLButtonElement | HTMLTextAreaElement)[] = [];
   let recording = false;
   let voice: ReturnType<typeof voiceEntry> | undefined;
-  const editable = () => !busy && !complete && !destroyed && !callbacks.hasPending();
+  const editable = () =>
+    !busy && !complete && !staleBinding && !destroyed && !callbacks.hasPending();
   const drag = pointerMoves(root, () => editable() && !recording);
   const gestureHelp = document.createElement('p');
   gestureHelp.className = 'ww-mission-gesture-help';
@@ -166,18 +170,30 @@ export function mountMissionActivity(
     if (destroyed) return;
     const answer = selectedAnswer();
     const pending = callbacks.hasPending();
-    check.disabled = busy || recording || complete || pending || !answer;
+    check.disabled = busy || recording || complete || staleBinding || pending || !answer;
     hint.disabled =
-      busy || recording || complete || pending || currentActivity.support.hintCount >= 20;
+      busy ||
+      recording ||
+      complete ||
+      staleBinding ||
+      pending ||
+      currentActivity.support.hintCount >= 20;
     example.disabled =
-      busy || recording || complete || pending || currentActivity.support.workedExample;
+      busy ||
+      recording ||
+      complete ||
+      staleBinding ||
+      pending ||
+      currentActivity.support.workedExample;
     abandon.disabled = busy || recording || complete || pending;
-    together.disabled = busy || recording || complete || pending;
+    together.disabled = busy || recording || complete || staleBinding || pending;
     retry.hidden = !retryAvailable;
     retry.disabled = busy || !retryAvailable;
     refresh.hidden = !refreshAvailable;
     refresh.disabled = busy || !refreshAvailable;
-    inputs.forEach((input) => (input.disabled = busy || recording || complete || pending));
+    inputs.forEach(
+      (input) => (input.disabled = busy || recording || complete || staleBinding || pending),
+    );
     voice?.update();
     if (busy || complete || pending) drag.cancel();
     root.setAttribute('aria-busy', String(busy));
@@ -556,8 +572,19 @@ export function mountMissionActivity(
     renderChoices(task.choices);
   }
 
+  function finish() {
+    if (destroyed || complete) return;
+    complete = true;
+    root.hidden = true;
+    drag.cancel();
+    queueMicrotask(() => {
+      if (!destroyed) callbacks.onContinue();
+    });
+  }
+
   function showSnapshot(snapshot: MissionLearningSnapshot) {
     if (destroyed) return;
+    currentRevision = snapshot.revision;
     if (
       snapshot.activeActivity &&
       (snapshot.activeActivity.id !== activity.id ||
@@ -577,12 +604,7 @@ export function mountMissionActivity(
     if (feedback) {
       status.textContent = feedback.message;
       if (feedback.completed && !snapshot.activeActivity && !complete) {
-        complete = true;
-        root.hidden = true;
-        drag.cancel();
-        queueMicrotask(() => {
-          if (!destroyed) callbacks.onContinue();
-        });
+        finish();
       }
     }
     const revealed = snapshot.activeActivity?.revealedSupport;
@@ -594,6 +616,51 @@ export function mountMissionActivity(
     update();
   }
 
+  async function recover(error: unknown) {
+    if (destroyed) return;
+    retryAvailable = callbacks.hasPending();
+    if (retryAvailable) {
+      // The outcome is uncertain: only retry the original prepared command.
+      status.textContent = 'We could not confirm that save. The same action is ready to retry.';
+      return;
+    }
+    if (!(error instanceof ApiFailure) || error.code !== 'REVISION_CONFLICT') {
+      refreshAvailable = true;
+      status.textContent = 'This task could not reconnect. Refresh progress before checking again.';
+      return;
+    }
+    status.textContent = 'Checking your saved progress…';
+    const previousRevision = currentRevision;
+    try {
+      // A definite conflict permits a read, never an automatic replacement write.
+      const snapshot = await callbacks.onRefresh();
+      if (destroyed) return;
+      const completed = snapshot.skills.some(
+        (skill) => skill.skillId === activity.skillId && skill.activityCompleted,
+      );
+      if (snapshot.activeActivity?.id !== activity.id) {
+        if (completed || !snapshot.activeActivity) finish();
+        else {
+          root.hidden = true;
+          complete = true;
+          callbacks.onContinue();
+        }
+        return;
+      }
+      const sameQuestion = snapshot.activeActivity.variantId === activity.variantId;
+      showSnapshot(snapshot);
+      if (destroyed || complete) return;
+      staleBinding = sameQuestion && snapshot.revision === previousRevision;
+      refreshAvailable = false;
+      status.textContent = staleBinding
+        ? 'The story has moved on since this task opened. Put this task aside, then open the current mission step.'
+        : 'Your progress is up to date. Your answer is still here; check it again when you are ready.';
+    } catch {
+      refreshAvailable = true;
+      status.textContent = 'Saved progress could not be loaded. Refresh progress to reconnect.';
+    }
+  }
+
   async function perform(operation: () => Promise<MissionLearningSnapshot>) {
     if (busy || destroyed || complete) return;
     busy = true;
@@ -601,12 +668,8 @@ export function mountMissionActivity(
     update();
     try {
       showSnapshot(await operation());
-    } catch {
-      retryAvailable = callbacks.hasPending();
-      refreshAvailable = !retryAvailable;
-      status.textContent = retryAvailable
-        ? 'We could not confirm that save. The same action is ready to retry.'
-        : 'Progress changed. Refresh it before choosing another action.';
+    } catch (error) {
+      await recover(error);
     } finally {
       busy = false;
       update();
@@ -637,13 +700,7 @@ export function mountMissionActivity(
         if (!snapshot.activeActivity) callbacks.onContinue();
         else showSnapshot(snapshot);
       })
-      .catch(() => {
-        retryAvailable = callbacks.hasPending();
-        refreshAvailable = !retryAvailable;
-        status.textContent = retryAvailable
-          ? 'The same practice save could not be confirmed. Try again.'
-          : 'Progress changed. Refresh it before choosing another action.';
-      })
+      .catch((error: unknown) => recover(error))
       .finally(() => {
         busy = false;
         update();
@@ -681,7 +738,7 @@ export function mountMissionActivity(
         refreshAvailable = !retryAvailable;
         status.textContent = retryAvailable
           ? 'The leave action could not be confirmed. Retry the same save.'
-          : 'Progress changed. Refresh it before choosing another action.';
+          : 'This task could not be put aside. Refresh progress to reconnect.';
       })
       .finally(() => {
         busy = false;
