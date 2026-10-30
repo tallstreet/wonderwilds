@@ -14,6 +14,7 @@ import { StoryClient, StorySession, type StoryPayload } from './client.ts';
 import { MissionLearningClient, MissionLearningSession } from '../mission-learning/client.ts';
 import { mountMissionActivity } from '../mission-learning/activity.ts';
 import '../mission-learning/world.css';
+import { createRecorder, type AnswerRecorder } from '../learning/voice.ts';
 import {
   storyPlaces,
   storyBounds,
@@ -53,13 +54,20 @@ export class StoryWorld {
     profile: string,
     private hooks: Hooks,
     learningClient: MissionLearningClient,
+    private recorder?: AnswerRecorder,
   ) {
     this.commands = new StorySession(client, profile, sessionStorage);
     this.learning = new MissionLearningSession(learningClient, profile, sessionStorage);
+    document.querySelector('dialog')?.addEventListener('close', () => {
+      this.learningActivity?.destroy();
+      this.learningActivity = undefined;
+    });
     this.state.hero = 'rose';
     document.querySelector<HTMLElement>('.hud-stars')!.style.display = 'none';
     window.addEventListener('pagehide', () => {
       this.disposed = true;
+      this.learningActivity?.destroy();
+      this.recorder?.cancel();
       this.client.destroy();
       learningClient.destroy();
     });
@@ -235,6 +243,7 @@ export class StoryWorld {
       activity,
       snapshot,
       {
+        recorder: this.recorder,
         onAttempt: (answer: MissionLearningAnswer) =>
           this.missionLearningCommand({
             type: 'answer',
@@ -339,6 +348,8 @@ export class StoryWorld {
     }
   }
   missions() {
+    this.learningActivity?.destroy();
+    this.learningActivity = undefined;
     if (this.crossing) return;
     if (this.snapshot.commandBudgetExhausted) {
       this.hooks.open(
@@ -611,5 +622,10 @@ export async function connectStoryWorld(hooks: Hooks) {
     value.profileId,
     hooks,
     new MissionLearningClient(value.profileId, value.csrf),
+    value.voiceInput === true &&
+      typeof MediaRecorder !== 'undefined' &&
+      typeof navigator.mediaDevices?.getUserMedia === 'function'
+      ? createRecorder(value.csrf, value.profileId)
+      : undefined,
   );
 }

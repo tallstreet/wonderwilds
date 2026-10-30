@@ -142,6 +142,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:5173/ > /dev/null
           npm test --prefix qa/e2e
           node frontend/src/learning/activity.browser.mjs
+          node frontend/src/mission-learning/activity.browser.mjs
       - name: Check default authored world with real API and disposable PostgreSQL
         if: matrix.suite == 'browser'
         run: node qa/e2e/run-training-qa.mjs

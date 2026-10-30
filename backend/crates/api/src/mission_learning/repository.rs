@@ -22,7 +22,7 @@ use wonderwilds_learning::mission::{
 
 const STORAGE_FORMAT: &str = "mission-learning-storage-v1";
 const ZERO_DIGEST: &str = "0000000000000000000000000000000000000000000000000000000000000000";
-const POLICY_EXPLANATION: &str = "Practice readiness requires eight independent first checks, at least seven correct, varied task variants and representations, two story contexts, two authenticated sessions, and three recent correct checks. It is experimental practice routing, not calibrated academic mastery.";
+const POLICY_EXPLANATION: &str = "The original five skills retain their varied, two-session readiness checks. New starters follow prerequisite exposure through correct practice or worked examples. Exposure is not full-skill readiness or mastery; open responses need adult review.";
 
 pub trait Repository: Send + Sync {
     fn readiness(&self) -> Result<(), Error> {
@@ -408,7 +408,7 @@ impl PostgresRepository {
             skills.push(json!({"skillId":node.skill_id,"objective":node.objective,"prerequisites":node.prerequisites,"status":status,"supportedByMission":node.supported_by_mission,"eligibleChecks":eligible,"correctChecks":correct,"distinctVariants":variants,"distinctContexts":contexts,"distinctRepresentations":representations,"distinctSessions":sessions,"blockers":blockers,"nextStep":next_step}));
         }
         let seed = state.revision.saturating_add(1);
-        let frontier_skill_id = mission::select(&state.policy, Some("maths"), seed)
+        let frontier_skill_id = mission::select(&state.policy, None, seed)
             .map_err(|_| Error::Unavailable)?
             .map(|s| s.skill_id);
         let active_invite =
@@ -560,13 +560,10 @@ impl Repository for PostgresRepository {
                 if step.is_none() {
                     invitation(&context.mission_id, &context.location_id).ok_or(Error::NotFound)?;
                 }
-                let selected = mission::select(
-                    &state.policy,
-                    Some("maths"),
-                    state.revision.saturating_add(1),
-                )
-                .map_err(|_| Error::Unavailable)?
-                .ok_or(Error::NotFound)?;
+                let selected =
+                    mission::select(&state.policy, None, state.revision.saturating_add(1))
+                        .map_err(|_| Error::Unavailable)?
+                        .ok_or(Error::NotFound)?;
                 let issued = state
                     .issued_by_skill
                     .entry(selected.skill_id.clone())
@@ -617,7 +614,7 @@ impl Repository for PostgresRepository {
                 let evidence = Self::evidence(
                     identity,
                     active,
-                    &activity.view.representation,
+                    &activity.view,
                     sequence,
                     EventKind::AnswerCheck,
                     if outcome.correct {
@@ -695,7 +692,7 @@ impl Repository for PostgresRepository {
                 let evidence = Self::evidence(
                     identity,
                     active,
-                    &activity.view.representation,
+                    &activity.view,
                     sequence,
                     event_kind,
                     ResultKind::NotAssessed,
@@ -740,7 +737,7 @@ impl Repository for PostgresRepository {
                 let evidence = Self::evidence(
                     identity,
                     &active,
-                    &activity.view.representation,
+                    &activity.view,
                     sequence,
                     if together {
                         EventKind::WorkedExample
@@ -821,7 +818,7 @@ impl PostgresRepository {
     fn evidence(
         identity: &Identity,
         active: &ActiveActivity,
-        representation: &str,
+        view: &mission::MissionActivityView,
         sequence: u64,
         event_kind: EventKind,
         result: ResultKind,
@@ -837,10 +834,10 @@ impl PostgresRepository {
             event_id,
             encounter_id: active.id.clone(),
             skill_id: active.skill_id.clone(),
-            variant_id: format!("{}-mission-v1-{:02}", active.skill_id, active.seed % 12),
+            variant_id: view.variant_id.clone(),
             item_family: active.skill_id.clone(),
             context_id: format!("{}:{}", active.mission_id, active.location_id),
-            representation: representation.to_owned(),
+            representation: view.representation.clone(),
             result,
             event_kind,
             first_check,

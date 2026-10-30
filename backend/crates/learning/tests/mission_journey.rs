@@ -10,6 +10,9 @@ use wonderwilds_learning::{
 
 fn answer(task: &PublicTask) -> MissionAnswer {
     match task {
+        PublicTask::PracticeCards { .. } => {
+            panic!("this regression covers the established five-skill path")
+        }
         PublicTask::Pairing {
             objects,
             recipients,
@@ -150,7 +153,12 @@ fn actual_items_advance_the_graph_and_replay_the_same_bounded_progress() {
             "{skill}"
         );
     }
-    assert!(mission::frontier(&state, Some("maths")).unwrap().is_empty());
+    assert!(
+        mission::frontier(&state, Some("maths"))
+            .unwrap()
+            .iter()
+            .any(|n| n.skill_id == "M02")
+    );
     assert_eq!(mission::replay(&history).unwrap(), state);
     assert!(state.observations.len() <= 60);
     assert_eq!(mission::all_skill_projections(&state).unwrap().len(), 120);

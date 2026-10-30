@@ -826,6 +826,18 @@
         {
           "type": "object",
           "properties": {
+            "kind": { "const": "practice_cards", "type": "string" },
+            "stimulus": { "type": "string", "minLength": 1, "maxLength": 2000 },
+            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "maxItems": 5 },
+            "adultReview": { "type": "boolean" }
+          },
+          "required": ["kind", "stimulus", "choices", "adultReview"],
+          "allOf": [{ "if": { "properties": { "adultReview": { "const": false } } }, "then": { "properties": { "choices": { "type": "array", "minItems": 2 } } }, "else": { "properties": { "choices": { "type": "array", "maxItems": 0 } } } }],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
             "kind": { "const": "pairing", "type": "string" },
             "layout": { "type": "string", "enum": ["object_cards", "recipient_slots"] },
             "objects": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "minItems": 1, "maxItems": 12 },

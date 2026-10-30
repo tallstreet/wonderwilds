@@ -401,6 +401,9 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         let Some(skill) = current["frontierSkillId"].as_str().map(str::to_owned) else {
             break;
         };
+        if !["M01", "M03", "M04", "M05", "M06"].contains(&skill.as_str()) {
+            break;
+        }
         let mut session_identity = identity_a.clone();
         let context_revision;
         let started;
@@ -490,24 +493,16 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         assert_eq!(progress["distinctSessions"], 2, "{skill}");
         assert_eq!(progress["distinctContexts"], 2, "{skill}");
     }
-    assert_eq!(current["available"], false);
-    assert_eq!(current["frontierSkillId"], Value::Null);
+    assert_eq!(current["available"], true);
+    assert!(current["frontierSkillId"].is_string());
     assert!(
         current["skills"]
             .as_array()
             .unwrap()
             .iter()
-            .filter(|s| s["supportedByMission"] == true)
-            .all(|s| s["status"] == "ready_for_next")
+            .all(|s| s["supportedByMission"] == true)
     );
-    assert!(
-        current["skills"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .filter(|s| s["supportedByMission"] == false)
-            .all(|s| s["status"] == "unavailable")
-    );
+    assert_eq!(current["skills"].as_array().unwrap().len(), 120);
     assert_eq!(
         row_count(&mut admin, "story_command_receipts", profile),
         current_story["revision"].as_i64().unwrap()
@@ -515,6 +510,50 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     assert_eq!(row_count(&mut admin, "progress", profile), 0);
     assert_eq!(row_count(&mut admin, "learning_events", profile), 0);
     assert_eq!(row_count(&mut admin, "game_events", profile), 0);
+
+    // Every new starter can be issued, taught, resumed and persisted without inventing mastery.
+    let mut explored = std::collections::BTreeSet::new();
+    for index in 0..115 {
+        let before = repo.read(&identity_b).unwrap();
+        let skill = before["frontierSkillId"].as_str().unwrap().to_owned();
+        assert!(explored.insert(skill.clone()), "repeated starter {skill}");
+        let (_, started) = begin(
+            &repo,
+            &identity_b,
+            &before,
+            &format!("starter-begin-{index}"),
+        );
+        let activity = &started["activeActivity"];
+        assert_eq!(activity["skillId"], skill);
+        assert_eq!(activity["task"]["kind"], "practice_cards");
+        assert_eq!(repo.read(&identity_b).unwrap()["activeActivity"], *activity);
+        let support = command(
+            &format!("starter-help-{index}"),
+            started["revision"].as_u64().unwrap(),
+            json!({"type":"support","encounterId":activity["id"],"kind":"worked_example"}),
+        );
+        let taught = repo.execute(&identity_b, &support).unwrap();
+        assert_eq!(repo.execute(&identity_b, &support).unwrap(), taught);
+        let abandoned = command(
+            &format!("starter-leave-{index}"),
+            taught["revision"].as_u64().unwrap(),
+            json!({"type":"abandon","encounterId":activity["id"]}),
+        );
+        let after = repo.execute(&identity_b, &abandoned).unwrap();
+        let progress = after["skills"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["skillId"] == skill)
+            .unwrap();
+        assert_ne!(progress["status"], "ready_for_next");
+        assert_eq!(progress["eligibleChecks"], 0);
+        assert_eq!(
+            story.read(&identity_b).unwrap()["revision"],
+            current_story["revision"]
+        );
+    }
+    assert_eq!(explored.len(), 115);
 
     // Durable full event replay agrees with the compact <=60-item checkpoint.
     let loaded = {
@@ -530,7 +569,7 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     let final_event_count = row_count(&mut admin, "mission_learning_events", profile);
     assert_eq!(
         final_event_count,
-        before_journey_event_count + i64::from(practice_attempts)
+        before_journey_event_count + i64::from(practice_attempts) + 230
     );
     let checkpoint_bytes: i32 = admin.query_one("SELECT octet_length(checkpoint::text) FROM wonderwilds.mission_learning_progress WHERE profile_id=$1::text::uuid", &[&profile]).unwrap().get(0);
     assert!(

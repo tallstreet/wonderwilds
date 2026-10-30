@@ -1,5 +1,7 @@
-//! Original, bounded maths activities and a separate provisional mission progression policy.
+//! Original, bounded curriculum practice and a separate provisional readiness policy.
 //! This does not alter the established independent-transfer mastery policy.
+mod catalogue;
+
 use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
@@ -21,6 +23,9 @@ pub struct MissionState {
     pub policy_version: String,
     /// Monotonic command/evidence sequence; observations below are a bounded latest-item projection.
     pub last_sequence: u64,
+    /// Exposure through correct practice or a worked example; never mastery.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    pub explored_skills: BTreeSet<String>,
     #[serde(default)]
     pub introduced_skills: BTreeSet<String>,
     #[serde(default)]
@@ -34,6 +39,7 @@ impl Default for MissionState {
         Self {
             policy_version: POLICY_VERSION.to_owned(),
             last_sequence: 0,
+            explored_skills: BTreeSet::new(),
             introduced_skills: BTreeSet::new(),
             attempted_skills: BTreeSet::new(),
             observations: Vec::new(),
@@ -122,6 +128,11 @@ pub struct NamedItem {
     tag = "kind"
 )]
 pub enum PublicTask {
+    PracticeCards {
+        stimulus: String,
+        choices: Vec<NamedItem>,
+        adult_review: bool,
+    },
     Pairing {
         layout: String,
         objects: Vec<NamedItem>,
@@ -219,6 +230,7 @@ pub struct Support {
 
 #[derive(Debug, Clone)]
 enum AssessmentKey {
+    Review,
     Pairing {
         object_ids: Vec<String>,
         recipient_ids: Vec<String>,
@@ -245,6 +257,7 @@ impl MissionActivity {
     /// material, never independent answer-check evidence.
     pub fn discovery_solution(&self) -> String {
         match &self.view.task {
+            PublicTask::PracticeCards { adult_review, .. } => if *adult_review { "Thank you for sharing! Review your ideas with a grown-up. We explored this together; your work has not been automatically assessed.".to_owned() } else { match &self.key { AssessmentKey::Choice { correct_id, .. } => { if let PublicTask::PracticeCards { choices, .. } = &self.view.task { format!("Together, we found: {}. Ask a grown-up to help explain your thinking.", choices.iter().find(|c| &c.id == correct_id).map_or("our answer", |c|c.label.as_str())) } else { unreachable!() } }, _ => unreachable!() } },
             PublicTask::Pairing { .. } => "We put one marker at each spot and checked that no spot was missed. Now let's discover together!".to_owned(),
             PublicTask::CountCollection { objects, .. } => format!("We counted each marker once: {} altogether. Now let's discover together!", objects.len()),
             PublicTask::CompareCollections { collections, prompt_mode, .. } => {
@@ -320,10 +333,10 @@ pub enum SupportKind {
     WorkedExample,
 }
 
-const SUPPORTED_SKILLS: [&str; 5] = ["M01", "M03", "M04", "M05", "M06"];
+const READINESS_SKILLS: [&str; 5] = ["M01", "M03", "M04", "M05", "M06"];
 
 pub fn supported_skill(skill_id: &str) -> bool {
-    SUPPORTED_SKILLS.contains(&skill_id)
+    READINESS_SKILLS.contains(&skill_id) || catalogue::item(skill_id, 0).is_some()
 }
 
 pub fn authored_activity(
@@ -333,6 +346,9 @@ pub fn authored_activity(
 ) -> Result<MissionActivity, MissionError> {
     if !supported_skill(skill_id) || activity_id.is_empty() {
         return Err(MissionError::UnsupportedSkill);
+    }
+    if !READINESS_SKILLS.contains(&skill_id) {
+        return catalogue::activity(skill_id, seed, activity_id);
     }
     let slot = (seed % 12) as u8;
     let variant_id = format!("{skill_id}-mission-v1-{slot:02}");
@@ -585,6 +601,7 @@ pub fn discovery_activity(mut activity: MissionActivity) -> MissionActivity {
         }
     }
     let prompt = match &mut activity.view.task {
+        PublicTask::PracticeCards { .. } => return activity,
         PublicTask::Pairing {
             objects,
             recipients,
@@ -630,6 +647,15 @@ pub fn discovery_activity(mut activity: MissionActivity) -> MissionActivity {
 
 fn canonical_fingerprint(skill_id: &str, task: &PublicTask) -> String {
     let shape = match task {
+        PublicTask::PracticeCards {
+            stimulus,
+            choices,
+            adult_review,
+        } => {
+            let mut labels: Vec<_> = choices.iter().map(|c| c.label.as_str()).collect();
+            labels.sort_unstable();
+            format!("practice:{adult_review}:{stimulus}:{labels:?}")
+        }
         PublicTask::Pairing {
             layout,
             objects,
@@ -812,7 +838,22 @@ pub fn support_content(skill_id: &str, kind: SupportKind, hint_index: usize) -> 
             "Think: shown part plus missing part equals the whole.",
             "Count on from the shown part until you reach the whole.",
         ],
-        _ => return None,
+        _ => {
+            let item = catalogue::item(skill_id, 0)?;
+            return Some(match kind {
+                SupportKind::Hint => item.hint,
+                SupportKind::WorkedExample => {
+                    if let Some(answer) = item.answers.first() {
+                        format!(
+                            "For example: {} One answer is {answer}. {}",
+                            item.stimulus, item.hint
+                        )
+                    } else {
+                        format!("Try together: {} {}", item.stimulus, item.hint)
+                    }
+                }
+            });
+        }
     };
     match kind {
         SupportKind::Hint => hints.get(hint_index.min(hints.len() - 1)).map(|v| (*v).to_owned()),
@@ -848,7 +889,8 @@ pub fn record(
     if e.server_sequence <= state.last_sequence {
         return Err(MissionError::SequenceOrder);
     }
-    let eligible = e.provenance == Provenance::ServerVerified
+    let eligible = READINESS_SKILLS.contains(&e.skill_id.as_str())
+        && e.provenance == Provenance::ServerVerified
         && e.event_kind == EventKind::AnswerCheck
         && e.first_check
         && e.result != ResultKind::NotAssessed
@@ -864,6 +906,13 @@ pub fn record(
         return Err(MissionError::InvalidState);
     }
     state.last_sequence = e.server_sequence;
+    if !READINESS_SKILLS.contains(&e.skill_id.as_str())
+        && e.provenance == Provenance::ServerVerified
+        && ((e.event_kind == EventKind::AnswerCheck && e.result == ResultKind::Correct)
+            || e.event_kind == EventKind::WorkedExample)
+    {
+        state.explored_skills.insert(e.skill_id.clone());
+    }
     if e.provenance == Provenance::ServerVerified
         && matches!(
             e.event_kind,
@@ -1018,6 +1067,28 @@ pub fn summary(skill_id: &str, state: &MissionState) -> Result<SkillSummary, Mis
     if !supported_skill(skill_id) {
         return Err(MissionError::UnsupportedSkill);
     }
+    if !READINESS_SKILLS.contains(&skill_id) {
+        return Ok(SkillSummary {
+            skill_id: skill_id.into(),
+            status: if state.introduced_skills.contains(skill_id) {
+                Status::Introduced
+            } else {
+                Status::Unseen
+            },
+            eligible_checks: 0,
+            correct_checks: 0,
+            distinct_variants: 0,
+            distinct_contexts: 0,
+            distinct_representations: 0,
+            distinct_sessions: 0,
+            blockers: vec!["Full-skill assessment pending.".into()],
+            next_step: if state.explored_skills.contains(skill_id) {
+                "Explored through practice; not assessed mastery.".into()
+            } else {
+                "Try this starter or explore a worked example together.".into()
+            },
+        });
+    }
     let eligible = qualifying(skill_id, state)?;
     let window = &eligible[eligible.len().saturating_sub(QUALIFYING_CHECKS)..];
     let correct = window
@@ -1120,6 +1191,15 @@ pub fn all_skill_projections(state: &MissionState) -> Result<Vec<SkillProjection
     graph.nodes().map(|node| projection(node, state)).collect()
 }
 
+fn prerequisite_available(skill: &str, prerequisite: &str, state: &MissionState) -> bool {
+    summary(prerequisite, state).is_ok_and(|s| s.status == Status::PracticeReady)
+        || (!READINESS_SKILLS.contains(&skill)
+            && (state.explored_skills.contains(prerequisite)
+                || state.observations.iter().any(|o| {
+                    o.evidence.skill_id == prerequisite && o.evidence.result == ResultKind::Correct
+                })))
+}
+
 pub fn frontier(
     state: &MissionState,
     subject: Option<&str>,
@@ -1136,7 +1216,7 @@ pub fn frontier(
         if node
             .prerequisites
             .iter()
-            .all(|pre| summary(pre, state).is_ok_and(|s| s.status == Status::PracticeReady))
+            .all(|pre| prerequisite_available(&node.id, pre, state))
         {
             let mut item = projection(node, state)?;
             if matches!(item.status, Status::Ready | Status::Unseen) {
@@ -1157,6 +1237,33 @@ pub fn select(
     if frontier.is_empty() {
         return Ok(None);
     }
+    // Retain the established five-skill assessed path before expanding into starters.
+    if frontier
+        .iter()
+        .any(|s| READINESS_SKILLS.contains(&s.skill_id.as_str()))
+    {
+        frontier.retain(|s| READINESS_SKILLS.contains(&s.skill_id.as_str()));
+    } else if frontier
+        .iter()
+        .any(|s| !state.explored_skills.contains(&s.skill_id))
+    {
+        frontier.retain(|s| !state.explored_skills.contains(&s.skill_id));
+    }
+    // Later-year roots must not displace available Foundation starters just because
+    // they have no academic prerequisite (for example map conventions).
+    let wave = |id: &str| {
+        if id.len() == 3 {
+            0
+        } else {
+            id.as_bytes().get(2).copied().unwrap_or(b'9') - b'0'
+        }
+    };
+    let earliest = frontier
+        .iter()
+        .map(|s| wave(&s.skill_id))
+        .min()
+        .unwrap_or(0);
+    frontier.retain(|s| wave(&s.skill_id) == earliest);
     frontier.sort_by(|a, b| a.skill_id.cmp(&b.skill_id));
     let least_practised = frontier
         .iter()
@@ -1183,9 +1290,10 @@ fn projection(node: &SkillNode, state: &MissionState) -> Result<SkillProjection,
             Status::Practising => Status::Practising,
             Status::Unseen | Status::Introduced
                 if node.prerequisites.is_empty()
-                    || node.prerequisites.iter().all(|p| {
-                        summary(p, state).is_ok_and(|s| s.status == Status::PracticeReady)
-                    }) =>
+                    || node
+                        .prerequisites
+                        .iter()
+                        .all(|p| prerequisite_available(&node.id, p, state)) =>
             {
                 Status::Ready
             }
@@ -1213,7 +1321,7 @@ mod tests {
 
     #[test]
     fn discovery_markers_preserve_assessment_shape_and_evidence_fingerprint() {
-        for skill in SUPPORTED_SKILLS {
+        for skill in READINESS_SKILLS {
             for seed in 0..12 {
                 let original = authored_activity(skill, seed, "original").unwrap();
                 let themed = discovery_activity(original.clone());
@@ -1244,6 +1352,9 @@ mod tests {
                     read_aloud: false,
                 };
                 match &original.key {
+                    AssessmentKey::Review => {
+                        unreachable!("original five skills are objectively assessed")
+                    }
                     AssessmentKey::Choice { choice_ids, .. } => {
                         for id in choice_ids {
                             let answer = MissionAnswer::Choice {
@@ -1302,6 +1413,9 @@ mod tests {
                 .clone()
         };
         match &view.task {
+            PublicTask::PracticeCards { .. } => {
+                panic!("use catalogue assessment coverage for practice cards")
+            }
             PublicTask::Pairing {
                 objects,
                 recipients,
@@ -1364,7 +1478,7 @@ mod tests {
 
     #[test]
     fn every_supported_authored_task_accepts_a_wire_answer_derived_from_its_public_view() {
-        for skill in SUPPORTED_SKILLS {
+        for skill in READINESS_SKILLS {
             for seed in 0..12 {
                 let activity = authored_activity(skill, seed, "test-activity").unwrap();
                 let generated_answer = answer_from_public_view(&activity.view);
@@ -1419,23 +1533,19 @@ mod tests {
     }
 
     #[test]
-    fn graph_frontier_starts_at_m01_and_unlocks_only_after_each_prerequisite() {
+    fn graph_frontier_preserves_original_prerequisites_and_exposes_authored_roots() {
         let state = MissionState::default();
         let initial_frontier = frontier(&state, Some("maths")).unwrap();
-        assert_eq!(
-            initial_frontier
-                .iter()
-                .map(|s| s.skill_id.as_str())
-                .collect::<Vec<_>>(),
-            ["M01"]
-        );
+        assert!(initial_frontier.iter().any(|s| s.skill_id == "M01"));
+        assert!(initial_frontier.iter().any(|s| s.skill_id == "M02"));
+        assert!(!initial_frontier.iter().any(|s| s.skill_id == "M03"));
         assert_eq!(
             all_skill_projections(&state)
                 .unwrap()
                 .iter()
                 .filter(|s| s.status == Status::Unavailable)
                 .count(),
-            115
+            0
         );
         let mut state = state;
         for i in 0..8 {
@@ -1445,13 +1555,11 @@ mod tests {
             summary("M01", &state).unwrap().status,
             Status::PracticeReady
         );
-        assert_eq!(
+        assert!(
             frontier(&state, Some("maths"))
                 .unwrap()
                 .iter()
-                .map(|s| s.skill_id.as_str())
-                .collect::<Vec<_>>(),
-            ["M03"]
+                .any(|s| s.skill_id == "M03")
         );
     }
 
@@ -1619,7 +1727,7 @@ mod tests {
 
     #[test]
     fn finite_task_bank_has_eight_distinct_canonical_variants() {
-        for skill in SUPPORTED_SKILLS {
+        for skill in READINESS_SKILLS {
             let unique: BTreeSet<_> = (0..12)
                 .map(|seed| {
                     authored_activity(skill, seed, "x")
@@ -1639,7 +1747,7 @@ mod tests {
     #[test]
     fn mission_representations_match_the_graph_and_number_paths_are_bounded() {
         let graph = CurriculumGraph::load().unwrap();
-        for skill in SUPPORTED_SKILLS {
+        for skill in READINESS_SKILLS {
             let node = graph.get(skill).unwrap();
             for seed in 0..12 {
                 let activity = authored_activity(skill, seed, "bounded-item").unwrap();
@@ -1662,5 +1770,238 @@ mod tests {
                 }
             }
         }
+    }
+    #[test]
+    fn full_catalogue_is_deterministic_valid_and_keeps_keys_private() {
+        let graph = CurriculumGraph::load().unwrap();
+        assert_eq!(graph.nodes().count(), 120);
+        let support = Support {
+            hint_count: 0,
+            worked_example: false,
+            read_aloud: false,
+        };
+        for node in graph.nodes() {
+            assert!(supported_skill(&node.id), "missing {}", node.id);
+            for seed in 0..24 {
+                let activity = authored_activity(&node.id, seed, "coverage").unwrap();
+                let repeated = authored_activity(&node.id, seed, "coverage").unwrap();
+                assert_eq!(activity.view, repeated.view);
+                assert_eq!(
+                    activity.canonical_fingerprint(),
+                    repeated.canonical_fingerprint()
+                );
+                let mut wire = serde_json::to_value(&activity.view).unwrap();
+                wire["support"] =
+                    serde_json::json!({"hintCount":0,"workedExample":false,"readAloud":false});
+                wonderwilds_contracts::validate("MissionActivity", &wire)
+                    .unwrap_or_else(|e| panic!("{} seed {seed}: {e:?}", node.id));
+                assert!(!wire.to_string().contains("correctId"));
+                for kind in [SupportKind::Hint, SupportKind::WorkedExample] {
+                    assert!(
+                        support_content(&node.id, kind, 0).unwrap().chars().count() <= 500,
+                        "{} support too long",
+                        node.id
+                    );
+                }
+                assert!(
+                    activity.discovery_solution().chars().count() <= 160,
+                    "{} completion message too long",
+                    node.id
+                );
+                if let PublicTask::PracticeCards {
+                    choices,
+                    adult_review,
+                    ..
+                } = &activity.view.task
+                {
+                    assert!(
+                        node.allowed_representations
+                            .contains(&activity.view.representation)
+                    );
+                    let labels: BTreeSet<_> = choices.iter().map(|c| &c.label).collect();
+                    assert_eq!(
+                        labels.len(),
+                        choices.len(),
+                        "{} has duplicate answer labels",
+                        node.id
+                    );
+                    match &activity.key {
+                        AssessmentKey::Review => {
+                            assert!(*adult_review);
+                            assert!(choices.is_empty());
+                            assert_eq!(
+                                activity.assess(
+                                    &MissionAnswer::Choice {
+                                        choice_id: "card-0".into()
+                                    },
+                                    support
+                                ),
+                                Err(MissionError::InvalidAnswer)
+                            );
+                        }
+                        AssessmentKey::Choice { correct_id, .. } => {
+                            for c in choices {
+                                let outcome = activity
+                                    .assess(
+                                        &MissionAnswer::Choice {
+                                            choice_id: c.id.clone(),
+                                        },
+                                        support,
+                                    )
+                                    .unwrap();
+                                assert_eq!(outcome.correct, &c.id == correct_id);
+                            }
+                            assert_eq!(
+                                activity.assess(
+                                    &MissionAnswer::Choice {
+                                        choice_id: "forged".into()
+                                    },
+                                    support
+                                ),
+                                Err(MissionError::InvalidAnswer)
+                            );
+                        }
+                        _ => panic!("unexpected practice key"),
+                    }
+                    assert_eq!(discovery_activity(activity.clone()).view, activity.view);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn every_starter_is_reachable_without_faking_full_skill_readiness_or_growing_evidence_windows()
+    {
+        let mut state = MissionState::default();
+        let mut history = Vec::new();
+        for skill in READINESS_SKILLS {
+            for _ in 0..8 {
+                let event = observation(skill, history.len(), true);
+                record(&mut state, event.clone()).unwrap();
+                history.push(event);
+            }
+        }
+        let graph = CurriculumGraph::load().unwrap();
+        for _ in 0..115 {
+            let selected = select(&state, None, 0).unwrap().unwrap();
+            if selected.skill_id.len() > 3 {
+                assert!(
+                    graph
+                        .nodes()
+                        .filter(|n| n.id.len() == 3 && !READINESS_SKILLS.contains(&n.id.as_str()))
+                        .all(|n| state.explored_skills.contains(&n.id)),
+                    "later-year starter displaced Foundation practice"
+                );
+            }
+            assert!(
+                !state.explored_skills.contains(&selected.skill_id),
+                "repeated {} before exploring the catalogue",
+                selected.skill_id
+            );
+            let activity = authored_activity(&selected.skill_id, 0, "starter").unwrap();
+            let mut event = observation(&selected.skill_id, history.len(), true);
+            if matches!(activity.key, AssessmentKey::Review) {
+                event.evidence.event_kind = EventKind::WorkedExample;
+                event.evidence.result = ResultKind::NotAssessed;
+                event.evidence.first_check = false;
+                event.evidence.support.worked_example = true;
+            }
+            record(&mut state, event.clone()).unwrap();
+            history.push(event);
+            let summary = summary(&selected.skill_id, &state).unwrap();
+            assert_ne!(summary.status, Status::PracticeReady);
+            assert_eq!(summary.eligible_checks, 0);
+        }
+        assert_eq!(state.explored_skills.len(), 115);
+        assert_eq!(state.observations.len(), 40);
+        assert!(serde_json::to_vec(&state).unwrap().len() < 64 * 1024);
+        assert_eq!(replay(&history).unwrap(), state);
+    }
+    #[test]
+    fn starter_arithmetic_has_independently_authored_answer_examples() {
+        for (skill, expected) in [
+            ("M02", "2"),
+            ("M07", "4"),
+            ("M08", "2"),
+            ("M15", "2"),
+            ("M16", "23"),
+            ("M17", "6"),
+            ("MY101", "16"),
+            ("MY102", "21"),
+            ("MY104", "9"),
+            ("MY105", "5"),
+            ("MY107", "3"),
+            ("MY108", "7"),
+            ("MY109", "4"),
+            ("MY201", "242"),
+            ("MY202", "48"),
+            ("MY203", "9"),
+            ("MY204", "2"),
+            ("MY205", "1"),
+            ("MY206", "4"),
+            ("MY209", "3"),
+            ("MY301", "100"),
+            ("MY302", "412"),
+            ("MY303", "21"),
+            ("MY304", "1"),
+            ("MY306", "3"),
+            ("MY307", "2"),
+            ("MY401", "30000"),
+            ("MY402", "84"),
+            ("MY403", "3"),
+            ("MY405", "2"),
+            ("MY408", "26"),
+            ("MY501", "21"),
+            ("MY505", "5"),
+            ("MY506", "4"),
+            ("MY507", "7"),
+            ("MY508", "12"),
+            ("MY601", "8"),
+            ("MY602", "1"),
+            ("MY604", "3"),
+            ("MY605", "1"),
+            ("MY606", "79"),
+        ] {
+            let item = catalogue::item(skill, 0).unwrap();
+            assert_eq!(item.answers[0], expected, "{skill}: {}", item.stimulus);
+        }
+    }
+
+    #[test]
+    fn old_five_skill_checkpoints_keep_the_same_projection_and_replay() {
+        let mut state = MissionState::default();
+        let event = observation("M01", 0, true);
+        record(&mut state, event.clone()).unwrap();
+        let serialized = serde_json::to_value(&state).unwrap();
+        assert!(serialized.get("exploredSkills").is_none());
+        let old: MissionState = serde_json::from_value(serialized).unwrap();
+        assert_eq!(replay(&[event]).unwrap(), old);
+    }
+    #[test]
+    fn starter_exposure_requires_verified_correct_practice_or_worked_teaching() {
+        let mut state = MissionState::default();
+        let mut imported = observation("E01", 0, true);
+        imported.evidence.provenance = Provenance::LegacyUnverified;
+        record(&mut state, imported).unwrap();
+        assert!(!state.explored_skills.contains("E01"));
+        let mut hint = observation("E01", 1, true);
+        hint.evidence.event_kind = EventKind::Hint;
+        hint.evidence.result = ResultKind::NotAssessed;
+        hint.evidence.first_check = false;
+        hint.evidence.support.hint_count = 1;
+        record(&mut state, hint).unwrap();
+        assert!(!prerequisite_available("E02", "E01", &state));
+        let mut example = observation("E01", 2, true);
+        example.evidence.event_kind = EventKind::WorkedExample;
+        example.evidence.result = ResultKind::NotAssessed;
+        example.evidence.first_check = false;
+        example.evidence.support.worked_example = true;
+        record(&mut state, example).unwrap();
+        assert!(prerequisite_available("E02", "E01", &state));
+        assert_ne!(
+            summary("E01", &state).unwrap().status,
+            Status::PracticeReady
+        );
+        assert!(state.observations.is_empty());
     }
 }

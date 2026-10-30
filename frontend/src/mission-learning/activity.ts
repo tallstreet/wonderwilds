@@ -5,8 +5,13 @@ import type {
   MissionChoice,
 } from '../../../contracts/generated/contracts.ts';
 import './activity.css';
+import { pointerMoves } from '../learning/drag.ts';
+import type { AnswerRecorder } from '../learning/voice.ts';
+import { voiceEntry } from './voice.ts';
+import { art, picture } from '../learning/visuals.ts';
 
 export type MissionLearningActivityCallbacks = {
+  recorder?: AnswerRecorder;
   onAttempt(answer: MissionLearningAnswer): Promise<MissionLearningSnapshot>;
   onSupport(kind: 'hint' | 'worked_example'): Promise<MissionLearningSnapshot>;
   onRetry(): Promise<MissionLearningSnapshot>;
@@ -90,11 +95,14 @@ export function mountMissionActivity(
   together.textContent = 'Let’s do it together';
   together.hidden = !callbacks.onFinishTogether;
   actions.append(check, hint, example, together, abandon);
-  root.append(heading, intro, prompt, form, status, help, actions);
+  const welcome = document.createElement('header');
+  welcome.className = 'ww-mission-welcome';
+  welcome.append(art(document, 'pip', 'hero'), heading);
+  root.append(welcome, intro, prompt, form, status, help, actions);
   container.replaceChildren(root);
 
   let choiceId: string | undefined;
-  let assignments = new Map<string, string>();
+  const assignments = new Map<string, string>();
   let currentActivity = activity;
   let busy = false;
   let complete =
@@ -114,7 +122,15 @@ export function mountMissionActivity(
   refresh.textContent = 'Refresh practice progress';
   refresh.hidden = true;
   help.append(refresh);
-  const inputs: (HTMLInputElement | HTMLSelectElement)[] = [];
+  const inputs: (HTMLInputElement | HTMLButtonElement | HTMLTextAreaElement)[] = [];
+  let recording = false;
+  let voice: ReturnType<typeof voiceEntry> | undefined;
+  const editable = () => !busy && !complete && !destroyed && !callbacks.hasPending();
+  const drag = pointerMoves(root, () => editable() && !recording);
+  const gestureHelp = document.createElement('p');
+  gestureHelp.className = 'ww-mission-gesture-help';
+  gestureHelp.textContent = 'Drag a piece to its place, or tap a piece and then a place.';
+  form.append(gestureHelp);
 
   const node = <K extends keyof HTMLElementTagNameMap>(tag: K, className: string, text = '') => {
     const element = document.createElement(tag);
@@ -126,15 +142,16 @@ export function mountMissionActivity(
   function pairAnswer(): MissionLearningAnswer | undefined {
     const task = activity.task;
     if (task.kind !== 'pairing') return undefined;
-    const objectFirst = task.layout === 'object_cards';
-    const rows = objectFirst ? task.objects : task.recipients;
-    if (assignments.size !== rows.length || rows.some((row) => !assignments.has(row.id)))
+    if (
+      assignments.size !== task.recipients.length ||
+      task.recipients.some((row) => !assignments.has(row.id))
+    )
       return undefined;
     return {
       kind: 'pairing',
-      assignments: rows.map((row) => ({
-        objectId: objectFirst ? row.id : assignments.get(row.id)!,
-        recipientId: objectFirst ? assignments.get(row.id)! : row.id,
+      assignments: task.recipients.map((row) => ({
+        objectId: assignments.get(row.id)!,
+        recipientId: row.id,
       })),
     };
   }
@@ -148,43 +165,94 @@ export function mountMissionActivity(
     if (destroyed) return;
     const answer = selectedAnswer();
     const pending = callbacks.hasPending();
-    check.disabled = busy || complete || pending || !answer;
-    hint.disabled = busy || complete || pending || currentActivity.support.hintCount >= 20;
-    example.disabled = busy || complete || pending || currentActivity.support.workedExample;
-    abandon.disabled = busy || complete || pending;
-    together.disabled = busy || complete || pending;
+    check.disabled = busy || recording || complete || pending || !answer;
+    hint.disabled =
+      busy || recording || complete || pending || currentActivity.support.hintCount >= 20;
+    example.disabled =
+      busy || recording || complete || pending || currentActivity.support.workedExample;
+    abandon.disabled = busy || recording || complete || pending;
+    together.disabled = busy || recording || complete || pending;
     retry.hidden = !retryAvailable;
     retry.disabled = busy || !retryAvailable;
     refresh.hidden = !refreshAvailable;
     refresh.disabled = busy || !refreshAvailable;
-    inputs.forEach((input) => (input.disabled = busy || complete || pending));
+    inputs.forEach((input) => (input.disabled = busy || recording || complete || pending));
+    voice?.update();
+    if (busy || complete || pending) drag.cancel();
     root.setAttribute('aria-busy', String(busy));
   }
 
   function renderChoices(choices: MissionChoice[]) {
+    gestureHelp.textContent =
+      activity.task.kind === 'count_collection'
+        ? 'Count the objects, then drag or tap an answer card.'
+        : 'Drag an answer card into the tray, or tap a card.';
     const fieldset = node('fieldset', 'ww-mission-options');
     const legend = document.createElement('legend');
-    legend.textContent = 'Choose one answer';
+    legend.textContent = 'Pick an answer card';
+    const tray = node('div', 'ww-mission-answer-tray', 'Drop your answer here, or tap a card');
+    tray.setAttribute('role', 'group');
+    tray.setAttribute('aria-label', 'Your answer');
+    const options = new Map<string, HTMLInputElement>();
+    const labels = choices.map((c) => ({ id: c.id, label: c.label ?? String(c.value) }));
+    const choose = (id: string) => {
+      if (!editable() || recording) return;
+      const input = options.get(id);
+      const label = labels.find((c) => c.id === id);
+      if (!input || !label) return;
+      choiceId = id;
+      input.checked = true;
+      tray.textContent = `Your idea: ${label.label}`;
+      update();
+    };
     fieldset.append(legend);
     for (const choice of choices) {
       const label = node('label', 'ww-mission-choice');
       const input = document.createElement('input');
       input.type = 'radio';
-      input.name = 'mission-choice';
+      input.name = `mission-choice-${activity.id}`;
       input.value = choice.id;
-      input.addEventListener('change', () => {
-        choiceId = choice.id;
-        update();
-      });
+      input.addEventListener('change', () => choose(choice.id));
+      options.set(choice.id, input);
       inputs.push(input);
-      const text = document.createElement('span');
-      const title =
-        choice.label ?? (choice.value === undefined ? 'Choice' : `Number ${choice.value}`);
-      text.textContent = choice.value === undefined ? title : `${title} (${choice.value})`;
-      label.append(input, text);
+      const text = node(
+        'span',
+        !choice.label || /^\d+$/.test(choice.label) ? 'ww-mission-sr-only' : '',
+        choice.label ?? String(choice.value),
+      );
+      if (choice.value !== undefined || /^\d+$/.test(choice.label ?? '')) {
+        label.append(input, picture(document, String(choice.value ?? choice.label)), text);
+      } else label.append(input, text);
+      drag.source(label, choice.id);
       fieldset.append(label);
     }
-    form.append(fieldset);
+    drag.target(tray, choose);
+    form.append(fieldset, tray);
+    // Phonics/spelling and decoding must not use transcription as a substitute for the skill.
+    const noVoice = new Set([
+      'E03',
+      'E04',
+      'E05',
+      'E06',
+      'E07',
+      'E08',
+      'E09',
+      'E10',
+      'EY101',
+      'EY102',
+      'EY106',
+      'EY201',
+      'EY204',
+      'EY303',
+      'EY403',
+    ]);
+    if (callbacks.recorder && !noVoice.has(activity.skillId)) {
+      voice = voiceEntry(form, callbacks.recorder, labels, editable, choose, (active) => {
+        recording = active;
+        if (active) drag.cancel();
+        update();
+      });
+    }
   }
 
   const task = activity.task;
@@ -193,42 +261,128 @@ export function mountMissionActivity(
       status.textContent = 'This pairing task is not available right now.';
       check.disabled = true;
     } else {
-      const table = node('div', 'ww-mission-pairing');
-      const objectFirst = task.layout === 'object_cards';
-      const rows = objectFirst ? task.objects : task.recipients;
-      for (const row of rows) {
-        const label = node('label', 'ww-mission-pair-row');
-        const caption = document.createElement('span');
-        caption.textContent = objectFirst ? `Give ${row.label} to` : `${row.label} receives`;
-        const select = document.createElement('select');
-        select.setAttribute('aria-label', caption.textContent);
-        const blank = document.createElement('option');
-        blank.value = '';
-        blank.textContent = 'Choose a match';
-        select.append(blank);
-        const options = objectFirst ? task.recipients : task.objects;
-        for (const option of options) {
-          const item = document.createElement('option');
-          item.value = option.id;
-          item.textContent = option.label;
-          select.append(item);
+      const table = node(
+        'div',
+        `ww-mission-pairing ${task.layout === 'recipient_slots' ? 'ww-mission-recipient-slots' : 'ww-mission-delivery-paths'}`,
+      );
+      const rows = task.recipients;
+      const pieces = task.objects;
+      const bank = node('div', 'ww-mission-piece-bank');
+      bank.setAttribute('role', 'group');
+      bank.setAttribute('aria-label', 'Pieces to match');
+      let selected: string | undefined;
+      const pieceButtons = new Map<string, HTMLButtonElement>();
+      const slots = new Map<string, HTMLButtonElement>();
+      const refreshPairs = () => {
+        for (const [id, button] of pieceButtons) {
+          button.setAttribute('aria-pressed', String(selected === id));
+          const used = [...assignments.values()].includes(id);
+          button.classList.toggle('is-placed', used);
         }
-        select.addEventListener('change', () => {
-          if (objectFirst) {
-            if (select.value) assignments.set(row.id, select.value);
-            else assignments.delete(row.id);
-          } else {
-            if (select.value) assignments.set(row.id, select.value);
-            else assignments.delete(row.id);
-          }
-          update();
-        });
-        inputs.push(select);
-        label.append(caption, select);
-        table.append(label);
+        for (const row of rows) {
+          const piece = pieces.find((p) => p.id === assignments.get(row.id));
+          const button = slots.get(row.id)!;
+          button.textContent = `${row.label}: ${piece?.label ?? 'tap here'}`;
+          button.setAttribute('aria-label', `${row.label}: ${piece?.label ?? 'empty place'}`);
+        }
+        update();
+      };
+      const place = (row: string, piece: string) => {
+        if (!editable() || recording || !pieces.some((p) => p.id === piece)) return;
+        // Moving a piece removes its old match. Every edit remains reversible.
+        for (const [previous, value] of assignments)
+          if (value === piece) assignments.delete(previous);
+        assignments.set(row, piece);
+        selected = undefined;
+        status.textContent = `${assignments.size} of ${rows.length} places filled.`;
+        refreshPairs();
+      };
+      for (const piece of pieces) {
+        const button = node('button', 'ww-mission-piece', piece.label);
+        button.type = 'button';
+        const token = node('span', 'ww-mission-piece-token', '◆');
+        token.setAttribute('aria-hidden', 'true');
+        button.prepend(token);
+        button.setAttribute('aria-pressed', 'false');
+        button.onclick = () => {
+          if (!editable() || recording) return;
+          selected = selected === piece.id ? undefined : piece.id;
+          refreshPairs();
+        };
+        pieceButtons.set(piece.id, button);
+        inputs.push(button);
+        drag.source(button, piece.id);
+        bank.append(button);
       }
+      for (const row of rows) {
+        const button = node('button', 'ww-mission-pair-row');
+        button.type = 'button';
+        button.onclick = () => {
+          if (!editable() || recording) return;
+          if (selected) place(row.id, selected);
+          else {
+            assignments.delete(row.id);
+            refreshPairs();
+          }
+        };
+        slots.set(row.id, button);
+        inputs.push(button);
+        drag.target(button, (piece) => place(row.id, piece));
+        table.append(button);
+      }
+      refreshPairs();
+      form.append(bank);
       form.append(table);
     }
+  } else if (task.kind === 'practice_cards') {
+    const stimulus = node('div', 'ww-mission-stimulus', task.stimulus);
+    form.append(stimulus);
+    if (task.adultReview) {
+      gestureHelp.textContent =
+        'Make, write or talk with a grown-up. There is more than one good answer.';
+      check.hidden = true;
+      const notice = node(
+        'p',
+        'ww-mission-review-note',
+        'A grown-up helps review this activity. Choose Let’s do it together to continue with supported practice.',
+      );
+      const draftLabel = node(
+        'label',
+        'ww-mission-draft-label',
+        'Your ideas (draw or talk with a grown-up, or write here)',
+      );
+      const draft = document.createElement('textarea');
+      draft.rows = 4;
+      draft.maxLength = 4000;
+      draft.placeholder = 'Start your idea here…';
+      inputs.push(draft);
+      draftLabel.append(draft);
+      const note = node(
+        'p',
+        'ww-mission-review-note',
+        'This draft stays on this screen until you close it. Review it with a grown-up before continuing.',
+      );
+      form.append(notice, draftLabel, note);
+      if (
+        callbacks.recorder &&
+        !['E04', 'E05', 'E06', 'EY101', 'EY201'].includes(activity.skillId)
+      ) {
+        voice = voiceEntry(
+          form,
+          callbacks.recorder,
+          [],
+          editable,
+          () => {},
+          (active) => {
+            recording = active;
+            update();
+          },
+          (text) => {
+            draft.value = text;
+          },
+        );
+      }
+    } else renderChoices(task.choices);
   } else if (task.kind === 'count_collection') {
     if (activity.representation === 'ten_frame') {
       const frame = node('div', 'ww-mission-ten-frames');
@@ -257,20 +411,32 @@ export function mountMissionActivity(
       counted.setAttribute('role', 'group');
       counted.setAttribute('aria-label', 'Objects counted so far');
       const placed = new Set<string>();
+      const pieces = new Map<string, HTMLButtonElement>();
+      const movePiece = (id: string, intoCounted: boolean) => {
+        if (!editable() || recording) return;
+        const piece = pieces.get(id);
+        if (!piece) return;
+        if (intoCounted) placed.add(id);
+        else placed.delete(id);
+        piece.setAttribute('aria-pressed', String(intoCounted));
+        (intoCounted ? counted : source).append(piece);
+      };
+      drag.target(counted, (id) => movePiece(id, true));
+      drag.target(source, (id) => movePiece(id, false));
       for (const item of task.objects) {
         const piece = document.createElement('button');
         piece.type = 'button';
         piece.className = 'ww-mission-movable-object';
         piece.textContent = item.label;
         piece.setAttribute('aria-pressed', 'false');
-        piece.addEventListener('click', () => {
-          if (placed.has(item.id)) placed.delete(item.id);
-          else placed.add(item.id);
-          piece.setAttribute('aria-pressed', String(placed.has(item.id)));
-          (placed.has(item.id) ? counted : source).append(piece);
-        });
+        inputs.push(piece);
+        piece.addEventListener('click', () => movePiece(item.id, !placed.has(item.id)));
+        pieces.set(item.id, piece);
+        drag.source(piece, item.id);
         source.append(piece);
       }
+      source.setAttribute('data-caption', 'Ready to count');
+      counted.setAttribute('data-caption', 'Counted');
       form.append(source, counted);
     }
     renderChoices(task.choices);
@@ -384,6 +550,10 @@ export function mountMissionActivity(
     if (destroyed) return;
     if (snapshot.activeActivity?.id === activity.id) currentActivity = snapshot.activeActivity;
     const feedback = snapshot.lastFeedback;
+    if (!feedback)
+      status.textContent = snapshot.activeActivity?.revealedSupport
+        ? 'Here’s some help. Try when you are ready.'
+        : 'Your idea is ready.';
     if (feedback) {
       status.textContent = feedback.message;
       if (feedback.completed && !snapshot.activeActivity) {
@@ -516,6 +686,8 @@ export function mountMissionActivity(
   return {
     destroy() {
       destroyed = true;
+      voice?.destroy();
+      drag.destroy();
       root.remove();
     },
     focus() {

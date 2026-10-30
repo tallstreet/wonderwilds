@@ -41,6 +41,15 @@ The default journey now runs `story-world.mjs` directly at `/`. Legacy guest,
 training and inspector browser helpers are historical and no longer active app
 checks. Use `WW_QA_API_PORT` and `WW_QA_VITE_PORT` to avoid busy QA ports.
 
+Focused mission controls (with Vite running) cover mouse/touch dragging, tap and
+keyboard matching, answer trays, phone layouts and mocked speech review/cancellation:
+
+```sh
+node frontend/src/mission-learning/activity.browser.mjs
+```
+
+Set `WW_ACTIVITY_TEST_URL` for another Vite origin. No provider calls are made.
+
 Curriculum practice inside the story world:
 
 ```sh

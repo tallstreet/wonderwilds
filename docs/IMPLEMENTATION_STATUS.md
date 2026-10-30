@@ -5,6 +5,64 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Authored curriculum starters and accessible play controls — 31 October 2026
+
+All 120 draft curriculum nodes now have a deterministic activity factory: the
+existing five assessed maths activities, 93 additional focused answer-card
+starters and 22 guided workshops needing human review. Rust owns selection,
+parameters, distractors and assessment; no activity or learning progression is
+LLM-generated. Original readiness requirements remain unchanged. After that path,
+new starter selection follows prerequisite exposure and prefers unexplored,
+earlier-year content. Correct practice or a committed worked example can record
+exposure; hints/abandonment alone cannot. Exposure never marks a new skill ready
+or mastered. See [activity coverage and IXL research limits](ACTIVITY_COVERAGE.md)
+and [the decision record](adr/curriculum-starter-practice.md).
+
+Mission matching now moves objects into recipient places with drag, tap or native
+keyboard buttons instead of dropdowns. Delivery rows and recipient-slot grids
+retain distinct layouts. Counting pieces move between labelled trays. Answer
+cards support dragging, native radios and optional speech-to-text. The story host
+now wires the existing Muse/Baseten recorder into these controls; transcripts
+remain editable and need explicit use and a separate check. Large integers,
+fractions, simple decimals and common symbols have deterministic spoken forms;
+ambiguous matches preserve the answer. Recording freezes editing, and closing or
+destroying the screen cancels recording and late transcripts. There is no TTS.
+
+Guided writing/discussion tasks provide a local draft pad and optional dictation,
+with explicit human-review instructions. The pad is discarded when closed and is
+not submitted or assessed. Decoding, phoneme production and oral fluency use
+human-observed tasks; STT is not a pronunciation or reading assessment. Supported
+inline completion retains the existing atomic story/evidence transaction. New
+starter events remain in the immutable journal; a bounded exploration set avoids
+growing the original <=60 qualifying-observation projection. Old five-skill
+checkpoints omit the empty new field and replay identically. No migration,
+persistent demo reset, review approval or release activation was introduced.
+
+Validation: aggregate repository checks passed, including Rust formatting/Clippy,
+workspace tests, 155 shared contract fixtures/generated checks, content validators,
+frontend checks/build and legacy fixtures. Final frontend checks include 123
+unit/API tests. Learning tests validate all 120 factories across 24 seeds, private
+keys, authored arithmetic examples, supported exposure, grade ordering,
+reachability and legacy replay. The complete disposable PostgreSQL suite passed;
+the final focused mission test also passed issuing, resuming, teaching and saving
+all 115 new starters, exact retries, ownership, replay, export and deletion.
+The real isolated API/browser story journey passed independent/wrong/supported
+answers and lost-response recovery. Existing story smoke and six-family activity
+browser checks passed. New desktop/phone checks passed real mouse/touch drags,
+keyboard/tap matching, invalid drops, literal untrusted text, long-label wrapping,
+mocked transcription review and cancellation. Screenshots were inspected. CI runs
+the new component browser suite alongside the existing suites.
+
+Limitations: many starters sample only one facet or one canonical example; they
+are not full-objective or transfer assessments and may use shorter examples than
+the curriculum pack's draft assessment ranges. Richer manipulatives, additional
+representations/variants, educator calibration, child/assistive-technology
+playtesting and reviewed audio remain outstanding. IXL research used public year
+catalogues; interactive item-by-item parity was not verified. No live Muse/Modal
+calls or child-speech-quality checks were made. Node 26.12.0 was available rather
+than Node 24; the existing production bundle-size warning remains. Earlier
+sections below describe their original delivery scope.
+
 ## Two content modes and a single app entry — 31 October 2026
 
 The app now always opens the Phaser story world at `/`. Guest and older

@@ -971,7 +971,8 @@
         "$ref": "./schemas/v1.json#/$defs/MissionActivity"
       },
       "MissionTask": {
-        "$ref": "./schemas/v1.json#/$defs/MissionTask"
+        "$ref": "./schemas/v1.json#/$defs/MissionTask",
+        "description": "Server-authored activity, including focused practice cards and unassessed adult-review workshops. Assessment keys are never public."
       },
       "MissionLearningAnswer": {
         "$ref": "./schemas/v1.json#/$defs/MissionLearningAnswer"

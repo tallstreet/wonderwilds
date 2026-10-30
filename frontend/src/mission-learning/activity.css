@@ -346,3 +346,227 @@
     grid-template-columns: 1fr;
   }
 }
+
+.ww-mission-piece-bank,
+.ww-mission-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ww-mission-piece,
+.ww-mission-pair-row {
+  border: 2px solid #aac198;
+  border-radius: 16px;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  min-height: 56px;
+  padding: 12px 16px;
+  overflow-wrap: anywhere;
+}
+
+.ww-mission-piece[aria-pressed='true'] {
+  background: #e1efcd;
+  border-color: #397443;
+  box-shadow: 0 0 0 3px #b5d09e;
+}
+
+.ww-mission-piece.is-placed::after {
+  content: ' ✓';
+}
+
+.ww-mission-answer-tray {
+  background: #edf6e4;
+  border: 2px dashed #83a66c;
+  border-radius: 18px;
+  min-height: 62px;
+  padding: 16px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.ww-mission-activity .ww-movable {
+  touch-action: none;
+  user-select: none;
+}
+
+.ww-mission-activity .ww-dragging {
+  opacity: 0.45;
+}
+
+.ww-mission-activity .ww-drop-hover {
+  background: #d5eac5;
+  outline: 3px solid #397443;
+}
+
+.ww-mission-activity .ww-drag-ghost {
+  position: fixed;
+  z-index: 100;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  opacity: 0.9;
+}
+
+.ww-mission-stimulus {
+  background: #fff9e9;
+  border: 1px solid #ead8a9;
+  border-radius: 18px;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  padding: 18px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ww-mission-voice {
+  border: 1px solid #a6b99c;
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.ww-mission-voice label {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.ww-mission-voice input {
+  box-sizing: border-box;
+  color: inherit;
+  font: inherit;
+  min-height: 48px;
+  width: 100%;
+}
+
+.ww-mission-choice {
+  min-height: 56px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.ww-mission-choice:has(input:checked) {
+  background: #e1efcd;
+  border-color: #397443;
+}
+
+.ww-mission-welcome {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.ww-mission-welcome .ww-art {
+  flex: 0 0 84px;
+  height: 84px;
+}
+
+.ww-mission-choice .ww-picture {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ww-mission-choice .ww-number {
+  font-size: 1.8rem;
+}
+
+.ww-mission-choice .ww-count-dots {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: repeat(5, 8px);
+}
+
+.ww-mission-choice .ww-count-dots i {
+  background: #55844b;
+  border-radius: 50%;
+  height: 8px;
+  width: 8px;
+}
+
+.ww-mission-movable-source::before,
+.ww-mission-movable-count::before {
+  content: attr(data-caption);
+  flex-basis: 100%;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ww-mission-draft-label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.ww-mission-draft-label textarea {
+  border: 1px solid #9eaf9e;
+  border-radius: 12px;
+  box-sizing: border-box;
+  color: inherit;
+  font: inherit;
+  padding: 12px;
+  resize: vertical;
+  width: 100%;
+}
+
+.ww-mission-piece-token {
+  color: #7c62aa;
+  display: inline-block;
+  font-size: 1.4rem;
+  margin-right: 8px;
+}
+
+.ww-mission-sr-only {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.ww-mission-voice button {
+  min-height: 48px;
+}
+
+.ww-mission-activity textarea:focus-visible {
+  outline: 3px solid #3272bf;
+  outline-offset: 2px;
+}
+
+.ww-mission-options {
+  min-width: 0;
+}
+
+.ww-mission-choice,
+.ww-mission-piece {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.ww-mission-choice > span {
+  min-width: 0;
+}
+
+.ww-mission-delivery-paths .ww-mission-pair-row {
+  display: flex;
+  justify-content: center;
+}
+
+.ww-mission-recipient-slots {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ww-mission-recipient-slots .ww-mission-pair-row {
+  border-style: dashed;
+  display: flex;
+  justify-content: center;
+  min-height: 96px;
+}

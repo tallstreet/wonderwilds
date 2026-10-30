@@ -144,6 +144,7 @@ pub enum MissionTask {
     Variant3(MissionTaskVariant3),
     Variant4(MissionTaskVariant4),
     Variant5(MissionTaskVariant5),
+    Variant6(MissionTaskVariant6),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -895,15 +896,24 @@ pub struct MissionLearningAnswerVariant2 {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionTaskVariant1 {
     pub kind: MissionTaskVariant1Kind,
-    pub layout: MissionTaskVariant1Layout,
-    pub objects: Vec<MissionObject>,
-    pub recipients: Vec<MissionObject>,
+    pub stimulus: String,
+    pub choices: Vec<MissionObject>,
+    pub adult_review: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionTaskVariant2 {
     pub kind: MissionTaskVariant2Kind,
+    pub layout: MissionTaskVariant2Layout,
+    pub objects: Vec<MissionObject>,
+    pub recipients: Vec<MissionObject>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionTaskVariant3 {
+    pub kind: MissionTaskVariant3Kind,
     pub layout: String,
     pub objects: Vec<MissionObject>,
     pub choices: Vec<MissionChoice>,
@@ -911,26 +921,26 @@ pub struct MissionTaskVariant2 {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct MissionTaskVariant3 {
-    pub kind: MissionTaskVariant3Kind,
-    pub collections: Vec<MissionCollection>,
-    pub prompt_mode: MissionTaskVariant3PromptMode,
-    pub choices: Vec<MissionChoice>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionTaskVariant4 {
     pub kind: MissionTaskVariant4Kind,
-    pub shown: Vec<u64>,
+    pub collections: Vec<MissionCollection>,
+    pub prompt_mode: MissionTaskVariant4PromptMode,
     pub choices: Vec<MissionChoice>,
-    pub direction: MissionTaskVariant4Direction,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionTaskVariant5 {
     pub kind: MissionTaskVariant5Kind,
+    pub shown: Vec<u64>,
+    pub choices: Vec<MissionChoice>,
+    pub direction: MissionTaskVariant5Direction,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionTaskVariant6 {
+    pub kind: MissionTaskVariant6Kind,
     pub whole: u64,
     pub shown_part: u64,
     pub choices: Vec<MissionChoice>,
@@ -1728,12 +1738,18 @@ pub enum MissionLearningAnswerVariant2Kind {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MissionTaskVariant1Kind {
+    #[serde(rename = "practice_cards")]
+    PracticeCards,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant2Kind {
     #[serde(rename = "pairing")]
     Pairing,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionTaskVariant1Layout {
+pub enum MissionTaskVariant2Layout {
     #[serde(rename = "object_cards")]
     ObjectCards,
     #[serde(rename = "recipient_slots")]
@@ -1741,19 +1757,19 @@ pub enum MissionTaskVariant1Layout {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionTaskVariant2Kind {
+pub enum MissionTaskVariant3Kind {
     #[serde(rename = "count_collection")]
     CountCollection,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionTaskVariant3Kind {
+pub enum MissionTaskVariant4Kind {
     #[serde(rename = "compare_collections")]
     CompareCollections,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionTaskVariant3PromptMode {
+pub enum MissionTaskVariant4PromptMode {
     #[serde(rename = "more")]
     More,
     #[serde(rename = "fewer")]
@@ -1761,13 +1777,13 @@ pub enum MissionTaskVariant3PromptMode {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionTaskVariant4Kind {
+pub enum MissionTaskVariant5Kind {
     #[serde(rename = "number_path")]
     NumberPath,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionTaskVariant4Direction {
+pub enum MissionTaskVariant5Direction {
     #[serde(rename = "forward")]
     Forward,
     #[serde(rename = "backward")]
@@ -1775,7 +1791,7 @@ pub enum MissionTaskVariant4Direction {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionTaskVariant5Kind {
+pub enum MissionTaskVariant6Kind {
     #[serde(rename = "part_whole")]
     PartWhole,
 }

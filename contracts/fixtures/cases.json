@@ -12833,5 +12833,108 @@
       ],
       "payoff": "You shared a woodland discovery."
     }
+  },
+{
+  "name": "original practice cards",
+  "contract": "MissionTask",
+  "valid": true,
+  "value": {
+    "kind": "practice_cards",
+    "stimulus": "Pip has 3 shells and finds 2 more.",
+    "choices": [
+      {
+        "id": "card-a",
+        "label": "5"
+      },
+      {
+        "id": "card-b",
+        "label": "4"
+      }
+    ],
+    "adultReview": false
   }
+},
+{
+  "name": "adult review workshop",
+  "contract": "MissionTask",
+  "valid": true,
+  "value": {
+    "kind": "practice_cards",
+    "stimulus": "Pip has 3 shells and finds 2 more.",
+    "choices": [],
+    "adultReview": true
+  }
+},
+{
+  "name": "practice rejects empty choices",
+  "contract": "MissionTask",
+  "valid": false,
+  "value": {
+    "kind": "practice_cards",
+    "stimulus": "Pip has 3 shells and finds 2 more.",
+    "choices": [],
+    "adultReview": false
+  }
+},
+{
+  "name": "workshop rejects assessed choices",
+  "contract": "MissionTask",
+  "valid": false,
+  "value": {
+    "kind": "practice_cards",
+    "stimulus": "Pip has 3 shells and finds 2 more.",
+    "choices": [
+      {
+        "id": "card-a",
+        "label": "5"
+      },
+      {
+        "id": "card-b",
+        "label": "4"
+      }
+    ],
+    "adultReview": true
+  }
+},
+{
+  "name": "practice rejects oversized stimulus",
+  "contract": "MissionTask",
+  "valid": false,
+  "value": {
+    "kind": "practice_cards",
+    "stimulus": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "choices": [
+      {
+        "id": "card-a",
+        "label": "5"
+      },
+      {
+        "id": "card-b",
+        "label": "4"
+      }
+    ],
+    "adultReview": false
+  }
+},
+{
+  "name": "practice rejects leaked key",
+  "contract": "MissionTask",
+  "valid": false,
+  "value": {
+    "kind": "practice_cards",
+    "stimulus": "Pip has 3 shells and finds 2 more.",
+    "choices": [
+      {
+        "id": "card-a",
+        "label": "5"
+      },
+      {
+        "id": "card-b",
+        "label": "4"
+      }
+    ],
+    "adultReview": false,
+    "correctId": "card-a"
+  }
+}
 ]

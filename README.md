@@ -248,10 +248,17 @@ it without completing the story action. Travel or another tab can invalidate a
 joining point; put that task aside and reopen the current step. Unsupported
 frontiers retain the normal story action. Original direct story commands remain available without an academic gate.
 
-The combined Foundation/Years 1–6 graph contains 120 draft nodes. This first
-activity slice supports **M01 → M03 → M04/M05/M06**: one-to-one matching,
-counting, comparisons, sequences and part–whole quantities. Other graph nodes
-have explicit unavailable-activity status. New profile-owned practice progress
+The combined Foundation/Years 1–6 graph contains 120 draft nodes, all with
+code-authored practice. **M01 → M03 → M04/M05/M06** retain their original
+assessed matching, counting, comparison, sequence and part–whole activities.
+The other 115 have focused answer-card starters or guided human-review workshops.
+Matching and counting support drag/tap/keyboard; answer cards support drag/tap and
+optional reviewed speech-to-text. Writing workshops offer a local draft pad and
+optional dictation, with human review and supported completion. There is no TTS.
+These starters do not establish full-skill readiness or mastery. After the original
+five-skill path, Rust offers new starters by prerequisite exposure and year band.
+See the [activity inventory and research limits](docs/ACTIVITY_COVERAGE.md) and
+[selection/evidence decisions](docs/adr/curriculum-starter-practice.md). New profile-owned practice progress
 and exact retry receipts persist separately from story and assessed-adventure
 progress. Migration `0006_mission_learning.sql` is applied by the local launcher
 on restart; disposable QA must use its own database.

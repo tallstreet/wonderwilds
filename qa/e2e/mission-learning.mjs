@@ -120,29 +120,27 @@ try {
   });
   await mountVisual(pairing('object_cards'));
   assert.match(await componentError('.ww-mission-objective').textContent(), /Share one object/);
-  let visualSelects = componentError('.ww-mission-pair-row select');
-  await visualSelects.nth(0).selectOption('recipient-a');
-  await visualSelects.nth(1).selectOption('recipient-a');
-  assert.equal(
-    await componentError('button').filter({ hasText: 'Check my idea' }).isEnabled(),
-    true,
-    'A non-bijective pairing reaches the server for assessment',
-  );
+  assert.equal(await componentError('select').count(), 0);
+  await componentError('.ww-mission-piece').nth(0).click();
+  await componentError('.ww-mission-pair-row').nth(0).click();
+  await componentError('.ww-mission-piece').nth(0).click();
+  await componentError('.ww-mission-pair-row').nth(1).click();
+  assert.equal(await componentError('button').filter({ hasText: 'Check my idea' }).isEnabled(), false,
+    'Moving a piece frees its previous place');
+  await componentError('.ww-mission-piece').nth(1).click();
+  await componentError('.ww-mission-pair-row').nth(0).click();
   await componentError('button').filter({ hasText: 'Check my idea' }).click();
-  assert.deepEqual(await visualPage.evaluate(() => window.missionCalls[0]), [
-    'answer',
-    {
-      kind: 'pairing',
-      assignments: [
-        { objectId: 'object-a', recipientId: 'recipient-a' },
-        { objectId: 'object-b', recipientId: 'recipient-a' },
-      ],
-    },
-  ]);
+  assert.deepEqual(await visualPage.evaluate(() => window.missionCalls[0]), ['answer', {
+    kind: 'pairing', assignments: [
+      { objectId: 'object-b', recipientId: 'recipient-a' },
+      { objectId: 'object-a', recipientId: 'recipient-b' },
+    ],
+  }]);
   await mountVisual(pairing('recipient_slots'));
-  visualSelects = componentError('.ww-mission-pair-row select');
-  await visualSelects.nth(0).selectOption('object-a');
-  await visualSelects.nth(1).selectOption('object-a');
+  for (let i = 0; i < 2; i++) {
+    await componentError('.ww-mission-piece').nth(i).click();
+    await componentError('.ww-mission-pair-row').nth(i).click();
+  }
   await componentError('button').filter({ hasText: 'Check my idea' }).click();
   assert.equal(await visualPage.evaluate(() => window.missionCalls[0][1].assignments.length), 2);
 
@@ -308,10 +306,9 @@ try {
   await page.screenshot({ path: '/tmp/wonderwilds-mission-learning-desktop.png', fullPage: true });
 
   // The first authored pairing has one object; the server completes it, not the client.
-  let selects = page.locator('.ww-mission-pair-row select');
-  assert.equal(await selects.count(), 1);
-  const oneValidChoice = await selects.first().locator('option').nth(1).getAttribute('value');
-  await selects.first().selectOption(oneValidChoice);
+  assert.equal(await page.locator('.ww-mission-pair-row').count(), 1);
+  await page.locator('.ww-mission-piece').first().click();
+  await page.locator('.ww-mission-pair-row').first().click();
   await page.getByRole('button', { name: 'Check my idea' }).click();
   await page.getByRole('status').filter({ hasText: 'That works!' }).waitFor();
   const firstCorrect = await learningSnapshot();
@@ -347,14 +344,21 @@ try {
   assert.ok(secondTask.storyStep);
   const beforeSecond = (await storySnapshot()).revision;
 
-  // Intentionally send a non-bijective answer. Only the server decides its result.
-  selects = page.locator('.ww-mission-pair-row select');
-  const rowCount = await selects.count();
-  assert.ok(rowCount >= 2);
-  const repeatedOption = await selects.nth(0).locator('option').nth(1).getAttribute('value');
-  for (let index = 0; index < rowCount; index++)
-    await selects.nth(index).selectOption(repeatedOption);
-  await page.getByRole('button', { name: 'Check my idea' }).click();
+  // Direct malformed matching still reaches Rust; the new UI prevents duplicate pieces.
+  const wrongState = await learningSnapshot();
+  const wrong = await page.request.post(`${origin}/api/v1/mission-learning/commands`, {
+    headers: commandHeaders,
+    data: { schemaVersion: '1.0', commandId: 'browser-non-bijective', expectedRevision: wrongState.revision,
+      payload: { type: 'answer', encounterId: secondTask.id, answer: { kind: 'pairing',
+        assignments: secondTask.task.objects.map((o) => ({ objectId: o.id, recipientId: secondTask.task.recipients[0].id })),
+      } },
+    },
+  });
+  assert.equal(wrong.status(), 200);
+  await page.reload();
+  await page.locator('#game canvas').waitFor();
+  await page.locator('#missions').click();
+  await page.getByRole('button', { name: 'Resume the mission task' }).click();
   await page
     .getByRole('status')
     .filter({ hasText: 'Try another way, or ask for a hint.' })

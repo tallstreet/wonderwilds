@@ -4,6 +4,17 @@ Updated: 31 October 2026. First five-skill integration implemented; final checks
 scope are recorded in `IMPLEMENTATION_STATUS.md`. This is development content,
 not an educator-approved mastery instrument or released curriculum.
 
+## Activity expansion update
+
+All 120 nodes now have a code-authored activity factory. The original five-skill
+assessment path remains; the other 115 provide focused card starters or guided
+human-review workshops. They are not full objective/transfer assessments. New
+starters progress through prerequisite exposure with Foundation/earlier year
+priority, without awarding mastery or changing the original readiness evidence.
+See [coverage and research limits](ACTIVITY_COVERAGE.md) and the
+[starter-practice decision](adr/curriculum-starter-practice.md). The historical
+first-slice description below records the original implementation.
+
 ## Product loop
 
 The player's curriculum state persists with their profile. Rust reads the
