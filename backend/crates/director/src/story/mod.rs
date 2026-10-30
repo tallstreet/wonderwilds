@@ -6,6 +6,7 @@ use serde_json::{Value, json};
 use wonderwilds_contracts::validate;
 use wonderwilds_domain::story::{Action, Location, Mission, MissionStatus, State};
 
+pub mod evaluation;
 mod mock;
 pub use mock::{MockSceneProvider, SceneProvider, scene_with_provider, validate_scene};
 

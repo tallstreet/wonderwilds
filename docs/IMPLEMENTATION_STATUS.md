@@ -20,7 +20,7 @@ No release, deployment, curriculum approval or learning-efficacy claim is made.
 | WW-11 | Six accessible DOM renderers, authored presentation binding, keyboard/touch controls, support-before-narration | Entrypoint/account integration, human screen-reader/accessibility review and complete browser journeys |
 | WW-12 | Meadow world, character journal, training entry point, team controls/two followers; 75-destination exploration library | Server regional/discovery/story integration, optional roles and full playable ending |
 | WW-13 | Bounded proposal validation, authored-only director/fallback, exact task binding and deterministic replay | API commit integration and approved content activation |
-| WW-14–16 | Not implemented; authored game has no model dependency | Provider/privacy/budget decisions, adapter, evaluation corpus and gated training experiment |
+| WW-14–16 | Offline synthetic scene evaluation pilot; authored game has no model dependency | Live provider adapter, human grader calibration, broader evaluation corpus and gated training experiment |
 | WW-17 | Existing guest parent view preserved; Rust summaries/client foundation available | New parent learning view, approved pack workflow and coverage dashboard |
 | WW-18 | Local reproducible install/start/migration/check helpers and GitHub Actions configuration | Hosted CI execution, database/browser CI, deployment, observability, backup restore and rollback drills, operational owner |
 | WW-19–20 | Automated foundations and synthetic checks only | Integrated QA/security review, consented pilot, educator audit and measured curriculum expansion |
@@ -485,3 +485,27 @@ existing Bramble art for the woodcutter, local pixel movement and authoritative
 coarse locations. There is no fourth mission, model generation, personalized
 preferences or release approval. Restart a running demo to load the new backend;
 reload alone only updates the frontend.
+
+### Offline scene-evaluation pilot (30 October 2026)
+
+`qa/story-eval/run.py` prepares 137 runtime-derived situations and 411 generation
+requests by default. The Rust `story_eval` example exports replay-checked inputs
+and grades imported candidates against the shared scene validator and domain
+actions. A valid candidate keeps every legal action, present speakers and required
+introduction metadata. Each choice executes independently on a cloned state with
+retry/replay checks. Invalid candidates receive no authored-fallback credit.
+
+The Python workflow emits quality-judge requests, imports evidence-based judgments,
+renders escaped local HTML reviews and exports only explicitly human-approved,
+hard-passing targets. Prompt/schema/content/provider metadata and hashes bind the
+artifacts. Entire journeys stay together in train/evaluation splits; exact prompt
+overlap with held-out scenarios is excluded from training export. The related
+authored scenarios do not establish generalization to new mission structures.
+
+The domain/director subagent implemented and tested the Rust portion; the integration
+owner reviewed it, implemented the review/export workflow and addressed cross-review
+findings. Director tests, formatting/Clippy and 12 Python workflow tests passed.
+Actual CLI integration produced 137/137 authored-reference hard passes; an unreviewed
+batch exported zero examples. These are pipeline checks, not model quality results.
+No live provider calls, human-quality calibration, actual training or new-mission
+generation were performed. Existing gameplay and educational state are unchanged.

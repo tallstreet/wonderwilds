@@ -233,6 +233,26 @@ stages. Content review gates are unchanged.
 See the [payload builder notes](backend/crates/director/src/story/README.md) for
 field sources, contracts and implementation limits.
 
+An [offline story-evaluation harness](qa/story-eval/README.md) captures 137 real
+synthetic runtime situations, prepares candidate/judge requests, checks candidate
+scenes with the game engine and exports human-approved examples with a held-out
+split. Start without a model or database:
+
+```sh
+python3 qa/story-eval/run.py prepare --out /tmp/story-eval-run \
+  --brief 'Ages 6–8; short, warm sentences; concrete next steps.'
+python3 qa/story-eval/run.py grade --run /tmp/story-eval-run \
+  --candidates /tmp/story-eval-run/reference-candidates.jsonl \
+  --out /tmp/story-eval-graded
+```
+
+The example age brief is an editorial test target. Open the generated
+`review.html` to inspect results. Model integration uses imported JSONL files;
+no provider calls or training jobs run automatically. Hard checks establish scene
+bindings and immediate action executability, not prose quality or new-mission
+playability. The authored references are smoke-test candidates, not approved
+training examples.
+
 Run story browser QA against a fresh disposable database (never `.local-demo/`):
 
 ```sh

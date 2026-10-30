@@ -8,6 +8,30 @@ input builder. It does not replace the current assessed bridge, modify guest
 saves or expose a model/provider. API/database and browser integration follow
 explicitly after this foundation is verified.
 
+## Fifth delivery: offline scene evaluation
+
+Implemented the [offline harness](../qa/story-eval/README.md), ahead of any paid
+generation or training. The Rust subagent supplied replayable scenario capture,
+scene/binding grading and independent action simulation. The integration owner
+implemented provider-independent request files, quality-judge import, escaped
+review reports, explicit human approval and SFT-style export. Cross-review caught
+and addressed exact-input train/evaluation overlap and stale-review/metadata risks.
+
+The pilot has 137 reachable situations across four variants of the existing three
+missions. It prepares three candidate requests per situation by default. Existing
+authored scenes exercise the pipeline without claiming model performance. A hard
+pass cannot establish prose truth, child suitability or fun; those remain explicit
+quality rubric criteria and human-review responsibilities. Pending examples never
+enter training exports. Full journeys remain in one split, and exact input matches
+to held-out scenarios are excluded from training exports.
+
+Verified: director tests including mutation/replay coverage, Python workflow tests,
+real CLI preparation/grading of all 137 authored references, and export of an
+unreviewed batch producing zero training/evaluation targets. This is scene
+evaluation only. Provider calls, grader calibration against people, human-approved
+training data, unseen mission-family evaluation, generic mission simulation and
+actual fine-tuning remain later work.
+
 ## Fourth delivery: connected authored stories
 
 Delivered on `codex/playable-story-series`, with a PR covering the playable world,

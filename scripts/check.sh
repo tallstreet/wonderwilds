@@ -14,5 +14,6 @@ node content/curriculum/check-schema.mjs
 python3 content/story/validate.py
 python3 content/creatures/art/validate.py
 python3 -m unittest discover -s content/story -p 'test_*.py'
+python3 -m unittest discover -s qa/story-eval -p 'test_*.py'
 (cd frontend && npm run check)
 node --import ./frontend/node_modules/tsx/dist/loader.mjs qa/fixtures/legacy/baseline.test.ts

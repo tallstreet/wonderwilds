@@ -74,6 +74,8 @@ jobs:
           python3 content/story/validate.py
           python3 content/creatures/art/validate.py
           python3 -m unittest discover -s content/story -p 'test_*.py'
+      - name: Check offline story evaluation workflow
+        run: python3 -m unittest discover -s qa/story-eval -p 'test_*.py'
       - name: Check frontend including nested API tests
         working-directory: frontend
         run: npm run check
