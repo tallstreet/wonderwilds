@@ -61,11 +61,22 @@ fn sends_real_schema_and_caches_only_valid_scenes() {
     let sent = handle.join().unwrap();
     assert_eq!(sent["model"], "wonderwilds");
     assert_eq!(sent["chat_template_kwargs"]["reasoning_strength"], "low");
+    let contract: Value =
+        serde_json::from_str(include_str!("../../../../../../contracts/schemas/v1.json")).unwrap();
+    assert_eq!(
+        sent["response_format"],
+        json!({"type":"json_schema","json_schema":{
+            "name":"story_scene","schema":contract["$defs"]["StoryScene"],"strict":true}})
+    );
     let payload: Value =
         serde_json::from_str(sent["messages"][1]["content"].as_str().unwrap()).unwrap();
     assert_eq!(payload["input"], input);
     assert_eq!(payload["allowedSpeakerIds"], json!(["pip"]));
     assert!(payload["outputSchema"]["properties"]["choices"].is_object());
+    assert_eq!(
+        payload["outputSchema"],
+        sent["response_format"]["json_schema"]["schema"]
+    );
     // Server is gone: identical input is served from the validated cache.
     assert_eq!(provider.propose(&input, &canonical).unwrap(), canonical);
     let _busy = provider.cache.lock().unwrap();
@@ -79,12 +90,18 @@ fn errors_oversize_truncation_and_invalid_bindings_are_rejected() {
     let canonical = authored_scene(&state).unwrap();
     let mut invalid = canonical.clone();
     invalid["choices"] = json!([]);
+    let mut invalid_binding = canonical.clone();
+    invalid_binding["choices"][0]["actionId"] = json!("invented-action");
+    // Strict schema output still needs authoritative gameplay validation.
+    wonderwilds_contracts::validate("StoryScene", &invalid_binding).unwrap();
     for (status, body) in [
+        ("400 Bad Request", json!({"error":{"message":"unsupported schema"}}).to_string()),
         ("503 Unavailable", "{}".into()),
         ("302 Found", "{}".into()),
         ("200 OK", "x".repeat(MAX_RESPONSE as usize + 1)),
         ("200 OK", "not JSON".into()),
         ("200 OK", envelope(&invalid).to_string()),
+        ("200 OK", envelope(&invalid_binding).to_string()),
         ("200 OK", json!({"choices":[{"finish_reason":"length","message":{"content":canonical.to_string()}}]}).to_string()),
     ] {
         let (url, handle) = server(status, body);

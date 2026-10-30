@@ -822,8 +822,9 @@ checks pass; GPU merge, recipe acceptance and BF16 story quality remain unverifi
 
 The development API can opt into the deployed `wonderwilds` endpoint using
 `WONDERWILDS_MODAL_STORY=1` and backend-only Modal proxy credentials. Authenticated
-story GET snapshots use the real schema, explicit speaker/unique-entry prompt,
-and low reasoning; the existing story UI already refreshes after actions. Network
+story GET snapshots send the real `StoryScene` schema in a strict `json_schema`
+response format as well as the explicit speaker/unique-entry prompt, with low
+reasoning; the existing story UI already refreshes after actions. Network
 I/O happens outside database transactions. Rust validates every proposal, rechecks
 session/ownership and state, and discards stale generations. Timeouts, invalid
 responses and busy generation use authored fallback. There is one outbound request
@@ -831,7 +832,10 @@ at a time and a bounded exact-prompt cache. Command execution, persistent receip
 learning and guest mode are unchanged. No migration or wire-schema change is needed.
 
 Local HTTP fixtures and router tests cover valid results, malformed/oversized/error
-responses, truncation, cache behavior, unavailable endpoints, authentication,
-expired sessions, stale state and unchanged command retries. Live model-backed
+responses, strict response-format/schema serialization, schema-valid illegal action
+bindings, unsupported-schema errors, truncation, cache behavior, unavailable
+endpoints, authentication, expired sessions, stale state and unchanged command
+retries. Live model-backed
 browser play has not been exercised by this implementation; content approval and
-production readiness remain pending.
+production readiness remain pending. Live enforcement of the full scene schema
+and structured-output latency on the deployed server remain unverified.
