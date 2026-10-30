@@ -236,6 +236,13 @@ for the policy and remaining activity coverage.
 
 ### Optional Modal scene generation
 
+The game HUD and story inspector show the source of the displayed dialogue:
+**Preauthored story**, **LLM-generated dialogue**, or **Preauthored story · LLM
+fallback**. This reflects the validated scene returned by the backend, including
+cached LLM scenes, rather than probing a live connection. Mission planning is
+separate. Restart the backend after updating to enable source reporting; older
+responses show “Story source unavailable · refresh to check”.
+
 The backend can call the deployed `wonderwilds` model at
 `https://garytafe--ep-wonderwilds-server.us-west.modal.direct/v1/chat/completions`.
 It uses the real scene schema, `speakers-unique-v1` instructions and low reasoning.

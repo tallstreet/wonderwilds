@@ -199,3 +199,8 @@ local Chromium; the runner discovers PostgreSQL or accepts `WONDERWILDS_PG_BIN`.
 The separate `sh scripts/check-postgres.sh` suite verifies migration, exact old
 receipts, audit/recovery, missing-history refusal, snapshot sizes and ownership.
 See [storage formats and recovery](../../docs/LONG_PLAY_STORAGE_PLAN.md).
+
+Story source display regression (synthetic API responses, no database/provider):
+start Vite, then run `WONDERWILDS_TEST_URL=http://127.0.0.1:5173 node qa/e2e/story-source-status.mjs`
+from the root, with `CHROMIUM_PATH` when needed. Covers authored, generated,
+fallback and missing metadata at desktop/phone sizes in the world and inspector.

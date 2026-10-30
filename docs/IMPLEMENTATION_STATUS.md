@@ -977,3 +977,19 @@ retries. Live model-backed
 browser play has not been exercised by this implementation; content approval and
 production readiness remain pending. Live enforcement of the full scene schema
 and structured-output latency on the deployed server remain unverified.
+
+### Story source indicator — 31 October 2026
+
+The game HUD and `/story.html` inspector display server-reported scene provenance:
+preauthored, LLM-generated, or preauthored fallback. Failed/invalid generations and
+state changes during generation report fallback. Cached valid LLM scenes count as
+generated prose; the label does not claim a live connection or describe mission
+plan provenance. Guest/main-adventure text is preauthored. The optional wire field
+preserves historical receipts; missing metadata is displayed as unknown. No
+persistence or command receipt changes are introduced.
+
+Validation: frontend checks/build, API unit tests (35 passed, four database tests
+ignored), shared contract fixtures/generated checks, synthetic desktop/phone
+source-status browser checks for both views, and desktop/tablet guest smoke checks.
+Node 26 was used; live provider connectivity and database integration were not
+exercised for this display change.
