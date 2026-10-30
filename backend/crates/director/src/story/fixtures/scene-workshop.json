@@ -5,7 +5,7 @@
         "type": "cancel_mission"
       },
       "description": "Take a break from helping Pip.",
-      "id": "story-3-0"
+      "id": "story-v2-3-0"
     },
     {
       "action": {
@@ -13,7 +13,7 @@
         "type": "travel"
       },
       "description": "Walk to the bridge bank.",
-      "id": "story-3-1"
+      "id": "story-v2-3-1"
     },
     {
       "action": {
@@ -23,7 +23,7 @@
         "type": "collect"
       },
       "description": "Collect 3 pieces of spare wood.",
-      "id": "story-3-2"
+      "id": "story-v2-3-2"
     },
     {
       "action": {
@@ -32,7 +32,7 @@
         "type": "exchange"
       },
       "description": "Ask the woodcutter to turn 3 pieces of wood into 3 planks.",
-      "id": "story-3-3"
+      "id": "story-v2-3-3"
     }
   ],
   "context": {
@@ -101,7 +101,8 @@
       "Repair the bridge.",
       "Cross with Pip."
     ],
-    "status": "active"
+    "status": "active",
+    "missionId": "pips_bridge"
   },
   "mode": "continue_story"
 }

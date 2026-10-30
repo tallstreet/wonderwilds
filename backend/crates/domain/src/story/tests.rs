@@ -342,3 +342,295 @@ fn presentation_never_speaks_as_an_absent_pip_or_invents_building_history() {
     assert_eq!(s.pip_location(), Location::FarBank);
     assert!(s.presentation().entries[0].speaker_id.is_empty());
 }
+
+fn bound_collect(source: &str, item: &str) -> Action {
+    Action::Collect {
+        source_id: source.into(),
+        item_id: item.into(),
+        quantity: 3,
+    }
+}
+fn recipe(id: &str) -> Action {
+    Action::Exchange {
+        character_id: "woodcutter".into(),
+        recipe_id: id.into(),
+    }
+}
+fn build(object: &str, recipe: &str) -> Action {
+    Action::Assemble {
+        object_id: object.into(),
+        recipe_id: recipe.into(),
+    }
+}
+fn finish_bridge() -> State {
+    let mut state = ready_bridge("fallen_wood");
+    perform(&mut state, cross());
+    state
+}
+fn picnic_actions() -> Vec<Action> {
+    vec![
+        Action::AcceptMission,
+        bound_collect("berry_bush", "berries"),
+        travel("bridge_bank"),
+        travel("workshop"),
+        recipe("berries_to_picnic"),
+        travel("bridge_bank"),
+        build("picnic_table", "prepare_picnic"),
+        travel("far_bank"),
+        Action::Accompany {
+            character_id: "pip".into(),
+            destination_id: "bridge_bank".into(),
+        },
+    ]
+}
+fn lights_actions() -> Vec<Action> {
+    vec![
+        Action::AcceptMission,
+        travel("far_bank"),
+        bound_collect("glow_stones", "glow_pebbles"),
+        travel("bridge_bank"),
+        travel("workshop"),
+        recipe("glow_to_lanterns"),
+        travel("bridge_bank"),
+        build("near_lanterns", "light_near_bank"),
+        travel("far_bank"),
+        build("far_lantern", "light_far_bank"),
+    ]
+}
+
+#[test]
+fn three_connected_missions_require_explicit_acceptance_and_preserve_all_outcomes() {
+    let mut state = finish_bridge();
+    assert_eq!(state.mission(), Mission::Bridge);
+    assert_eq!(state.next_mission(), Some(Mission::Picnic));
+    assert_eq!(state.completed_missions(), &[Mission::Bridge]);
+    assert!(state.available_actions().contains(&Action::AcceptMission));
+    perform(&mut state, travel("bridge_bank"));
+    let before = state.clone();
+    assert_eq!(
+        state.apply(&command(&state, Action::AcceptMission)),
+        Err(Rejection::NotAvailable)
+    );
+    assert_eq!(state, before);
+    perform(&mut state, travel("far_bank"));
+    for action in picnic_actions() {
+        perform(&mut state, action);
+        state = State::from_checkpoint(&state.checkpoint()).unwrap();
+        assert!(state.bridge_repaired());
+        assert!(state.crossed_with_pip());
+    }
+    assert_eq!(state.mission(), Mission::Picnic);
+    assert_eq!(state.mission_status(), MissionStatus::Completed);
+    assert_eq!(state.next_mission(), Some(Mission::WelcomeLights));
+    assert_eq!(
+        state.completed_missions(),
+        &[Mission::Bridge, Mission::Picnic]
+    );
+    assert!(state.picnic_ready() && state.picnic_shared());
+    assert_eq!((state.berries(), state.picnic_basket()), (0, 0));
+    assert!(state.milestones().iter().all(|m| m.complete));
+    for action in lights_actions() {
+        perform(&mut state, action);
+        state = State::from_checkpoint(&state.checkpoint()).unwrap();
+        assert!(state.bridge_repaired() && state.picnic_shared());
+    }
+    assert_eq!(state.mission(), Mission::WelcomeLights);
+    assert_eq!(state.mission_status(), MissionStatus::Completed);
+    assert_eq!(state.next_mission(), None);
+    assert_eq!(
+        state.completed_missions(),
+        &[Mission::Bridge, Mission::Picnic, Mission::WelcomeLights]
+    );
+    assert!(state.near_lit() && state.far_lit());
+    assert_eq!((state.glow_pebbles(), state.lanterns()), (0, 0));
+    assert!(state.inventory().is_empty());
+    assert!(state.milestones().iter().all(|m| m.complete));
+    assert!(!state.available_actions().contains(&Action::AcceptMission));
+    perform(&mut state, travel("bridge_bank"));
+    assert_eq!(state.presentation().entries[0].speaker_id, "pip");
+    assert!(state.presentation().entries[0].text.contains("Both banks"));
+}
+
+#[test]
+fn new_resources_recipes_and_world_objects_are_bound_to_their_active_mission() {
+    let mut state = State::new();
+    perform(&mut state, Action::AcceptMission);
+    for action in [
+        bound_collect("berry_bush", "berries"),
+        bound_collect("glow_stones", "glow_pebbles"),
+        recipe("berries_to_picnic"),
+        build("picnic_table", "prepare_picnic"),
+        build("near_lanterns", "light_near_bank"),
+    ] {
+        let before = state.clone();
+        assert!(state.apply(&command(&state, action)).is_err());
+        assert_eq!(state, before);
+    }
+    let mut state = finish_bridge();
+    perform(&mut state, Action::AcceptMission);
+    for action in [
+        bound_collect("glow_stones", "glow_pebbles"),
+        bound_collect("berry_bush", "wood"),
+        build("picnic_table", "prepare_picnic"),
+    ] {
+        let before = state.clone();
+        assert!(state.apply(&command(&state, action)).is_err());
+        assert_eq!(state, before);
+    }
+    perform(&mut state, bound_collect("berry_bush", "berries"));
+    perform(&mut state, travel("bridge_bank"));
+    perform(&mut state, travel("workshop"));
+    let before = state.clone();
+    assert_eq!(
+        state.apply(&command(&state, recipe("glow_to_lanterns"))),
+        Err(Rejection::NotAvailable)
+    );
+    assert_eq!(state, before);
+    let exchange = command(&state, recipe("berries_to_picnic"));
+    let receipt = state.apply(&exchange).unwrap();
+    assert_eq!(state.apply(&exchange), Ok(receipt));
+    assert_eq!((state.berries(), state.picnic_basket()), (0, 1));
+    let after = state.clone();
+    assert_eq!(
+        state.apply(&command(&state, recipe("berries_to_picnic"))),
+        Err(Rejection::InsufficientInventory)
+    );
+    assert_eq!(state, after);
+}
+
+#[test]
+fn pauses_preserve_new_milestones_and_partial_world_changes_without_refunds() {
+    let mut state = finish_bridge();
+    for action in picnic_actions() {
+        perform(&mut state, action);
+    }
+    for action in lights_actions().into_iter().take(8) {
+        perform(&mut state, action);
+    }
+    assert!(state.near_lit());
+    assert!(!state.far_lit());
+    assert_eq!(state.lanterns(), 1);
+    perform(&mut state, Action::CancelMission);
+    perform(&mut state, travel("far_bank"));
+    let saved = state.checkpoint();
+    let mut state = State::from_checkpoint(&saved).unwrap();
+    assert_eq!(state.mission_status(), MissionStatus::Abandoned);
+    assert_eq!(state.mission(), Mission::WelcomeLights);
+    assert_eq!(state.lanterns(), 1);
+    assert!(
+        state
+            .milestones()
+            .iter()
+            .find(|m| m.condition_id == "lanterns_ready")
+            .unwrap()
+            .complete
+    );
+    assert!(
+        !state
+            .available_actions()
+            .contains(&build("far_lantern", "light_far_bank"))
+    );
+    perform(&mut state, Action::AcceptMission);
+    perform(&mut state, build("far_lantern", "light_far_bank"));
+    assert!(state.near_lit() && state.far_lit());
+    assert_eq!(state.lanterns(), 0);
+    assert_eq!(state.mission_status(), MissionStatus::Completed);
+    let after = state.clone();
+    assert!(
+        state
+            .apply(&command(&state, build("far_lantern", "light_far_bank")))
+            .is_err()
+    );
+    assert_eq!(state, after);
+}
+
+#[test]
+fn alternate_lantern_order_and_solo_picnic_return_do_not_skip_outcomes() {
+    let mut state = finish_bridge();
+    for action in picnic_actions().into_iter().take(8) {
+        perform(&mut state, action);
+    }
+    assert!(state.picnic_ready());
+    perform(&mut state, travel("bridge_bank"));
+    assert!(!state.picnic_shared());
+    assert_eq!(state.mission_status(), MissionStatus::Active);
+    perform(&mut state, travel("far_bank"));
+    perform(
+        &mut state,
+        Action::Accompany {
+            character_id: "pip".into(),
+            destination_id: "bridge_bank".into(),
+        },
+    );
+    for action in lights_actions().into_iter().take(7) {
+        perform(&mut state, action);
+    }
+    perform(&mut state, travel("far_bank"));
+    perform(&mut state, build("far_lantern", "light_far_bank"));
+    assert!(!state.near_lit());
+    assert!(state.far_lit());
+    assert_eq!(state.lanterns(), 2);
+    assert_eq!(state.mission_status(), MissionStatus::Active);
+    perform(&mut state, travel("bridge_bank"));
+    perform(&mut state, build("near_lanterns", "light_near_bank"));
+    assert_eq!(state.mission_status(), MissionStatus::Completed);
+}
+
+#[test]
+fn literal_legacy_completed_checkpoint_migrates_without_reset_and_can_continue() {
+    let legacy: Value =
+        serde_json::from_str(include_str!("fixtures/bridge-completed-v1.json")).unwrap();
+    assert_eq!(legacy["version"], "pip-bridge-1");
+    let mut state = State::from_checkpoint(&legacy).unwrap();
+    assert_eq!(state.mission(), Mission::Bridge);
+    assert_eq!(state.mission_status(), MissionStatus::Completed);
+    assert_eq!(state.revision(), 7);
+    assert!(state.bridge_repaired() && state.crossed_with_pip());
+    assert_eq!(state.completed_missions(), &[Mission::Bridge]);
+    assert_eq!(state.legacy_checkpoint(), legacy);
+    assert_eq!(state.checkpoint()["version"], "pip-stories-2");
+    assert_eq!(
+        State::from_checkpoint(&state.checkpoint()),
+        Ok(state.clone())
+    );
+    let original: Command = serde_json::from_value(legacy["commands"][0].clone()).unwrap();
+    assert_eq!(
+        serde_json::to_value(state.apply(&original).unwrap()).unwrap(),
+        legacy["receipts"]["cmd-0"]
+    );
+    for action in picnic_actions() {
+        perform(&mut state, action);
+    }
+    assert_eq!(state.mission(), Mission::Picnic);
+    assert!(state.picnic_shared());
+    assert!(State::from_checkpoint(&state.checkpoint()).is_ok());
+}
+
+#[test]
+fn legacy_reader_rejects_new_semantics_and_tampered_legacy_receipts() {
+    let mut legacy: Value =
+        serde_json::from_str(include_str!("fixtures/bridge-completed-v1.json")).unwrap();
+    legacy["receipts"]["cmd-6"]["description"] = json!("invented crossing");
+    assert_eq!(
+        State::from_checkpoint(&legacy),
+        Err(Rejection::InvalidCheckpoint)
+    );
+    let mut state = finish_bridge();
+    perform(&mut state, Action::AcceptMission);
+    assert_eq!(state.mission(), Mission::Picnic);
+    // Even a legacy-shaped projection and matching receipts cannot admit new v2 actions.
+    assert_eq!(
+        State::from_checkpoint(&state.legacy_checkpoint()),
+        Err(Rejection::InvalidCheckpoint)
+    );
+    let mut state = finish_bridge();
+    for action in picnic_actions() {
+        perform(&mut state, action);
+    }
+    let mut bad = state.checkpoint();
+    bad["state"]["completedMissions"] = json!(["pips_bridge"]);
+    assert_eq!(
+        State::from_checkpoint(&bad),
+        Err(Rejection::InvalidCheckpoint)
+    );
+}

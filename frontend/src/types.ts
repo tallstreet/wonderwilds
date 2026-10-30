@@ -11,6 +11,8 @@ export interface WorldEncounter extends Point {
   short: string;
   character: string;
   sprite?: string;
+  prop?: string;
+  shape?: 'stones' | 'lantern';
 }
 export type Blocked = (x: number, y: number) => boolean;
 export type Rect = [number, number, number, number];

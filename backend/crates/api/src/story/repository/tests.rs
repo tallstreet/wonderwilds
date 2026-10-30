@@ -218,6 +218,8 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
         0
     );
 
+    legacy_series_upgrade(&mut admin, &repo, &other);
+
     let mut lifecycle = PostgresIdentity::new(Client::connect(&restricted, NoTls).unwrap());
     let verified = VerifiedContext {
         parent_id: parent.into(),
@@ -266,4 +268,111 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
     admin
         .batch_execute("DROP OWNED BY ww_story_test; DROP ROLE ww_story_test;")
         .unwrap();
+}
+
+fn legacy_series_upgrade(admin: &mut Client, repo: &PostgresRepository, identity: &Identity) {
+    let legacy: Value = serde_json::from_str(include_str!(
+        "../../../../domain/src/story/fixtures/bridge-completed-v1.json"
+    ))
+    .unwrap();
+    let profile = &identity.profile_id;
+    admin.execute("INSERT INTO wonderwilds.story_progress(profile_id,revision,checkpoint) VALUES($1::text::uuid,7,$2)", &[profile,&legacy]).unwrap();
+    // Synthetic v1 public response receipts accompany the literal legacy checkpoint.
+    // Save exact old-format responses, including the ambiguous old completion handle.
+    let mut state = State::new();
+    let mut originals = Vec::new();
+    for saved in legacy["commands"].as_array().unwrap() {
+        let command: wonderwilds_domain::story::Command =
+            serde_json::from_value(saved.clone()).unwrap();
+        let index = state
+            .available_actions()
+            .iter()
+            .position(|a| *a == command.action)
+            .unwrap();
+        let request = json!({"schemaVersion":"1.0","commandId":command.command_id,"expectedRevision":command.expected_revision,"payload":{"type":"choose","actionId":format!("story-{}-{index}",state.revision())}});
+        state.apply(&command).unwrap();
+        let mut response = super::super::snapshot(&state).unwrap();
+        response["contentVersion"] = json!("pip-bridge-1");
+        response["sceneInput"]["mission"]
+            .as_object_mut()
+            .unwrap()
+            .remove("missionId");
+        // v1 completion had no successor acceptance. Keep only old legal choices.
+        let actions = response["sceneInput"]["availableActions"]
+            .as_array_mut()
+            .unwrap();
+        if state.mission_status() == wonderwilds_domain::story::MissionStatus::Completed {
+            actions.retain(|a| a["action"]["type"] != "accept_mission");
+        }
+        for (index, action) in actions.iter_mut().enumerate() {
+            action["id"] = json!(format!("story-{}-{index}", state.revision()));
+        }
+        response["scene"]["choices"] = json!(
+            actions
+                .iter()
+                .map(|a| json!({"label":a["description"],"actionId":a["id"]}))
+                .collect::<Vec<_>>()
+        );
+        validate("StorySnapshot", &response).unwrap();
+        let revision = state.revision() as i64;
+        admin.execute("INSERT INTO wonderwilds.story_command_receipts(profile_id,command_id,request,response,revision) VALUES($1::text::uuid,$2,$3,$4,$5)", &[profile,&command.command_id,&request,&response,&revision]).unwrap();
+        originals.push((request, response));
+    }
+    let mut current = repo.read(identity).unwrap();
+    assert_eq!(current["contentVersion"], "pip-stories-2");
+    assert_eq!(current["sceneInput"]["mission"]["status"], "completed");
+    let stale = command(
+        "old-handle-new-command",
+        7,
+        json!({"type":"choose","actionId":"story-7-0"}),
+    );
+    assert_eq!(repo.execute(identity, &stale), Err(Error::RevisionConflict));
+    for (request, response) in &originals {
+        assert_eq!(repo.execute(identity, request).unwrap(), *response);
+    }
+    for (kind, destination) in [
+        ("accept_mission", None),
+        ("collect", None),
+        ("travel", Some("bridge_bank")),
+        ("travel", Some("workshop")),
+        ("exchange", None),
+        ("travel", Some("bridge_bank")),
+        ("assemble", None),
+        ("travel", Some("far_bank")),
+        ("accompany", Some("bridge_bank")),
+        ("accept_mission", None),
+        ("travel", Some("far_bank")),
+        ("collect", None),
+        ("travel", Some("bridge_bank")),
+        ("travel", Some("workshop")),
+        ("exchange", None),
+        ("travel", Some("bridge_bank")),
+        ("assemble", None),
+        ("travel", Some("far_bank")),
+        ("assemble", None),
+    ] {
+        let request = choose(
+            &current,
+            &format!("series-{}", current["revision"]),
+            kind,
+            destination,
+        );
+        current = repo.execute(identity, &request).unwrap();
+        assert_eq!(repo.read(identity).unwrap(), current);
+    }
+    assert_eq!(
+        current["sceneInput"]["mission"]["missionId"],
+        "welcome_lights"
+    );
+    assert_eq!(current["sceneInput"]["mission"]["status"], "completed");
+    assert_eq!(
+        current["sceneInput"]["context"]["memory"]["recentMissions"]
+            .as_array()
+            .unwrap()
+            .len(),
+        3
+    );
+    for (request, response) in originals {
+        assert_eq!(repo.execute(identity, &request).unwrap(), response);
+    }
 }

@@ -27,7 +27,12 @@ export function createWorld(
   onMapChange?: (region: MapId, position: Point) => void,
   backend?: {
     encounters(): WorldEncounter[];
-    companions(): { sprite: string; name: string }[];
+    companions(): { sprite: string; name: string; offsetX?: number }[];
+    decorations?(): { id: string; kind: 'picnic' | 'lantern'; x: number; y: number }[];
+    allowExits?: boolean;
+    blocked?(x: number, y: number): boolean;
+    inputLocked?(): boolean;
+    observe?(point: Point, followers: { x: number; y: number; sprite: string }[]): void;
   },
 ) {
   class Island extends Phaser.Scene {
@@ -41,12 +46,13 @@ export function createWorld(
     >;
     player!: Actor;
     followers: { actor: Actor; trail: Point[]; label?: Phaser.GameObjects.Text }[] = [];
-    markers: (Point & { e: WorldEncounter; cat: Phaser.GameObjects.Image })[] = [];
+    markers: (Point & { e: WorldEncounter; cat: Phaser.GameObjects.GameObject })[] = [];
     you!: Phaser.GameObjects.Text;
     prompt!: Phaser.GameObjects.Text;
     lastSave = 0;
     paintedRegion = '';
     exitArmed = true;
+    arrival?: () => void;
 
     constructor() {
       super('island');
@@ -80,13 +86,23 @@ export function createWorld(
       this.input.on(
         'pointerdown',
         (p: Phaser.Input.Pointer, objects: Phaser.GameObjects.GameObject[]) => {
-          if (!objects.length && !document.querySelector('dialog[open]'))
+          if (
+            !objects.length &&
+            !document.querySelector('dialog[open]') &&
+            !backend?.inputLocked?.()
+          )
             this.walkTo(this.cameras.main.getWorldPoint(p.x, p.y));
         },
       );
       this.game.events.on('refresh', () => this.paint());
+      this.game.events.on('authoritative-position', () => this.paint(true));
+      this.game.events.on('scripted-walk', (point: Point, arrived: () => void) => {
+        this.walkTo(point, null, true);
+        this.arrival = arrived;
+      });
       this.game.events.on('reset-position', () => this.player.setPosition(160, 490));
       this.game.events.on('visit', (e: WorldEncounter) => {
+        if (backend?.inputLocked?.()) return;
         if (getState().region !== e.region) {
           onMapChange?.(e.region, { x: 160, y: 490 });
           this.paint();
@@ -95,6 +111,7 @@ export function createWorld(
         if (m) this.walkTo({ x: m.x - 30, y: m.y + 25 }, m.e);
       });
       this.game.events.on('guide', (e: WorldEncounter) => {
+        if (backend?.inputLocked?.()) return;
         const waypoint = questWaypoint(getState().region, e);
         if (waypoint) this.walkTo(waypoint.point, waypoint.arrived ? e : null);
       });
@@ -114,9 +131,9 @@ export function createWorld(
         .setOrigin(0.5)
         .setDepth(y + 50);
     }
-    paint() {
+    paint(forcePosition = false) {
       const old =
-        this.player?.active && this.paintedRegion === getState().region
+        !forcePosition && this.player?.active && this.paintedRegion === getState().region
           ? { x: this.player.x, y: this.player.y }
           : getState().position;
       this.tweens.killAll();
@@ -128,7 +145,18 @@ export function createWorld(
       this.paintedRegion = s.region;
       const fixed = s.done.includes('meadow-bridge');
       paintScenery(this, s, Boolean(backend));
-      if (s.region === 'meadow')
+      for (const decoration of backend?.decorations?.() ?? []) {
+        // Meadow already contains the picnic blanket; its display flags add the food.
+        if (decoration.kind === 'picnic' && s.region !== 'meadow')
+          this.add
+            .image(decoration.x, decoration.y, 'prop-atlas', 'picnic')
+            .setDisplaySize(160, 100)
+            .setOrigin(0.5, 0.9)
+            .setDepth(decoration.y);
+        else if (decoration.kind === 'lantern')
+          this.storyShape(decoration.x, decoration.y, 'lantern', true);
+      }
+      if (s.region === 'meadow' && backend?.allowExits !== false)
         this.add
           .zone(1030, 355, 85, 110)
           .setInteractive({ useHandCursor: true })
@@ -144,20 +172,26 @@ export function createWorld(
             y = backend ? e.y : e.y + (i === 0 ? 45 : 65) + 38;
           this.add.ellipse(x, y, 39, 10, 0x354e44, 0.2).setDepth(y - 0.5);
           const sprite = e.sprite ?? 'pip';
-          const character = availableCharacter(sprite, this.textures);
+          const character =
+            e.prop || e.shape ? undefined : availableCharacter(sprite, this.textures);
           const npcFacing = character
             ? { originX: 0.5, originY: 0.96, scaleX: 1, scaleY: 1 }
             : resolveFacing(heroFrames.includes(sprite) ? sprite : 'pip', 0, 0, 'down');
-          const cat = this.add
-            .image(
-              x,
-              y,
-              character?.texture ?? 'hero-atlas',
-              character?.frame ?? (heroFrames.includes(sprite) ? sprite : 'pip'),
-            )
-            .setOrigin(npcFacing.originX, npcFacing.originY)
-            .setDisplaySize(86 * npcFacing.scaleX, 96 * npcFacing.scaleY)
-            .setDepth(y);
+          const cat = e.shape
+            ? this.storyShape(x, y, e.shape, false)
+            : this.add
+                .image(
+                  x,
+                  y,
+                  e.prop ? 'prop-atlas' : (character?.texture ?? 'hero-atlas'),
+                  e.prop ?? character?.frame ?? (heroFrames.includes(sprite) ? sprite : 'pip'),
+                )
+                .setOrigin(npcFacing.originX, npcFacing.originY)
+                .setDisplaySize(
+                  e.prop === 'berry' ? 32 : 86 * npcFacing.scaleX,
+                  e.prop === 'berry' ? 32 : 96 * npcFacing.scaleY,
+                )
+                .setDepth(y);
           const badge = this.add
             .circle(x, y - 112, 16, complete ? 0xffffff : 0xfff2be)
             .setStrokeStyle(3, complete ? 0x8abb8d : 0xffffff)
@@ -176,7 +210,7 @@ export function createWorld(
             .setDepth(y + 102)
             .setInteractive({ useHandCursor: true });
           zone.on('pointerdown', () => {
-            if (document.querySelector('dialog[open]')) return;
+            if (document.querySelector('dialog[open]') || backend?.inputLocked?.()) return;
             if (Math.hypot(this.player.x - x, this.player.y - y) <= 110) this.chat(e);
             else this.walkTo({ x: x - 30, y: y + 25 }, e);
           });
@@ -192,7 +226,7 @@ export function createWorld(
               ease: 'Sine.easeInOut',
             });
         });
-      const pos = old && !isBlocked(old.x, old.y, fixed, s.region) ? old : { x: 160, y: 490 };
+      const pos = old && !this.blocked(old.x, old.y) ? old : { x: 160, y: 490 };
       this.player = this.makeActor(pos.x, pos.y, s.hero, 100, 112);
 
       this.you = this.add
@@ -207,13 +241,14 @@ export function createWorld(
         .setOrigin(0.5)
         .setDepth(pos.y + 100);
       this.followers = [];
-      const companions =
+      const companions: { sprite: string; name: string; offsetX?: number }[] =
         backend?.companions() ?? (s.done.length === 3 ? [{ sprite: 'pip', name: '' }] : []);
       for (const [index, companion] of companions.entries()) {
         const offset = 40 + index * 42;
-        const start = !this.blocked(pos.x - offset, pos.y) ? { x: pos.x - offset, y: pos.y } : pos;
+        const startX = pos.x + (companion.offsetX ?? -offset);
+        const start = !this.blocked(startX, pos.y) ? { x: startX, y: pos.y } : pos;
         const actor = this.makeActor(start.x, start.y, companion.sprite, 78, 87);
-        const trail = findRoute(start, pos, fixed, s.region);
+        const trail = findRoute(start, pos, fixed, s.region, backend?.blocked);
         trail.push({ x: pos.x, y: pos.y });
         this.followers.push({
           actor,
@@ -228,7 +263,7 @@ export function createWorld(
         12,
         '#6e5288',
       ).setDepth(2000);
-      for (const side of ['west', 'east'] as const) {
+      for (const side of backend?.allowExits === false ? [] : (['west', 'east'] as const)) {
         const destination = maps[s.region as MapId][side];
         const point = exitPoint(s.region as MapId, side);
         this.label(
@@ -246,6 +281,27 @@ export function createWorld(
       this.addAmbientDetails();
       this.prompt.setVisible(false);
       this.fitCamera();
+    }
+    storyShape(x: number, y: number, kind: 'stones' | 'lantern', lit: boolean) {
+      const shape = this.add.graphics({ x, y }).setDepth(y);
+      if (kind === 'stones') {
+        shape.fillStyle(0xffee8b, 0.25).fillEllipse(0, -10, 76, 44);
+        for (const [dx, dy] of [
+          [-20, -9],
+          [2, -20],
+          [23, -6],
+        ]) {
+          shape.fillStyle(0xc2dad0).fillEllipse(dx, dy, 25, 21);
+          shape.fillStyle(0xfff3a3).fillCircle(dx - 3, dy - 4, 6);
+        }
+      } else {
+        if (lit) shape.fillStyle(0xffdf70, 0.2).fillCircle(0, -55, 48);
+        shape.lineStyle(6, 0x76543b).lineBetween(0, 0, 0, -90).lineBetween(0, -90, 18, -90);
+        shape.fillStyle(lit ? 0xffe382 : 0x8c9d8c).fillRoundedRect(5, -83, 28, 38, 6);
+        shape.lineStyle(2, 0x76543b).strokeRoundedRect(5, -83, 28, 38, 6);
+        if (lit) shape.fillStyle(0xfffae1).fillCircle(19, -64, 7);
+      }
+      return shape;
     }
     fitCamera() {
       if (!this.player) return;
@@ -306,16 +362,20 @@ export function createWorld(
       g.fillCircle(x, y, 2.5 * scale);
     }
     blocked(x: number, y: number) {
-      return isBlocked(x, y, getState().done.includes('meadow-bridge'), getState().region);
+      return (
+        isBlocked(x, y, getState().done.includes('meadow-bridge'), getState().region) ||
+        Boolean(backend?.blocked?.(x, y))
+      );
     }
-    walkTo(point: Point, pending: WorldEncounter | 'portal' | null = null) {
-      if (document.querySelector('dialog[open]')) return;
+    walkTo(point: Point, pending: WorldEncounter | 'portal' | null = null, scripted = false) {
+      if (document.querySelector('dialog[open]') || (!scripted && backend?.inputLocked?.())) return;
       this.pending = pending;
       this.route = findRoute(
         this.player,
         point,
         getState().done.includes('meadow-bridge'),
         getState().region,
+        backend?.blocked,
       );
       this.target = this.route.shift() || null;
       if (!this.target) {
@@ -330,15 +390,16 @@ export function createWorld(
       }
     }
     chat(encounter: WorldEncounter) {
-      if (document.querySelector('dialog[open]')) return;
+      if (document.querySelector('dialog[open]') || backend?.inputLocked?.()) return;
       // Stop any click-to-walk interaction so it cannot reopen chat after closing.
       this.target = null;
       this.route = [];
       this.pending = null;
+      onPosition?.({ x: this.player.x, y: this.player.y });
       onEncounter(encounter);
     }
     interact() {
-      if (document.querySelector('dialog[open]')) return;
+      if (document.querySelector('dialog[open]') || backend?.inputLocked?.()) return;
       const close = nearestCharacter(this.player, this.markers);
       if (close) this.chat(close.e);
       else if (
@@ -438,7 +499,7 @@ export function createWorld(
     }
     update(t: number, delta: number) {
       if (!this.player) return;
-      if (document.querySelector('dialog[open]')) {
+      if (document.querySelector('dialog[open]') || (backend?.inputLocked?.() && !this.arrival)) {
         // Do not leave a bunny suspended above its shadow while a modal is open.
         this.poseActor(this.player, 0, 0, 0);
         for (const follower of this.followers) this.poseActor(follower.actor, 0, 0, 0);
@@ -448,10 +509,10 @@ export function createWorld(
         dy = 0;
       const k = this.keys,
         dt = Math.min(delta, 40);
-      if (k.LEFT.isDown || k.A.isDown) dx--;
-      if (k.RIGHT.isDown || k.D.isDown) dx++;
-      if (k.UP.isDown || k.W.isDown) dy--;
-      if (k.DOWN.isDown || k.S.isDown) dy++;
+      if (!backend?.inputLocked?.() && (k.LEFT.isDown || k.A.isDown)) dx--;
+      if (!backend?.inputLocked?.() && (k.RIGHT.isDown || k.D.isDown)) dx++;
+      if (!backend?.inputLocked?.() && (k.UP.isDown || k.W.isDown)) dy--;
+      if (!backend?.inputLocked?.() && (k.DOWN.isDown || k.S.isDown)) dy++;
       if (dx || dy) {
         this.target = null;
         this.route = [];
@@ -472,6 +533,11 @@ export function createWorld(
           else this.chat(pending);
         }
       }
+      if (!this.target && this.arrival) {
+        const arrived = this.arrival;
+        this.arrival = undefined;
+        arrived();
+      }
       const oldX = this.player.x,
         oldY = this.player.y;
       const distance = this.target ? Math.min(dt * 0.23, Math.hypot(dx, dy)) : dt * 0.23;
@@ -489,9 +555,17 @@ export function createWorld(
         follower.label?.setPosition(follow.x, follow.y - 90).setDepth(follow.y + 100);
         this.poseActor(follower.actor, follow.x - before.x, follow.y - before.y, follow.distance);
       }
+      backend?.observe?.(
+        { x: this.player.x, y: this.player.y },
+        this.followers.map((follower) => ({
+          x: follower.actor.x,
+          y: follower.actor.y,
+          sprite: follower.actor.heroId,
+        })),
+      );
       const exit = mapExit(getState().region, this.player);
       if (!exit) this.exitArmed = true;
-      if (exit && this.exitArmed && onMapChange) {
+      if (exit && this.exitArmed && onMapChange && backend?.allowExits !== false) {
         this.exitArmed = false;
         onMapChange(exit.region, exit.position);
         this.paint();

@@ -24,7 +24,7 @@ No release, deployment, curriculum approval or learning-efficacy claim is made.
 | WW-17 | Existing guest parent view preserved; Rust summaries/client foundation available | New parent learning view, approved pack workflow and coverage dashboard |
 | WW-18 | Local reproducible install/start/migration/check helpers and GitHub Actions configuration | Hosted CI execution, database/browser CI, deployment, observability, backup restore and rollback drills, operational owner |
 | WW-19–20 | Automated foundations and synthetic checks only | Integrated QA/security review, consented pilot, educator audit and measured curriculum expansion |
-| Authored story slice | Pure Pip bridge runtime/payload builder, separate authenticated PostgreSQL saves and opt-in `/story.html` controls | Phaser/world integration, broader missions/preferences, model adapter/evaluation and human usability review |
+| Authored story slice | Three connected missions, compatible authenticated saves, mock scenes and Phaser `/?story=1` adventure; `/story.html` inspector | Broader catalogue/preferences, shared-adventure integration, model adapter/evaluation and human usability review |
 
 Design-only update, 30 October 2026: the [generative story design](GENERATIVE_STORY_DESIGN.md)
 proposes separate mission-planning and scene-continuation protocols, with reusable
@@ -428,3 +428,60 @@ Desktop/mobile story screenshots were inspected and the final recovery/label
 polish was retested. CI now schedules both story routes; hosted execution and Node
 24 were not verified locally (Node 26.12.0 was available). Human accessibility and
 child usability research remain pending, as do all content/release approvals.
+
+### Playable story world with mock scenes — 30 October 2026
+
+**Missions → Pip’s story adventure** opens `/?story=1` in the actual Phaser world.
+The saved story snapshot drives present NPCs, resource/route controls, conversations,
+inventory and mission milestones. A deterministic mock provider consumes compact
+story input and returns scene dialogue/choices through binding validation and an
+authored fallback. Both wood-source paths lead through the orchard workshop and
+back to the visible meadow bridge; confirmed crossing animates Pip following and
+restores the correct bank after reload. The old `/story.html` is an inspector.
+
+Story mode restricts movement to the server-confirmed bank/location and blocks
+stale actions during recovery. Pixel movement is still local, not server-verified.
+The woodcutter uses existing Bramble art. Main-adventure education and guest saves
+are separate and unchanged; there is one complete authored mission, not automatic
+successor missions. Model generation, personalized preferences and release
+activation remain disabled/unimplemented.
+
+Three subagents implemented/reviewed the provider, world adapter and browser QA;
+the integration owner checked code, tests and desktop/mobile/crossing screenshots.
+Aggregate checks and 102 frontend tests passed, as did disposable PostgreSQL,
+both world routes, existing training and guest desktop/tablet checks. Expanded
+bank QA proved discovery from Missions, response-driven safe text, second-tab
+advancement, exact old-receipt retry with a failed refresh, locked recovery and
+terminal rendering. Both routes are configured in CI; hosted execution and Node
+24 were not verified locally. One concurrent disposable DB startup hit local
+shared-memory capacity; serial retry passed without touching demo data.
+
+### Connected story series (30 October 2026)
+
+The story world now contains Pip’s bridge, Pip’s picnic and Welcome lights. A
+completed mission offers its successor explicitly. Resources, reversible pause,
+milestones, Pip’s location and prior world changes persist; the journal retains
+all three completed goals. The picnic brings Pip back across the bridge. Its
+food appears on the existing meadow blanket, and lights remain on both banks.
+No academic activity or mastery is needed for these missions.
+
+Content version `pip-stories-2` strictly replays and validates historical
+`pip-bridge-1` checkpoints before projecting them forward. Revision and original
+command receipts are preserved. Version-bound action handles prevent an old
+travel choice from becoming a new mission-accept action at the same revision.
+There is no save reset or modification to an applied migration.
+
+Domain, director/API and browser subagents implemented their respective parts;
+independent cross-review found and fixed partial-resource planning quantities.
+The integration owner ran aggregate checks, disposable PostgreSQL including legacy
+save/retry continuation, the real three-story browser journey, desktop/tablet guest
+smoke and real assessment/training QA. Contracts include 107 shared fixtures.
+Browser evidence covers explicit next acceptance, pause/reload, uncertain-write
+retry, both crossing directions, persistent scenery/history and mobile layout.
+Local Node was 26; CI is configured for Node 24. Hosted results are separate.
+
+This remains a finite three-mission development series with a 256-command cap,
+existing Bramble art for the woodcutter, local pixel movement and authoritative
+coarse locations. There is no fourth mission, model generation, personalized
+preferences or release approval. Restart a running demo to load the new backend;
+reload alone only updates the frontend.

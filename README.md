@@ -65,6 +65,7 @@ preview or production deployment is created. See the feature READMEs under
 Install PostgreSQL 17 (`brew install postgresql@17`) and locked frontend
 packages, then run `sh scripts/local-demo.sh` from the repository root.
 Open <http://127.0.0.1:5173/> to play the server-backed adventure in the actual world.
+Use that exact address: `localhost:5173` is rejected by the demo session bridge.
 Use <http://127.0.0.1:5173/?guest=1> for the original guest adventure.
 The earlier `/demo.html` remains available as a diagnostic screen.
 Both ports 5173 and 3001 must be free. `WONDERWILDS_PG_BIN` can select another
@@ -165,17 +166,35 @@ needed to verify hackathon access and transcription quality.
 
 ## Authored story development slice
 
-After starting `sh scripts/local-demo.sh`, open
-[the story view](http://127.0.0.1:5173/story.html). This opt-in scene view runs Pip's
-bridge mission against authenticated PostgreSQL saves. Choose either wood source,
-meet the woodcutter, exchange wood for planks, repair the bridge and cross with Pip.
-Keyboard/touch controls show current inventory and milestones; reload restores
-server progress. If saving is uncertain, use **Retry the same action**. It preserves
-the original command across reloads and then refreshes current progress.
+After starting `sh scripts/local-demo.sh`, open **Missions → Pip’s story adventure**
+in the main game, or [open it directly](http://127.0.0.1:5173/?story=1).
+This uses the actual Phaser world and authenticated PostgreSQL saves. Three
+connected stories are playable:
+
+1. **Pip’s bridge:** collect wood, prepare planks, repair the visible bridge and
+   cross with Pip following.
+2. **Pip’s picnic:** gather berries, pack a basket at the workshop, lay out the
+   picnic and bring Pip back across to share it.
+3. **Welcome lights:** gather glow pebbles, make lanterns and light both banks.
+
+Talk to Pip after each completion to accept the next story. Earlier world changes
+remain visible, and Missions remembers the completed stories. Restart an already
+running local demo after updating the backend; existing bridge saves continue
+without a reset.
+Missions offers paths to the current characters/resources and shows inventory and
+milestones. Click a nearby character or press Space to read the returned dialogue.
+Reload restores the server's location/progress. If saving is uncertain, open
+Missions and use **Retry the same action**; the exact command survives reloads.
 
 Story saves are separate from the existing adventure, guest saves and educational
-activities. This view uses three coarse locations; it does not implement Phaser
-walking or synchronize the existing assessed bridge. Model generation is disabled.
+activities. A deterministic mock provider returns scenes for the three authored
+missions through the same validated response boundary that a future
+provider can use. Server state controls who is present, available actions and
+bridge/milestone changes. Pixel movement remains local; server commands verify
+coarse location transitions. The woodcutter temporarily uses existing Bramble art.
+This mode does not synchronize the old assessed bridge or generate new missions.
+Model generation is disabled. The earlier [/story.html inspector](http://127.0.0.1:5173/story.html)
+remains available for checking scenes without walking.
 
 The [story implementation plan](docs/STORY_IMPLEMENTATION_PLAN.md) starts with an
 isolated Rust mission and deterministic model-input builder. Run Pip's bridge
@@ -209,7 +228,7 @@ The CLI remains a developer harness. Local checkpoints verify
 replay consistency, not authenticity; never import them as trusted server progress.
 Both CLI and server retain the 256-command development limit. At that limit the
 browser shows a terminal view and preserves the save; there is no reset endpoint.
-Broader mission planning, Phaser integration and model generation remain later
+Broader mission planning, shared-adventure integration and model generation remain later
 stages. Content review gates are unchanged.
 See the [payload builder notes](backend/crates/director/src/story/README.md) for
 field sources, contracts and implementation limits.
@@ -219,6 +238,9 @@ Run story browser QA against a fresh disposable database (never `.local-demo/`):
 ```sh
 WW_QA_BROWSER_TEST=qa/e2e/story-browser.mjs node qa/e2e/run-training-qa.mjs
 WW_STORY_SOURCE=workshop WW_QA_BROWSER_TEST=qa/e2e/story-browser.mjs node qa/e2e/run-training-qa.mjs
+WW_QA_BROWSER_TEST=qa/e2e/story-world.mjs node qa/e2e/run-training-qa.mjs
+WW_STORY_SOURCE=workshop WW_QA_BROWSER_TEST=qa/e2e/story-world.mjs node qa/e2e/run-training-qa.mjs
+WW_QA_BROWSER_TEST=qa/e2e/story-series.mjs node qa/e2e/run-training-qa.mjs
 ```
 
 Set `CHROMIUM_PATH` to your Chromium executable if required. Persistence checks run

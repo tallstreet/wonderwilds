@@ -1004,6 +1004,8 @@ pub struct StorySceneInputMission {
     pub current: Option<String>,
     pub remaining: Vec<String>,
     pub status: StorySceneInputMissionStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mission_id: Option<StorySceneInputMissionMissionId>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1045,6 +1047,8 @@ pub enum StoryPayloadInput {
 pub enum StoryPayloadContentVersion {
     #[serde(rename = "pip-bridge-1")]
     PipBridge1,
+    #[serde(rename = "pip-stories-2")]
+    PipStories2,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1070,6 +1074,8 @@ pub enum StorySnapshotSchemaVersion {
 pub enum StorySnapshotContentVersion {
     #[serde(rename = "pip-bridge-1")]
     PipBridge1,
+    #[serde(rename = "pip-stories-2")]
+    PipStories2,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1302,6 +1308,16 @@ pub enum StorySceneInputMissionStatus {
     Abandoned,
     #[serde(rename = "completed")]
     Completed,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StorySceneInputMissionMissionId {
+    #[serde(rename = "pips_bridge")]
+    PipsBridge,
+    #[serde(rename = "pips_picnic")]
+    PipsPicnic,
+    #[serde(rename = "welcome_lights")]
+    WelcomeLights,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

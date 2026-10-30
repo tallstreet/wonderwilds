@@ -2536,6 +2536,14 @@
                 "abandoned",
                 "completed"
               ]
+            },
+            "missionId": {
+              "type": "string",
+              "enum": [
+                "pips_bridge",
+                "pips_picnic",
+                "welcome_lights"
+              ]
             }
           },
           "required": [
@@ -2717,7 +2725,10 @@
         },
         "contentVersion": {
           "type": "string",
-          "const": "pip-bridge-1"
+          "enum": [
+            "pip-bridge-1",
+            "pip-stories-2"
+          ]
         }
       },
       "required": [
@@ -2812,7 +2823,10 @@
         },
         "contentVersion": {
           "type": "string",
-          "const": "pip-bridge-1"
+          "enum": [
+            "pip-bridge-1",
+            "pip-stories-2"
+          ]
         },
         "revision": {
           "type": "integer",

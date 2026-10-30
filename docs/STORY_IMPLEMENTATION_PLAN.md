@@ -1,12 +1,120 @@
 # Story implementation plan
 
-Status: authored foundation and separate API/browser delivery implemented and checked. 30 October 2026.
+Status: authored foundation, API/browser and playable mock-driven world deliveries implemented and checked. 30 October 2026.
 
 Design: [Mission-led generative storytelling](GENERATIVE_STORY_DESIGN.md).
 The first delivery is an executable headless authored mission and deterministic
 input builder. It does not replace the current assessed bridge, modify guest
 saves or expose a model/provider. API/database and browser integration follow
 explicitly after this foundation is verified.
+
+## Fourth delivery: connected authored stories
+
+Delivered on `codex/playable-story-series`, with a PR covering the playable world,
+mock-provider seam, startup-address fix and this expansion. Three stories reuse
+the same supported actions and locations:
+
+1. **Pip’s bridge:** gather wood, prepare planks, repair the bridge and cross together.
+2. **Pip’s picnic:** gather far-bank berries, pack a basket at the workshop, prepare
+   the near-bank table, then bring Pip back across to share the picnic.
+3. **Welcome lights:** gather glow pebbles, make lanterns at the workshop and light
+   both banks. Near and far installations may be completed in either order.
+
+Each completion offers the next mission explicitly. The repaired bridge, Pip’s
+location, picnic and lights remain world facts; new missions do not reset old
+progress. Pausing preserves supplies and milestone receipts. Completed missions
+remain in compact story memory. Academic activities stay separate.
+
+Domain subagent owns mechanics, resource conservation and strict legacy checkpoint
+replay; director/API subagent owns truthful payloads/scenes, version-compatible
+contracts and database verification; browser subagent owns mission-specific art
+bindings, both crossing directions, visible outcomes and real three-story QA.
+The integration owner reviews these changes, runs combined/regression checks and
+opens the PR. No provider or paid model call is introduced.
+
+Compatibility acceptance: validate old `pip-bridge-1` checkpoints before projecting
+them into `pip-stories-2`; preserve revision and original response receipts. New
+version-bound action handles must reject old ambiguous handles even at the same
+revision. Never reset a save or edit an applied migration to upgrade content.
+Verify old completed saves can continue, new checkpoints replay all missions,
+wrong-mission recipes fail atomically, and real browser progress survives reloads.
+
+Verification: the aggregate repository check and disposable PostgreSQL suite pass,
+including a literal historical completed bridge checkpoint and original response
+receipts. The real browser completes all three missions, pauses/resumes the picnic,
+reloads between stories, recovers an uncertain lantern exchange with the exact
+command, and checks both Pip crossing directions, persistent scenery and all three
+completed memories. Desktop/tablet guest smoke and the real assessment/training
+journey also pass. Local tooling used Node 26; CI retains the required Node 24.
+This is a finite authored series, with no fourth mission after Welcome lights.
+
+## Third delivery: playable world with mocked story responses
+
+Delivered: the real Phaser world connects to the persisted story flow at
+`/?story=1`, discoverable through Missions in the normal game. `/story.html` remains a diagnostic
+scene view. This delivery uses a sequence of deterministic mock scene responses
+for the full Pip bridge mission; no model, paid provider or training is required.
+
+| Work | Owner | Acceptance |
+| --- | --- | --- |
+| S10. Mock scene provider | Director subagent | Actual compact input selects mock dialogue/choices; shared-schema and semantic validation bind speakers and legal handles; invalid output has authored fallback |
+| S11. World adapter | Browser subagent | Server snapshot drives present NPCs, conversations, resource interactions, inventory, mission milestones, visible bridge state and shared crossing in Phaser |
+| S12. End-to-end verification | QA subagent and integration owner | Complete actual walking/interactions with real API/database; check reload/retry, keyboard/mobile, story continuity and untouched educational/guest records |
+
+The child walks to characters and resources, talks, chooses a current legal action
+and sees the confirmed result in the world. Dialogue comes from returned scenes;
+the browser does not invent conversations or grant inventory/milestones. An
+authored registry maps supported character/object/location IDs to existing art and
+reachable placements. Server coarse location changes occur through validated story
+commands; pixel movement is a browser concern and is not server-verified.
+
+Preserve the current retry/session protections. Do not replay a conversation as
+remembered merely because it was fetched. Hide stale choices while writes or
+reconciliation are pending. Existing assessed activities and guest saves keep their
+own paths. This is one complete mission with multiple scripted story responses,
+not arbitrary generated missions or a claim of an endless story catalogue.
+
+### Third-delivery evidence and limits
+
+The director subagent supplied the mock-provider seam and scene validation;
+the browser subagent implemented the world adapter; a QA subagent independently
+reviewed both and built the real-world journey. The integration owner reviewed
+source and screenshots, resolved review findings and ran aggregate/regression
+checks. The pipeline is confirmed action → saved state → compact input → mock
+scene → validated snapshot → world/dialogue/mission UI. Replacing the provider
+later does not give it authority to grant items, rewards or arbitrary state.
+
+Pip occupies the near/far meadow bank according to server state; the woodcutter
+uses existing Bramble art in the orchard workshop. Supported IDs bind to authored,
+reachable placements. Wood/bridge/route interactions require walking to their
+markers. Ordinary map exits are disabled in this mode. A confirmed shared crossing
+animates the player and Pip over the measured bridge deck, then presents Pip on
+the far bank without a duplicate follower. Existing activities stay in the main
+adventure and are not a prerequisite for these story actions.
+
+Review fixes keep the displayed world on its last confirmed current snapshot when
+an old receipt is followed by a failed refresh; pending recovery blocks movement
+and choices. Terminal snapshots stop rendering actionable scenery, and lifecycle
+guards prevent late startup responses from mounting a departed page. Every present
+NPC has a returned dialogue line across reachable states. Invalid proposals fall
+back to authored scenes; this binding validation is not general prose safety or
+truth verification for a future model.
+
+Validation passed: aggregate `bash scripts/check.sh`, full frontend check with
+102 tests, disposable PostgreSQL suite, both actual Phaser wood-source journeys,
+existing real training and guest desktop/tablet regressions. The final expanded
+bank journey also verified Missions discovery, inert HTML-looking response text,
+second-tab advancement with an older exact retry and failed GET, locked recovery,
+and terminal rendering. Actual bridge bounds and Pip's mid-crossing follower were
+checked; desktop/mobile/crossing screenshots were inspected. Final typecheck,
+format and diff checks passed. CI includes both world routes; hosted execution
+and Node 24 remain unverified locally (Node 26.12.0 was used).
+
+One concurrent database startup hit macOS shared-memory capacity; its disposable
+cluster was removed. The suite passed after browser clusters stopped. Persistent
+demo data was never used by QA. This remains one complete authored mission with
+fixed preferences and a 256-command cap, not a chain of new missions. No model,
+fine-tuning, new artwork, academic gate or release approval was introduced.
 
 ## First delivery and ownership
 

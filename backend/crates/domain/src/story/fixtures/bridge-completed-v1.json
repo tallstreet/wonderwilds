@@ -1,0 +1,179 @@
+{
+  "commands": [
+    {
+      "action": {
+        "type": "accept_mission"
+      },
+      "commandId": "cmd-0",
+      "expectedRevision": 0
+    },
+    {
+      "action": {
+        "itemId": "wood",
+        "quantity": 3,
+        "sourceId": "fallen_wood",
+        "type": "collect"
+      },
+      "commandId": "cmd-1",
+      "expectedRevision": 1
+    },
+    {
+      "action": {
+        "destinationId": "workshop",
+        "type": "travel"
+      },
+      "commandId": "cmd-2",
+      "expectedRevision": 2
+    },
+    {
+      "action": {
+        "characterId": "woodcutter",
+        "recipeId": "wood_to_planks",
+        "type": "exchange"
+      },
+      "commandId": "cmd-3",
+      "expectedRevision": 3
+    },
+    {
+      "action": {
+        "destinationId": "bridge_bank",
+        "type": "travel"
+      },
+      "commandId": "cmd-4",
+      "expectedRevision": 4
+    },
+    {
+      "action": {
+        "objectId": "bridge",
+        "recipeId": "repair_bridge",
+        "type": "assemble"
+      },
+      "commandId": "cmd-5",
+      "expectedRevision": 5
+    },
+    {
+      "action": {
+        "characterId": "pip",
+        "destinationId": "far_bank",
+        "type": "accompany"
+      },
+      "commandId": "cmd-6",
+      "expectedRevision": 6
+    }
+  ],
+  "initial": {
+    "bridgeRepaired": false,
+    "planks": 0,
+    "wood": 0
+  },
+  "receipts": {
+    "cmd-0": {
+      "commandId": "cmd-0",
+      "description": "The player accepted the mission to cross the bridge with Pip.",
+      "revision": 1
+    },
+    "cmd-1": {
+      "commandId": "cmd-1",
+      "description": "The player collected 3 wood from fallen_wood.",
+      "revision": 2
+    },
+    "cmd-2": {
+      "commandId": "cmd-2",
+      "description": "The player arrived at workshop.",
+      "revision": 3
+    },
+    "cmd-3": {
+      "commandId": "cmd-3",
+      "description": "The woodcutter exchanged three wood for three planks.",
+      "revision": 4
+    },
+    "cmd-4": {
+      "commandId": "cmd-4",
+      "description": "The player arrived at bridge_bank.",
+      "revision": 5
+    },
+    "cmd-5": {
+      "commandId": "cmd-5",
+      "description": "The player used three planks to repair the bridge.",
+      "revision": 6
+    },
+    "cmd-6": {
+      "commandId": "cmd-6",
+      "description": "The player and Pip crossed the repaired bridge together.",
+      "revision": 7
+    }
+  },
+  "state": {
+    "bridgeRepaired": true,
+    "crossedWithPip": true,
+    "events": [
+      {
+        "description": "The player accepted the mission to cross the bridge with Pip.",
+        "revision": 1
+      },
+      {
+        "description": "The player collected 3 wood from fallen_wood.",
+        "revision": 2
+      },
+      {
+        "description": "The player arrived at workshop.",
+        "revision": 3
+      },
+      {
+        "description": "The woodcutter exchanged three wood for three planks.",
+        "revision": 4
+      },
+      {
+        "description": "The player arrived at bridge_bank.",
+        "revision": 5
+      },
+      {
+        "description": "The player used three planks to repair the bridge.",
+        "revision": 6
+      },
+      {
+        "description": "The player and Pip crossed the repaired bridge together.",
+        "revision": 7
+      }
+    ],
+    "location": "far_bank",
+    "metWoodcutter": false,
+    "milestones": [
+      {
+        "complete": true,
+        "conditionId": "wood_ready",
+        "label": "Find suitable wood."
+      },
+      {
+        "complete": true,
+        "conditionId": "planks_ready",
+        "label": "Get the planks ready."
+      },
+      {
+        "complete": true,
+        "conditionId": "planks_at_bridge",
+        "label": "Bring the planks to the bridge."
+      },
+      {
+        "complete": true,
+        "conditionId": "bridge_repaired",
+        "label": "Repair the bridge."
+      },
+      {
+        "complete": true,
+        "conditionId": "crossed_with_pip",
+        "label": "Cross with Pip."
+      }
+    ],
+    "missionStatus": "completed",
+    "pipLocation": "far_bank",
+    "planks": 0,
+    "revision": 7,
+    "sources": {
+      "fallen_wood": 0,
+      "spare_wood": 3
+    },
+    "wood": 0
+  },
+  "version": "pip-bridge-1"
+}

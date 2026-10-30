@@ -1,3 +1,4 @@
+import { nextStoryLabel } from './world-model.ts';
 import type { StorySnapshot } from '../../../contracts/generated/contracts.ts';
 import { ApiFailure } from '../api/client.ts';
 import { isRecord } from '../types.ts';
@@ -13,9 +14,9 @@ function element<K extends keyof HTMLElementTagNameMap>(tag: K, text = '', class
 }
 const header = element('header', '', 'story-header');
 header.append(element('p', 'WONDERWILDS · STORY WORKSHOP', 'eyebrow'));
-header.append(element('h1', 'A way across, together'));
+header.append(element('h1', 'Adventures with Pip'));
 header.append(
-  element('p', 'Help Pip prepare a bridge, meet the woodcutter, and explore the far bank.'),
+  element('p', 'Follow connected stories, help your friends, and see the world change.'),
 );
 const home = element('a', 'Return to the adventure');
 home.href = '/';
@@ -198,7 +199,7 @@ function renderSnapshot(snapshot: StorySnapshot) {
     const state = element(
       'p',
       mission.status === 'completed'
-        ? 'Mission complete! You crossed with Pip.'
+        ? `Mission complete! ${mission.narrative.payoff}`
         : mission.status === 'abandoned'
           ? 'Mission paused. Your progress is saved.'
           : 'One step at a time.',
@@ -218,6 +219,14 @@ function renderSnapshot(snapshot: StorySnapshot) {
     aside.append(milestones);
   } else {
     aside.append(element('p', 'Pip has an idea. Accept the mission when you’re ready.'));
+  }
+  const next = nextStoryLabel(snapshot);
+  if (next) aside.append(element('p', next, 'next-story'));
+  if (input.context.memory.recentMissions.length) {
+    aside.append(element('h3', 'Our adventures so far'));
+    const history = element('ul');
+    for (const memory of input.context.memory.recentMissions) history.append(element('li', memory));
+    aside.append(history);
   }
   aside.append(element('h3', 'What you’re carrying'));
   const inventory = element('ul', '', 'inventory');

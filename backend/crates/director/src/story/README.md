@@ -1,8 +1,8 @@
 # Authored story payload builder
 
-This is a headless development projection over `wonderwilds_domain::story::State`.
-It makes no provider calls and reads no profile, account, learning, browser or
-free-text user data. Existing `director::core` and Director v1 contracts are unchanged.
+This is a development projection over `wonderwilds_domain::story::State`.
+It calls only a local deterministic mock provider and reads no profile, account,
+learning, browser or free-text user data. Existing `director::core` and Director v1 contracts are unchanged.
 
 Public functions return schema-validated JSON:
 
@@ -12,13 +12,18 @@ Public functions return schema-validated JSON:
   new offer. It remains inspectable after completion; `opportunities` is then empty.
 - `build_scene_input(&State)`: default preferences, actual inventory and facts,
   presented-introduction history, compact mission progress and currently legal actions.
-- `authored_scene(&State)`: exact domain-authored presentation and action-derived choices.
+- `authored_scene(&State)`: deterministic local mock scenes through the provider seam,
+  validated against the current input with a canonical authored fallback.
+- `scene_with_provider(&State, &impl SceneProvider)`: builds input and canonical
+  presentation metadata, calls the provider, then validates or falls back.
+- `MockSceneProvider`: local scene responses for the connected bridge, picnic and lights stories; no
+  network, provider SDK, random output or model credentials.
 - `resolve_action(&State, handle)`: resolves only an exact current revision/index
   handle to its bound domain action. Execute with the same expected revision and
   stable command ID; the domain rechecks preconditions and idempotency.
 - `payload(&State, Mode::Plan | Mode::Scene)`: adds `story-proposal-1`, content version
-  and state revision outside the model input. The local harness needs no account or
-  request correlation; a future HTTP adapter must add authenticated scoping.
+  and state revision outside the model input. The headless harness needs no account or
+  request correlation; the separate story API supplies authenticated scoping.
 
 ## Sources and limits
 
@@ -29,7 +34,7 @@ The runtime owns mechanics; descriptions explain its fixed bound recipes. Golden
 fixtures and journey tests verify these projections against real state transitions.
 No claim is made that the current small catalogue supports arbitrary mission planning.
 
-The first slice has fixed default preferences and one authored opportunity. Existing
+The series has fixed default preferences and three authored opportunities. Existing
 planks and an already-repaired bridge reduce the authored milestone list; the neutral
 goal is to help Pip cross rather than claiming the player repaired an existing bridge.
 A paused mission retains its narrative/progress with explicit `status: abandoned`.
@@ -39,18 +44,17 @@ no model-generated summarization or psychological inference is used.
 Implementation refinements to the design shapes: scene input includes mission
 `status` so resumed/paused context is explicit; authored scene output includes
 `sceneId` and presentation `entryId` to bind acknowledgements. Entries support
-narration when no character is present. The runtime canonical presentation supplies
-those IDs and text. Rendering/building never acknowledges an entry automatically.
-Available actions include accept/cancel lifecycle variants. The headless harness
-shows all eligible actions (up to 12); narrowing to four UI choices is later browser
-integration and must preserve access to every needed action. Ordinary dismissal
+narration when no character is present. The runtime canonical presentation supplies revision-bound scene IDs and the
+woodcutter introduction. The mock preserves that exact introduction until Continue
+is acknowledged; other entries are selected from the actual input state. Rendering/building never acknowledges an entry automatically.
+Available actions include accept/cancel lifecycle variants. Responses retain all eligible actions (up to 12), preserving access to every
+needed action. Ordinary dismissal
 requires no state change and is not a domain command.
 
 The builder does not load the existing API snapshot, which mixes story and learning
 fields. It does not publish endpoints, persist database state, create browser art,
-verify physical walking or accept model-proposed missions. The new `Story*` contracts
-are additive definitions in the schema source and OpenAPI components only; no HTTP
-route is implied. Validating a JSON shape is not validating arbitrary prose safety.
+verify physical walking or accept model-proposed missions. The `Story*` contracts are additive definitions in the shared schema;
+the separate API consumes this module for its authenticated story routes. Validating a JSON shape is not validating arbitrary prose safety.
 
 ## Checks
 
@@ -69,3 +73,46 @@ The developer runtime caps history at 256 commands (including acknowledgements).
 At that bound the builder and action resolver return `CommandBudgetExhausted`
 instead of emitting a supposedly playable payload. Checkpoints and historical plan
 inspection remain available. This is not a sustained-play storage implementation.
+
+## Mock scene provider
+
+The scene path is `State -> build_scene_input -> MockSceneProvider -> validate_scene
+-> StoryScene`. The provider receives JSON input and canonical fallback metadata,
+not mutable runtime state. It selects bridge offer, gathering, workshop introduction,
+exchange, return with planks, repair, shared crossing, completion, pause or exploration
+responses using location, inventory, mission status and currently legal actions.
+The authored successors are a shared picnic and welcome lights on both banks. There is no
+model generation or educational input/output.
+
+The validator checks the scene schema, exact scene ID, unique entry IDs, speakers
+present in the input, and a complete unique set of current action handles. A pending
+woodcutter introduction must retain its exact canonical entry. Unknown grant/state
+fields fail the closed schema. Failed or invalid proposals use the canonical authored
+scene with all legal actions. This does not validate the truth or safety of arbitrary
+model prose; replacing the trusted local mock with a network model requires further
+content controls. Actions still go through the domain and authenticated API.
+
+Responses are deterministic for a given state and mock implementation. Persisted
+command receipts remain the API's exact-retry authority even after future prose edits.
+Tests cover each mission stage, pause/resume, absent characters, immutable input state,
+invalid bindings/grants/introduction edits, and canonical fallback.
+
+## Connected stories and upgrades
+
+The current registry is `pips_bridge -> pips_picnic -> welcome_lights`. Completion
+keeps the current mission visible until the child explicitly accepts its successor
+beside Pip. Scene `missionId` is optional in the wire schema for old responses and
+always emitted by the new builder. Goal, narrative and milestones describe the
+current mission; plan opportunities and the accept choice describe the next story.
+Completed goals persist in `context.memory.recentMissions`. Inventory and object facts
+come only from runtime state; the bridge, shared picnic and lit banks survive later
+stories. Each source capability uses its remaining quantity, including partial picks.
+
+New payloads use `pip-stories-2`; contracts still accept `pip-bridge-1` receipts.
+New action handles have the `story-v2-` prefix. Old index handles cannot be reused
+as new commands because adding a successor could otherwise reinterpret an old
+travel handle as mission acceptance. Exact stored command retries still return their
+original response through the repository. Tests cover the legacy checkpoint upgrade,
+full successor sequence and reload after every step. The exhaustive bridge exploration
+remains bounded to the first mission; targeted sequel coverage avoids a state-space
+explosion while testing every new action and shared outcome.
