@@ -103,6 +103,11 @@ const locations: Record<string, string> = {
   bridge_bank: 'The bridge bank',
   workshop: 'The woodcutter’s workshop',
   far_bank: 'The far bank',
+  cove: 'Starlight Cove',
+  fern_hollow: 'Fern Hollow',
+  mossy_clearing: 'Mossy Clearing',
+  owl_grove: 'Owl Grove',
+  acorn_trail: 'Acorn Trail',
 };
 function render() {
   renderControls();

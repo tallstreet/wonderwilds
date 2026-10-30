@@ -7,6 +7,7 @@ use serde_json::{Value, json};
 use std::collections::BTreeMap;
 
 mod broader;
+pub mod exploration;
 mod missions;
 use broader::BroaderProgress;
 pub use missions::Mission;
@@ -23,6 +24,11 @@ pub enum Location {
     BridgeBank,
     Workshop,
     FarBank,
+    Cove,
+    FernHollow,
+    MossyClearing,
+    OwlGrove,
+    AcornTrail,
 }
 impl Location {
     pub fn as_str(self) -> &'static str {
@@ -30,6 +36,11 @@ impl Location {
             Self::BridgeBank => "bridge_bank",
             Self::Workshop => "workshop",
             Self::FarBank => "far_bank",
+            Self::Cove => "cove",
+            Self::FernHollow => "fern_hollow",
+            Self::MossyClearing => "mossy_clearing",
+            Self::OwlGrove => "owl_grove",
+            Self::AcornTrail => "acorn_trail",
         }
     }
     fn parse(value: &str) -> Result<Self, Rejection> {
@@ -37,6 +48,11 @@ impl Location {
             "bridge_bank" => Ok(Self::BridgeBank),
             "workshop" => Ok(Self::Workshop),
             "far_bank" => Ok(Self::FarBank),
+            "cove" => Ok(Self::Cove),
+            "fern_hollow" => Ok(Self::FernHollow),
+            "mossy_clearing" => Ok(Self::MossyClearing),
+            "owl_grove" => Ok(Self::OwlGrove),
+            "acorn_trail" => Ok(Self::AcornTrail),
             _ => Err(Rejection::InvalidAction),
         }
     }
@@ -70,6 +86,12 @@ impl MissionStatus {
 )]
 pub enum Action {
     AcceptMission,
+    // Internal, server-validated enrichment of a public travel choice. Never offered
+    // as a browser action; saved in the durable command log for exact replay.
+    GeneratedTravel {
+        destination_id: String,
+        story: exploration::GeneratedStory,
+    },
     Inspect {
         object_id: String,
     },
@@ -211,6 +233,8 @@ pub struct State {
     near_lit: bool,
     far_lit: bool,
     broader: BroaderProgress,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    exploration: Vec<exploration::Quest>,
     events: Vec<Event>,
     history: Vec<Command>,
     receipts: BTreeMap<String, Receipt>,
@@ -260,6 +284,7 @@ impl State {
             near_lit: false,
             far_lit: false,
             broader: BroaderProgress::default(),
+            exploration: Vec::new(),
             events: Vec::new(),
             history: Vec::new(),
             receipts: BTreeMap::new(),
@@ -429,7 +454,20 @@ impl State {
     }
 
     fn transition(&mut self, action: &Action) -> Result<String, Rejection> {
+        if let Some(result) = self.exploration_transition(action) {
+            return result;
+        }
         match action {
+            Action::GeneratedTravel {
+                destination_id,
+                story,
+            } => {
+                let description = self.transition(&Action::Travel {
+                    destination_id: destination_id.clone(),
+                })?;
+                self.install_generated_story(story)?;
+                Ok(description)
+            }
             Action::AcceptMission => {
                 if self.mission_status == MissionStatus::Completed {
                     let next = self.next_mission().ok_or(Rejection::NotAvailable)?;
@@ -722,15 +760,18 @@ impl State {
         }
     }
     fn route_open(&self, to: Location) -> bool {
-        matches!(
-            (self.location, to),
-            (Location::BridgeBank, Location::Workshop) | (Location::Workshop, Location::BridgeBank)
-        ) || self.bridge_repaired
-            && matches!(
+        exploration::connected(self.location, to)
+            || matches!(
                 (self.location, to),
-                (Location::BridgeBank, Location::FarBank)
-                    | (Location::FarBank, Location::BridgeBank)
+                (Location::BridgeBank, Location::Workshop)
+                    | (Location::Workshop, Location::BridgeBank)
             )
+            || self.bridge_repaired
+                && matches!(
+                    (self.location, to),
+                    (Location::BridgeBank, Location::FarBank)
+                        | (Location::FarBank, Location::BridgeBank)
+                )
     }
     fn initialize_milestones(&mut self) {
         let mut definitions = Vec::new();
@@ -820,45 +861,73 @@ impl State {
     /// Canonical authored lines. Acknowledgements are bound to this revision and entry.
     /// Calling this read-only method does not establish a meeting or any progress.
     pub fn presentation(&self) -> Presentation {
-        let (speaker, text) = if matches!(
-            self.mission,
-            Mission::HummingHollow
-                | Mission::CosyCorner
-                | Mission::BramblesVisit
-                | Mission::MoonlightGathering
-        ) {
-            self.broader_presentation()
-        } else if self.mission != Mission::Bridge {
-            self.series_presentation()
-        } else {
-            match self.location {
-                Location::Workshop if self.met_woodcutter => {
-                    ("woodcutter", "I can help shape wood into sturdy planks.")
+        let (speaker, text) =
+            if let Some(q) = self.current_neighbour().filter(|q| q.story.is_some()) {
+                let story = &q.story.as_ref().unwrap().content;
+                (
+                    q.character.as_str(),
+                    if q.status == "completed" {
+                        story.payoff.as_str()
+                    } else if q.status == "open" && !q.inspected {
+                        story.steps[q.step as usize].label.as_str()
+                    } else if q.inspected {
+                        "Thank you for exploring! Come and share what you found."
+                    } else {
+                        story.greeting.as_str()
+                    },
+                )
+            } else if let Some(place) = exploration::place(self.location) {
+                (
+                    place.character,
+                    if self
+                        .exploration
+                        .iter()
+                        .any(|q| q.character == place.character && q.status == "completed")
+                    {
+                        place.payoff
+                    } else {
+                        place.premise
+                    },
+                )
+            } else if matches!(
+                self.mission,
+                Mission::HummingHollow
+                    | Mission::CosyCorner
+                    | Mission::BramblesVisit
+                    | Mission::MoonlightGathering
+            ) {
+                self.broader_presentation()
+            } else if self.mission != Mission::Bridge {
+                self.series_presentation()
+            } else {
+                match self.location {
+                    Location::Workshop if self.met_woodcutter => {
+                        ("woodcutter", "I can help shape wood into sturdy planks.")
+                    }
+                    Location::Workshop => (
+                        "woodcutter",
+                        "Hello! I am the woodcutter. I can shape wood into sturdy planks.",
+                    ),
+                    Location::BridgeBank if self.pip_location != self.location => (
+                        "",
+                        "The repaired bridge leads to the far bank, where Pip is waiting.",
+                    ),
+                    Location::BridgeBank if self.bridge_repaired => {
+                        ("pip", "The bridge is ready! We can cross together.")
+                    }
+                    Location::BridgeBank => (
+                        "pip",
+                        "Shall we repair this bridge and explore the far bank together?",
+                    ),
+                    Location::FarBank if self.crossed_with_pip => {
+                        ("pip", "We made it! Thank you for crossing with me.")
+                    }
+                    _ => (
+                        "",
+                        "The player reached the far bank. Pip is waiting across the bridge.",
+                    ),
                 }
-                Location::Workshop => (
-                    "woodcutter",
-                    "Hello! I am the woodcutter. I can shape wood into sturdy planks.",
-                ),
-                Location::BridgeBank if self.pip_location != self.location => (
-                    "",
-                    "The repaired bridge leads to the far bank, where Pip is waiting.",
-                ),
-                Location::BridgeBank if self.bridge_repaired => {
-                    ("pip", "The bridge is ready! We can cross together.")
-                }
-                Location::BridgeBank => (
-                    "pip",
-                    "Shall we repair this bridge and explore the far bank together?",
-                ),
-                Location::FarBank if self.crossed_with_pip => {
-                    ("pip", "We made it! Thank you for crossing with me.")
-                }
-                Location::FarBank => (
-                    "",
-                    "The player reached the far bank. Pip is waiting across the bridge.",
-                ),
-            }
-        };
+            };
         Presentation {
             scene_id: format!("pip-bridge-scene-{}", self.revision),
             entries: vec![PresentationEntry {
@@ -1024,6 +1093,7 @@ impl State {
             },
         ]);
         candidates.extend(self.broader_actions());
+        candidates.extend(self.exploration_actions());
         candidates
             .into_iter()
             .filter(|action| self.clone().transition(action).is_ok())
@@ -1057,7 +1127,8 @@ impl State {
         }
         let state: Self = serde_json::from_value(value["state"].clone())
             .map_err(|_| Rejection::InvalidCheckpoint)?;
-        if state.durable_checkpoint() != *value
+        if !state.valid_exploration()
+            || state.durable_checkpoint() != *value
             || state.events.len() > 8
             || state.revision > 1_000_000_000
         {
@@ -1107,13 +1178,17 @@ impl State {
             // v1 had no transition from a completed bridge into another mission.
             // Do not reinterpret a forged legacy log using expanded v2 semantics.
             if ((legacy || legacy_v2)
-                && matches!(
-                    command.action,
-                    Action::Inspect { .. }
-                        | Action::Talk { .. }
-                        | Action::Choose { .. }
-                        | Action::Invite { .. }
-                ))
+                && matches!(&command.action, Action::Travel { destination_id }
+                    if !["bridge_bank", "workshop", "far_bank"].contains(&destination_id.as_str())))
+                || ((legacy || legacy_v2)
+                    && matches!(
+                        command.action,
+                        Action::GeneratedTravel { .. }
+                            | Action::Inspect { .. }
+                            | Action::Talk { .. }
+                            | Action::Choose { .. }
+                            | Action::Invite { .. }
+                    ))
                 || ((legacy || legacy_v2 && state.mission == Mission::WelcomeLights)
                     && state.mission_status == MissionStatus::Completed
                     && command.action == Action::AcceptMission)
@@ -1143,8 +1218,12 @@ impl State {
         Ok(state)
     }
     fn projection(&self) -> Value {
-        json!({"revision":self.revision,"location":self.location,"wood":self.wood,"planks":self.planks,"sources":self.sources,"bridgeRepaired":self.bridge_repaired,"crossedWithPip":self.crossed_with_pip,"pipLocation":self.pip_location,"missionStatus":self.mission_status,"milestones":self.milestones,"metWoodcutter":self.met_woodcutter,"events":self.events,
-        "mission":self.mission,"completedMissions":self.completed_missions,"berries":self.berries,"picnicBasket":self.picnic_basket,"glowPebbles":self.glow_pebbles,"lanterns":self.lanterns,"picnicReady":self.picnic_ready,"picnicShared":self.picnic_shared,"nearLit":self.near_lit,"farLit":self.far_lit,"broader":self.broader})
+        let mut value = json!({"revision":self.revision,"location":self.location,"wood":self.wood,"planks":self.planks,"sources":self.sources,"bridgeRepaired":self.bridge_repaired,"crossedWithPip":self.crossed_with_pip,"pipLocation":self.pip_location,"missionStatus":self.mission_status,"milestones":self.milestones,"metWoodcutter":self.met_woodcutter,"events":self.events,
+        "mission":self.mission,"completedMissions":self.completed_missions,"berries":self.berries,"picnicBasket":self.picnic_basket,"glowPebbles":self.glow_pebbles,"lanterns":self.lanterns,"picnicReady":self.picnic_ready,"picnicShared":self.picnic_shared,"nearLit":self.near_lit,"farLit":self.far_lit,"broader":self.broader});
+        if !self.exploration.is_empty() {
+            value["exploration"] = json!(self.exploration);
+        }
+        value
     }
     fn v2_checkpoint(&self) -> Value {
         let mut state = self.projection();

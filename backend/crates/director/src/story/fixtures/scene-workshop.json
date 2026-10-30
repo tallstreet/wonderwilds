@@ -33,6 +33,14 @@
       },
       "description": "Ask the woodcutter to turn 3 pieces of wood into 3 planks.",
       "id": "story-v3-3-3"
+    },
+    {
+      "action": {
+        "destinationId": "cove",
+        "type": "travel"
+      },
+      "description": "Walk to Starlight Cove.",
+      "id": "story-v3-3-4"
     }
   ],
   "context": {

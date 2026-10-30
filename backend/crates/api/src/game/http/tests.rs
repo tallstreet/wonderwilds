@@ -54,6 +54,7 @@ fn app() -> (Router, Arc<MemoryRepository>) {
         mission_learning_repository: Arc::new(DisabledMissionLearningRepository),
         story_provider: None,
         story_planner: None,
+        story_explorer: None,
         content,
         permits: Arc::new(tokio::sync::Semaphore::new(16)),
         configured: true,

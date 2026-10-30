@@ -118,6 +118,7 @@ pub struct AppState {
     pub(crate) auth: Arc<dyn Authenticator>,
     pub(crate) story_provider:
         Option<Arc<dyn wonderwilds_director::story::SceneProvider + Send + Sync>>,
+    pub(crate) story_explorer: Option<Arc<dyn crate::story::generation::ExplorationProvider>>,
     pub(crate) story_planner: Option<Arc<dyn crate::story::planning::PlanProvider>>,
     pub(crate) story_repository: Arc<dyn crate::story::repository::Repository>,
     pub(crate) mission_learning_repository:
@@ -134,8 +135,13 @@ impl AppState {
                 Arc::new(provider)
                     as Arc<dyn wonderwilds_director::story::SceneProvider + Send + Sync>
             });
+        self.story_explorer = crate::story::modal::ModalSceneProvider::explorer_from_env()?
+            .map(|p| Arc::new(p) as Arc<dyn crate::story::generation::ExplorationProvider>);
         self.story_planner = crate::story::modal::ModalSceneProvider::planner_from_env()?
             .map(|p| Arc::new(p) as Arc<dyn crate::story::planning::PlanProvider>);
+        if self.story_explorer.is_some() {
+            eprintln!("Generated neighbourhood stories enabled for development arrivals");
+        }
         if self.story_planner.is_some() {
             eprintln!("Modal mission planning enabled for new story acceptances");
         }
@@ -190,6 +196,7 @@ impl AppState {
             mission_learning_repository,
             story_provider: None,
             story_planner: None,
+            story_explorer: None,
             content,
             permits: Arc::new(tokio::sync::Semaphore::new(16)),
             configured,

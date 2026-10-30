@@ -74,6 +74,7 @@ mod tests {
                     "LearningEvidence" => round_trip!(LearningEvidence),
                     "DomainEvent" => round_trip!(DomainEvent),
                     "ContentManifest" => round_trip!(ContentManifest),
+                    "GeneratedNeighbourhood" => round_trip!(GeneratedNeighbourhood),
                     "StoryPlanInput" => round_trip!(StoryPlanInput),
                     "StoryAction" => round_trip!(StoryAction),
                     "StorySceneInput" => round_trip!(StorySceneInput),

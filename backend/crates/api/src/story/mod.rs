@@ -6,6 +6,7 @@ use wonderwilds_contracts as wire;
 use wonderwilds_director::story as director;
 use wonderwilds_domain::story::{Action, Command, Location, Rejection, State};
 
+pub mod generation;
 pub mod http;
 pub mod modal;
 pub mod planning;
@@ -38,6 +39,16 @@ pub fn snapshot(state: &State) -> Result<Value, Error> {
     if !exhausted {
         value["sceneInput"] = director::build_scene_input(state).map_err(|_| Error::Unavailable)?;
         value["scene"] = director::authored_scene(state).map_err(|_| Error::Unavailable)?;
+        if let Some(q) = state.current_neighbour()
+            && let Some(story) = &q.story
+            && (!q.inspected || q.status == "completed")
+        {
+            value["sceneSource"] = json!(if story.model_generated {
+                "llm"
+            } else {
+                "authored_fallback"
+            });
+        }
     }
     wire::validate("StorySnapshot", &value).map_err(|_| Error::Unavailable)?;
     Ok(value)

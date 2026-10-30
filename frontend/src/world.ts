@@ -209,19 +209,39 @@ export function createWorld(
                   e.prop === 'berry' ? 32 : 96 * npcFacing.scaleY,
                 )
                 .setDepth(y);
-          const badge = this.add
-            .circle(x, y - 112, 16, complete ? 0xffffff : 0xfff2be)
-            .setStrokeStyle(3, complete ? 0x8abb8d : 0xffffff)
-            .setDepth(y + 100);
-          this.add
-            .text(x, y - 112, complete ? '✓' : '!', {
-              fontFamily: 'Trebuchet MS',
-              fontSize: 22,
-              fontStyle: 'bold',
-              color: complete ? '#60a17a' : '#8f6a3d',
-            })
-            .setOrigin(0.5)
-            .setDepth(y + 101);
+          // Keep every layer in one container so the symbol never drifts from its badge.
+          const badge = this.add.container(x, y - 112).setDepth(y + 100);
+          const medallion = this.add.graphics();
+          medallion.fillStyle(0x354e44, 0.16);
+          medallion.fillCircle(0, 3, 19);
+          medallion.fillStyle(complete ? 0xeaf3df : 0xffe3a0);
+          medallion.fillCircle(0, 0, 18);
+          medallion.lineStyle(2.5, 0xfffdf3);
+          medallion.strokeCircle(0, 0, 18);
+          medallion.lineStyle(1, complete ? 0x8bab79 : 0xd4a858, 0.7);
+          medallion.strokeCircle(0, 0, 14.5);
+          medallion.fillStyle(0xffffff, 0.35);
+          medallion.fillEllipse(-4, -9, 15, 5);
+          badge.add(medallion);
+          if (complete) {
+            badge.add(
+              this.add
+                .text(0, 0, '✓', {
+                  fontFamily: 'Trebuchet MS',
+                  fontSize: 22,
+                  fontStyle: 'bold',
+                  color: '#527746',
+                })
+                .setOrigin(0.5),
+            );
+          } else {
+            // Rounded vector punctuation stays crisp at every camera zoom.
+            const symbol = this.add.graphics();
+            symbol.fillStyle(0x79552e);
+            symbol.fillRoundedRect(-2.5, -9, 5, 12, 2.5);
+            symbol.fillCircle(0, 8, 2.6);
+            badge.add(symbol);
+          }
           const zone = this.add
             .zone(x, y - 43, 88, 144)
             .setDepth(y + 102)

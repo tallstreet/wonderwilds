@@ -246,6 +246,12 @@ pub fn assess(
             break;
         }
         for action in state.available_actions() {
+            // Neighbourhood detours cannot advance any Pip-series condition.
+            // Keep the proof within the capability graph supplied to the planner.
+            if matches!(&action, Action::Travel { destination_id } if !["bridge_bank", "workshop", "far_bank"].contains(&destination_id.as_str()))
+            {
+                continue;
+            }
             if matches!(action, Action::AcceptMission | Action::CancelMission) {
                 continue;
             }

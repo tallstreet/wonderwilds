@@ -425,3 +425,80 @@ test('both cosy corner construction markers retain the selected design', () => {
     );
   }
 });
+
+test('walking exits require a legal edge route and all new neighbourhood markers are reachable', async () => {
+  const { walkingStoryExit, storyRoutePoint, neighbours } = await import('./world-model.ts');
+  const places = ['cove', 'fern_hollow', 'mossy_clearing', 'owl_grove', 'acorn_trail'] as const;
+  for (const [index, place] of places.entries()) {
+    const value = snapshot(place);
+    const character = Object.keys(neighbours)[index];
+    value.sceneInput!.here.characters = [{ id: character, description: '', relationship: '' }];
+    const destination = index ? places[index - 1] : 'workshop';
+    value.sceneInput!.availableActions = [
+      { id: 'exit', description: '', action: { type: 'travel', destinationId: destination } },
+    ];
+    const point = storyRoutePoint(place, destination);
+    assert.equal(walkingStoryExit(value, point)?.id, 'exit');
+    assert.equal(walkingStoryExit(value, { x: 560, y: 345 }), undefined);
+    const route = findRoute(
+      storyPlaces[place].spawn,
+      point,
+      true,
+      storyPlaces[place].region,
+      storyBounds(place),
+    );
+    assert.ok(route.length);
+    assert.ok(Math.hypot(route.at(-1)!.x - point.x, route.at(-1)!.y - point.y) < 18);
+    assert.ok(storyMarkers(value).some((m) => m.id === `npc:${character}`));
+    value.sceneInput!.availableActions = [];
+    assert.equal(walkingStoryExit(value, point), undefined);
+  }
+});
+
+test('generated people and sequential tasks use saved names, art and distinct reachable positions', () => {
+  const value = snapshot('cove');
+  value.sceneInput!.here.characters = [
+    { id: 'marina', description: 'A new friend', relationship: '' },
+  ];
+  value.sceneInput!.neighbourMissions = [
+    {
+      characterId: 'marina',
+      locationId: 'cove',
+      title: 'Little sounds',
+      status: 'open',
+      inspected: false,
+      task: 'Listen here',
+      payoff: 'Shared a discovery',
+      generation: 1,
+      stepIndex: 1,
+      storySource: 'llm',
+      generatedStory: {
+        name: 'Wren',
+        personality: 'Curious',
+        sprite: 'flutter',
+        greeting: 'Hello!',
+        title: 'Little sounds',
+        premise: 'Investigate two places',
+        payoff: 'Shared a discovery',
+        steps: [
+          { label: 'Listen to the branch', shape: 'hollow' },
+          { label: 'Look at the leaf', shape: 'leaf' },
+        ],
+      },
+    },
+  ];
+  value.sceneInput!.availableActions = [
+    {
+      id: 'step',
+      description: 'Look at the leaf',
+      action: { type: 'inspect', objectId: 'neighbour_marina_1' },
+    },
+  ];
+  const markers = storyMarkers(value);
+  assert.equal(markers.find((m) => m.id === 'npc:marina')?.character, 'Wren');
+  assert.equal(markers.find((m) => m.id === 'npc:marina')?.sprite, 'flutter');
+  const task = markers.find((m) => m.id === 'object:neighbour_marina_1')!;
+  assert.equal(task.shape, 'leaf');
+  assert.deepEqual({ x: task.x, y: task.y }, { x: 420, y: 540 });
+  assert.ok(findRoute(storyPlaces.cove.spawn, task, true, 'cove').length);
+});

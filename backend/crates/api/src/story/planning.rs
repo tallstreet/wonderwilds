@@ -12,6 +12,7 @@ pub trait PlanProvider: Send + Sync {
 pub struct ValidatedPlan {
     checkpoint: Value,
     plan: Value,
+    generated: bool,
 }
 impl ValidatedPlan {
     pub fn new(state: &State, plan: Value) -> Result<Self, Error> {
@@ -27,7 +28,33 @@ impl ValidatedPlan {
         Ok(Self {
             checkpoint: state.checkpoint(),
             plan,
+            generated: false,
         })
+    }
+    pub fn generated(state: &State, content: Value, model_generated: bool) -> Result<Self, Error> {
+        wire::validate("GeneratedNeighbourhood", &content).map_err(|_| Error::InvalidInput)?;
+        let content = serde_json::from_value(content).map_err(|_| Error::InvalidInput)?;
+        let story = wonderwilds_domain::story::exploration::GeneratedStory {
+            content,
+            model_generated,
+        };
+        if !story.valid()
+            || !state.needs_generated_story()
+            || !matches!(
+                state.last_command().map(|c| &c.action),
+                Some(Action::Travel { .. })
+            )
+        {
+            return Err(Error::InvalidInput);
+        }
+        Ok(Self {
+            checkpoint: state.checkpoint(),
+            plan: json!(story),
+            generated: true,
+        })
+    }
+    pub fn is_generated(&self) -> bool {
+        self.generated
     }
     pub fn for_state(&self, state: &State) -> Result<&Value, Error> {
         if self.checkpoint != state.checkpoint() {

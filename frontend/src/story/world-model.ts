@@ -1,11 +1,45 @@
 import type { StoryAction, StorySnapshot } from '../../../contracts/generated/contracts.ts';
+import { exitPoint } from '../maps.ts';
 import type { Point, WorldEncounter, StoryShape, WorldDecoration } from '../types.ts';
 
 export const storyPlaces = {
   bridge_bank: { region: 'meadow', name: 'Pip’s bridge · near bank', spawn: { x: 160, y: 490 } },
   workshop: { region: 'orchard', name: 'The woodcutter’s workshop', spawn: { x: 850, y: 490 } },
   far_bank: { region: 'meadow', name: 'Pip’s bridge · far bank', spawn: { x: 850, y: 359 } },
+  cove: { region: 'cove', name: 'Starlight Cove', spawn: { x: 160, y: 330 } },
+  fern_hollow: { region: 'explore-0-0', name: 'Fern Hollow', spawn: { x: 160, y: 345 } },
+  mossy_clearing: { region: 'explore-0-1', name: 'Mossy Clearing', spawn: { x: 160, y: 345 } },
+  owl_grove: { region: 'explore-0-2', name: 'Owl Grove', spawn: { x: 160, y: 345 } },
+  acorn_trail: { region: 'explore-0-3', name: 'Acorn Trail', spawn: { x: 160, y: 345 } },
 } as const;
+export const neighbours: Record<string, { name: string; sprite: string }> = {
+  marina: { name: 'Marina', sprite: 'sail' },
+  fern: { name: 'Fern', sprite: 'flutter' },
+  moss: { name: 'Moss', sprite: 'nib' },
+  orla: { name: 'Orla', sprite: 'luna' },
+  hazel: { name: 'Hazel', sprite: 'patter' },
+};
+const trail = ['workshop', 'cove', 'fern_hollow', 'mossy_clearing', 'owl_grove', 'acorn_trail'];
+export function storyRoutePoint(from: StorySnapshot['locationId'], to: string): Point {
+  if (from === 'bridge_bank' && to === 'workshop') return exitPoint('meadow', 'west');
+  if (from === 'workshop' && to === 'bridge_bank') return exitPoint('orchard', 'east');
+  if (trail.includes(from) && trail.includes(to)) {
+    const forward = trail.indexOf(to) > trail.indexOf(from);
+    // The workshop's eastern path already returns to Pip.
+    return exitPoint(storyPlaces[from].region, from === 'workshop' || !forward ? 'west' : 'east');
+  }
+  return from === 'far_bank' ? { x: 810, y: 359 } : { x: 570, y: 359 };
+}
+/** Walking only commits a currently offered route; never invents an exit. */
+export function walkingStoryExit(snapshot: StorySnapshot, point: Point) {
+  return snapshot.sceneInput?.availableActions.find(({ action }) => {
+    if (action.type !== 'travel') return false;
+    const target = storyRoutePoint(snapshot.locationId, action.destinationId);
+    return (
+      (target.x < 65 || target.x > 1055) && Math.hypot(target.x - point.x, target.y - point.y) < 18
+    );
+  });
+}
 export function storyBounds(location: StorySnapshot['locationId'], crossing = false) {
   return (x: number, _y: number) =>
     !crossing && (location === 'bridge_bank' ? x > 600 : location === 'far_bank' ? x < 780 : false);
@@ -58,6 +92,13 @@ export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
       shape: art.shape,
     });
   for (const character of snapshot.sceneInput?.here.characters ?? []) {
+    const generated = snapshot.sceneInput?.neighbourMissions?.find(
+      (q) => q.characterId === character.id,
+    )?.generatedStory;
+    const neighbour = generated
+      ? { name: generated.name, sprite: generated.sprite }
+      : neighbours[character.id];
+    if (neighbour) add(`npc:${character.id}`, neighbour.name, { x: 530, y: 400 }, neighbour);
     if (character.id === 'pip')
       add(
         'npc:pip',
@@ -89,6 +130,22 @@ export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
       if (source && source.location === snapshot.locationId) add(id, source.name, source, source);
     }
     if (action.type === 'assemble' || action.type === 'inspect' || action.type === 'choose') {
+      if (action.type === 'inspect' && action.objectId.startsWith('neighbour_')) {
+        const task =
+          snapshot.sceneInput?.availableActions.find((item) => item.action === action)
+            ?.description ?? 'Explore this place';
+        const mission = snapshot.sceneInput?.neighbourMissions?.find((q) =>
+          action.objectId.startsWith(`neighbour_${q.characterId}_`),
+        );
+        const index = mission?.stepIndex ?? 0;
+        const shape = mission?.generatedStory?.steps[index]?.shape ?? 'hollow';
+        const points = [
+          { x: 780, y: 460 },
+          { x: 420, y: 540 },
+          { x: 900, y: 300 },
+        ];
+        add(id, task, points[index] ?? points[0], { shape });
+      }
       const object = assemblyPlaces[action.type === 'choose' ? action.choiceId : action.objectId];
       const selectedPlace = gatheringLocation(snapshot);
       const point = gatheringPoint(snapshot);
@@ -117,21 +174,13 @@ export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
         add(id, placed.name, placed, cornerBuild ? { ...placed, shape: chosenShape } : placed);
     }
     if (action.type === 'travel') {
-      const point =
-        snapshot.locationId === 'workshop'
-          ? { x: 960, y: 453 }
-          : action.destinationId === 'workshop'
-            ? { x: 100, y: 475 }
-            : snapshot.locationId === 'far_bank'
-              ? { x: 810, y: 359 }
-              : { x: 570, y: 359 };
+      const edge = storyRoutePoint(snapshot.locationId, action.destinationId);
+      // Keep the accessible signpost approach inside the map. Walking beyond it
+      // onto the edge takes the route without a second confirmation dialog.
+      const point = { ...edge, x: edge.x < 65 ? 100 : edge.x > 1055 ? 1020 : edge.x };
       add(
         id,
-        action.destinationId === 'workshop'
-          ? 'Path to the workshop'
-          : action.destinationId === 'far_bank'
-            ? 'Cross the bridge'
-            : 'Return to the bridge',
+        `Path to ${storyPlaces[action.destinationId as keyof typeof storyPlaces]?.name ?? action.destinationId}`,
         point,
         { prop: 'arch' },
       );
@@ -282,7 +331,11 @@ const assemblyPlaces: Record<string, Placement> = {
   },
 };
 export function storyDecorations(snapshot: StorySnapshot): WorldDecoration[] {
-  if (!snapshot.sceneInput) return [];
+  if (
+    !snapshot.sceneInput ||
+    !['bridge_bank', 'far_bank', 'workshop'].includes(snapshot.locationId)
+  )
+    return [];
   const facts = snapshot.sceneInput.context.memory.facts;
   if (snapshot.locationId === 'workshop')
     return facts.includes('The workshop path is clear.')

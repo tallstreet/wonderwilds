@@ -4,6 +4,7 @@
 //! catalogue below describes the bound actions implemented by domain::story.
 use serde_json::{Value, json};
 use wonderwilds_contracts::validate;
+use wonderwilds_domain::story::exploration;
 use wonderwilds_domain::story::{Action, Location, Mission, MissionStatus, State};
 
 mod broader;
@@ -51,12 +52,28 @@ fn description(location: Location) -> &'static str {
         Location::BridgeBank => "A bridge beside a quiet stream, with a path to the workshop.",
         Location::Workshop => "An open-air workshop beside the stream path.",
         Location::FarBank => "A quiet clearing across the stream.",
+        other => {
+            exploration::place(other)
+                .expect("exploration location")
+                .name
+        }
     }
 }
 fn narrative(mission: Mission) -> Value {
     json!({"premise":mission.premise(),"participantIds":mission.participant_ids(),"payoff":mission.payoff()})
 }
 fn character(state: &State, id: &str) -> Value {
+    if let Some(q) = state
+        .exploration_quests()
+        .iter()
+        .find(|q| q.character == id)
+        && let Some(story) = &q.story
+    {
+        return json!({"id":id,"description":format!("{}: {}",story.content.name,story.content.personality),"relationship":"A neighbour sharing a saved story with the player."});
+    }
+    if let Some(p) = exploration::PLACES.iter().find(|p| p.character == id) {
+        return json!({"id":id,"description":p.premise,"relationship":"A neighbour with a story to share."});
+    }
     match id {
         "pip" => {
             json!({"id":"pip","description":"A curious and patient friend.","relationship":if state.picnic_shared(){"The player and Pip crossed the bridge and shared a picnic together."}else if state.crossed_with_pip(){"The player and Pip crossed the bridge together."}else if !state.milestones().is_empty(){"The player accepted a mission to cross the stream with Pip."}else{"No prior shared mission is recorded."}})
@@ -298,6 +315,34 @@ fn capabilities(state: &State, mission: Mission) -> Vec<Value> {
 }
 
 fn action_description(state: &State, action: &Action) -> String {
+    if let Some(p) = exploration::place(state.location()) {
+        match action {
+            Action::Talk { topic_id, .. } if topic_id == "start_neighbour_story" => {
+                return state
+                    .current_neighbour()
+                    .and_then(|q| q.story.as_ref())
+                    .map_or_else(
+                        || format!("Start or resume: {}", p.title),
+                        |_| "Start or resume this story".into(),
+                    );
+            }
+            Action::Talk { topic_id, .. } if topic_id == "finish_neighbour_story" => {
+                return "Share your discoveries.".into();
+            }
+            Action::Inspect { object_id } if object_id.starts_with("neighbour_") => {
+                return state
+                    .current_neighbour()
+                    .and_then(|q| {
+                        q.story
+                            .as_ref()
+                            .and_then(|s| s.content.steps.get(q.step as usize))
+                    })
+                    .map_or(p.task, |step| step.label.as_str())
+                    .into();
+            }
+            _ => {}
+        }
+    }
     match action {
         Action::AcceptMission if state.mission_status() == MissionStatus::Completed => state
             .next_mission()
@@ -318,7 +363,10 @@ fn action_description(state: &State, action: &Action) -> String {
                 "bridge_bank" => "the bridge bank",
                 "workshop" => "the workshop",
                 "far_bank" => "the far bank",
-                _ => "the next clearing",
+                other => exploration::PLACES
+                    .iter()
+                    .find(|p| p.location.as_str() == other)
+                    .map_or("the next clearing", |p| p.name),
             };
             format!("Walk to {destination}.")
         }
@@ -397,6 +445,9 @@ pub fn build_scene_input(state: &State) -> Result<Value, Error> {
     if broader::visible(state) && state.bramble_location() == state.location() {
         characters.push(character(state, "bramble"));
     }
+    if let Some(p) = exploration::place(state.location()) {
+        characters.push(character(state, p.character));
+    }
     let mut objects = match state.location() {
         Location::BridgeBank => vec![
             json!({"id":"bridge","state":if state.bridge_repaired(){"repaired"}else{"broken"}}),
@@ -406,7 +457,7 @@ pub fn build_scene_input(state: &State) -> Result<Value, Error> {
             json!({"id":"workbench","state":"ready"}),
             json!({"id":"spare_wood","state":format!("{} wood available",state.source_remaining("spare_wood").unwrap_or(0))}),
         ],
-        Location::FarBank => vec![],
+        _ => vec![],
     };
     match state.location() {
         Location::BridgeBank => {
@@ -423,9 +474,12 @@ pub fn build_scene_input(state: &State) -> Result<Value, Error> {
             objects
                 .push(json!({"id":"far_lantern","state":if state.far_lit(){"lit"}else{"unlit"}}));
         }
-        Location::Workshop => {}
+        _ => {}
     }
     objects.extend(broader::objects(state));
+    if let Some(p) = exploration::place(state.location()) {
+        objects.push(json!({"id":format!("neighbour_{}",p.character),"state":p.task}));
+    }
     let mission = if matches!(
         state.mission_status(),
         MissionStatus::Active | MissionStatus::Abandoned | MissionStatus::Completed
@@ -447,10 +501,24 @@ pub fn build_scene_input(state: &State) -> Result<Value, Error> {
         Value::Null
     };
     let actions: Vec<_> = state.available_actions().iter().enumerate().map(|(i,a)|json!({"id":action_handle(state,i),"description":action_description(state,a),"action":a})).collect();
-    checked(
-        "StorySceneInput",
-        json!({"mode":"continue_story","context":context(state),"here":{"description":description(state.location()),"characters":characters,"objects":objects},"mission":mission,"availableActions":actions}),
-    )
+    let mut value = json!({"mode":"continue_story","context":context(state),"here":{"description":description(state.location()),"characters":characters,"objects":objects},"mission":mission,"availableActions":actions});
+    if !state.exploration_quests().is_empty() {
+        value["neighbourMissions"] = json!(state.exploration_quests().iter().map(|q| {
+            let p = exploration::PLACES.iter().find(|p| p.character == q.character).unwrap();
+            let mut mission = json!({"characterId":q.character,"locationId":p.location.as_str(),"title":p.title,"status":q.status,"inspected":q.inspected,"task":p.task,"payoff":p.payoff});
+            if let Some(story) = &q.story {
+                mission["title"] = json!(story.content.title);
+                mission["task"] = json!(story.content.steps.get(q.step as usize).map_or("Return and share your discoveries.", |s| s.label.as_str()));
+                mission["payoff"] = json!(story.content.payoff);
+                mission["generatedStory"] = json!(story.content);
+                mission["storySource"] = json!(if story.model_generated { "llm" } else { "authored_fallback" });
+                mission["generation"] = json!(q.generation);
+                mission["stepIndex"] = json!(q.step);
+            }
+            mission
+        }).collect::<Vec<_>>());
+    }
+    checked("StorySceneInput", value)
 }
 
 pub fn authored_scene(state: &State) -> Result<Value, Error> {

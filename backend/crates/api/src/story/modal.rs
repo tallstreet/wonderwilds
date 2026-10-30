@@ -24,6 +24,31 @@ impl ModalSceneProvider {
     pub fn from_env() -> Result<Option<Self>, &'static str> {
         Self::configured("WONDERWILDS_MODAL_STORY")
     }
+    pub fn explorer_from_env() -> Result<Option<Self>, &'static str> {
+        let flag = if std::env::var_os("WONDERWILDS_MODAL_EXPLORATION").is_some() {
+            "WONDERWILDS_MODAL_EXPLORATION"
+        } else {
+            "WONDERWILDS_MODAL_STORY"
+        };
+        let mut provider = Self::configured(flag)?;
+        if let Some(provider) = &mut provider
+            && let Ok(endpoint) = std::env::var("WONDERWILDS_MODAL_EXPLORATION_ENDPOINT")
+        {
+            let url = reqwest::Url::parse(&endpoint).map_err(|_| "Invalid exploration endpoint")?;
+            if !url.username().is_empty()
+                || url.password().is_some()
+                || url.query().is_some()
+                || url.fragment().is_some()
+                || !(url.scheme() == "https"
+                    || url.scheme() == "http"
+                        && matches!(url.host_str(), Some("127.0.0.1" | "[::1]" | "localhost")))
+            {
+                return Err("Exploration endpoint requires HTTPS or loopback HTTP");
+            }
+            provider.endpoint = endpoint;
+        }
+        Ok(provider)
+    }
     pub fn planner_from_env() -> Result<Option<Self>, &'static str> {
         Self::configured("WONDERWILDS_MODAL_PLANNER")
     }
@@ -181,5 +206,23 @@ impl super::planning::PlanProvider for ModalSceneProvider {
         let plan = self.request(&body)?;
         wonderwilds_contracts::validate("StoryMissionPlan", &plan).map_err(|_| unavailable())?;
         Ok(plan)
+    }
+}
+
+impl super::generation::ExplorationProvider for ModalSceneProvider {
+    fn propose(&self, input: &Value) -> Result<Value, Error> {
+        let schema: Value =
+            serde_json::from_str(include_str!("../../../../../contracts/schemas/v1.json")).unwrap();
+        let body = json!({"model":"wonderwilds","messages":[
+            {"role":"system","content":include_str!("exploration_prompt.txt")},
+            {"role":"user","content":input.to_string()}],
+            "response_format":response_format("GeneratedNeighbourhood", &schema["$defs"]["GeneratedNeighbourhood"]),
+            "temperature":0.8,"max_tokens":1600,"stream":false,
+            "chat_template_kwargs":{"reasoning_strength":"low"}});
+        let _guard = self.cache.try_lock().map_err(|_| unavailable())?;
+        let proposal = self.request(&body)?;
+        wonderwilds_contracts::validate("GeneratedNeighbourhood", &proposal)
+            .map_err(|_| unavailable())?;
+        Ok(proposal)
     }
 }

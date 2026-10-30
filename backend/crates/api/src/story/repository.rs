@@ -37,6 +37,9 @@ pub trait Repository: Send + Sync {
     }
     fn read(&self, identity: &Identity) -> Result<Value, Error>;
     fn execute(&self, identity: &Identity, request: &Value) -> Result<Value, Error>;
+    fn generation_state(&self, _: &Identity, _: &Value) -> Result<Option<State>, Error> {
+        Ok(None)
+    }
     fn planning_state(&self, _: &Identity, _: &Value) -> Result<Option<State>, Error> {
         Ok(None)
     }
@@ -348,6 +351,33 @@ impl Repository for PostgresRepository {
         Ok(response)
     }
 
+    fn generation_state(
+        &self,
+        identity: &Identity,
+        request: &Value,
+    ) -> Result<Option<State>, Error> {
+        validate("StoryCommand", request).map_err(|_| Error::InvalidInput)?;
+        let id = request["commandId"].as_str().ok_or(Error::InvalidInput)?;
+        let mut client = self.connect()?;
+        let mut tx = client.transaction().map_err(|_| Error::Unavailable)?;
+        own_profile(&mut tx, identity, true)?;
+        let state = load(&mut tx, identity)?;
+        let retry = tx.query_opt("SELECT 1 FROM wonderwilds.story_command_receipts WHERE profile_id=$1::text::uuid AND command_id=$2", &[&identity.profile_id, &id]).map_err(|_| Error::Unavailable)?.is_some();
+        let result = if retry {
+            None
+        } else {
+            let (next, _) = super::execute(&state, request)?;
+            (next.needs_generated_story()
+                && matches!(
+                    next.last_command().map(|c| &c.action),
+                    Some(wonderwilds_domain::story::Action::Travel { .. })
+                ))
+            .then_some(next)
+        };
+        tx.commit().map_err(|_| Error::Unavailable)?;
+        Ok(result)
+    }
+
     fn planning_state(&self, identity: &Identity, request: &Value) -> Result<Option<State>, Error> {
         validate("StoryCommand", request).map_err(|_| Error::InvalidInput)?;
         let id = request["commandId"].as_str().ok_or(Error::InvalidInput)?;
@@ -407,8 +437,23 @@ impl Repository for PostgresRepository {
             return Ok(response);
         }
         crate::persistence::take_budget(&mut tx, &identity.profile_id, "story")?;
-        let (next, _) = super::execute(&state, request)?;
-        if let Some(plan) = plan {
+        let (mut next, _) = super::execute(&state, request)?;
+        if let Some(plan) = plan.filter(|p| p.is_generated()) {
+            let value = plan.for_state(&next)?;
+            let story = serde_json::from_value(value.clone()).map_err(|_| Error::InvalidInput)?;
+            let mut command = next.last_command().ok_or(Error::InvalidInput)?.clone();
+            let wonderwilds_domain::story::Action::Travel { destination_id } = command.action
+            else {
+                return Err(Error::InvalidInput);
+            };
+            command.action = wonderwilds_domain::story::Action::GeneratedTravel {
+                destination_id,
+                story,
+            };
+            next = state.clone();
+            next.apply(&command).map_err(|_| Error::InvalidInput)?;
+        }
+        if let Some(plan) = plan.filter(|p| !p.is_generated()) {
             if super::planning::acceptance(&state, request)?.is_none() {
                 return Err(Error::InvalidInput);
             }

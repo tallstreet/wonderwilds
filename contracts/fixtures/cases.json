@@ -12196,5 +12196,547 @@
     "acknowledgeableEntryIds": [],
     "sceneSource": "connected"
   }
-}
+},
+  {
+    "name": "Neighbour missions bounded story projection",
+    "contract": "StorySceneInput",
+    "valid": true,
+    "value": {
+      "availableActions": [
+        {
+          "action": {
+            "type": "cancel_mission"
+          },
+          "description": "Pause the mission; keep items and world changes.",
+          "id": "story-3-0"
+        },
+        {
+          "action": {
+            "destinationId": "bridge_bank",
+            "type": "travel"
+          },
+          "description": "Travel to bridge_bank.",
+          "id": "story-3-1"
+        },
+        {
+          "action": {
+            "itemId": "wood",
+            "quantity": 3,
+            "sourceId": "spare_wood",
+            "type": "collect"
+          },
+          "description": "Collect 3 wood from spare_wood.",
+          "id": "story-3-2"
+        },
+        {
+          "action": {
+            "characterId": "woodcutter",
+            "recipeId": "wood_to_planks",
+            "type": "exchange"
+          },
+          "description": "Give 3 wood to the woodcutter and receive 3 planks.",
+          "id": "story-3-3"
+        }
+      ],
+      "context": {
+        "inventory": [
+          {
+            "itemId": "wood",
+            "quantity": 3
+          }
+        ],
+        "locationId": "workshop",
+        "memory": {
+          "facts": [
+            "The bridge is broken.",
+            "Pip is at bridge_bank."
+          ],
+          "recentEvents": [
+            "The player accepted the mission to cross the bridge with Pip.",
+            "The player collected 3 wood from fallen_wood.",
+            "The player arrived at workshop."
+          ],
+          "recentMissions": []
+        },
+        "player": {
+          "avoid": [],
+          "interests": [],
+          "language": "short_simple"
+        },
+        "trigger": "The player arrived at workshop."
+      },
+      "here": {
+        "characters": [
+          {
+            "description": "A patient neighbour who shapes wood.",
+            "id": "woodcutter",
+            "relationship": "No recorded presentation of the woodcutter's introduction."
+          }
+        ],
+        "description": "An open-air workshop beside the stream path.",
+        "objects": [
+          {
+            "id": "workbench",
+            "state": "ready"
+          },
+          {
+            "id": "spare_wood",
+            "state": "3 wood available"
+          }
+        ]
+      },
+      "mission": {
+        "completed": [
+          "Find suitable wood."
+        ],
+        "current": "Get the planks ready.",
+        "goal": "Help Pip cross the stream.",
+        "narrative": {
+          "participantIds": [
+            "pip",
+            "woodcutter"
+          ],
+          "payoff": "Cross the repaired bridge with Pip and celebrate reaching the far bank.",
+          "premise": "Pip wants to explore the far bank with the player. Help make a way across together."
+        },
+        "remaining": [
+          "Bring the planks to the bridge.",
+          "Repair the bridge.",
+          "Cross with Pip."
+        ],
+        "status": "active"
+      },
+      "mode": "continue_story",
+      "neighbourMissions": [
+        {
+          "characterId": "marina",
+          "locationId": "cove",
+          "title": "Marina's shell song",
+          "status": "open",
+          "inspected": false,
+          "task": "Listen to the shell",
+          "payoff": "Shared a rhythm"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Neighbour missions reject invented status",
+    "contract": "StorySceneInput",
+    "valid": false,
+    "value": {
+      "availableActions": [
+        {
+          "action": {
+            "type": "cancel_mission"
+          },
+          "description": "Pause the mission; keep items and world changes.",
+          "id": "story-3-0"
+        },
+        {
+          "action": {
+            "destinationId": "bridge_bank",
+            "type": "travel"
+          },
+          "description": "Travel to bridge_bank.",
+          "id": "story-3-1"
+        },
+        {
+          "action": {
+            "itemId": "wood",
+            "quantity": 3,
+            "sourceId": "spare_wood",
+            "type": "collect"
+          },
+          "description": "Collect 3 wood from spare_wood.",
+          "id": "story-3-2"
+        },
+        {
+          "action": {
+            "characterId": "woodcutter",
+            "recipeId": "wood_to_planks",
+            "type": "exchange"
+          },
+          "description": "Give 3 wood to the woodcutter and receive 3 planks.",
+          "id": "story-3-3"
+        }
+      ],
+      "context": {
+        "inventory": [
+          {
+            "itemId": "wood",
+            "quantity": 3
+          }
+        ],
+        "locationId": "workshop",
+        "memory": {
+          "facts": [
+            "The bridge is broken.",
+            "Pip is at bridge_bank."
+          ],
+          "recentEvents": [
+            "The player accepted the mission to cross the bridge with Pip.",
+            "The player collected 3 wood from fallen_wood.",
+            "The player arrived at workshop."
+          ],
+          "recentMissions": []
+        },
+        "player": {
+          "avoid": [],
+          "interests": [],
+          "language": "short_simple"
+        },
+        "trigger": "The player arrived at workshop."
+      },
+      "here": {
+        "characters": [
+          {
+            "description": "A patient neighbour who shapes wood.",
+            "id": "woodcutter",
+            "relationship": "No recorded presentation of the woodcutter's introduction."
+          }
+        ],
+        "description": "An open-air workshop beside the stream path.",
+        "objects": [
+          {
+            "id": "workbench",
+            "state": "ready"
+          },
+          {
+            "id": "spare_wood",
+            "state": "3 wood available"
+          }
+        ]
+      },
+      "mission": {
+        "completed": [
+          "Find suitable wood."
+        ],
+        "current": "Get the planks ready.",
+        "goal": "Help Pip cross the stream.",
+        "narrative": {
+          "participantIds": [
+            "pip",
+            "woodcutter"
+          ],
+          "payoff": "Cross the repaired bridge with Pip and celebrate reaching the far bank.",
+          "premise": "Pip wants to explore the far bank with the player. Help make a way across together."
+        },
+        "remaining": [
+          "Bring the planks to the bridge.",
+          "Repair the bridge.",
+          "Cross with Pip."
+        ],
+        "status": "active"
+      },
+      "mode": "continue_story",
+      "neighbourMissions": [
+        {
+          "characterId": "marina",
+          "locationId": "cove",
+          "title": "Marina's shell song",
+          "status": "rewarded",
+          "inspected": false,
+          "task": "Listen to the shell",
+          "payoff": "Shared a rhythm"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Neighbour missions reject oversized catalogue",
+    "contract": "StorySceneInput",
+    "valid": false,
+    "value": {
+      "availableActions": [
+        {
+          "action": {
+            "type": "cancel_mission"
+          },
+          "description": "Pause the mission; keep items and world changes.",
+          "id": "story-3-0"
+        },
+        {
+          "action": {
+            "destinationId": "bridge_bank",
+            "type": "travel"
+          },
+          "description": "Travel to bridge_bank.",
+          "id": "story-3-1"
+        },
+        {
+          "action": {
+            "itemId": "wood",
+            "quantity": 3,
+            "sourceId": "spare_wood",
+            "type": "collect"
+          },
+          "description": "Collect 3 wood from spare_wood.",
+          "id": "story-3-2"
+        },
+        {
+          "action": {
+            "characterId": "woodcutter",
+            "recipeId": "wood_to_planks",
+            "type": "exchange"
+          },
+          "description": "Give 3 wood to the woodcutter and receive 3 planks.",
+          "id": "story-3-3"
+        }
+      ],
+      "context": {
+        "inventory": [
+          {
+            "itemId": "wood",
+            "quantity": 3
+          }
+        ],
+        "locationId": "workshop",
+        "memory": {
+          "facts": [
+            "The bridge is broken.",
+            "Pip is at bridge_bank."
+          ],
+          "recentEvents": [
+            "The player accepted the mission to cross the bridge with Pip.",
+            "The player collected 3 wood from fallen_wood.",
+            "The player arrived at workshop."
+          ],
+          "recentMissions": []
+        },
+        "player": {
+          "avoid": [],
+          "interests": [],
+          "language": "short_simple"
+        },
+        "trigger": "The player arrived at workshop."
+      },
+      "here": {
+        "characters": [
+          {
+            "description": "A patient neighbour who shapes wood.",
+            "id": "woodcutter",
+            "relationship": "No recorded presentation of the woodcutter's introduction."
+          }
+        ],
+        "description": "An open-air workshop beside the stream path.",
+        "objects": [
+          {
+            "id": "workbench",
+            "state": "ready"
+          },
+          {
+            "id": "spare_wood",
+            "state": "3 wood available"
+          }
+        ]
+      },
+      "mission": {
+        "completed": [
+          "Find suitable wood."
+        ],
+        "current": "Get the planks ready.",
+        "goal": "Help Pip cross the stream.",
+        "narrative": {
+          "participantIds": [
+            "pip",
+            "woodcutter"
+          ],
+          "payoff": "Cross the repaired bridge with Pip and celebrate reaching the far bank.",
+          "premise": "Pip wants to explore the far bank with the player. Help make a way across together."
+        },
+        "remaining": [
+          "Bring the planks to the bridge.",
+          "Repair the bridge.",
+          "Cross with Pip."
+        ],
+        "status": "active"
+      },
+      "mode": "continue_story",
+      "neighbourMissions": [
+        {
+          "characterId": "marina",
+          "locationId": "cove",
+          "title": "Marina's shell song",
+          "status": "open",
+          "inspected": false,
+          "task": "Listen to the shell",
+          "payoff": "Shared a rhythm"
+        },
+        {
+          "characterId": "marina",
+          "locationId": "cove",
+          "title": "Marina's shell song",
+          "status": "open",
+          "inspected": false,
+          "task": "Listen to the shell",
+          "payoff": "Shared a rhythm"
+        },
+        {
+          "characterId": "marina",
+          "locationId": "cove",
+          "title": "Marina's shell song",
+          "status": "open",
+          "inspected": false,
+          "task": "Listen to the shell",
+          "payoff": "Shared a rhythm"
+        },
+        {
+          "characterId": "marina",
+          "locationId": "cove",
+          "title": "Marina's shell song",
+          "status": "open",
+          "inspected": false,
+          "task": "Listen to the shell",
+          "payoff": "Shared a rhythm"
+        },
+        {
+          "characterId": "marina",
+          "locationId": "cove",
+          "title": "Marina's shell song",
+          "status": "open",
+          "inspected": false,
+          "task": "Listen to the shell",
+          "payoff": "Shared a rhythm"
+        },
+        {
+          "characterId": "marina",
+          "locationId": "cove",
+          "title": "Marina's shell song",
+          "status": "open",
+          "inspected": false,
+          "task": "Listen to the shell",
+          "payoff": "Shared a rhythm"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Generated neighbourhood accepts new character and mission",
+    "contract": "GeneratedNeighbourhood",
+    "valid": true,
+    "value": {
+      "name": "Wren",
+      "personality": "A curious neighbour.",
+      "sprite": "flutter",
+      "greeting": "Hello! Shall we listen to the woods?",
+      "title": "A whisper in the leaves",
+      "premise": "Notice small sounds and share them.",
+      "steps": [
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow"
+        }
+      ],
+      "payoff": "You shared a woodland discovery."
+    }
+  },
+  {
+    "name": "Generated neighbourhood rejects invented rewards",
+    "contract": "GeneratedNeighbourhood",
+    "valid": false,
+    "value": {
+      "name": "Wren",
+      "personality": "A curious neighbour.",
+      "sprite": "flutter",
+      "greeting": "Hello! Shall we listen to the woods?",
+      "title": "A whisper in the leaves",
+      "premise": "Notice small sounds and share them.",
+      "steps": [
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow"
+        }
+      ],
+      "payoff": "You shared a woodland discovery.",
+      "rewards": 100
+    }
+  },
+  {
+    "name": "Generated neighbourhood rejects unknown art",
+    "contract": "GeneratedNeighbourhood",
+    "valid": false,
+    "value": {
+      "name": "Wren",
+      "personality": "A curious neighbour.",
+      "sprite": "invented",
+      "greeting": "Hello! Shall we listen to the woods?",
+      "title": "A whisper in the leaves",
+      "premise": "Notice small sounds and share them.",
+      "steps": [
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow"
+        }
+      ],
+      "payoff": "You shared a woodland discovery."
+    }
+  },
+  {
+    "name": "Generated neighbourhood rejects empty mission",
+    "contract": "GeneratedNeighbourhood",
+    "valid": false,
+    "value": {
+      "name": "Wren",
+      "personality": "A curious neighbour.",
+      "sprite": "flutter",
+      "greeting": "Hello! Shall we listen to the woods?",
+      "title": "A whisper in the leaves",
+      "premise": "Notice small sounds and share them.",
+      "steps": [],
+      "payoff": "You shared a woodland discovery."
+    }
+  },
+  {
+    "name": "Generated neighbourhood rejects too many steps",
+    "contract": "GeneratedNeighbourhood",
+    "valid": false,
+    "value": {
+      "name": "Wren",
+      "personality": "A curious neighbour.",
+      "sprite": "flutter",
+      "greeting": "Hello! Shall we listen to the woods?",
+      "title": "A whisper in the leaves",
+      "premise": "Notice small sounds and share them.",
+      "steps": [
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow"
+        },
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow"
+        },
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow"
+        },
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow"
+        }
+      ],
+      "payoff": "You shared a woodland discovery."
+    }
+  },
+  {
+    "name": "Generated neighbourhood rejects markup",
+    "contract": "GeneratedNeighbourhood",
+    "valid": false,
+    "value": {
+      "name": "Wren",
+      "personality": "A curious neighbour.",
+      "sprite": "flutter",
+      "greeting": "<script>alert(1)</script>",
+      "title": "A whisper in the leaves",
+      "premise": "Notice small sounds and share them.",
+      "steps": [
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow"
+        }
+      ],
+      "payoff": "You shared a woodland discovery."
+    }
+  }
 ]

@@ -185,3 +185,28 @@ unchanged domain checkpoints. The API projects plan labels from actual milestone
 receipts and supplies the saved brief to scene generation. This module still does
 not accept arbitrary new mechanics or change domain mission definitions. See the
 root README for activation and persistent-plan behavior.
+
+## Neighbourhood exploration
+
+Five additive neighbourhood locations and defined character missions are supplied
+by the pure domain exploration catalogue. They use the existing travel/talk/inspect
+actions, appended after old candidates so legacy action indexes stay stable.
+`StorySceneInput.neighbourMissions` is an optional bounded journal projection;
+old receipts omit it. Models receive these statuses and only currently legal actions.
+The mock uses the canonical neighbourhood greeting; the optional scene provider can
+supply prose through the existing validator. Pip's plan search excludes detours
+outside its capability graph. Neighbourhood mission acceptance is deterministic
+and does not request a generated mission plan.
+
+## Saved generated neighbourhood content
+
+Arrival-time generation now supplies a validated `GeneratedNeighbourhood` containing
+character identity/display art, greeting, mission premise and one to three local
+investigation steps. The API commits the spec inside an internal `GeneratedTravel`
+domain receipt. This internal action is never advertised or accepted as a public
+browser payload. Replaying it checks the same domain preconditions and spec bounds.
+`neighbourMissions` optionally carries the saved content, generation counter,
+current step and generation source. The scene builder resolves names and canonical
+text from that saved content; model IDs never determine new commands or rewards.
+Completed slots can be replaced on a later arrival, while unfinished work remains
+stable. Existing pure authored projections and receipts stay compatible.

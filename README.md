@@ -209,6 +209,58 @@ Model generation is disabled by default; the opt-in Modal integration below can
 generate scene prose. The earlier [/story.html inspector](http://127.0.0.1:5173/story.html)
 remains available for checking scenes without walking.
 
+### Walking to neighbourhood stories
+
+In `/?story=1`, walk west from the bridge bank to the workshop, then take its
+western path to Starlight Cove. Continue east through Fern Hollow, Mossy Clearing,
+Owl Grove and Acorn Trail. Walking onto a labelled route at the map edge commits
+its server-approved travel action. Missions also offers accessible route buttons;
+bridge crossing and shared escort actions keep their existing controls.
+
+Marina, Fern, Moss, Orla and Hazel each offer a small three-step story: accept the
+request, investigate the marked object, then return to share the discovery.
+The Missions journal retains their task and status through reloads. At most three
+neighbourhood missions are open, reserving a fourth slot for Pip's ongoing story.
+Accepting or resuming another archives the oldest open neighbourhood mission;
+its checked task is preserved and visiting its friend allows resumption. Completed
+missions stay completed, and Pip's story is never automatically archived.
+
+### Repeatable AI-generated neighbourhood stories
+
+With `WONDERWILDS_MODAL_STORY=1`, arrivals now also generate neighbourhood stories.
+`WONDERWILDS_MODAL_EXPLORATION=1` enables these independently; setting it to `0`
+stops new arrival generation while preserving already saved stories. The same
+backend-only Modal credentials are used. Restart the local demo after updating.
+
+On entering a neighbourhood without unfinished work, the model invents a name,
+personality, greeting, mission title/premise, one to three sequential investigation
+tasks, and a payoff. It chooses from existing character and object artwork. Accept
+the story, investigate its marked objects, then return to share the discoveries.
+After completion, leave and return to receive another story. There is no fixed
+catalogue limit on these repeat visits; the physical map catalogue remains finite.
+
+Unfinished and archived stories keep their generated content and progress. At most
+three neighbourhood missions are open, reserving Pip's fourth slot; old open
+missions are archived on acceptance as before. The latest story for each of the
+five areas stays in the hot journal. Older completed versions remain in durable
+command history, not an ever-growing browser list.
+
+Generation happens outside database locks and is validated before committing with
+travel. Exact retries return the original saved story; reloads do not regenerate
+it. Rust owns adjacency, task order, completion and the mission cap. AI generates
+content for supported investigation actions, not arbitrary mechanics or rewards.
+Malformed, busy or unavailable model responses use a saved, labelled offline
+fallback; an unfinished fallback also remains stable until completed.
+
+The mission journal distinguishes **AI-generated story** from **Offline story
+fallback**. New geography, new image assets and production content approval are
+not supplied by this feature. Existing saves and original command receipts remain
+compatible. No demo-data reset or new SQL migration is needed.
+
+For local mock/provider testing, `WONDERWILDS_MODAL_EXPLORATION_ENDPOINT` selects an
+explicit backend endpoint (HTTPS, or loopback HTTP only). It receives the configured
+Modal authorization header; leave it unset for the existing deployed model.
+
 ### Curriculum practice in story missions
 
 In `/?story=1`, accept a mission and open **Missions → Practice this story skill**.

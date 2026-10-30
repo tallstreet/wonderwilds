@@ -930,3 +930,229 @@ fn instrument_transport_requires_arrival_and_placement_before_sharing() {
     replay_step(&mut state, talk("pip", "share_discovery"));
     assert_eq!(state.mission_status(), MissionStatus::Completed);
 }
+
+#[test]
+fn neighbourhood_stories_cap_archive_resume_complete_and_replay() {
+    let mut state = State::new();
+    perform(&mut state, Action::AcceptMission);
+    assert_eq!(
+        state.apply(&command(&state, travel("cove"))),
+        Err(Rejection::NotAvailable)
+    );
+    perform(&mut state, travel("workshop"));
+    for p in &exploration::PLACES {
+        perform(&mut state, travel(p.location.as_str()));
+        let talk = Action::Talk {
+            character_id: p.character.into(),
+            topic_id: "start_neighbour_story".into(),
+        };
+        let cmd = command(&state, talk);
+        let receipt = state.apply(&cmd).unwrap();
+        assert_eq!(state.apply(&cmd).unwrap(), receipt);
+        assert!(
+            state
+                .exploration
+                .iter()
+                .filter(|q| q.status == "open")
+                .count()
+                <= 3
+        );
+        assert_eq!(state.mission_status(), MissionStatus::Active);
+        let premature = Action::Talk {
+            character_id: p.character.into(),
+            topic_id: "finish_neighbour_story".into(),
+        };
+        assert_eq!(
+            state.apply(&command(&state, premature)),
+            Err(Rejection::NotAvailable)
+        );
+        perform(
+            &mut state,
+            Action::Inspect {
+                object_id: format!("neighbour_{}", p.character),
+            },
+        );
+        assert_eq!(State::from_checkpoint(&state.checkpoint()).unwrap(), state);
+        assert_eq!(
+            State::from_durable_checkpoint(&state.durable_checkpoint()).unwrap(),
+            state.compact()
+        );
+    }
+    assert_eq!(state.exploration[0].status, "archived");
+    for destination in ["owl_grove", "mossy_clearing", "fern_hollow", "cove"] {
+        perform(&mut state, travel(destination));
+    }
+    perform(
+        &mut state,
+        Action::Talk {
+            character_id: "marina".into(),
+            topic_id: "start_neighbour_story".into(),
+        },
+    );
+    let marina = state.exploration.last().unwrap();
+    assert!(marina.inspected, "archiving preserves the task");
+    assert_eq!(marina.status, "open");
+    perform(
+        &mut state,
+        Action::Talk {
+            character_id: "marina".into(),
+            topic_id: "finish_neighbour_story".into(),
+        },
+    );
+    assert_eq!(state.exploration.last().unwrap().status, "completed");
+    assert!(!state.available_actions().iter().any(
+        |a| matches!(a, Action::Talk { topic_id, .. } if topic_id == "start_neighbour_story")
+    ));
+    perform(&mut state, travel("workshop"));
+    perform(&mut state, travel("bridge_bank"));
+    assert!(!state.bridge_repaired());
+    assert_eq!(state.mission_status(), MissionStatus::Active);
+    assert_eq!(State::from_checkpoint(&state.checkpoint()).unwrap(), state);
+}
+
+#[test]
+fn exploration_checkpoint_rejects_corruption_and_old_version_route_claims() {
+    let mut state = State::new();
+    perform(&mut state, travel("workshop"));
+    perform(&mut state, travel("cove"));
+    assert_eq!(
+        State::from_checkpoint(&state.legacy_checkpoint()),
+        Err(Rejection::InvalidCheckpoint)
+    );
+    assert_eq!(
+        State::from_checkpoint(&state.v2_checkpoint()),
+        Err(Rejection::InvalidCheckpoint)
+    );
+    perform(
+        &mut state,
+        Action::Talk {
+            character_id: "marina".into(),
+            topic_id: "start_neighbour_story".into(),
+        },
+    );
+    let checkpoint = state.durable_checkpoint();
+    for status in ["invented", "completed"] {
+        let mut corrupt = checkpoint.clone();
+        corrupt["state"]["exploration"][0]["status"] = json!(status);
+        assert_eq!(
+            State::from_durable_checkpoint(&corrupt),
+            Err(Rejection::InvalidCheckpoint)
+        );
+    }
+    let mut duplicate = checkpoint;
+    let quest = duplicate["state"]["exploration"][0].clone();
+    duplicate["state"]["exploration"]
+        .as_array_mut()
+        .unwrap()
+        .push(quest);
+    assert_eq!(
+        State::from_durable_checkpoint(&duplicate),
+        Err(Rejection::InvalidCheckpoint)
+    );
+}
+
+#[test]
+fn generated_stories_repeat_without_replacing_unfinished_work_and_replay_every_step() {
+    use exploration::{GeneratedContent, GeneratedStep, GeneratedStory};
+    let mut state = State::new();
+    perform(&mut state, travel("workshop"));
+    for generation in 1..=8 {
+        let story = GeneratedStory {
+            model_generated: true,
+            content: GeneratedContent {
+                name: format!("Visitor {generation}"),
+                personality: "A curious neighbour.".into(),
+                sprite: "flutter".into(),
+                greeting: "Shall we explore?".into(),
+                title: format!("Discovery {generation}"),
+                premise: "Listen and notice the woodland.".into(),
+                payoff: "You shared a discovery.".into(),
+                steps: vec![
+                    GeneratedStep {
+                        label: "Listen to the hollow branch.".into(),
+                        shape: "hollow".into(),
+                    },
+                    GeneratedStep {
+                        label: "Look at the rustling leaf.".into(),
+                        shape: "leaf".into(),
+                    },
+                ],
+            },
+        };
+        perform(
+            &mut state,
+            Action::GeneratedTravel {
+                destination_id: "cove".into(),
+                story: story.clone(),
+            },
+        );
+        assert_eq!(state.current_neighbour().unwrap().generation, generation);
+        assert_eq!(
+            State::from_checkpoint(&state.legacy_checkpoint()),
+            Err(Rejection::InvalidCheckpoint)
+        );
+        assert_eq!(
+            State::from_checkpoint(&state.v2_checkpoint()),
+            Err(Rejection::InvalidCheckpoint)
+        );
+        perform(
+            &mut state,
+            Action::Talk {
+                character_id: "marina".into(),
+                topic_id: "start_neighbour_story".into(),
+            },
+        );
+        perform(
+            &mut state,
+            Action::Inspect {
+                object_id: "neighbour_marina_0".into(),
+            },
+        );
+        let before = state.checkpoint();
+        assert_eq!(
+            state.apply(&command(
+                &state,
+                Action::Inspect {
+                    object_id: "neighbour_marina_0".into()
+                }
+            )),
+            Err(Rejection::NotAvailable)
+        );
+        assert_eq!(state.checkpoint(), before);
+        perform(&mut state, travel("workshop"));
+        let before = state.checkpoint();
+        assert_eq!(
+            state.apply(&command(
+                &state,
+                Action::GeneratedTravel {
+                    destination_id: "cove".into(),
+                    story
+                }
+            )),
+            Err(Rejection::NotAvailable)
+        );
+        assert_eq!(state.checkpoint(), before);
+        perform(&mut state, travel("cove"));
+        assert_eq!(state.current_neighbour().unwrap().step, 1);
+        perform(
+            &mut state,
+            Action::Inspect {
+                object_id: "neighbour_marina_1".into(),
+            },
+        );
+        perform(
+            &mut state,
+            Action::Talk {
+                character_id: "marina".into(),
+                topic_id: "finish_neighbour_story".into(),
+            },
+        );
+        assert_eq!(State::from_checkpoint(&state.checkpoint()).unwrap(), state);
+        assert_eq!(
+            State::from_durable_checkpoint(&state.durable_checkpoint()).unwrap(),
+            state.compact()
+        );
+        assert!(state.durable_checkpoint().to_string().len() < 12000);
+        perform(&mut state, travel("workshop"));
+    }
+}

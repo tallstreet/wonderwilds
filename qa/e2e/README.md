@@ -210,3 +210,19 @@ checks the mission journal and non-modal speech on desktop/phone with synthetic
 story responses. Start Vite on that port and set `CHROMIUM_PATH` if needed. It
 uses no database or provider and checks that only explicit acknowledgement
 submits a command; reading and dismissing speech do not write progress.
+
+### Story neighbourhood exploration
+
+`WW_QA_BROWSER_TEST=qa/e2e/story-exploration.mjs node qa/e2e/run-training-qa.mjs`
+creates a disposable PostgreSQL cluster and checks a keyboard map-edge transition,
+five character missions, the four-slot policy, archive/resume with retained progress,
+completion, a lost-response exact retry after reload, and phone layout. Set
+`CHROMIUM_PATH` to an installed executable when needed. Never point this journey
+at persistent demo progress.
+
+`node qa/e2e/run-generated-exploration-qa.mjs` runs the same real-world journey
+against a local synthetic OpenAI-compatible model endpoint and a disposable
+PostgreSQL cluster. It checks generated people and multiple steps, exact retry,
+archive/resume, stable reloads, malformed-model fallback and a fresh story after
+returning to a completed area. It makes no paid model calls. The ordinary database
+suite additionally checks eight generations, rollback and full durable replay.

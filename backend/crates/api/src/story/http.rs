@@ -67,6 +67,35 @@ async fn run(
                         return Err(Error::Forbidden);
                     }
                 }
+                if plan.is_none()
+                    && let Some(provider) = &state.story_explorer
+                    && let Some(candidate) = state
+                        .story_repository
+                        .generation_state(&identity, &request)?
+                {
+                    let input = super::generation::input(&candidate)?;
+                    plan = provider.propose(&input).ok().and_then(|content| {
+                        super::planning::ValidatedPlan::generated(&candidate, content, true).ok()
+                    });
+                    if plan.is_none() {
+                        plan = Some(super::planning::ValidatedPlan::generated(
+                            &candidate,
+                            super::generation::fallback(&candidate)?,
+                            false,
+                        )?);
+                    }
+                    let now = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map_err(|_| Error::Unavailable)?
+                        .as_secs();
+                    let fresh = state.auth.authenticate(&headers, true, now)?;
+                    if fresh.parent_id != identity.parent_id
+                        || fresh.profile_id != identity.profile_id
+                        || fresh.session_id != identity.session_id
+                    {
+                        return Err(Error::Forbidden);
+                    }
+                }
                 state
                     .story_repository
                     .execute_planned(&identity, &request, plan.as_ref())

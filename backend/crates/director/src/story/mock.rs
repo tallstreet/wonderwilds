@@ -40,6 +40,12 @@ impl SceneProvider for MockSceneProvider {
     fn propose(&self, input: &Value, canonical: &Value) -> Result<Value, Error> {
         checked("StorySceneInput", input.clone())?;
         checked("StoryScene", canonical.clone())?;
+        if exploration::PLACES
+            .iter()
+            .any(|p| input["context"]["locationId"] == p.location.as_str())
+        {
+            return Ok(canonical.clone());
+        }
         if matches!(
             input["mission"]["missionId"].as_str(),
             Some("pips_picnic" | "welcome_lights")

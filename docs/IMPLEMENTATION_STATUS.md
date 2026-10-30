@@ -5,6 +5,80 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Repeatable generated neighbourhood stories — 31 October 2026
+
+Arrival-time generation now invents a character name/personality, greeting, title,
+premise, one to three sequential local investigation steps, and a payoff. The
+model chooses existing character/object art; this does not generate new map or
+image assets. Entering a new or completed neighbourhood requests the next story.
+There is no fixed mission-catalogue limit on repeat visits across the five current
+neighbourhoods. Unfinished and archived stories remain stable until completed.
+Three open neighbourhood slots continue to reserve Pip's fourth slot.
+
+`WONDERWILDS_MODAL_EXPLORATION` overrides arrival generation; when unset, it follows
+`WONDERWILDS_MODAL_STORY`. Model calls run outside database locks with closed-schema
+output, bounded requests, no profile/session/learning context, and authentication
+plus revision checks before commit. Only supported investigation steps are exposed.
+The internal generated-travel command commits content with the arrival receipt;
+it is not a public browser action. Exact retries reuse saved content. Malformed,
+busy or unavailable model output commits a labelled offline fallback. The hot
+journal keeps only the latest content per area; previous versions remain in durable
+command history. No new SQL migration, save reset or release/content approval.
+
+Verification: repository aggregate checks passed, including 143 shared fixtures,
+121 frontend tests/build and Rust/content checks. The real PostgreSQL suite passed
+all four integration tests, including eight successive generated missions, rollback,
+exact retries, fresh-reader consistency and full history replay. A disposable real
+API/Phaser journey used a loopback mock model: six arrival requests covered generated
+names/art, sequential tasks, the four-mission cap, archive/resume, completion,
+reload/retry stability, invalid-output fallback and a second generated story on
+return. Desktop/phone screenshots were reviewed. The provider HTTP test verifies
+closed-schema requests and generated responses. Targeted regressions reject wrong
+step IDs, replacement of unfinished stories and legacy-version claims of generated
+travel. CI includes this mock-model journey; hosted CI was not run here.
+
+Live generation quality and latency on the deployed model were not exercised.
+Physical geography remains finite and mechanics are limited to supported local
+investigation tasks. Node 26.12.0 was used instead of Node 24; the existing bundle
+warning remains. Persistent demo data and the pre-existing badge-art edit were
+preserved. Restart the local backend to activate the new generator.
+
+## Story neighbourhood travel and bounded missions — 31 October 2026
+
+Pip's playable story now supports walking onto server-offered map-edge routes.
+The workshop connects to Starlight Cove, Fern Hollow, Mossy Clearing, Owl Grove
+and Acorn Trail. Five new named neighbours (Marina, Fern, Moss, Orla and Hazel)
+have defined accept/investigate/report missions, with provisional reused artwork.
+Their journal statuses and checked tasks persist in the existing story checkpoints.
+
+Three neighbourhood slots reserve a fourth for Pip. Starting/resuming another
+archives the oldest open neighbourhood mission without losing its checked task;
+returning to its character resumes it. Completed missions remain complete. The
+pure Rust domain controls adjacency, task completion, cap and archive order.
+Neighbourhood actions are appended after historical bindings, empty new state is
+omitted to preserve old checkpoint bytes, and older content versions cannot claim
+new travel. No applied migration, persistent demo data or guest evidence changed.
+
+The optional scene provider receives the new characters, legal actions and bounded
+mission journal, and may generate dialogue. Five defined missions are shipped;
+endless/model-invented missions and generated neighbourhood mission plans are not.
+Pip's planner proof excludes unrelated detours. No content or release approval is
+implied. Restart the local backend to use new locations; no save reset is needed.
+
+Verification: aggregate repository checks passed (137 shared fixtures, 120 frontend
+tests/build, Rust and content checks), followed by targeted checkpoint-corruption
+coverage and workspace Clippy. Real PostgreSQL checks passed all four integration
+tests, migration replay and hash-drift rejection. The disposable exploration browser
+journey passed keyboard travel, all five missions, archive/resume, completion,
+reload and exact lost-response retry. Screenshot review found and corrected phone
+journal text clipping; the final exploration rerun passed an explicit dialog-width
+assertion and desktop/phone screenshots were reviewed. The original Pip bank-source
+world journey also passed, including shared crossing, lost-response recovery and
+separate guest/education state. CI includes the new exploration journey; hosted CI
+was not run here. Node 26.12.0 was used; Node 24 and live model-generated dialogue
+were not verified. Existing Phaser bundle-size warnings remain. `git diff --check`
+passed. The pre-existing badge artwork edit in `frontend/src/world.ts` was preserved.
+
 ## Curriculum practice inside missions — 31 October 2026
 
 The story Missions panel now offers profile-owned curriculum practice bound to

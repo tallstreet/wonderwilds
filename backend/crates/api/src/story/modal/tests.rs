@@ -195,3 +195,38 @@ fn planner_sends_shared_dependency_prompt_and_closed_plan_schema() {
     let _busy = provider.cache.lock().unwrap();
     assert!(crate::story::planning::PlanProvider::propose(&provider, &input, &[]).is_err());
 }
+
+#[test]
+fn exploration_requests_closed_schema_and_validates_model_created_characters_and_tasks() {
+    let mut state = State::new();
+    for destination in ["workshop", "cove"] {
+        state
+            .apply(&wonderwilds_domain::story::Command {
+                command_id: destination.into(),
+                expected_revision: state.revision(),
+                action: wonderwilds_domain::story::Action::Travel {
+                    destination_id: destination.into(),
+                },
+            })
+            .unwrap();
+    }
+    let content = crate::story::generation::fallback(&state).unwrap();
+    let (url, server) = server("200 OK", envelope(&content).to_string());
+    let provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+    let input = crate::story::generation::input(&state).unwrap();
+    let output = crate::story::generation::ExplorationProvider::propose(&provider, &input).unwrap();
+    assert_eq!(output, content);
+    let body = server.join().unwrap();
+    assert_eq!(
+        body["response_format"]["json_schema"]["name"],
+        "GeneratedNeighbourhood"
+    );
+    assert_eq!(body["response_format"]["json_schema"]["strict"], true);
+    let prompt = body["messages"][1]["content"].as_str().unwrap();
+    assert!(!prompt.contains("profile"));
+    assert!(!prompt.contains("session"));
+    assert!(crate::story::planning::ValidatedPlan::generated(&state, output, true).is_ok());
+    let mut bad = content;
+    bad["steps"] = json!([]);
+    assert!(crate::story::planning::ValidatedPlan::generated(&state, bad, true).is_err());
+}

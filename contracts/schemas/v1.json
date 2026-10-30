@@ -2,6 +2,106 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://wonderwilds.invalid/contracts/v1",
   "$defs": {
+    "GeneratedNeighbourhood": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[^<>\\u0000-\\u001f]+$"
+        },
+        "personality": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^[^<>\\u0000-\\u001f]+$"
+        },
+        "greeting": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180,
+          "pattern": "^[^<>\\u0000-\\u001f]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[^<>\\u0000-\\u001f]+$"
+        },
+        "premise": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^[^<>\\u0000-\\u001f]+$"
+        },
+        "payoff": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180,
+          "pattern": "^[^<>\\u0000-\\u001f]+$"
+        },
+        "sprite": {
+          "type": "string",
+          "enum": [
+            "pip",
+            "tansy",
+            "nib",
+            "flutter",
+            "cleo",
+            "bramble",
+            "patter",
+            "twizzle",
+            "luna",
+            "pebble",
+            "glimmer",
+            "sail"
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60,
+                "pattern": "^[^<>\\u0000-\\u001f]+$"
+              },
+              "shape": {
+                "type": "string",
+                "enum": [
+                  "hollow",
+                  "leaf",
+                  "stones",
+                  "trail",
+                  "instrument"
+                ]
+              }
+            },
+            "required": [
+              "label",
+              "shape"
+            ]
+          }
+        }
+      },
+      "required": [
+        "name",
+        "personality",
+        "greeting",
+        "title",
+        "premise",
+        "payoff",
+        "sprite",
+        "steps"
+      ]
+    },
     "Parameters": {
       "oneOf": [
         {
@@ -2951,6 +3051,92 @@
           },
           "minItems": 1,
           "maxItems": 12
+        },
+        "neighbourMissions": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "characterId": {
+                "type": "string",
+                "enum": [
+                  "marina",
+                  "fern",
+                  "moss",
+                  "orla",
+                  "hazel"
+                ]
+              },
+              "locationId": {
+                "type": "string",
+                "enum": [
+                  "cove",
+                  "fern_hollow",
+                  "mossy_clearing",
+                  "owl_grove",
+                  "acorn_trail"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "archived",
+                  "completed",
+                  "offered"
+                ]
+              },
+              "inspected": {
+                "type": "boolean"
+              },
+              "task": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "payoff": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "generatedStory": {
+                "$ref": "#/$defs/GeneratedNeighbourhood"
+              },
+              "storySource": {
+                "type": "string",
+                "enum": [
+                  "llm",
+                  "authored_fallback"
+                ]
+              },
+              "generation": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000000
+              },
+              "stepIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3
+              }
+            },
+            "required": [
+              "characterId",
+              "locationId",
+              "title",
+              "status",
+              "inspected",
+              "task",
+              "payoff"
+            ]
+          }
         }
       },
       "required": [
@@ -3187,7 +3373,11 @@
       "properties": {
         "sceneSource": {
           "type": "string",
-          "enum": ["authored", "llm", "authored_fallback"],
+          "enum": [
+            "authored",
+            "llm",
+            "authored_fallback"
+          ],
           "description": "Source of the displayed scene on this read, not a live connection probe. Optional for historical command receipts."
         },
         "schemaVersion": {
@@ -3212,7 +3402,12 @@
           "enum": [
             "bridge_bank",
             "workshop",
-            "far_bank"
+            "far_bank",
+            "cove",
+            "fern_hollow",
+            "mossy_clearing",
+            "owl_grove",
+            "acorn_trail"
           ]
         },
         "commandBudgetExhausted": {

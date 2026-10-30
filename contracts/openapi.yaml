@@ -954,7 +954,7 @@
         "$ref": "./schemas/v1.json#/$defs/StoryCommand"
       },
       "StorySnapshot": {
-        "description": "Story reads include sceneSource for displayed prose; historical command receipts may omit it.",
+        "description": "Story reads include sceneSource for displayed prose and may include neighbourhood mission status in sceneInput. Coarse travel includes five neighbourhood locations. Generated neighbourhood stories are optional saved projections; clients still submit only revision-bound choices. Historical command receipts may omit additive fields.",
         "$ref": "./schemas/v1.json#/$defs/StorySnapshot"
       },
       "StoryAction": {

@@ -568,3 +568,37 @@ fn sequel_planning_sources_preserve_partial_remaining_quantities() {
         serde_json::from_value(glow["action"].clone()).unwrap(),
     );
 }
+
+#[test]
+fn neighbourhood_scenes_bind_present_characters_and_persist_missions() {
+    let mut state = workshop();
+    for p in &exploration::PLACES {
+        apply(
+            &mut state,
+            Action::Travel {
+                destination_id: p.location.as_str().into(),
+            },
+        );
+        apply(
+            &mut state,
+            Action::Talk {
+                character_id: p.character.into(),
+                topic_id: "start_neighbour_story".into(),
+            },
+        );
+        let input = build_scene_input(&state).unwrap();
+        let scene = authored_scene(&state).unwrap();
+        assert_eq!(input["here"]["characters"][0]["id"], p.character);
+        assert_eq!(scene["presentation"][0]["speakerId"], p.character);
+        assert!(input["neighbourMissions"].as_array().unwrap().len() <= 5);
+        for action in state.available_actions() {
+            let mut next = state.clone();
+            apply(&mut next, action.clone());
+            assert!(
+                authored_scene(&next).is_ok(),
+                "{action:?}: {:?}",
+                authored_scene(&next)
+            );
+        }
+    }
+}

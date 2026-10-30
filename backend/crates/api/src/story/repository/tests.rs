@@ -350,6 +350,7 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
     legacy_series_upgrade(&mut admin, &repo, &other);
     v2_series_upgrade(&mut admin, &repo, &other);
     exhausted_upgrade(&mut admin, &repo, &other);
+    generated_neighbourhood_replay(&repo, &other);
 
     let mut lifecycle = PostgresIdentity::new(Client::connect(&restricted, NoTls).unwrap());
     let verified = VerifiedContext {
@@ -730,4 +731,89 @@ fn exhausted_upgrade(admin: &mut Client, repo: &PostgresRepository, identity: &I
     let current = repo.execute(identity, &next).unwrap();
     assert_eq!(current["revision"], 257);
     assert_eq!(repo.verify_history(identity).unwrap(), current);
+}
+
+fn generated_neighbourhood_replay(repo: &PostgresRepository, identity: &Identity) {
+    let mut current = repo.read(identity).unwrap();
+    if current["locationId"] == "far_bank" {
+        current = repo
+            .execute(
+                identity,
+                &choose(&current, "gen-bank", "travel", Some("bridge_bank")),
+            )
+            .unwrap();
+    }
+    if current["locationId"] != "workshop" {
+        current = repo
+            .execute(
+                identity,
+                &choose(&current, "gen-workshop", "travel", Some("workshop")),
+            )
+            .unwrap();
+    }
+    for cycle in 0..8 {
+        let travel = choose(
+            &current,
+            &format!("gen-travel-{cycle}"),
+            "travel",
+            Some("cove"),
+        );
+        let candidate = repo.generation_state(identity, &travel).unwrap().unwrap();
+        let mut content = super::super::generation::fallback(&candidate).unwrap();
+        content["name"] = json!(format!("Visitor {cycle}"));
+        content["steps"] = json!([{"label":"Listen to the shell.","shape":"stones"},{"label":"Look at the winding trail.","shape":"trail"}]);
+        let plan = ValidatedPlan::generated(&candidate, content.clone(), true).unwrap();
+        if cycle == 0 {
+            let mut faulty = repo.clone();
+            faulty.fail_before_commit = true;
+            assert_eq!(
+                faulty.execute_planned(identity, &travel, Some(&plan)),
+                Err(Error::Unavailable)
+            );
+            assert_eq!(repo.read(identity).unwrap(), current);
+        }
+        current = repo
+            .execute_planned(identity, &travel, Some(&plan))
+            .unwrap();
+        assert_eq!(repo.execute(identity, &travel).unwrap(), current);
+        assert!(repo.generation_state(identity, &travel).unwrap().is_none());
+        assert_eq!(
+            current["sceneInput"]["neighbourMissions"][0]["generatedStory"],
+            content
+        );
+        assert_eq!(
+            current["sceneInput"]["neighbourMissions"][0]["generation"],
+            cycle + 1
+        );
+        for (step, kind) in ["talk", "inspect", "inspect", "talk"].iter().enumerate() {
+            current = repo
+                .execute(
+                    identity,
+                    &choose(&current, &format!("gen-{cycle}-{step}"), kind, None),
+                )
+                .unwrap();
+        }
+        assert_eq!(
+            current["sceneInput"]["neighbourMissions"][0]["status"],
+            "completed"
+        );
+        assert_eq!(repo.verify_history(identity).unwrap(), current);
+        assert_eq!(
+            PostgresRepository::new(repo.connection.clone())
+                .read(identity)
+                .unwrap(),
+            current
+        );
+        current = repo
+            .execute(
+                identity,
+                &choose(
+                    &current,
+                    &format!("gen-return-{cycle}"),
+                    "travel",
+                    Some("workshop"),
+                ),
+            )
+            .unwrap();
+    }
 }
