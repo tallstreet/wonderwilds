@@ -73,7 +73,10 @@ try {
               await new Promise((resolve) => {
                 window.resolveAttempt = resolve;
               });
-            return { message: 'The server checked this answer.', result: 'not_assessed' };
+            return {
+              message: 'The server checked this answer.',
+              result: 'not_assessed',
+            };
           },
           onSupport: async (kind) => {
             window.calls.push(['support', kind]);
@@ -82,7 +85,10 @@ try {
               await new Promise((resolve) => {
                 window.resolveSupport = resolve;
               });
-            return { message: 'Help recorded.', narrationText: 'Reviewed local narration.' };
+            return {
+              message: 'Help recorded.',
+              narrationText: 'Reviewed local narration.',
+            };
           },
           narrate: async (text) => {
             window.calls.push(['narrate', text]);
@@ -143,7 +149,10 @@ try {
   assert.match(await page.locator('section').textContent(), /Pattern so far: Leaf, Star, Leaf/);
   await click('Choose: Star');
   await click('Check my answer');
-  assert.deepEqual(await lastAnswer(), { kind: 'choices', choiceIds: ['star'] });
+  assert.deepEqual(await lastAnswer(), {
+    kind: 'choices',
+    choiceIds: ['star'],
+  });
 
   await mount(
     'pattern_sort',
@@ -171,7 +180,10 @@ try {
   });
   await click('Choose: Long rope, length 5 units');
   await click('Check my answer');
-  assert.deepEqual(await lastAnswer(), { kind: 'choices', choiceIds: ['long'] });
+  assert.deepEqual(await lastAnswer(), {
+    kind: 'choices',
+    choiceIds: ['long'],
+  });
 
   await mount('pattern_sort', {
     objects: [
@@ -203,6 +215,64 @@ try {
     'multiple',
   );
 
+  // Pick-one questions are answered by tapping the picture itself: no abstract answer slot.
+  const countParameters = {
+    objects: [
+      { id: 'shown-0', label: '1', attribute: 'shown' },
+      { id: 'shown-1', label: '2', attribute: 'shown' },
+      { id: 'number-2', label: '2', attribute: 'choice' },
+      { id: 'number-3', label: '3', attribute: 'choice' },
+      { id: 'number-4', label: '4', attribute: 'choice' },
+    ],
+    prefixLength: 2,
+    instructionId: 'count-next',
+  };
+  assert.equal(
+    await page.evaluate(
+      (parameters) => window.presentationTest({ templateId: 'pattern_sort', parameters }).prompt,
+      countParameters,
+    ),
+    'Count along: 1, 2. Which number comes next?',
+  );
+  await mount('pattern_sort', countParameters, { choiceMode: 'single' });
+  assert.equal(await page.locator('.ww-answer-slot').count(), 0);
+  assert.equal(await page.locator('.ww-next-tile').innerText(), '?');
+  await click('Choose: 3');
+  await click('Choose: 4');
+  assert.equal(
+    await page.getByRole('button', { name: 'Choose: 3', exact: true }).getAttribute('aria-pressed'),
+    'false',
+  );
+  assert.equal(
+    await page.getByRole('button', { name: 'Choose: 4', exact: true }).getAttribute('aria-pressed'),
+    'true',
+  );
+  assert.match(await page.locator('.ww-next-tile').innerText(), /4/);
+  await click('Check my answer');
+  assert.deepEqual(await lastAnswer(), {
+    kind: 'choices',
+    choiceIds: ['number-4'],
+  });
+
+  await mount(
+    'pattern_sort',
+    {
+      objects: [
+        { id: 'a', label: 'round object 1', attribute: 'round' },
+        { id: 'b', label: 'square object 2', attribute: 'square' },
+        { id: 'c', label: 'round object 3', attribute: 'round' },
+      ],
+      instructionId: 'sort-round',
+    },
+    { choiceMode: 'multiple' },
+  );
+  assert.equal(await page.locator('.ww-answer-slot').count(), 0);
+  await click('Choose: round object 1');
+  await click('Choose: round object 3');
+  await click('Choose: round object 1');
+  await click('Check my answer');
+  assert.deepEqual(await lastAnswer(), { kind: 'choices', choiceIds: ['c'] });
+
   await mount(
     'phonics_word_building',
     { tiles: ['t', 'a', 't'], promptId: 'build' },
@@ -215,7 +285,10 @@ try {
   await click('Undo last choice');
   await click('Choose tile 1: t');
   await click('Check my answer');
-  assert.deepEqual(await lastAnswer(), { kind: 'choices', choiceIds: ['2', '1', '0'] });
+  assert.deepEqual(await lastAnswer(), {
+    kind: 'choices',
+    choiceIds: ['2', '1', '0'],
+  });
   await click('Read the activity aloud (with support)');
   assert.deepEqual(
     await page.evaluate(() => window.calls.filter((c) => ['support', 'narrate'].includes(c[0]))),
@@ -246,10 +319,16 @@ try {
   await click('Choose: Plant the seed');
   await click('Choose: Water the seed');
   await click('Check my answer');
-  assert.deepEqual(await lastAnswer(), { kind: 'choices', choiceIds: ['plant', 'water'] });
+  assert.deepEqual(await lastAnswer(), {
+    kind: 'choices',
+    choiceIds: ['plant', 'water'],
+  });
   await mount(
     'story_message',
-    { cards: [{ id: 'kind', text: '<img src=x onerror=alert(1)>' }], promptId: 'reason' },
+    {
+      cards: [{ id: 'kind', text: '<img src=x onerror=alert(1)>' }],
+      promptId: 'reason',
+    },
     {},
     'E14',
   );
@@ -360,7 +439,10 @@ try {
   await page.evaluate(() => {
     window.delayTranscript = false;
   });
-  await mount('phonics_word_building', { tiles: ['c', 'a', 't'], promptId: 'word-cat' });
+  await mount('phonics_word_building', {
+    tiles: ['c', 'a', 't'],
+    promptId: 'word-cat',
+  });
   assert.equal(await page.getByRole('button', { name: 'Say my answer' }).count(), 0);
   await mount('missing_quantity', { total: 6, given: 2 }, {}, 'M06', ['hint']);
   assert.equal(await page.getByRole('button', { name: 'Say my answer' }).isDisabled(), true);
@@ -387,7 +469,10 @@ try {
   await page.getByRole('textbox', { name: 'Your answer', exact: true }).fill('Blue cup.');
   await click('Use this answer');
   await click('Check my answer');
-  assert.deepEqual(await lastAnswer(), { kind: 'choices', choiceIds: ['blue'] });
+  assert.deepEqual(await lastAnswer(), {
+    kind: 'choices',
+    choiceIds: ['blue'],
+  });
 
   // Exercise real browser recording and WAV conversion with a synthetic microphone.
   let upload;

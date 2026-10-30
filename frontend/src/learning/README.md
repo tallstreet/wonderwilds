@@ -44,6 +44,19 @@ plate transfers, card reordering, exact answer payloads and narrow-screen layout
 Run it with the local Vite server and `CHROMIUM_PATH` as for the other browser tests.
 The component suite still covers all six families and support/lifecycle boundaries.
 
+## Quiz-style questions
+
+Pick-one and pick-many questions (count-next, pattern-next, sort, position,
+rope length, /s/ sound, message matching) are answered by tapping the picture
+itself: no answer tray. The chosen card shows a thick outline plus a "✓ Chosen"
+label; in sequences a read-only "?" tile fills with the choice. Position
+pictures carry a text caption. Only ordering tasks (word tiles, story order)
+keep numbered answer slots, since position is part of the answer. Prompts say
+what to do concretely (e.g. "Count along: 1, 2, 3. Which number comes next?",
+"Which picture shows the cup beside the tree?") and the bridge and sharing
+prompts state their numbers. Answer payloads, accessible names and server
+assessment are unchanged.
+
 ## Optional spoken and typed answers
 
 `ActivityCallbacks.recorder` supplies `start`, `finish` (transcript) and `cancel`.

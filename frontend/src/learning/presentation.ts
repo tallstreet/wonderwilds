@@ -10,13 +10,14 @@ export function authoredPresentation(encounter: EncounterInstance): ActivityPres
     'total' in parameters &&
     !('recipients' in parameters)
   ) {
+    const given = parameters.given ?? 0;
     return {
-      prompt: 'Help Pip finish the bridge!',
+      prompt: `The bridge needs ${parameters.total} planks. ${given === 1 ? '1 plank is' : `${given} planks are`} already in place. Tap planks to add the ones that are missing.`,
     };
   }
   if (encounter.templateId === 'equal_sharing' && 'recipients' in parameters) {
     return {
-      prompt: `Share ${parameters.total} berries. Give everyone the same!`,
+      prompt: `Share ${parameters.total} berries between ${parameters.recipients} friends. Everyone gets the same number!`,
     };
   }
   const promptId =
@@ -26,19 +27,25 @@ export function authoredPresentation(encounter: EncounterInstance): ActivityPres
         ? parameters.promptId
         : null;
   if (!promptId || !Object.hasOwn(prompts, promptId)) return null;
+  const shown =
+    'objects' in parameters
+      ? parameters.objects.filter((o) => 'attribute' in o && o.attribute === 'shown')
+      : [];
   const shortPrompts: Record<string, string> = {
-    'count-next': 'Which number comes next?',
-    'pattern-next': 'What comes next?',
-    'sort-round': 'Find all the round things.',
-    'place-beside': 'Put it beside the tree.',
-    'longest-rope': 'Which rope is longest?',
-    'sound-s': 'Which letter makes /s/?',
-    'word-cat': 'Build the word for a pet that meows.',
-    'word-sun': 'Build the word for our bright daytime star.',
-    'word-map': 'Build the word for a drawing of places.',
-    'seed-order': 'Help Pip grow a seed. What happens first?',
-    'listen-direction': 'Put the cup beside the tree.',
-    'read-red-cup': 'Pip needs a red cup. Can you find it?',
+    'count-next': shown.length
+      ? `Count along: ${shown.map((o) => o.label).join(', ')}. Which number comes next?`
+      : 'Which number comes next?',
+    'pattern-next': 'Look at the pattern. Which picture comes next?',
+    'sort-round': 'Tap every round shape.',
+    'place-beside': 'Which picture shows the cup beside the tree?',
+    'longest-rope': 'Which rope is the longest? Tap it.',
+    'sound-s': 'Which letter makes the /s/ sound? Tap it.',
+    'word-cat': 'Tap the letters in order to spell the word for a pet that meows.',
+    'word-sun': 'Tap the letters in order to spell the word for our bright daytime star.',
+    'word-map': 'Tap the letters in order to spell the word for a drawing of places.',
+    'seed-order': 'Help Pip grow a seed. Tap the cards in order: first, next, last.',
+    'listen-direction': 'Pip says: “Put the cup beside the tree.” Tap the matching picture.',
+    'read-red-cup': 'Pip needs a red cup. Tap the message that says so.',
   };
   const prompt = shortPrompts[promptId] ?? prompts[promptId as keyof typeof prompts].instruction;
   const choiceMode =

@@ -1,23 +1,20 @@
-import type {
-  Answer,
-  EncounterInstance,
-} from "../../../contracts/generated/contracts.ts";
-import "./activity.css";
-import { art, picture } from "./visuals.ts";
-import { pointerMoves } from "./drag.ts";
-import { matchingChoice, spokenNumber } from "./answer-text.ts";
-import type { AnswerRecorder } from "./voice.ts";
+import type { Answer, EncounterInstance } from '../../../contracts/generated/contracts.ts';
+import './activity.css';
+import { art, picture } from './visuals.ts';
+import { pointerMoves } from './drag.ts';
+import { matchingChoice, spokenNumber } from './answer-text.ts';
+import type { AnswerRecorder } from './voice.ts';
 
-export type SupportKind = "hint" | "worked_example" | "read_aloud";
+export type SupportKind = 'hint' | 'worked_example' | 'read_aloud';
 export type ActivityFeedback = {
   message: string;
-  result?: "correct" | "incorrect" | "not_assessed";
+  result?: 'correct' | 'incorrect' | 'not_assessed';
 };
 export type SupportFeedback = { message: string; narrationText?: string };
 export type ActivityPresentation = {
   /** Approved authored instructions, resolved from promptId/instructionId by the content adapter. */
   prompt: string;
-  choiceMode?: "single" | "multiple" | "ordered";
+  choiceMode?: 'single' | 'multiple' | 'ordered';
   narrationAvailable?: boolean;
 };
 export type ActivityCallbacks = {
@@ -41,37 +38,37 @@ export function mountActivity(
   presentation: ActivityPresentation,
 ): { destroy(): void; focus(): void } {
   const document = container.ownerDocument;
-  const root = document.createElement("section");
-  root.className = "ww-activity";
+  const root = document.createElement('section');
+  root.className = 'ww-activity';
   const id = `ww-activity-${++nextActivityId}`;
-  const heading = document.createElement("h2");
+  const heading = document.createElement('h2');
   heading.id = `${id}-heading`;
-  heading.textContent = "Help with an adventure";
+  heading.textContent = 'Help with an adventure';
   heading.tabIndex = -1;
-  heading.className = "ww-sr-only";
-  root.setAttribute("aria-labelledby", heading.id);
-  const prompt = document.createElement("p");
+  heading.className = 'ww-sr-only';
+  root.setAttribute('aria-labelledby', heading.id);
+  const prompt = document.createElement('p');
   prompt.id = `${id}-prompt`;
   prompt.textContent = presentation.prompt;
-  prompt.className = "ww-instruction";
-  root.setAttribute("aria-describedby", prompt.id);
-  const live = document.createElement("p");
-  live.className = "ww-activity-status";
-  live.setAttribute("role", "status");
-  live.setAttribute("aria-live", "polite");
-  live.setAttribute("aria-atomic", "true");
-  const controls = document.createElement("div");
-  const header = document.createElement("header");
-  header.className = "ww-activity-header";
-  header.append(art(document, "pip", "hero"), prompt);
-  const help = document.createElement("p");
-  help.className = "ww-gesture-help";
-  help.textContent = "Drag to move · Tap to choose";
-  controls.className = "ww-play-area";
+  prompt.className = 'ww-instruction';
+  root.setAttribute('aria-describedby', prompt.id);
+  const live = document.createElement('p');
+  live.className = 'ww-activity-status';
+  live.setAttribute('role', 'status');
+  live.setAttribute('aria-live', 'polite');
+  live.setAttribute('aria-atomic', 'true');
+  const controls = document.createElement('div');
+  const header = document.createElement('header');
+  header.className = 'ww-activity-header';
+  header.append(art(document, 'pip', 'hero'), prompt);
+  const help = document.createElement('p');
+  help.className = 'ww-gesture-help';
+  help.textContent = 'Drag to move · Tap to choose';
+  controls.className = 'ww-play-area';
   root.append(heading, header, help, controls);
   let destroyed = false;
   let busy = false;
-  let answer: () => Answer = () => ({ kind: "choices", choiceIds: [] });
+  let answer: () => Answer = () => ({ kind: 'choices', choiceIds: [] });
   let refresh: () => void = () => {};
   let applyText: ((text: string) => boolean) | undefined;
   let recording = false;
@@ -81,16 +78,12 @@ export function mountActivity(
   const buttons: HTMLButtonElement[] = [];
   const conditions = new Map<HTMLButtonElement, () => boolean>();
 
-  function button(
-    label: string,
-    action: () => void,
-    disabled: () => boolean = () => false,
-  ) {
-    const node = document.createElement("button");
-    node.type = "button";
+  function button(label: string, action: () => void, disabled: () => boolean = () => false) {
+    const node = document.createElement('button');
+    node.type = 'button';
     node.textContent = label;
-    node.setAttribute("aria-label", label);
-    node.addEventListener("click", () => {
+    node.setAttribute('aria-label', label);
+    node.addEventListener('click', () => {
       if (!busy && !recording && !destroyed) action();
     });
     buttons.push(node);
@@ -103,9 +96,8 @@ export function mountActivity(
     for (const node of buttons)
       node.disabled = busy || recording || Boolean(conditions.get(node)?.());
     if (textInput)
-      textInput.disabled =
-        busy || recording || !encounter.permittedActions.includes("attempt");
-    root.setAttribute("aria-busy", String(busy));
+      textInput.disabled = busy || recording || !encounter.permittedActions.includes('attempt');
+    root.setAttribute('aria-busy', String(busy));
   }
   async function perform(operation: () => Promise<void>) {
     if (busy || destroyed) return;
@@ -118,7 +110,7 @@ export function mountActivity(
     } catch {
       if (!destroyed)
         live.textContent =
-          "That did not reach the adventure. Your answer is still here. Please try again.";
+          'That did not reach the adventure. Your answer is still here. Please try again.';
     } finally {
       busy = false;
       update();
@@ -131,11 +123,7 @@ export function mountActivity(
         previousFocus.focus();
     }
   }
-  function node(
-    tag: "div" | "span" | "p" | "fieldset" | "legend",
-    className: string,
-    text = "",
-  ) {
+  function node(tag: 'div' | 'span' | 'p' | 'fieldset' | 'legend', className: string, text = '') {
     const item = document.createElement(tag);
     item.className = className;
     item.textContent = text;
@@ -153,69 +141,61 @@ export function mountActivity(
     return item;
   }
   function unsupported() {
-    controls.textContent =
-      "This activity needs an updated content adapter. Your progress is safe.";
+    controls.textContent = 'This activity needs an updated content adapter. Your progress is safe.';
     return false;
   }
   function configure(): boolean {
     const parameters = encounter.parameters;
-    if (encounter.templateId === "missing_quantity") {
+    if (encounter.templateId === 'missing_quantity') {
       if (
-        !("total" in parameters) ||
+        !('total' in parameters) ||
         !Number.isSafeInteger(parameters.total) ||
         parameters.total < 1 ||
         parameters.total > 20
       )
         return unsupported();
-      const given = ("given" in parameters ? parameters.given : undefined) ?? 0;
+      const given = ('given' in parameters ? parameters.given : undefined) ?? 0;
       if (!Number.isSafeInteger(given) || given < 0 || given > parameters.total)
         return unsupported();
       const placed = new Set<number>();
-      const supply = node("div", "ww-supply ww-plank-supply");
-      const deck = node("div", "ww-bridge-deck");
-      const river = node("div", "ww-river");
+      const supply = node('div', 'ww-supply ww-plank-supply');
+      const deck = node('div', 'ww-bridge-deck');
+      const river = node('div', 'ww-river');
       river.append(deck);
-      const goal = node(
-        "p",
-        "ww-goal",
-        `${parameters.total} planks altogether`,
-      );
-      const count = node("p", "ww-small-count");
+      const goal = node('p', 'ww-goal', `${parameters.total} planks altogether`);
+      const count = node('p', 'ww-small-count');
       const move = (key: string, toDeck: boolean) => {
         const index = Number(key);
-        if (!Number.isInteger(index) || index < 0 || index >= parameters.total)
-          return;
+        if (!Number.isInteger(index) || index < 0 || index >= parameters.total) return;
         if (toDeck) placed.add(index);
         else placed.delete(index);
         update();
       };
       for (let i = 0; i < given; i++) {
-        const fixed = art(document, "plank");
-        fixed.classList.add("ww-fixed-plank");
+        const fixed = art(document, 'plank');
+        fixed.classList.add('ww-fixed-plank');
         deck.append(fixed);
       }
       const loose = Array.from({ length: parameters.total }, (_, i) => {
-        const item = button(`Place plank ${i + 1}`, () =>
-          move(String(i), !placed.has(i)),
-        );
-        item.className = "ww-plank-piece";
-        item.replaceChildren(art(document, "plank"));
+        const item = button(`Place plank ${i + 1}`, () => move(String(i), !placed.has(i)));
+        item.className = 'ww-plank-piece';
+        item.replaceChildren(art(document, 'plank'));
         drag.source(item, String(i));
         return item;
       });
-      const spaces = node("div", "ww-bridge-spaces");
+      const spaces = node('div', 'ww-bridge-spaces');
       for (let i = 0; i < parameters.total - given; i++)
-        spaces.append(node("span", "ww-plank-space"));
+        spaces.append(node('span', 'ww-plank-space'));
       deck.append(spaces);
-      const added = node("div", "ww-added-planks");
+      const added = node('div', 'ww-added-planks');
       deck.append(added);
       drag.target(river, (key) => move(key, true));
       drag.target(supply, (key) => move(key, false));
-      const tools = node("div", "ww-small-tools");
+      const tools = node('div', 'ww-small-tools');
       tools.append(
         iconButton(
-          "Add one object",
-          "＋",
+          'Add one object',
+          '＋',
           () => {
             const i = loose.findIndex((_, i) => !placed.has(i));
             if (i >= 0) move(String(i), true);
@@ -223,8 +203,8 @@ export function mountActivity(
           () => placed.size >= parameters.total,
         ),
         iconButton(
-          "Remove one object",
-          "↶",
+          'Remove one object',
+          '↶',
           () => {
             const i = [...placed].at(-1);
             if (i !== undefined) move(String(i), false);
@@ -235,7 +215,7 @@ export function mountActivity(
       controls.append(
         goal,
         river,
-        node("p", "ww-tray-label", "Loose planks"),
+        node('p', 'ww-tray-label', 'Loose planks'),
         supply,
         tools,
         count,
@@ -244,10 +224,7 @@ export function mountActivity(
         loose.forEach((item, i) => {
           const target = placed.has(i) ? added : supply;
           if (item.parentElement !== target) target.append(item);
-          item.setAttribute(
-            "aria-label",
-            `${placed.has(i) ? "Return" : "Place"} plank ${i + 1}`,
-          );
+          item.setAttribute('aria-label', `${placed.has(i) ? 'Return' : 'Place'} plank ${i + 1}`);
         });
         spaces.hidden = placed.size > 0;
         count.textContent = `${given} ready + ${placed.size} added`;
@@ -259,12 +236,12 @@ export function mountActivity(
         for (let i = 0; i < value; i++) placed.add(i);
         return true;
       };
-      answer = () => ({ kind: "quantity", value: placed.size });
+      answer = () => ({ kind: 'quantity', value: placed.size });
       return true;
     }
-    if (encounter.templateId === "equal_sharing") {
+    if (encounter.templateId === 'equal_sharing') {
       if (
-        !("recipients" in parameters) ||
+        !('recipients' in parameters) ||
         !Number.isSafeInteger(parameters.total) ||
         parameters.total < 1 ||
         parameters.total > 20 ||
@@ -274,10 +251,10 @@ export function mountActivity(
       )
         return unsupported();
       const locations = Array<number>(parameters.total).fill(-1);
-      help.textContent = "Drag to a plate · Or tap a berry, then a plate";
+      help.textContent = 'Drag to a plate · Or tap a berry, then a plate';
       let selected = -1;
-      const supply = node("div", "ww-supply ww-berry-basket");
-      const plates = node("div", "ww-plates");
+      const supply = node('div', 'ww-supply ww-berry-basket');
+      const plates = node('div', 'ww-plates');
       const bowls: HTMLElement[] = [];
       const counts: HTMLElement[] = [];
       const move = (key: string, to: number) => {
@@ -294,77 +271,64 @@ export function mountActivity(
             update();
           } else move(String(i), -1);
         });
-        item.className = "ww-berry-piece";
-        item.replaceChildren(art(document, "berry"));
+        item.className = 'ww-berry-piece';
+        item.replaceChildren(art(document, 'berry'));
         drag.source(item, String(i));
         return item;
       });
       drag.target(supply, (key) => move(key, -1));
       for (let i = 0; i < parameters.recipients; i++) {
-        const plate = node("fieldset", "ww-friend-plate");
-        const legend = node(
-          "legend",
-          "ww-friend-name",
-          i === 0 ? "Pip" : `Friend ${i + 1}`,
-        );
+        const plate = node('fieldset', 'ww-friend-plate');
+        const legend = node('legend', 'ww-friend-name', i === 0 ? 'Pip' : `Friend ${i + 1}`);
         plate.append(
           legend,
-          art(
-            document,
-            ["pip", "rose", "clover", "poppy", "gold", "wren"][i],
-            "hero",
-          ),
+          art(document, ['pip', 'rose', 'clover', 'poppy', 'gold', 'wren'][i], 'hero'),
         );
-        const bowl = node("div", "ww-plate-objects");
+        const bowl = node('div', 'ww-plate-objects');
         bowls.push(bowl);
         const add = iconButton(
           `Give one object to friend ${i + 1}`,
-          "＋",
+          '＋',
           () => {
             const pick = selected >= 0 ? selected : locations.indexOf(-1);
             if (pick >= 0) move(String(pick), i);
           },
           () => !locations.includes(-1),
         );
-        add.classList.add("ww-plate-add");
+        add.classList.add('ww-plate-add');
         const remove = iconButton(
           `Take one object back from friend ${i + 1}`,
-          "↶",
+          '↶',
           () => {
             const pick = locations.lastIndexOf(i);
             if (pick >= 0) move(String(pick), -1);
           },
           () => !locations.includes(i),
         );
-        const count = node("span", "ww-plate-count");
+        const count = node('span', 'ww-plate-count');
         counts.push(count);
         plate.append(bowl, add, remove, count);
         plates.append(plate);
         drag.target(plate, (key) => move(key, i));
-        plate.addEventListener("click", (event) => {
+        plate.addEventListener('click', (event) => {
           if (
             busy ||
             destroyed ||
             !(event.target instanceof Element) ||
-            event.target.closest("button")
+            event.target.closest('button')
           )
             return;
           const pick = selected >= 0 ? selected : locations.indexOf(-1);
           if (pick >= 0) move(String(pick), i);
         });
       }
-      const count = node("p", "ww-small-count");
-      controls.append(
-        plates,
-        node("p", "ww-tray-label", "Berries to share"),
-        supply,
-        count,
-      );
+      const count = node('p', 'ww-small-count');
+      controls.append(plates, node('p', 'ww-tray-label', 'Berries to share'), supply, count);
       refresh = () => {
         berries.forEach((item, i) => {
           const target = locations[i] < 0 ? supply : bowls[locations[i]];
           if (item.parentElement !== target) target.append(item);
-          item.setAttribute("aria-pressed", String(selected === i));
+          item.setAttribute('aria-pressed', String(selected === i));
         });
         counts.forEach((count, i) => {
           count.textContent = String(locations.filter((v) => v === i).length);
@@ -372,7 +336,7 @@ export function mountActivity(
         count.textContent = `${locations.filter((v) => v < 0).length} left in the basket`;
       };
       answer = () => ({
-        kind: "groups",
+        kind: 'groups',
         groups: Array.from(
           { length: parameters.recipients },
           (_, i) => locations.filter((v) => v === i).length,
@@ -382,31 +346,27 @@ export function mountActivity(
     }
     const choices: { id: string; label: string; length?: number }[] = [];
     const prefix: string[] = [];
-    if (
-      encounter.templateId === "pattern_sort" ||
-      encounter.templateId === "spatial_measurement"
-    ) {
+    if (encounter.templateId === 'pattern_sort' || encounter.templateId === 'spatial_measurement') {
       if (
-        !("objects" in parameters) ||
+        !('objects' in parameters) ||
         parameters.objects.length < 1 ||
         parameters.objects.length > 20
       )
         return unsupported();
       parameters.objects.forEach((object) => {
-        if ("attribute" in object && object.attribute === "shown")
-          prefix.push(object.label);
+        if ('attribute' in object && object.attribute === 'shown') prefix.push(object.label);
         else
           choices.push({
             id: object.id,
             label: object.label,
-            length: "length" in object ? object.length : undefined,
+            length: 'length' in object ? object.length : undefined,
           });
       });
       if (
         !prefix.length &&
-        "prefixLength" in parameters &&
+        'prefixLength' in parameters &&
         parameters.prefixLength !== undefined &&
-        "unitLength" in parameters &&
+        'unitLength' in parameters &&
         parameters.unitLength
       ) {
         if (
@@ -421,43 +381,25 @@ export function mountActivity(
         for (let i = 0; i < parameters.prefixLength; i++)
           prefix.push(choices[i % parameters.unitLength].label);
       }
-    } else if (encounter.templateId === "phonics_word_building") {
-      if (
-        !("tiles" in parameters) ||
-        !parameters.tiles.length ||
-        parameters.tiles.length > 20
-      )
+    } else if (encounter.templateId === 'phonics_word_building') {
+      if (!('tiles' in parameters) || !parameters.tiles.length || parameters.tiles.length > 20)
         return unsupported();
-      parameters.tiles.forEach((label, i) =>
-        choices.push({ id: String(i), label }),
-      );
-    } else if (encounter.templateId === "story_message") {
-      if (
-        !("cards" in parameters) ||
-        !parameters.cards.length ||
-        parameters.cards.length > 20
-      )
+      parameters.tiles.forEach((label, i) => choices.push({ id: String(i), label }));
+    } else if (encounter.templateId === 'story_message') {
+      if (!('cards' in parameters) || !parameters.cards.length || parameters.cards.length > 20)
         return unsupported();
-      parameters.cards.forEach((card) =>
-        choices.push({ id: card.id, label: card.text }),
-      );
+      parameters.cards.forEach((card) => choices.push({ id: card.id, label: card.text }));
     } else return unsupported();
-    if (
-      !choices.length ||
-      new Set(choices.map((c) => c.id)).size !== choices.length
-    )
+    if (!choices.length || new Set(choices.map((c) => c.id)).size !== choices.length)
       return unsupported();
-    const maximumLength = Math.max(
-      1,
-      ...choices.map((choice) => choice.length ?? 0),
-    );
+    const maximumLength = Math.max(1, ...choices.map((choice) => choice.length ?? 0));
     const mode =
       presentation.choiceMode ??
-      (["phonics_word_building", "story_message"].includes(encounter.templateId)
-        ? "ordered"
-        : "single");
+      (['phonics_word_building', 'story_message'].includes(encounter.templateId)
+        ? 'ordered'
+        : 'single');
     let selected: string[] = [];
-    if (mode === "single" && encounter.templateId !== "phonics_word_building") {
+    if (mode === 'single' && encounter.templateId !== 'phonics_word_building') {
       applyText = (text) => {
         const id = matchingChoice(text, choices);
         if (!id) return false;
@@ -467,70 +409,59 @@ export function mountActivity(
     }
     // Pick-one and pick-many questions are answered by tapping the picture itself, as in a quiz.
     // Only ordering tasks need slots, because position is part of the answer.
-    const direct = mode !== "ordered";
+    const direct = mode !== 'ordered';
     if (direct)
-      help.textContent =
-        mode === "multiple" ? "Tap every one that fits" : "Tap your answer";
-    const line = node("div", "ww-pattern-line");
+      help.textContent = mode === 'multiple' ? 'Tap every one that fits' : 'Tap your answer';
+    const line = node('div', 'ww-pattern-line');
     prefix.forEach((label) => {
-      const tile = node("span", "ww-shown-tile");
+      const tile = node('span', 'ww-shown-tile');
       tile.append(picture(document, label));
       line.append(tile);
     });
     if (prefix.length) {
       const description = node(
-        "p",
-        "ww-sr-only",
-        `Pattern so far: ${prefix.join(", ")}. What comes next?`,
+        'p',
+        'ww-sr-only',
+        `Pattern so far: ${prefix.join(', ')}. What comes next?`,
       );
       controls.append(description, line);
     }
-    const selection = node("p", "ww-sr-only");
-    const tray = node("div", "ww-answer-tray");
-    tray.setAttribute("aria-label", "Your answer");
+    const selection = node('p', 'ww-sr-only');
+    const tray = node('div', 'ww-answer-tray');
+    tray.setAttribute('aria-label', 'Your answer');
     // A read-only "?" tile in the sequence that shows the chosen answer in place.
-    const nextTile = node("span", "ww-shown-tile ww-next-tile", "?");
-    nextTile.setAttribute("aria-hidden", "true");
-    const list = node("div", "ww-activity-choices");
+    const nextTile = node('span', 'ww-shown-tile ww-next-tile', '?');
+    nextTile.setAttribute('aria-hidden', 'true');
+    const list = node('div', 'ww-activity-choices');
     const choose = (id: string, index?: number, drop = false) => {
       if (!choices.some((c) => c.id === id)) return;
-      if (mode === "single") selected = [id];
-      else if (mode === "multiple" && index === undefined && !drop) {
-        selected = selected.includes(id)
-          ? selected.filter((value) => value !== id)
-          : [...selected, id];
-      } else if (index !== undefined) {
+      if (mode === 'single') selected = [id];
+      else if (index !== undefined) {
         selected = selected.filter((value) => value !== id);
         selected.splice(Math.min(index, selected.length), 0, id);
       } else if (selected.includes(id)) {
-        if (!drop && mode === "multiple")
-          selected = selected.filter((value) => value !== id);
+        if (!drop && mode === 'multiple') selected = selected.filter((value) => value !== id);
       } else selected.push(id);
       update();
     };
     const resolve = (key: string) =>
-      key.startsWith("selected:")
-        ? selected[Number(key.slice(9))]
-        : key.slice(7);
-    const slots = Array.from(
-      { length: direct ? 0 : choices.length },
-      (_, i) => {
-        const slot = button(`Answer position ${i + 1}`, () => {
-          if (selected[i]) {
-            selected.splice(i, 1);
-            update();
-          }
-        });
-        slot.className = "ww-answer-slot";
-        drag.source(slot, `selected:${i}`);
-        drag.target(slot, (key) => {
-          const id = resolve(key);
-          if (id) choose(id, i, true);
-        });
-        tray.append(slot);
-        return slot;
-      },
-    );
+      key.startsWith('selected:') ? selected[Number(key.slice(9))] : key.slice(7);
+    const slots = Array.from({ length: direct ? 0 : choices.length }, (_, i) => {
+      const slot = button(`Answer position ${i + 1}`, () => {
+        if (selected[i]) {
+          selected.splice(i, 1);
+          update();
+        }
+      });
+      slot.className = 'ww-answer-slot';
+      drag.source(slot, `selected:${i}`);
+      drag.target(slot, (key) => {
+        const id = resolve(key);
+        if (id) choose(id, i, true);
+      });
+      tray.append(slot);
+      return slot;
+    });
     if (!direct)
       drag.target(tray, (key) => {
         const id = resolve(key);
@@ -538,32 +469,27 @@ export function mountActivity(
       });
     const choiceButtons = choices.map((choice, i) => {
       const label =
-        encounter.templateId === "phonics_word_building"
+        encounter.templateId === 'phonics_word_building'
           ? `Choose tile ${i + 1}: ${choice.label}`
-          : `Choose: ${choice.label}${choice.length !== undefined ? `, length ${choice.length} units` : ""}`;
+          : `Choose: ${choice.label}${choice.length !== undefined ? `, length ${choice.length} units` : ''}`;
       const item = button(
         label,
         () => {
           choose(choice.id);
-          if (mode === "ordered")
+          if (mode === 'ordered')
             (
-              Array.from(list.querySelectorAll("button")).find(
-                (b) => !b.disabled,
-              ) ?? slots[0]
+              Array.from(list.querySelectorAll('button')).find((b) => !b.disabled) ?? slots[0]
             ).focus();
         },
-        () => mode === "ordered" && selected.includes(choice.id),
+        () => mode === 'ordered' && selected.includes(choice.id),
       );
-      item.className = "ww-choice-card";
-      item.replaceChildren(
-        picture(document, choice.label, choice.length, maximumLength),
-      );
+      item.className = 'ww-choice-card';
+      item.replaceChildren(picture(document, choice.label, choice.length, maximumLength));
       const captioned =
-        encounter.templateId === "story_message" ||
-        (encounter.templateId === "spatial_measurement" &&
-          choice.length === undefined);
+        encounter.templateId === 'story_message' ||
+        (encounter.templateId === 'spatial_measurement' && choice.length === undefined);
       if (captioned) {
-        const caption = node("span", "ww-card-caption", choice.label);
+        const caption = node('span', 'ww-card-caption', choice.label);
         item.append(caption);
       }
       if (!direct) drag.source(item, `choice:${choice.id}`);
@@ -572,16 +498,16 @@ export function mountActivity(
     });
     if (!direct)
       drag.target(list, (key) => {
-        if (key.startsWith("selected:")) {
+        if (key.startsWith('selected:')) {
           selected.splice(Number(key.slice(9)), 1);
           update();
         }
       });
-    const tools = node("div", "ww-small-tools");
+    const tools = node('div', 'ww-small-tools');
     tools.append(
       iconButton(
-        "Undo last choice",
-        "↶",
+        'Undo last choice',
+        '↶',
         () => {
           selected.pop();
           update();
@@ -589,8 +515,8 @@ export function mountActivity(
         () => !selected.length,
       ),
       iconButton(
-        "Clear answer",
-        "↺",
+        'Clear answer',
+        '↺',
         () => {
           selected = [];
           update();
@@ -605,102 +531,85 @@ export function mountActivity(
     controls.append(
       selection,
       node(
-        "p",
-        "ww-tray-label",
-        mode === "ordered"
-          ? "Put them in order"
-          : mode === "multiple"
-            ? "Tap every one that fits"
-            : "Tap the answer",
+        'p',
+        'ww-tray-label',
+        mode === 'ordered'
+          ? 'Put them in order'
+          : mode === 'multiple'
+            ? 'Tap every one that fits'
+            : 'Tap the answer',
       ),
       list,
-      tools,
+      ...(mode === 'single' ? [] : [tools]),
     );
     refresh = () => {
       selection.textContent = selected.length
-        ? `Your ${mode === "ordered" ? "order" : "choice"}: ${selected.map((id) => choices.find((c) => c.id === id)?.label).join(", ")}`
-        : "No choices yet.";
+        ? `Your ${mode === 'ordered' ? 'order' : 'choice'}: ${selected.map((id) => choices.find((c) => c.id === id)?.label).join(', ')}`
+        : 'No choices yet.';
       slots.forEach((slot, i) => {
         const choice = choices.find((c) => c.id === selected[i]);
         slot.replaceChildren();
-        if (choice)
-          slot.append(
-            picture(document, choice.label, choice.length, maximumLength),
-          );
-        else slot.textContent = mode === "ordered" ? String(i + 1) : "?";
-        slot.classList.toggle("ww-filled", Boolean(choice));
+        if (choice) slot.append(picture(document, choice.label, choice.length, maximumLength));
+        else slot.textContent = mode === 'ordered' ? String(i + 1) : '?';
+        slot.classList.toggle('ww-filled', Boolean(choice));
         slot.setAttribute(
-          "aria-label",
-          choice
-            ? `Remove ${choice.label} from position ${i + 1}`
-            : `Answer position ${i + 1}`,
+          'aria-label',
+          choice ? `Remove ${choice.label} from position ${i + 1}` : `Answer position ${i + 1}`,
         );
       });
       const chosen = choices.find((c) => c.id === selected[0]);
       nextTile.replaceChildren();
-      if (chosen && mode === "single")
-        nextTile.append(
-          picture(document, chosen.label, chosen.length, maximumLength),
-        );
-      else nextTile.textContent = "?";
-      nextTile.classList.toggle(
-        "ww-filled",
-        Boolean(chosen) && mode === "single",
-      );
+      if (chosen && mode === 'single')
+        nextTile.append(picture(document, chosen.label, chosen.length, maximumLength));
+      else nextTile.textContent = '?';
+      nextTile.classList.toggle('ww-filled', Boolean(chosen) && mode === 'single');
       choiceButtons.forEach((item, i) =>
-        item.setAttribute(
-          "aria-pressed",
-          String(selected.includes(choices[i].id)),
-        ),
+        item.setAttribute('aria-pressed', String(selected.includes(choices[i].id))),
       );
     };
-    answer = () => ({ kind: "choices", choiceIds: [...selected] });
+    answer = () => ({ kind: 'choices', choiceIds: [...selected] });
     return true;
   }
   const configured = presentation.prompt.trim().length > 0 && configure();
   if (!configured && !controls.textContent) unsupported();
   if (configured) {
     if (applyText) {
-      const entry = document.createElement("fieldset");
-      entry.className = "ww-answer-entry";
-      const legend = document.createElement("legend");
-      legend.textContent = callbacks.recorder
-        ? "Type or say your answer"
-        : "Type your answer";
-      const label = document.createElement("label");
+      const entry = document.createElement('fieldset');
+      entry.className = 'ww-answer-entry';
+      const legend = document.createElement('legend');
+      legend.textContent = callbacks.recorder ? 'Type or say your answer' : 'Type your answer';
+      const label = document.createElement('label');
       label.htmlFor = `${id}-answer-text`;
-      label.textContent = "Your answer";
-      textInput = document.createElement("input");
+      label.textContent = 'Your answer';
+      textInput = document.createElement('input');
       textInput.id = label.htmlFor;
-      textInput.type = "text";
+      textInput.type = 'text';
       textInput.maxLength = 300;
-      textInput.autocomplete = "off";
-      if (encounter.templateId === "missing_quantity")
-        textInput.inputMode = "numeric";
+      textInput.autocomplete = 'off';
+      if (encounter.templateId === 'missing_quantity') textInput.inputMode = 'numeric';
       const apply = button(
-        "Use this answer",
+        'Use this answer',
         () => {
           if (!applyText?.(textInput!.value)) {
             live.textContent =
-              "Please enter a number or the exact words on one choice. You can also use the pieces.";
+              'Please enter a number or the exact words on one choice. You can also use the pieces.';
             return;
           }
-          live.textContent =
-            "Your idea is ready. Check it when you are happy with it.";
+          live.textContent = 'Your idea is ready. Check it when you are happy with it.';
           update();
         },
-        () => !encounter.permittedActions.includes("attempt"),
+        () => !encounter.permittedActions.includes('attempt'),
       );
       entry.append(legend, label, textInput, apply);
       if (callbacks.recorder) {
         const recorder = callbacks.recorder;
-        const stop = document.createElement("button");
-        stop.type = "button";
-        stop.textContent = "Finish recording";
+        const stop = document.createElement('button');
+        stop.type = 'button';
+        stop.textContent = 'Finish recording';
         stop.hidden = true;
-        const cancel = document.createElement("button");
-        cancel.type = "button";
-        cancel.textContent = "Cancel recording";
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.textContent = 'Cancel recording';
         cancel.hidden = true;
         let voiceGeneration = 0;
         let recordingTimer: ReturnType<typeof setTimeout> | undefined;
@@ -714,7 +623,7 @@ export function mountActivity(
           update();
         };
         const start = button(
-          "Say my answer",
+          'Say my answer',
           () => {
             const current = ++voiceGeneration;
             recording = true;
@@ -723,7 +632,7 @@ export function mountActivity(
             cancel.hidden = false;
             update();
             live.textContent =
-              "Allow microphone access to record. Only your recording is sent to Baseten when you finish.";
+              'Allow microphone access to record. Only your recording is sent to Baseten when you finish.';
             void recorder
               .start()
               .then(() => {
@@ -732,7 +641,7 @@ export function mountActivity(
                 stop.disabled = false;
                 stop.focus();
                 live.textContent =
-                  "Listening. Press Finish recording when ready (up to 20 seconds).";
+                  'Listening. Press Finish recording when ready (up to 20 seconds).';
                 recordingTimer = setTimeout(() => {
                   stop.click();
                 }, 20000);
@@ -741,30 +650,30 @@ export function mountActivity(
                 if (destroyed || current !== voiceGeneration) return;
                 cancelRecording?.();
                 live.textContent =
-                  "The microphone is unavailable. You can still type or use the pieces.";
+                  'The microphone is unavailable. You can still type or use the pieces.';
               });
           },
-          () => !encounter.permittedActions.includes("attempt"),
+          () => !encounter.permittedActions.includes('attempt'),
         );
         stop.onclick = () => {
           if (stop.disabled || destroyed || !recording) return;
           clearTimeout(recordingTimer);
           stop.disabled = true;
           const current = voiceGeneration;
-          live.textContent = "Listening to your recording…";
+          live.textContent = 'Listening to your recording…';
           void recorder
             .finish()
             .then((text) => {
               if (destroyed || current !== voiceGeneration) return;
               if (text.trim()) textInput!.value = text;
               live.textContent = text.trim()
-                ? "Here is what I heard. Edit it if needed, then choose Use this answer."
-                : "I could not hear an answer. Try again or type it.";
+                ? 'Here is what I heard. Edit it if needed, then choose Use this answer.'
+                : 'I could not hear an answer. Try again or type it.';
             })
             .catch(() => {
               if (!destroyed && current === voiceGeneration)
                 live.textContent =
-                  "That recording could not be understood. Your previous answer is still here. Try again or type.";
+                  'That recording could not be understood. Your previous answer is still here. Try again or type.';
             })
             .finally(() => {
               if (!destroyed && current === voiceGeneration) {
@@ -775,74 +684,72 @@ export function mountActivity(
         };
         cancel.onclick = () => {
           cancelRecording?.();
-          live.textContent =
-            "Recording cancelled. You can type or use the pieces.";
+          live.textContent = 'Recording cancelled. You can type or use the pieces.';
           start.focus();
         };
-        const privacy = document.createElement("p");
+        const privacy = document.createElement('p');
         privacy.textContent =
-          "Say my answer records up to 20 seconds and sends it to Baseten to turn speech into text. Check the words before using them.";
+          'Say my answer records up to 20 seconds and sends it to Baseten to turn speech into text. Check the words before using them.';
         entry.append(start, stop, cancel, privacy);
       }
       controls.append(entry);
     }
     const check = button(
-      "Check my answer",
+      'Check my answer',
       () => {
         void perform(async () => {
           const feedback = await callbacks.onAttempt(answer());
           if (!destroyed) live.textContent = feedback.message;
         });
       },
-      () => !encounter.permittedActions.includes("attempt"),
+      () => !encounter.permittedActions.includes('attempt'),
     );
     const hint = button(
-      "Show a hint",
+      'Show a hint',
       () => {
         void perform(async () => {
-          const support = await callbacks.onSupport("hint");
+          const support = await callbacks.onSupport('hint');
           if (!destroyed) live.textContent = support.message;
         });
       },
-      () => !encounter.permittedActions.includes("hint"),
+      () => !encounter.permittedActions.includes('hint'),
     );
     const together = button(
-      "Let’s do it together",
+      'Let’s do it together',
       () => {
         void perform(async () => {
-          const support = await callbacks.onSupport("worked_example");
+          const support = await callbacks.onSupport('worked_example');
           if (!destroyed) live.textContent = support.message;
         });
       },
-      () => !encounter.permittedActions.includes("worked_example"),
+      () => !encounter.permittedActions.includes('worked_example'),
     );
-    check.textContent = "Check my idea ✓";
-    check.classList.add("ww-check");
-    hint.textContent = "A little hint";
-    together.textContent = "Help me";
-    const actions = document.createElement("div");
-    actions.className = "ww-activity-actions";
+    check.textContent = 'Check my idea ✓';
+    check.classList.add('ww-check');
+    hint.textContent = 'A little hint';
+    together.textContent = 'Help me';
+    const actions = document.createElement('div');
+    actions.className = 'ww-activity-actions';
     actions.append(check, hint, together);
     if (presentation.narrationAvailable && callbacks.narrate) {
       actions.append(
         button(
-          "Read the activity aloud (with support)",
+          'Read the activity aloud (with support)',
           () => {
             void perform(async () => {
-              const support = await callbacks.onSupport("read_aloud");
+              const support = await callbacks.onSupport('read_aloud');
               if (destroyed) return;
               live.textContent = `${support.message} Reading aloud is recorded as support.`;
-              if (support.narrationText)
-                await callbacks.narrate?.(support.narrationText);
+              if (support.narrationText) await callbacks.narrate?.(support.narrationText);
             });
           },
-          () => !encounter.permittedActions.includes("hint"),
+          () => !encounter.permittedActions.includes('hint'),
         ),
       );
-      const stop = document.createElement("button");
-      stop.type = "button";
-      stop.textContent = "Stop narration";
-      stop.addEventListener("click", () => {
+      const stop = document.createElement('button');
+      stop.type = 'button';
+      stop.textContent = 'Stop narration';
+      stop.addEventListener('click', () => {
         if (!destroyed) callbacks.stopNarration?.();
       });
       actions.append(stop);
@@ -850,20 +757,20 @@ export function mountActivity(
     if (callbacks.onAbandon)
       actions.append(
         button(
-          "Return to exploring",
+          'Return to exploring',
           () => {
             void perform(async () => {
               await callbacks.onAbandon?.();
             });
           },
-          () => !encounter.permittedActions.includes("abandon"),
+          () => !encounter.permittedActions.includes('abandon'),
         ),
       );
-    const notice = document.createElement("p");
-    notice.textContent = ["E13", "E14", "E15"].includes(encounter.skillId)
-      ? "An adult can discuss this response with you. Choosing tiles does not certify writing or reasoning."
-      : "Help always supports your adventure. Hints and reading support are recorded separately from independent practice.";
-    notice.className = "ww-sr-only";
+    const notice = document.createElement('p');
+    notice.textContent = ['E13', 'E14', 'E15'].includes(encounter.skillId)
+      ? 'An adult can discuss this response with you. Choosing tiles does not certify writing or reasoning.'
+      : 'Help always supports your adventure. Hints and reading support are recorded separately from independent practice.';
+    notice.className = 'ww-sr-only';
     root.append(actions, notice);
   }
   root.append(live);

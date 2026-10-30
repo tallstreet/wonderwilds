@@ -89,6 +89,9 @@ export function picture(
       '<path d="M46 70l45 17v46l-45-18z" fill="#c99668"/><path d="M91 87l43-16v45l-43 17z" fill="#deb88c"/>';
   else if (text === 'above')
     drawing = '<g transform="translate(0 35) scale(.75)">' + tree + '</g>' + cup(78, 2);
+  else if (text === 'below')
+    drawing = '<g transform="translate(0 -8) scale(.75)">' + tree + '</g>' + cup(78, 88);
+  else if (text === 'cup') drawing = cup(65, 60, '#e2858e');
   else if (text.includes('beside') || text.includes('tree')) drawing = tree + cup(45, 82);
   else if (text.includes('red cup')) drawing = cup(65, 60, '#e2858e');
   else if (text.includes('hat'))

@@ -400,17 +400,39 @@
     0 5px 0 #d4bfa0,
     0 8px 12px #9c7f4420;
 }
+.ww-activity .ww-choice-card[aria-pressed='true'] {
+  border: 4px solid #658553;
+  background: linear-gradient(#f6fced, #e5f2d3);
+  transform: translateY(-2px);
+}
 .ww-choice-card[aria-pressed='true']::after {
-  content: '✓';
+  content: '✓ Chosen';
   display: block;
-  color: #658553;
-  font-size: 18px;
+  color: #4d6c3d;
+  font-size: 16px;
+  font-weight: 900;
 }
 .ww-card-caption {
   display: block;
-  font-size: 12px;
+  font-size: 16px;
+  font-weight: 800;
   line-height: 1.3;
   margin-top: 7px;
+}
+.ww-next-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 98px;
+  border: 3px dashed #bfadca;
+  background: #fffdf599;
+  color: #8761b7;
+  font-size: 44px;
+  font-weight: 900;
+}
+.ww-next-tile.ww-filled {
+  border: 3px solid #658553;
+  background: #f6fced;
 }
 .ww-rope-picture {
   align-items: flex-start;
