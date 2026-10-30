@@ -207,3 +207,12 @@ ignored `qa/story-eval/experiments/`. Preserve selected versioned datasets under
 HTML/build outputs or provider credentials.
 The normal root check includes the workflow's Python tests. A small real CLI run
 as above checks Rust/Python integration without PostgreSQL, a browser or API keys.
+
+## Modal QLoRA experiment
+
+The [Modal runner](modal/README.md) prepares the separately accepted revised
+authored references, verifies current mechanical validity and splits journeys for
+training/validation/test. Its default GPU job performs two optimizer steps, saves
+an adapter and verifies a fresh reload. Preparation and the Python dry run are
+local; `modal run` explicitly launches paid cloud work. No model is connected to
+gameplay by these tools.

@@ -5,6 +5,39 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Modal QLoRA preparation — 30 October 2026
+
+The opt-in [Modal runner](../qa/story-eval/modal/README.md) and Glimmer Axolotl
+configuration are implemented. The separately recorded user acceptance covers
+all 607 revised authored reference hashes; this supersedes the pending-approval
+wording in the historical review below, without implying independent blind labels.
+Preparation verifies acceptance hashes, reruns the current engine grader and
+exports only approved unchanged scenes. All 607 pass; the approved export yields
+418 training candidates and 79 held-out examples after excluding 110 overlaps.
+Reserving the bank-series journey and excluding another 121 overlapping/duplicate
+training records produces 221 training, 76 validation and 79 final test examples.
+Eight short training examples form the smoke subset. Artifacts are local and
+ignored under `qa/story-eval/experiments/glimmer-modal-r1/`; the ignored source
+snapshot must also be preserved to reproduce preparation from a new checkout.
+
+The pinned real Glimmer tokenizer verifies assistant-only loss masks and complete
+untruncated targets for all splits; maximum sequence length is 1,764 tokens.
+The Modal SDK imports the runner and validates its local dry-run interface.
+Local environment setup and Modal image dependency installation use uv; the
+image pins uv 0.13.1 and retains the model/framework version pins.
+The default remote job requests one H100 for two optimizer steps, saves the
+adapter and checks its tensors and generation in a fresh process. Named volumes
+persist weights and run artifacts; final test answers and review notes stay local.
+No cloud image build, upload, GPU allocation, training, serving or gameplay change
+has run. Image compatibility, GPU memory and actual checkpoint reload remain
+unverified until the remote smoke run. These authored scenes do not establish
+novel-mission generalization or improved model quality.
+
+The first user-launched Modal image build failed before training because the
+non-isolated FlashAttention build could not import `wheel`. The image now
+explicitly installs `setuptools` and `wheel` alongside the other build tools
+before compiling CUDA extensions. The corrected remote build remains unverified.
+
 ## Authored story quality corrections — 30 October 2026
 
 The first model quality review of 607 authored references recommended 460 keeps

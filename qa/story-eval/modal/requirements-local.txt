@@ -1,0 +1,4 @@
+modal==1.6.3
+# Optional CPU tokenizer preflight; the remote trainer uses Axolotl's dependencies.
+transformers==5.22.0
+jinja2==3.1.6
