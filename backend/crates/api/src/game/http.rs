@@ -106,6 +106,7 @@ pub struct AppState {
     pub(crate) auth: Arc<dyn Authenticator>,
     pub(crate) story_provider:
         Option<Arc<dyn wonderwilds_director::story::SceneProvider + Send + Sync>>,
+    pub(crate) story_planner: Option<Arc<dyn crate::story::planning::PlanProvider>>,
     pub(crate) story_repository: Arc<dyn crate::story::repository::Repository>,
     content: Content,
     pub(crate) permits: Arc<tokio::sync::Semaphore>,
@@ -119,6 +120,11 @@ impl AppState {
                 Arc::new(provider)
                     as Arc<dyn wonderwilds_director::story::SceneProvider + Send + Sync>
             });
+        self.story_planner = crate::story::modal::ModalSceneProvider::planner_from_env()?
+            .map(|p| Arc::new(p) as Arc<dyn crate::story::planning::PlanProvider>);
+        if self.story_planner.is_some() {
+            eprintln!("Modal mission planning enabled for new story acceptances");
+        }
         if self.story_provider.is_some() {
             eprintln!("Modal story generation enabled for development scene reads");
         }
@@ -161,6 +167,7 @@ impl AppState {
             auth,
             story_repository,
             story_provider: None,
+            story_planner: None,
             content,
             permits: Arc::new(tokio::sync::Semaphore::new(16)),
             configured,

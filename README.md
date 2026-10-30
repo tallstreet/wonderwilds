@@ -246,6 +246,51 @@ rewards and progress still come from Rust. `.local-demo/api.log` contains only
 coarse accepted/fallback messages for this integration, without model text or
 credentials. To disable it, unset `WONDERWILDS_MODAL_STORY` and restart the demo.
 
+### Optional Modal mission planning
+
+Enable the planner alongside scene generation, with the existing Modal proxy
+credentials exported in the backend shell:
+
+```sh
+export WONDERWILDS_MODAL_PLANNER=1
+export WONDERWILDS_MODAL_STORY=1
+sh scripts/local-demo.sh
+```
+
+Restart the demo after updating; its migration runner applies
+`0004_story_mission_plans.sql` without resetting existing progress. In
+`/?story=1` (or `/story.html`), accepting a **new** mission requests a plan using
+that supported opportunity and the evaluated `dependencies-v1` prompt. The API
+checks its schema, character/condition bindings, outcome coverage and a bounded
+real-domain completion path before saving it atomically with acceptance. The
+mission title, premise, payoff and milestone labels appear in Missions and are
+supplied to subsequent scene generation. Rust still owns actions and completion;
+parallel tasks remain playable in either supported order.
+
+Plans persist across reloads, pause/resume and server restarts. Exact command
+retries return the original response without generating a replacement plan. Existing
+active missions keep their authored briefs; planning starts at the next new mission
+acceptance. Completed mission history uses saved titles. Profile export includes
+plans and profile deletion removes them. Model calls occur outside database locks,
+with session/CSRF and revision checks before commit.
+
+The six-second provider timeout, busy/unavailable endpoint, malformed output or
+unproven plan all fall back to the authored mission. Validation search also has a
+500 ms deadline. The planner receives authored world context and story progress, not
+profile/session identifiers or educational records. Both model flags
+are opt-in and independent. Disabling the planner stops future generation while
+already saved plans remain stable. Development content/release gates are unchanged.
+
+Both scene generation and mission planning send strict JSON Schema
+`response_format` constraints from the shared contracts, as well as the schema in
+the prompt. Responses still pass local schema and gameplay validation: the current
+endpoint has produced a scene text longer than its schema permits. See the
+[structured-output evaluation](qa/story-eval/RESULTS_JSON_SCHEMA_2026-10-31.md).
+
+This integrates model-written plans over the **seven supported opportunities**;
+it does not add arbitrary mission mechanics, competing opportunities or an endless
+mission catalogue. Mechanical validation does not establish prose suitability.
+
 The [story implementation plan](docs/STORY_IMPLEMENTATION_PLAN.md) starts with an
 isolated Rust mission and deterministic model-input builder. Run Pip's bridge
 journey without a model, database or browser:
@@ -278,8 +323,7 @@ The CLI remains a developer harness. Local checkpoints verify
 replay consistency, not authenticity; never import them as trusted server progress.
 Both CLI and server retain the 256-command development limit. At that limit the
 browser shows a terminal view and preserves the save; there is no reset endpoint.
-Broader mission planning, shared-adventure integration and model generation remain later
-stages. Content review gates are unchanged.
+Broader mission catalogues and shared-adventure integration remain later stages. Content review gates are unchanged.
 See the [payload builder notes](backend/crates/director/src/story/README.md) for
 field sources, contracts and implementation limits.
 

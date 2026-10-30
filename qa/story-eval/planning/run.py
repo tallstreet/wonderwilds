@@ -16,7 +16,11 @@ import urllib.request
 ROOT = Path(__file__).resolve().parents[3]
 VERSION = "mission-plan-eval-1"
 ENDPOINT = "https://garytafe--ep-wonderwilds-server.us-west.modal.direct/v1/chat/completions"
-SYSTEM = """You plan short, kind adventures for Wonderwilds. Return only a JSON object matching outputSchema. Choose an offered opportunity and plan its supported outcome using only the supplied characters, capabilities and condition IDs. Provide a clear goal, a persistent narrative brief (premise, participantIds, payoff), and an ordered list of meaningful milestones. Conditions must be achievable in that order; respect consumed resources, travel gates, prerequisites and existing progress. Already completed conditions need not be repeated. Do not ask for unavailable work (for example gathering wood when sufficient planks already exist or repairing an already repaired bridge). Include the conditions needed to finish the outcome. Do not invent mechanics, items, characters, condition IDs, rewards, educational tasks or academic gates. Do not claim that future events have already occurred. Ages 6–8: short, warm, concrete wording; no frightening or manipulative stakes. This is a planning request, not scene dialogue: do not return presentation or choices."""
+PROMPT_DIR = ROOT / "backend/crates/director/src/story/prompts"
+SYSTEM = (PROMPT_DIR / "mission_baseline.txt").read_text()
+DEPENDENCIES = (PROMPT_DIR / "mission_dependencies.txt").read_text()
+# Shared with the live API; original bytes remain frozen for baseline comparisons.
+PROMPTS = {"baseline": SYSTEM, "dependencies-v1": SYSTEM + DEPENDENCIES}
 
 
 def digest(value):
@@ -72,32 +76,45 @@ def output_schema():
     return {**result, "$defs": defs}
 
 
-def request_for(scenario, condition_order="authored"):
+def response_format(name, schema):
+    return {"type": "json_schema", "json_schema": {"name": name, "strict": True, "schema": schema}}
+
+
+def request_for(scenario, condition_order="authored", planner_prompt="baseline", response_mode="prompt-only"):
+    if response_mode not in {"prompt-only", "json-schema"}:
+        raise ValueError("Unknown response mode")
     if condition_order not in {"authored", "reversed"}:
         raise ValueError("Unknown condition order")
+    if planner_prompt not in PROMPTS:
+        raise ValueError("Unknown planner prompt")
     model_input = json.loads(json.dumps(scenario["input"]))
     if condition_order == "reversed":
         for opportunity in model_input["opportunities"]:
             opportunity["conditions"].reverse()
     supplied = {"input": model_input, "completedConditionIds": scenario["completedConditionIds"],
                 "outputSchema": output_schema()}
-    return {"scenarioId": scenario["source"]["scenarioId"], "candidateId": "current-model-1",
-            "promptVersion": VERSION + ("-reversed-conditions" if condition_order == "reversed" else ""),
-            "messages": [{"role": "system", "content": SYSTEM},
+    request = {"scenarioId": scenario["source"]["scenarioId"], "candidateId": "current-model-1",
+            "promptVersion": VERSION + ("-" + planner_prompt if planner_prompt != "baseline" else "") + ("-reversed-conditions" if condition_order == "reversed" else ""),
+            "messages": [{"role": "system", "content": PROMPTS[planner_prompt]},
                          {"role": "user", "content": json.dumps(supplied, separators=(",", ":"))}]}
+
+    if response_mode == "json-schema":
+        request["response_format"] = response_format("StoryMissionPlan", supplied["outputSchema"])
+    return request
 
 
 def prepare(args):
     args.out.mkdir(parents=True, exist_ok=False)
     rust("export", "--output", args.out / "scenarios.jsonl")
     scenarios = rows(args.out / "scenarios.jsonl")
-    requests = [request_for(s, args.condition_order) for s in scenarios]
+    requests = [request_for(s, args.condition_order, args.planner_prompt, args.response_mode) for s in scenarios]
     write_rows(args.out / "requests.jsonl", requests)
     write_rows(args.out / "references.jsonl", [{"scenarioId": s["source"]["scenarioId"],
                "candidateId": "reference", "output": s["reference"]} for s in scenarios])
     write_json(args.out / "manifest.json", {"version": VERSION, "scenarioCount": len(scenarios),
                "scenarioSha256": digest(scenarios), "requestSha256": digest(requests),
-               "conditionOrder": args.condition_order,
+               "conditionOrder": args.condition_order, "plannerPrompt": args.planner_prompt,
+               "responseMode": args.response_mode,
                "gitCommit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                "sourceSha256": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                    for p in [Path(__file__).resolve(), ROOT / "backend/crates/director/src/story/planning_evaluation.rs",
@@ -111,7 +128,7 @@ def verified_run(path):
     manifest = read_json(path / "manifest.json")
     if manifest["version"] != VERSION or digest(scenarios) != manifest["scenarioSha256"] or digest(requests) != manifest["requestSha256"]:
         raise ValueError("Run manifest mismatch")
-    if requests != [request_for(s, manifest.get("conditionOrder", "authored")) for s in scenarios]:
+    if requests != [request_for(s, manifest.get("conditionOrder", "authored"), manifest.get("plannerPrompt", "baseline"), manifest.get("responseMode", "prompt-only")) for s in scenarios]:
         raise ValueError("Requests differ from current prompt/schema; prepare a new run")
     return scenarios, requests, manifest
 
@@ -155,18 +172,25 @@ def parse_response(envelope):
 def generate(args):
     _, requests, manifest = verified_run(args.run)
     authorization = credentials(args.env_file)
-    args.out.mkdir(parents=True, exist_ok=False)
-    opener = urllib.request.build_opener(NoRedirect)
     metadata = {"version": VERSION, "endpoint": ENDPOINT, "model": "wonderwilds",
                 "modelRevision": "Endpoint alias; immutable deployed weight revision not exposed",
                 "suiteSha256": manifest["requestSha256"], "temperature": 0, "maxTokens": 2048,
-                "reasoningStrength": "low", "timeoutSeconds": 60, "automaticRetries": 0}
-    write_json(args.out / "generation.json", metadata)
+                "reasoningStrength": "low", "timeoutSeconds": 60, "automaticRetries": 0,
+                "responseMode": manifest.get("responseMode", "prompt-only")}
+    generate_requests(requests, args.out, authorization, metadata)
+
+
+def generate_requests(requests, out, authorization, metadata):
+    out.mkdir(parents=True, exist_ok=False)
+    opener = urllib.request.build_opener(NoRedirect)
+    write_json(out / "generation.json", metadata)
     # Flush each record: interruptions keep completed outputs; missing cases never count as passes.
-    with (args.out / "candidates.jsonl").open("x") as candidates, (args.out / "responses.jsonl").open("x") as raw:
+    with (out / "candidates.jsonl").open("x") as candidates, (out / "responses.jsonl").open("x") as raw:
         for index, request in enumerate(requests):
             body = {"model": "wonderwilds", "messages": request["messages"], "temperature": 0,
                     "max_tokens": 2048, "stream": False, "chat_template_kwargs": {"reasoning_strength": "low"}}
+            if "response_format" in request:
+                body["response_format"] = request["response_format"]
             record = {k: request[k] for k in ("scenarioId", "candidateId")}
             record["generator"] = {**metadata, "promptVersion": request["promptVersion"]}
             evidence = {"scenarioId": request["scenarioId"], "requestSha256": digest(body)}
@@ -241,6 +265,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("prepare"); p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--response-mode", choices=["prompt-only", "json-schema"], default="json-schema")
+    p.add_argument("--planner-prompt", choices=tuple(PROMPTS), default="dependencies-v1")
     p.add_argument("--condition-order", choices=("authored", "reversed"), default="authored")
     p = sub.add_parser("generate"); p.add_argument("--run", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True); p.add_argument("--env-file", type=Path)

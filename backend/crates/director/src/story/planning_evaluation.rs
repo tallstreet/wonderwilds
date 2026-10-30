@@ -1,4 +1,4 @@
-//! Offline planning checks against the existing authored runtime, never plan acceptance.
+//! Shared bounded plan verification plus offline corpus checks against authored mechanics.
 use super::{authored_plan, build_plan_input, evaluation};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -127,23 +127,39 @@ pub fn grade(row: &Scenario, candidate: &evaluation::Candidate) -> Result<Grade>
     if candidate.scenario_id != row.source.scenario_id {
         return Err("Wrong scenario binding".into());
     }
+    let mut result = assess(&state, &candidate.output, None)?;
+    result.scenario_id = candidate.scenario_id.clone();
+    result.candidate_id = candidate.candidate_id.clone();
+    Ok(result)
+}
+
+/// Shared mechanical validator for offline evaluation and live acceptance.
+/// A live deadline fails closed; it never turns an incomplete search into a pass.
+pub fn assess(
+    state: &State,
+    output: &Value,
+    deadline: Option<std::time::Instant>,
+) -> Result<Grade> {
+    if state.mission_status() != MissionStatus::Active {
+        return Err("Plan requires an active mission".into());
+    }
+    let input = build_plan_input(state).map_err(|e| format!("{e:?}"))?;
     let mut result = Grade {
-        scenario_id: candidate.scenario_id.clone(),
-        candidate_id: candidate.candidate_id.clone(),
+        scenario_id: String::new(),
+        candidate_id: String::new(),
         passed: false,
         failures: vec![],
         explored_states: 0,
         witness: vec![],
     };
-    let output = &candidate.output;
     if let Err(error) = wonderwilds_contracts::validate("StoryMissionPlan", output) {
         result.failures.push(format!("schema: {error}"));
         return Ok(result);
     }
-    if output["opportunityId"] != row.input["opportunities"][0]["id"] {
+    if output["opportunityId"] != input["opportunities"][0]["id"] {
         result.failures.push("unknown_opportunity".into());
     }
-    let characters: BTreeSet<_> = row.input["area"]["characters"]
+    let characters: BTreeSet<_> = input["area"]["characters"]
         .as_array()
         .unwrap()
         .iter()
@@ -168,7 +184,7 @@ pub fn grade(row: &Scenario, candidate: &evaluation::Candidate) -> Result<Grade>
         if !state.milestones().iter().any(|m| m.condition_id == id) {
             result.failures.push(format!("unavailable_condition: {id}"));
         }
-        if !done(&state, id) {
+        if !done(state, id) {
             pending.push(id.to_owned());
         }
     }
@@ -184,17 +200,21 @@ pub fn grade(row: &Scenario, candidate: &evaluation::Candidate) -> Result<Grade>
     };
     if terminal
         .iter()
-        .any(|id| !done(&state, id) && !unique.contains(id))
+        .any(|id| !done(state, id) && !unique.contains(id))
     {
         result.failures.push("missing_outcome_condition".into());
     }
     if !result.failures.is_empty() {
         return Ok(result);
     }
-    let mut visited = BTreeSet::from([key(&state, 0)]);
-    let mut queue = VecDeque::from([(state, 0, Vec::<Action>::new())]);
+    let mut visited = BTreeSet::from([key(state, 0)]);
+    let mut queue = VecDeque::from([(state.clone(), 0, Vec::<Action>::new())]);
     let mut bounded = false;
     while let Some((state, cursor, path)) = queue.pop_front() {
+        if deadline.is_some_and(|limit| std::time::Instant::now() >= limit) {
+            bounded = true;
+            break;
+        }
         result.explored_states += 1;
         if cursor == pending.len() && state.mission_status() == MissionStatus::Completed {
             State::from_checkpoint(&state.checkpoint())

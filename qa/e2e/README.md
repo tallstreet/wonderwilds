@@ -115,3 +115,14 @@ stationary character, present friends at the gathering, all seven completed goal
 persistent scenery, mobile layout and unchanged educational progress. The woodcutter
 uses existing Cleo art so Bramble remains visually distinct. Screenshots are written
 to `/tmp/wonderwilds-story-broader-{default,alternate}-{desktop,mobile}.png`.
+
+
+To require a persisted model plan for each of the seven accepted missions, run
+`run-training-qa.mjs` with `WW_QA_BROWSER_TEST=qa/e2e/story-broader.mjs`,
+`WW_STORY_EXPECT_PLANS=1`, `WONDERWILDS_MODAL_PLANNER=1` and exported Modal proxy
+credentials. Set `WONDERWILDS_MODAL_STORY=0` to isolate planning from scene requests.
+This makes seven live inference requests and requires a healthy deployment. It
+uses only the runner's disposable synthetic database, checks saved plans against
+snapshots and the Missions dialog, and verifies reload stability. Authored fallback
+is deliberately a failure in this opt-in mode, so availability is not mistaken for
+model-quality evidence. Without the flag, the ordinary authored journey is unchanged.

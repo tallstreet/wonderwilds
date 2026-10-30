@@ -45,6 +45,46 @@ class PlanningTests(unittest.TestCase):
         self.assertEqual(supplied["input"]["opportunities"][0]["conditions"][0]["id"], "second")
         self.assertEqual(scenario["input"]["opportunities"][0]["conditions"][0]["id"], "first")
 
+    def test_dependency_prompt_changes_only_system_message_and_preserves_legacy_runs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "run"
+            self.make_run(path)
+            scenarios, requests, manifest = planning.verified_run(path)
+            self.assertNotIn("plannerPrompt", manifest)
+            changed = [planning.request_for(s, planner_prompt="dependencies-v1") for s in scenarios]
+            for old, new in zip(requests, changed, strict=True):
+                self.assertEqual(old["messages"][1], new["messages"][1])
+                self.assertNotEqual(old["messages"][0], new["messages"][0])
+                self.assertNotEqual(old["promptVersion"], new["promptVersion"])
+            manifest["plannerPrompt"] = "dependencies-v1"
+            (path / "manifest.json").write_text(json.dumps(manifest))
+            with self.assertRaises(ValueError):
+                planning.verified_run(path)
+            manifest["requestSha256"] = planning.digest(changed)
+            (path / "requests.jsonl").write_text("\n".join(json.dumps(r) for r in changed))
+            (path / "manifest.json").write_text(json.dumps(manifest))
+            self.assertEqual(planning.verified_run(path)[1], changed)
+            with self.assertRaises(ValueError):
+                planning.request_for(scenarios[0], planner_prompt="unknown")
+
+    def test_response_format_is_sent_and_legacy_requests_remain_prompt_only(self):
+        scenario = {"source": {"scenarioId": "case"}, "input": {}, "completedConditionIds": []}
+        legacy = planning.request_for(scenario)
+        request = planning.request_for(scenario, response_mode="json-schema")
+        self.assertNotIn("response_format", legacy)
+        self.assertEqual(request["messages"], legacy["messages"])
+        expected = {"type": "json_schema", "json_schema": {"name": "StoryMissionPlan", "strict": True,
+                    "schema": planning.output_schema()}}
+        self.assertEqual(request["response_format"], expected)
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(planning.urllib.request, "build_opener") as opener:
+                opener.return_value.open.side_effect = OSError("private")
+                planning.generate_requests([request], Path(directory) / "out", "SENSITIVE", {})
+                sent = json.loads(opener.return_value.open.call_args.args[0].data)
+                self.assertEqual(sent["response_format"], expected)
+        with self.assertRaises(ValueError):
+            planning.request_for(scenario, response_mode="unknown")
+
     def test_env_parsed_as_data_not_executed_and_not_returned_in_metadata(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "model.env"

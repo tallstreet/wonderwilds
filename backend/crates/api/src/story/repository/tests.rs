@@ -73,24 +73,43 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
     assert_eq!(initial["revision"], 0);
     assert_eq!(count(&mut admin, "story_progress", profile), 0);
     let accept = choose(&initial, "accept", "accept_mission", None);
+    let planned_state = repo.planning_state(&identity, &accept).unwrap().unwrap();
+    let mut plan = wonderwilds_director::story::authored_plan(&planned_state).unwrap();
+    plan["goal"] = json!("A crossing planned for Pip");
+    plan["milestones"][0]["label"] = json!("Find wood for our crossing.");
+    let validated = std::sync::Arc::new(ValidatedPlan::new(&planned_state, plan.clone()).unwrap());
     let mut faulty = repo.clone();
     faulty.fail_before_commit = true;
-    assert_eq!(faulty.execute(&identity, &accept), Err(Error::Unavailable));
+    assert_eq!(
+        faulty.execute_planned(&identity, &accept, Some(&validated)),
+        Err(Error::Unavailable)
+    );
     assert_eq!(repo.read(&identity).unwrap(), initial);
     assert_eq!(count(&mut admin, "story_progress", profile), 0);
     assert_eq!(count(&mut admin, "story_command_receipts", profile), 0);
 
+    assert_eq!(count(&mut admin, "story_mission_plans", profile), 0);
     // Two same-ID writes race under the owned profile lock and publish one result.
     let mut threads = Vec::new();
     for _ in 0..2 {
         let repo = repo.clone();
         let identity = identity.clone();
         let accept = accept.clone();
-        threads.push(std::thread::spawn(move || repo.execute(&identity, &accept)));
+        let validated = validated.clone();
+        threads.push(std::thread::spawn(move || {
+            repo.execute_planned(&identity, &accept, Some(&validated))
+        }));
     }
     let first = threads.remove(0).join().unwrap().unwrap();
     assert_eq!(threads.remove(0).join().unwrap().unwrap(), first);
     assert_eq!(first["revision"], 1);
+    assert_eq!(
+        first["sceneInput"]["mission"]["goal"],
+        "A crossing planned for Pip"
+    );
+    assert_eq!(repo.read(&identity).unwrap(), first);
+    assert_eq!(count(&mut admin, "story_mission_plans", profile), 1);
+    assert!(repo.planning_state(&identity, &accept).unwrap().is_none());
     assert_eq!(count(&mut admin, "story_command_receipts", profile), 1);
     let collect = choose(&first, "collect", "collect", None);
     assert_eq!(faulty.execute(&identity, &collect), Err(Error::Unavailable));
@@ -120,6 +139,10 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
         ..identity.clone()
     };
     assert_eq!(repo.read(&foreign), Err(Error::Forbidden));
+    assert!(matches!(
+        repo.planning_state(&foreign, &accept),
+        Err(Error::Forbidden)
+    ));
     assert_eq!(repo.execute(&foreign, &accept), Err(Error::Forbidden));
 
     // Genuine restricted-role RLS checks, independent of repository owner checks.
@@ -130,6 +153,8 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
             &[&other_parent],
         )
         .unwrap();
+    assert_eq!(count(&mut runtime, "story_mission_plans", profile), 0);
+    assert!(runtime.execute("INSERT INTO wonderwilds.story_mission_plans(profile_id,content_version,mission_id,accepted_revision,plan) VALUES($1::text::uuid,'test','test',1,$2)", &[&profile,&plan]).is_err());
     assert_eq!(count(&mut runtime, "story_progress", profile), 0);
     assert_eq!(count(&mut runtime, "story_command_receipts", profile), 0);
     let checkpoint: Value = admin
@@ -140,7 +165,11 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
         .unwrap()
         .get(0);
     assert!(runtime.execute("INSERT INTO wonderwilds.story_progress(profile_id,revision,checkpoint) VALUES($1::text::uuid,2,$2)", &[&profile,&checkpoint]).is_err());
-    for table in ["story_progress", "story_command_receipts"] {
+    for table in [
+        "story_progress",
+        "story_command_receipts",
+        "story_mission_plans",
+    ] {
         let row = admin.query_one("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE oid=$1::text::regclass", &[&format!("wonderwilds.{table}")]).unwrap();
         assert!(row.get::<_, bool>(0) && row.get::<_, bool>(1));
     }
@@ -237,6 +266,11 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
         current["revision"].as_u64().unwrap() as usize
     );
     assert_eq!(export["learningEvents"], json!([]));
+    assert_eq!(export["storyMissionPlans"][0]["plan"], plan);
+    assert_eq!(
+        current["sceneInput"]["context"]["memory"]["recentMissions"][0],
+        "A crossing planned for Pip Completed."
+    );
     let foreign_context = VerifiedContext {
         parent_id: other_parent.into(),
         ..verified.clone()
@@ -248,6 +282,7 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
     assert_eq!(count(&mut admin, "story_progress", profile), 0);
     assert_eq!(count(&mut admin, "story_command_receipts", profile), 0);
     assert_eq!(count(&mut admin, "deletion_tombstones", profile), 1);
+    assert_eq!(count(&mut admin, "story_mission_plans", profile), 0);
 
     lifecycle
         .delete_profile(

@@ -114,6 +114,11 @@ fn introduction_is_preserved_and_metadata_is_not_an_answer() {
     let payload: Value =
         serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
     assert_eq!(
+        body["response_format"],
+        json!({"type":"json_schema", "json_schema":{
+        "name":"StoryScene", "strict":true, "schema":payload["outputSchema"]}})
+    );
+    assert_eq!(
         payload["presentation"]["requiredEntries"][0]["entryId"],
         "greeting"
     );
@@ -134,4 +139,42 @@ fn slow_endpoint_times_out_instead_of_blocking_play() {
     assert!(provider.request(&json!({})).is_err());
     assert!(started.elapsed() < Duration::from_secs(7));
     server.join().unwrap();
+}
+
+#[test]
+fn planner_sends_shared_dependency_prompt_and_closed_plan_schema() {
+    let mut state = State::new();
+    state
+        .apply(&wonderwilds_domain::story::Command {
+            command_id: "accept".into(),
+            expected_revision: 0,
+            action: wonderwilds_domain::story::Action::AcceptMission,
+        })
+        .unwrap();
+    let input = wonderwilds_director::story::build_plan_input(&state).unwrap();
+    let plan = wonderwilds_director::story::authored_plan(&state).unwrap();
+    let (url, handle) = server("200 OK", envelope(&plan).to_string());
+    let provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+    let result = crate::story::planning::PlanProvider::propose(&provider, &input, &[]).unwrap();
+    assert_eq!(result, plan);
+    let sent = handle.join().unwrap();
+    assert!(
+        sent["messages"][0]["content"]
+            .as_str()
+            .unwrap()
+            .contains("Follow prerequisites recursively")
+    );
+    let supplied: Value =
+        serde_json::from_str(sent["messages"][1]["content"].as_str().unwrap()).unwrap();
+    assert_eq!(
+        sent["response_format"],
+        response_format("StoryMissionPlan", &supplied["outputSchema"])
+    );
+    assert_eq!(supplied["input"], input);
+    assert_eq!(supplied["completedConditionIds"], json!([]));
+    assert!(supplied["outputSchema"]["$defs"]["StoryNarrative"].is_object());
+    assert!(supplied.get("checkpoint").is_none());
+    assert!(supplied.get("reference").is_none());
+    let _busy = provider.cache.lock().unwrap();
+    assert!(crate::story::planning::PlanProvider::propose(&provider, &input, &[]).is_err());
 }

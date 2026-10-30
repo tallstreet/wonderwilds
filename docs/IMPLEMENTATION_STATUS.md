@@ -5,6 +5,95 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Schema-constrained model requests — 31 October 2026
+
+Both live Modal request paths now include `response_format.type = json_schema`
+with a named contract schema and `strict: true`. Planning includes its referenced
+`StoryNarrative` definition; scenes use the closed `StoryScene` schema. Local JSON,
+binding and mechanical validation and authored fallback remain unchanged. There is
+no retry that silently removes the constraint.
+
+New planner evaluation runs default to schema constraints while legacy manifests
+remain verifiable as prompt-only. Paired ordinary and reversed-condition runs each
+passed 18/18, with unchanged prompts and scenarios; Bramble ordering still passes.
+A new current-endpoint scene runner uses the exact live prompt and a deterministic
+36-state mission/status/location/introduction sample. It passed 35/36: one narration
+was 210 characters against the contract's 180-character maximum. All requests
+returned JSON without transport failures. A conflicting-prompt constant probe
+confirmed actual server enforcement; a simple string-length probe passed, so the
+observed nested scene violation is not evidence that every string bound is ignored.
+These results do not establish full JSON Schema compliance by the serving backend.
+
+API regression tests (31 passed, three DB tests intentionally ignored), all 53
+Python evaluation tests, targeted Clippy, formatting and diff checks passed.
+This change does not alter persistence; the prior database integration evidence
+still applies. [Results and reproduction](../qa/story-eval/RESULTS_JSON_SCHEMA_2026-10-31.md)
+record the unresolved scene constraint violation. No fine-tuning was performed.
+
+## Mission planner game integration — 31 October 2026
+
+The opt-in API planner (`WONDERWILDS_MODAL_PLANNER=1`) now generates briefs when
+accepting a new supported mission. It uses the same evaluated `dependencies-v1`
+prompt files and bounded domain validator as the offline harness. Generation runs
+outside database locks; session/CSRF and revision are rechecked before commit.
+Migration `0004_story_mission_plans.sql` saves validated plans atomically with the
+acceptance checkpoint and original-response receipt, with forced profile RLS,
+export and cascading deletion. Reload, pause/resume and exact retries retain the
+saved plan. Existing active missions retain their authored brief.
+
+Both existing story clients consume saved goal/narrative/milestone projections;
+optional scene generation receives the same brief. Completion labels derive only
+from domain receipts. Invalid/unavailable/unproven proposals use authored fallback.
+This is planning over seven authored opportunities, not arbitrary new mechanics or
+an endless catalogue; model ordering does not add action gates to parallel tasks.
+No model weights or content-release approvals changed.
+
+Validation: `bash scripts/check.sh` passed, including API tests (31 passed, three
+DB tests deliberately ignored), director tests and the 51 Python evaluation tests.
+`sh scripts/check-postgres.sh` separately passed all three database tests and the
+migration/drift checks in a disposable cluster. Added coverage includes invalid
+plans, outages, session expiry, revision races, exact retries, state-bound plans,
+search deadlines, persistence rollback, concurrent acceptance, RLS, history,
+export and deletion. Node 26.12 was available for tooling rather than Node 24.
+The ordinary seven-mission Phaser browser journey passed. After a first live
+attempt correctly fell back during HTTP 503 availability failure, the recovered
+endpoint generated seven validated plans and the full live browser journey passed
+with `WW_STORY_EXPECT_PLANS=1`. It asserted a persisted plan and matching Missions
+UI for each acceptance, seven saved plans after pause/resume, unchanged plans and
+briefs after reload, all seven completed missions, mobile history and unchanged
+educational progress. Scene generation was disabled to isolate planning. Local logs:
+`/tmp/ww-plan-browser-live-r2.log` (seven validated plans),
+`/tmp/ww-plan-browser-fallback.log` (ordinary journey),
+`/tmp/ww-plan-postgres.log` and `/tmp/ww-plan-check.log`. This single default-choice
+live journey is integration evidence, not an unseen-mission or editorial evaluation.
+
+## Mission planner dependency prompt — 31 October 2026
+
+The offline planner now defaults to the versioned `dependencies-v1` prompt,
+which derives milestone ordering from capability prerequisites, follows dependencies
+recursively and checks the sequence against starting facts, inventory and location.
+It contains no Bramble-specific solution. `--planner-prompt baseline` preserves
+the original prompt; old manifests without a prompt selector remain verifiable.
+
+Both new 18-case runs have identical replayable scenarios and user messages to
+their corresponding ordinary/reversed baselines. Only the system message changes.
+The 51 Python evaluation tests and diff checks pass. No Rust, gameplay, model
+weights or deployment configuration changed.
+
+After endpoint recovery, both revised-prompt batches passed 18/18 mechanical
+checks. The ordinary baseline was 18/18; the reversed-condition baseline was 17/18.
+The sole improvement is `bank-series-062`: path checking and clearing now precede
+Bramble's readiness, with no mechanical regressions elsewhere. All 36 responses
+had valid schemas and replayable completion witnesses. Earlier 72 failed requests
+remain separate HTTP 503 availability evidence, excluded from quality results.
+[Comparison results](../qa/story-eval/planning/RESULTS_DEPENDENCIES_2026-10-31.md)
+record controls, hashes and remaining editorial limitations. Raw evidence remains
+under ignored `qa/story-eval/experiments/` directories prefixed
+`planning-2026-10-31-dependencies-ordinary` and
+`planning-2026-10-31-dependencies-reversed`; successful responses use `-live-r3`
+and grades use `-r3-grades`. No additional fine-tuning was performed. These are
+paired results on known authored families, not an unseen-mission evaluation.
+
 ## Mission planning evaluation — 31 October 2026
 
 The separate [offline planning harness](../qa/story-eval/planning/README.md)

@@ -5,7 +5,9 @@ It never accepts generated plans into game saves, trains weights, or changes a d
 Python uses the standard library; Rust uses the pinned workspace dependencies.
 
 The [31 October baseline results](RESULTS_2026-10-31.md) record 18/18 ordinary
-mechanical passes and 17/18 ordering-stress passes from the current model.
+mechanical passes and 17/18 ordering-stress passes from the current model. The
+[dependency prompt comparison](RESULTS_DEPENDENCIES_2026-10-31.md) improves the
+stress test to 18/18 while retaining 18/18 ordinary passes, without fine-tuning.
 
 ## Run
 
@@ -23,6 +25,26 @@ python3 qa/story-eval/planning/run.py generate --run /tmp/planning-inputs \
 python3 qa/story-eval/planning/run.py grade --run /tmp/planning-inputs \
   --candidates /tmp/planning-model/candidates.jsonl --out /tmp/planning-results
 ```
+
+New runs default to `--planner-prompt dependencies-v1`. This adds a dependency
+check based on capability requirements and effects, including recursive prerequisites,
+starting facts and consumed resources. It does not supply a mission-specific answer.
+Use `--planner-prompt baseline` to reproduce the original prompt. Prompt variants
+have distinct versions and hashes; manifests without `plannerPrompt` still resolve
+to the original baseline. Neither saved requests nor previous results are rewritten.
+
+To compare both condition orders with the revised prompt:
+
+```sh
+python3 qa/story-eval/planning/run.py prepare --planner-prompt dependencies-v1 \
+  --out /tmp/planning-dependencies-ordinary
+python3 qa/story-eval/planning/run.py prepare --planner-prompt dependencies-v1 \
+  --condition-order reversed --out /tmp/planning-dependencies-reversed
+```
+
+Generate and grade each prepared run separately with the commands above. Compare
+identical scenario hashes, condition order, user messages and inference settings;
+only the system message should differ from its corresponding baseline.
 
 For an ordering stress test, prepare a separate run with
 `--condition-order reversed`. This reverses only the supplied condition vocabulary,
@@ -101,4 +123,20 @@ Rust regressions cover real reference completion, impossible ordering, both lant
 orders, invented bindings, duplicate conditions, missing outcomes and input drift.
 Python checks cover strict parsing, prompt/reference separation, env-file parsing,
 manifest drift, preserved outputs, transport failures, partial coverage and HTML
-escaping. No database or browser setup is required.
+escaping. Prompt-version tests preserve legacy manifests and reject mismatched
+variant metadata. No database or browser setup is required.
+
+
+## Schema-constrained endpoint requests
+
+New `prepare` runs default to `--response-mode json-schema`. Requests include
+`response_format: {"type":"json_schema","json_schema":{"name":"StoryMissionPlan",
+"strict":true,"schema":...}}`, using the same contract and referenced
+`StoryNarrative` definition as the live API. The schema remains in the prompt too.
+Use `--response-mode prompt-only` for a controlled baseline. Old manifests without
+`responseMode` retain their original prompt-only requests and hashes. Generation
+forwards the recorded format exactly; it does not retry without constraints.
+
+The [31 October structured-output results](../RESULTS_JSON_SCHEMA_2026-10-31.md)
+record both 18-case planner reruns and a separate scene sample. Runtime validation
+and completion searches remain required even with constrained generation.
