@@ -146,6 +146,9 @@ jobs:
       - name: Check training with real API and disposable PostgreSQL
         if: matrix.suite == 'browser'
         run: node qa/e2e/run-training-qa.mjs
+      - name: Check local human story review
+        if: matrix.suite == 'browser'
+        run: node qa/e2e/story-human-review.mjs
       - name: Check authored story with real API and disposable PostgreSQL
         if: matrix.suite == 'browser'
         env:

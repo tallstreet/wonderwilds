@@ -271,10 +271,12 @@ def export(args):
     for key, review in reviews.items():
         if key not in by_key or review.get("candidateSha256") != digest(by_key[key]):
             raise ValueError(f"Unknown or stale review: {key}")
-        if review.get("decision") not in ("approve", "reject", "pending"):
-            raise ValueError("Review decision must be approve, reject or pending")
+        if review.get("decision") not in ("approve", "revise", "reject", "pending"):
+            raise ValueError("Review decision must be approve, revise, reject or pending")
         if review["decision"] != "approve":
             continue
+        if review.get("suggestedText"):
+            raise ValueError("Suggested edits need a new candidate and review; only unchanged originals can be approved")
         if not checks[key]["passed"]:
             raise ValueError(f"Cannot approve structurally invalid output: {key}")
         if not all(isinstance(review.get(k), str) and review[k].strip() for k in ("reviewer", "notes")):

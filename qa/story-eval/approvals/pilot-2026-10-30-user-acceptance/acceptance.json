@@ -1,0 +1,13 @@
+{
+  "format": "story-batch-acceptance-1",
+  "datasetId": "pilot-2026-10-30",
+  "datasetSha256": "5c63564cf5ab01627beabd7fe683c0481aa02dd43208d4a2e017d91b552e351d",
+  "authorizedAt": "2026-10-30T02:47:57.432558+00:00",
+  "authorization": "User requested: I am happy with all the model recommendations; accept them all.",
+  "interpretation": "Approve all keep recommendations; preserve revise/reject as unapproved. Held-out evaluations remain separate.",
+  "method": "Explicit user-authorized batch acceptance; do not treat newly accepted records as independent blind human labels.",
+  "priorDecisionCount": 17,
+  "updatedDecisionCount": 394,
+  "reviewsSha256": "f6a5e0845205db5ad4bd3e22010ed41b8851cc3f7c9d5650d76120eb3cb8aa3c",
+  "recommendationsSha256": "411eb5d899a53c23d82484ae392e50bc4dffb5c07cbb980395757ad9b974fa23"
+}

@@ -1,0 +1,37 @@
+{
+  "version": "story-scene-eval-1",
+  "run": {
+    "version": "story-scene-eval-1",
+    "corpusSha256": "65d69242d7ab55ee5a3c1750c265a72fdc1c2e6cab0a1b4d67a0d873f361a519",
+    "splits": {
+      "workshop-series": "eval",
+      "bank-series": "train",
+      "repaired-series": "train",
+      "supplied-series": "train"
+    },
+    "requestsSha256": "eb78c45063b130a93bbceb936c2c8e1259c148e9aeec7f61b9c496afc8cae094",
+    "schemaSha256": "64a414f2e56ffaf174762f38348ae205f66e57e02b8e8015130994962567b193",
+    "editorialBrief": "Ages 6–8; short, warm sentences; concrete next steps; no frightening or manipulative content.",
+    "scenarioCount": 137,
+    "warning": "Synthetic authored pilot; held-out journeys are not unseen mission families."
+  },
+  "evaluation": {
+    "version": "story-scene-eval-1",
+    "corpusSha256": "65d69242d7ab55ee5a3c1750c265a72fdc1c2e6cab0a1b4d67a0d873f361a519",
+    "requestsSha256": "eb78c45063b130a93bbceb936c2c8e1259c148e9aeec7f61b9c496afc8cae094",
+    "candidatesSha256": "a9b6b36d29472c0dbbe577868d145aacb70c22d268081f18db3fcb31cf587ca2",
+    "hardSha256": "90e0d56a9f5e7121b24d0af7f701bdb9207c7925a1334ec19edaa53ca3ce323f",
+    "judgmentsSha256": "19255df98fc507379bf082f9f45e73eced3573e734f4e4da30022ca6c1f50e43",
+    "candidateCount": 411,
+    "hardPassed": 411,
+    "qualityJudged": 411,
+    "rubricVersion": "story-quality-1"
+  },
+  "reviewsSha256": "bd13ff86552db238fcfcc671906a878f2b944e5e3f1d5ab6fbedbe8f5660b6a4",
+  "counts": {
+    "train": 269,
+    "eval": 114
+  },
+  "approvedExamplesExcludedForEvalOverlap": 3,
+  "note": "Human-approved SFT format only. No training/upload performed. Eval must remain held out."
+}
