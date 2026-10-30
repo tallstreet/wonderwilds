@@ -5,6 +5,46 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Complete once, vary wrong answers, return to the world — 31 October 2026
+
+Confirmed correct answers and explicit together-completions now close the learning
+panel automatically and mark the activity complete for the profile. The story
+selector excludes completed activities after reload and unlocks related practice
+without repeatedly requiring the same skill's multi-session readiness threshold.
+Academic readiness and mastery remain separate evidence policies. The journal
+uses the optional `activityCompleted` wire flag to label finished activities.
+Once all 120 activities are finished, normal story actions remain available.
+
+Incorrect answers atomically issue a different canonical question of the same
+skill, retaining the same encounter, story binding, support and cumulative check
+history. Fresh controls clear the previous selection/transcript. A corrected
+answer cannot become an independent first check. Seeds and command receipts
+preserve the replacement through reload and exact lost-response retries. New
+alternate items cover card activities that previously had only one question;
+every automatically marked activity in the new factory has multiple canonical
+questions, rather than merely rearranged answer cards.
+
+New tasks use the activity title and illustrated props, with at least three
+objects in initial matching tasks, instead of repeating the world objective and
+a single discovery marker. Old saved active questions retain their frozen factory
+until finished. Default-omitted completion metadata in checkpoints/observations
+and a default-omitted factory flag preserve old readers' data and historical
+replay; no migration or demo-data reset was introduced. A compatible new reader
+is still needed for new non-default metadata and factory content.
+
+Validation: aggregate repository checks passed, including frontend type/lint/
+format, 123 tests and build; 39 learning tests include all 120 activities finishing
+once without invented mastery, canonical question variation and legacy replay.
+157 shared Rust/TypeScript contract fixtures and generated-code checks passed.
+The focused disposable PostgreSQL learning suite passed completion, new questions,
+exact retry, checkpoint/history replay, ownership, rollback, export and deletion.
+Desktop/phone component checks and the real isolated learning journey passed
+automatic closing, persistent completion, wrong-answer replacement and lost-save
+recovery. The full authored story browser journey passed; its reload-position
+assertion now waits for Phaser's initialized world position. Screenshots were
+inspected. No live provider calls or child playtesting were made; the existing
+bundle-size warning remains.
+
 ## Authored curriculum starters and accessible play controls — 31 October 2026
 
 All 120 draft curriculum nodes now have a deterministic activity factory: the

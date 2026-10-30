@@ -8,7 +8,8 @@ not an educator-approved mastery instrument or released curriculum.
 
 All 120 nodes now have a code-authored activity factory. The original five-skill
 assessment path remains; the other 115 provide focused card starters or guided
-human-review workshops. They are not full objective/transfer assessments. Completed activities close automatically and are not offered again. Wrong
+human-review workshops. They are not full objective/transfer assessments.
+Completed activities close automatically and are not offered again. Wrong
 answers issue a different same-skill question, preserving support and first-check
 history. Completion unlocks related practice with Foundation/earlier-year priority,
 separately from academic readiness and mastery.

@@ -6,12 +6,15 @@ practice: five existing assessed maths activities, 93 additional card starters a
 curriculum assessment, pedagogical approval or IXL equivalence.
 
 Maths starters use fixed algorithms with bounded seeded quantities; language
-starters use authored text/word sets. Some starters currently have a single
-canonical example. Reordered choices and renamed contexts do not count as new
-learning evidence. Short samples deliberately do not establish readiness for
+starters use authored text/word sets. Every automatically marked activity in the
+current story factory has at least two canonical questions; some guided workshops
+still have a single scenario. Wrong answers receive a different same-skill
+question, and completed activities are not offered again. Reordered choices and
+renamed contexts do not count as new learning evidence. Short samples deliberately do not establish readiness for
 full objectives involving longer passages, multiple representations, writing,
 fluency or collaboration. New starters have no automatic full-skill readiness.
-The original five retain their experimental varied-evidence policy. Richer
+The original five retain their experimental varied-evidence diagnostic, separately
+from the completion-driven story journey. Richer
 manipulatives and item banks remain follow-on work.
 
 IXL's public Australian Foundation and Years 1–6 maths and English catalogues

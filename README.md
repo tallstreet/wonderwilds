@@ -269,13 +269,13 @@ and exact retry receipts persist separately from story and assessed-adventure
 progress. Migration `0006_mission_learning.sql` is applied by the local launcher
 on restart; disposable QA must use its own database.
 
-“Ready for another skill” is experimental practice progression, not the existing
-transfer-based secure-mastery assessment. It requires varied independent first
-checks across two story contexts and two authenticated server sessions; reloading
-a page alone is not a new session. Restarting the local demo launcher issues a
-new synthetic server session while preserving the profile. Helpers remain available without requiring independent success. Original activities use public IXL patterns as references; content
-review and release gates remain pending. See the [integration plan](docs/CURRICULUM_MISSION_PLAN.md)
-for the policy and remaining activity coverage.
+The original multi-session academic-readiness diagnostic remains separate from
+activity completion; children do not need to meet that threshold to move on after
+finishing an activity. Neither completion nor the diagnostic is the existing
+transfer-based secure-mastery assessment. Helpers remain available without
+independent success. Original activities use public IXL patterns as references;
+content review and release gates remain pending. See the
+[integration plan](docs/CURRICULUM_MISSION_PLAN.md) for evidence policy details.
 
 ### Optional Modal scene generation
 
