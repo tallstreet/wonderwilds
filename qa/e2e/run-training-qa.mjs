@@ -1,6 +1,6 @@
 // Portable runner: always uses a newly-created disposable synthetic cluster.
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { randomBytes, createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +18,9 @@ if (!process.argv.includes('--qa-child')) {
 const pgBin = process.env.WONDERWILDS_PG_BIN;
 const env = { ...process.env };
 const cargo = 'cargo';
+if (env.WW_STORY_COMBINED === '1' && (env.WONDERWILDS_MODAL_PLANNER !== '1' || env.WONDERWILDS_MODAL_STORY !== '1' || env.WW_STORY_EXPECT_PLANS !== '1')) {
+  throw new Error('Combined verification requires both Modal providers and saved-plan assertions');
+}
 const database = process.env.WW_QA_DATABASE_URL;
 if (!env.WW_QA_CLUSTER_DIR || database !== `host=${env.WW_QA_CLUSTER_DIR}/socket port=55432 user=ww_qa_admin dbname=ww_qa`) {
   throw new Error('Training QA requires its generated disposable cluster');
@@ -59,10 +62,19 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
   const configPath = join(temp, 'session.json');
   await writeFile(configPath, JSON.stringify({ session, csrf, profileId, browserToken: randomBytes(32).toString('hex') }), { mode: 0o600 });
   if (process.env.WW_QA_SKIP_BUILD !== '1') run(cargo, ['build', '-p', 'wonderwilds-api', '--locked']);
-  const api = spawn(join(root, 'target/debug/wonderwilds-api'), [], {
-    cwd: root, env: { ...env, WONDERWILDS_DATABASE_URL: database.replace('user=ww_qa_admin', 'user=ww_demo_runtime'), WONDERWILDS_ORIGIN: 'https://wonderwilds.local', WONDERWILDS_PORT: '3002' }, stdio: 'inherit',
-  });
-  children.push(api);
+  const apiLog = [];
+  const sessionLogs = [];
+  const startApi = () => {
+    const sessionLog = [];
+    sessionLogs.push(sessionLog);
+    const child = spawn(join(root, 'target/debug/wonderwilds-api'), [], {
+      cwd: root, env: { ...env, WONDERWILDS_DATABASE_URL: database.replace('user=ww_qa_admin', 'user=ww_demo_runtime'), WONDERWILDS_ORIGIN: 'https://wonderwilds.local', WONDERWILDS_PORT: '3002' }, stdio: ['ignore', 'inherit', 'pipe'],
+    });
+    child.stderr.on('data', chunk => { apiLog.push(chunk.toString()); sessionLog.push(chunk.toString()); process.stderr.write(chunk); });
+    children.push(child);
+    return child;
+  };
+  let api = startApi();
   await waitReady('http://127.0.0.1:3002/readyz', api);
   const vite = spawn(process.execPath, ['frontend/node_modules/vite/bin/vite.js', 'frontend', '--host', '127.0.0.1', '--port', '5180', '--strictPort'], {
     cwd: root, env: { ...env, WW_LOCAL_DEMO_CONFIG: configPath, WW_DEMO_PORT: '5180', WW_DEMO_API_PORT: '3002' }, stdio: 'inherit',
@@ -70,13 +82,53 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
   children.push(vite);
   await waitReady('http://127.0.0.1:5180/', vite);
   // Async child lets this process continue draining the local servers' output.
-  const test = spawn(process.execPath, [process.env.WW_QA_BROWSER_TEST || 'qa/e2e/training-browser.mjs'], { cwd: root, env: { ...env, WW_DEMO_TEST_URL: 'http://127.0.0.1:5180' }, stdio: 'inherit' });
+  const test = spawn(process.execPath, [process.env.WW_QA_BROWSER_TEST || 'qa/e2e/training-browser.mjs'], { cwd: root, env: { ...env, WW_DEMO_TEST_URL: 'http://127.0.0.1:5180' }, stdio: ['inherit', 'inherit', 'inherit', 'ipc'] });
   children.push(test);
+  test.on('message', async message => {
+    if (message?.type !== 'restart-api' || !(env.WW_STORY_COMBINED === '1' || env.WW_STORY_RETURNING === '1')) return;
+    try {
+      const stopped = once(api, 'exit');
+      api.kill('SIGTERM');
+      const timer = setTimeout(() => api.kill('SIGKILL'), 5000);
+      await stopped;
+      clearTimeout(timer);
+      api = startApi();
+      await waitReady('http://127.0.0.1:3002/readyz', api);
+      test.send({ type: 'api-restarted' });
+    } catch { test.send({ type: 'api-restart-failed' }); }
+  });
   const [code] = await once(test, 'exit');
+  if (env.WW_STORY_COMBINED === '1') {
+    const log = apiLog.join('');
+    const summary = {
+      branch: env.WW_STORY_BRANCHES || 'default',
+      model: 'wonderwilds',
+      modelRevision: 'Endpoint alias; immutable weight revision unavailable',
+      apiTimeoutSeconds: 6,
+      sourceSha256: Object.fromEntries(await Promise.all([
+        'contracts/schemas/v1.json', 'backend/crates/api/src/story/modal.rs',
+        'backend/crates/api/src/story/modal_prompt.txt',
+        'backend/crates/director/src/story/prompts/mission_baseline.txt',
+        'backend/crates/director/src/story/prompts/mission_dependencies.txt',
+        'qa/e2e/story-broader.mjs', 'qa/e2e/run-training-qa.mjs',
+      ].map(async path => [path, createHash('sha256').update(await readFile(join(root, path))).digest('hex')]))),
+      acceptedSceneResponses: (log.match(/Modal story: validated scene accepted/g) || []).length,
+      fallbackSceneResponses: (log.match(/Modal story: unavailable or invalid/g) || []).length,
+      staleSceneResponses: (log.match(/Modal story: state changed/g) || []).length,
+      acceptedPlans: (log.match(/Modal planner: validated plan/g) || []).length,
+      fallbackPlans: (log.match(/Modal planner: .*authored fallback/g) || []).length,
+      browserExitCode: code,
+      acceptedScenesBySession: sessionLogs.map(parts => (parts.join('').match(/Modal story: validated scene accepted/g) || []).length),
+      note: 'Scene counts include cache hits and QA reads; they are not unique inference counts.'
+    };
+    if (env.WW_STORY_REPORT) await writeFile(env.WW_STORY_REPORT, JSON.stringify(summary, null, 2));
+    console.log('Combined provider evidence:', JSON.stringify(summary));
+    if (summary.acceptedScenesBySession.length !== 4 || summary.acceptedScenesBySession.some(count => count === 0) || summary.acceptedPlans !== 7) throw new Error('Combined run requires accepted scenes in all four sessions and seven generated plans');
+  }
   if (code !== 0) throw new Error(`Training browser journey exited ${code}`);
 } finally {
   for (const child of children.reverse()) {
-    if (child.exitCode !== null) continue;
+    if (child.exitCode !== null || child.signalCode !== null) continue;
     const stopped = once(child, 'exit');
     child.kill('SIGTERM');
     const timer = setTimeout(() => child.kill('SIGKILL'), 5000);

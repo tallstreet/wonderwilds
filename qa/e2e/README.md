@@ -126,3 +126,42 @@ uses only the runner's disposable synthetic database, checks saved plans against
 snapshots and the Missions dialog, and verifies reload stability. Authored fallback
 is deliberately a failure in this opt-in mode, so availability is not mistaken for
 model-quality evidence. Without the flag, the ordinary authored journey is unchanged.
+
+
+Combined scene generation and mission planning with returning sessions:
+
+```sh
+WONDERWILDS_MODAL_PLANNER=1 WONDERWILDS_MODAL_STORY=1 \
+WW_STORY_COMBINED=1 WW_STORY_EXPECT_PLANS=1 \
+WW_STORY_REPORT=/tmp/ww-combined-default.json \
+WW_QA_BROWSER_TEST=qa/e2e/story-broader.mjs \
+node qa/e2e/run-training-qa.mjs
+```
+
+Export the existing Modal proxy credentials first; never commit them or include
+values in evidence. Repeat with `WW_STORY_BRANCHES=alternate` and a different report
+path. Each invocation owns a new disposable database. This is an opt-in live-model
+check with inference requests, not an ordinary offline CI test.
+
+The journey closes the browser context and restarts the API three times: after the
+original trilogy, while the corner mission is paused with a lasting choice, and
+during gathering preparation. A fresh browser context resumes the same synthetic
+profile/session credential; this does not test production login or session renewal.
+It compares revision, full canonical scene input and persisted plans before and
+after each restart, then completes all seven missions. It also loses one committed
+exchange response and checks reload plus exact-body retry without duplicate progress.
+
+Both providers must be enabled; all seven accepted missions must have persisted
+model plans and the API must report accepted scene responses in each of the four sessions. The JSON summary
+counts accepted/fallback/stale scene responses and accepted/fallback plans. Scene
+counts include cache hits and QA reads, so they are not unique generation counts.
+The browser log reports read and action-through-refresh timing distributions;
+these include UI/cache effects and are not isolated provider latency or token cost.
+Fallback is reported separately and never counted as successful model generation.
+A run with no accepted scenes or missing plans fails, even if authored play works.
+These checks establish mechanical continuity, not editorial prose approval.
+
+For an offline rehearsal of the same restarts and retry checks, use
+`WW_STORY_RETURNING=1` with both provider flags set to `0` and omit
+`WW_STORY_COMBINED`/`WW_STORY_EXPECT_PLANS`. Repeat both branches. An authored
+rehearsal cannot satisfy combined-model acceptance.

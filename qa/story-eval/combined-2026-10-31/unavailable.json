@@ -1,0 +1,11 @@
+{
+  "branch": "default",
+  "acceptedSceneResponses": 0,
+  "fallbackSceneResponses": 5,
+  "staleSceneResponses": 0,
+  "acceptedPlans": 0,
+  "fallbackPlans": 1,
+  "browserExitCode": 1,
+  "note": "Scene counts include cache hits and QA reads; they are not unique inference counts.",
+  "evidenceType": "Failed availability attempt before endpoint recovery"
+}

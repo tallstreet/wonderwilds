@@ -1224,3 +1224,96 @@ async fn planner_rechecks_expired_session_before_committing_acceptance() {
     assert!(records["profile-a"].plans.is_empty());
     assert!(records["profile-a"].receipts.is_empty());
 }
+
+#[tokio::test]
+async fn combined_scene_provider_receives_saved_plan_and_cannot_change_retry_receipt() {
+    struct PlannedScene(bool);
+    impl wonderwilds_director::story::SceneProvider for PlannedScene {
+        fn propose(
+            &self,
+            input: &Value,
+            canonical: &Value,
+        ) -> Result<Value, wonderwilds_director::story::Error> {
+            if input["mission"]["status"] == "active" {
+                assert_eq!(input["mission"]["goal"], "A planned crossing with Pip");
+                assert_eq!(input["mission"]["current"], "Find wood for our crossing.");
+            }
+            if self.0 {
+                return Err(wonderwilds_director::story::Error::InvalidPayload(
+                    "offline".into(),
+                ));
+            }
+            let mut scene = canonical.clone();
+            scene["presentation"][0]["text"] = json!("Our planned crossing awaits.");
+            Ok(scene)
+        }
+    }
+    for outage in [false, true] {
+        let repository = Arc::new(StoryMemory::new());
+        let calls = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let mut state = AppState::development(None, "https://game.example".into()).unwrap();
+        state.auth = Arc::new(SyntheticAuth);
+        state.story_repository = repository.clone();
+        state.story_planner = Some(Arc::new(TestPlanProvider {
+            calls: calls.clone(),
+            behavior: 0,
+            repository,
+        }));
+        state.story_provider = Some(Arc::new(PlannedScene(outage)));
+        let app = router(state);
+        let (_, initial) = send(
+            app.clone(),
+            "/api/v1/story",
+            None,
+            "test-parent-a",
+            "profile-a",
+            false,
+        )
+        .await;
+        let accept = cmd(
+            "combined-accept",
+            0,
+            json!({"type":"choose","actionId":initial["sceneInput"]["availableActions"][0]["id"]}),
+        );
+        let receipt = send(
+            app.clone(),
+            "/api/v1/story/commands",
+            Some(accept.clone()),
+            "test-parent-a",
+            "profile-a",
+            true,
+        )
+        .await;
+        assert_eq!(receipt.0, StatusCode::OK);
+        for _ in 0..2 {
+            let (status, snapshot) = send(
+                app.clone(),
+                "/api/v1/story",
+                None,
+                "test-parent-a",
+                "profile-a",
+                false,
+            )
+            .await;
+            assert_eq!(status, StatusCode::OK);
+            assert_eq!(snapshot["sceneInput"], receipt.1["sceneInput"]);
+            assert_eq!(
+                snapshot["scene"]["presentation"][0]["text"] == "Our planned crossing awaits.",
+                !outage
+            );
+        }
+        assert_eq!(
+            send(
+                app,
+                "/api/v1/story/commands",
+                Some(accept),
+                "test-parent-a",
+                "profile-a",
+                true
+            )
+            .await,
+            receipt
+        );
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+    }
+}

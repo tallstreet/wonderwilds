@@ -5,6 +5,45 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Combined-model returning-session verification — 31 October 2026
+
+The existing seven-story Phaser journey now has opt-in combined-provider QA and
+an authored rehearsal mode. Both branches restart the API and open a fresh browser
+context after the trilogy, during the paused corner mission, and during gathering
+preparation. Checks compare the full canonical scene input, revision and saved
+plans across restarts; a lost committed exchange response is recovered by reload
+and exact-body retry. The same synthetic authenticated session is reused; this is
+not production login/session-renewal verification.
+
+The live gate requires seven saved generated plans and accepted scene responses in
+each of four sessions. Logs distinguish accepted scenes, authored fallback and
+stale results; scene counts include cache hits and diagnostic reads, not unique
+inferences. Timings measure HTTP reads and UI actions through refresh, not isolated
+model latency. Reproduction is in [browser QA](../qa/e2e/README.md).
+
+API regression coverage now verifies that scene generation receives the persisted
+brief, scene outage preserves that brief, and exact acceptance retries retain the
+original receipt without replanning. Verification also found a duplicate scene
+`response_format` field and inconsistent schema-name assertions; the duplicate
+was removed while retaining the effective `story_scene` request name and schema.
+
+Both live branches subsequently passed all seven missions and all three restarts,
+with seven saved generated plans each. Default/alternate recorded 216/223 accepted
+scene responses and 10/9 scene fallbacks, with no planner fallbacks in the successful
+runs. Both authored rehearsals and desktop/tablet guest smoke also passed. API
+checks passed 32 tests (three DB tests ignored), targeted Clippy, Rust formatting,
+JavaScript syntax and diff checks. Real disposable PostgreSQL was exercised by the
+browser runs; the separate DB and full aggregate suites were not rerun. Node was
+26.12.0 rather than 24.
+
+The initial endpoint-503 attempt and an alternate run's first-workshop travel
+timeout are retained separately. The diagnostic alternate rerun passed, but the
+intermittent timeout cause remains unresolved. Combined branch/resumption coverage
+is delivered; M1 reliability is not unconditionally closed. See the
+[results and saved summaries](../qa/story-eval/RESULTS_COMBINED_2026-10-31.md) for
+counts, timing limits, failures and reproduction. Content/release gates remain
+unchanged; this is not an editorial or unseen-mission evaluation.
+
 ## Schema-constrained model requests — 31 October 2026
 
 Both live Modal request paths now include `response_format.type = json_schema`

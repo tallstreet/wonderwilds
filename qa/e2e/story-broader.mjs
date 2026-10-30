@@ -8,15 +8,38 @@ const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
 const alternate = process.env.WW_STORY_BRANCHES === 'alternate';
 const expectPlans = process.env.WW_STORY_EXPECT_PLANS === '1';
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
-const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+let page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const combined = process.env.WW_STORY_COMBINED === '1';
+const returning = combined || process.env.WW_STORY_RETURNING === '1';
 const errors = [];
-page.on('pageerror', error => errors.push(error.message));
+const returningSessions = [];
+const readLatencies = [];
+const commandLatencies = [];
+let lostResponseChecked = false;
+if (combined) assert.ok(expectPlans, 'Combined QA requires planner assertions');
+if (returning) assert.ok(process.send, 'Returning-session QA requires the disposable runner');
+const requestTrace = [];
+const observe = currentPage => {
+  currentPage.on('pageerror', error => errors.push(error.message));
+  currentPage.on('request', request => {
+    if (request.url().endsWith('/story/commands')) {
+      const body = request.postDataJSON();
+      requestTrace.push({ event: 'command', revision: body.expectedRevision, payload: body.payload, at: Date.now() });
+    }
+  });
+  currentPage.on('response', response => {
+    if (response.url().endsWith('/story/commands')) requestTrace.push({ event: 'response', status: response.status(), at: Date.now() });
+  });
+};
+observe(page);
 try {
   await page.goto(`${origin}/?story=1`);
   await page.locator('#game canvas').waitFor();
   const bootstrap = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
   const get = async path => {
+    const started = performance.now();
     const response = await page.request.get(`${origin}${path}`, { headers: { 'X-Wonderwilds-Profile': bootstrap.profileId } });
+    if (path === '/api/v1/story') readLatencies.push(performance.now() - started);
     assert.equal(response.status(), 200); return response.json();
   };
   const savedPlans = () => {
@@ -68,7 +91,31 @@ try {
       await visit(target);
     }
     const selected = findAction(state, type, fields);
+    const loseResponse = returning && !lostResponseChecked && type === 'exchange';
+    let originalBody;
+    if (loseResponse) await page.route('**/api/v1/story/commands', async route => {
+      originalBody = route.request().postData();
+      const response = await route.fetch();
+      assert.equal(response.status(), 200);
+      await route.abort('failed');
+    }, { times: 1 });
+    const started = performance.now();
     await page.locator(`[data-story-handle="${selected.id}"]`).click();
+    if (loseResponse) {
+      await page.locator('[data-story-retry]').waitFor();
+      const committed = await snapshot();
+      const plans = savedPlans();
+      await page.reload(); await page.locator('#game canvas').waitFor();
+      await page.locator('#missions').click();
+      const retry = page.waitForRequest(request => request.url().endsWith('/story/commands'));
+      await page.locator('[data-story-retry]').click();
+      assert.equal((await retry).postData(), originalBody);
+      await page.locator('dialog').waitFor({ state: 'hidden' });
+      assert.equal((await ready()).revision, committed.revision);
+      assert.deepEqual(savedPlans(), plans);
+      lostResponseChecked = true;
+      console.log('PASS lost response: reload and exact command retry');
+    }
     if (type === 'accompany') {
       await page.waitForFunction(character => {
         const surface = document.querySelector('#game');
@@ -78,6 +125,7 @@ try {
     }
     await page.waitForFunction(previous => Number(document.querySelector('#game')?.dataset.storyRevision) > previous, state.revision, { timeout: 20000 });
     const result = await ready();
+    commandLatencies.push(performance.now() - started);
     if (expectPlans && type === 'accept_mission') {
       const plan = savedPlans()[result.sceneInput.mission.missionId];
       assert.ok(plan, 'A model plan must be persisted for each new mission');
@@ -94,6 +142,30 @@ try {
   const inspect = objectId => act('inspect', { objectId });
   const assemble = objectId => act('assemble', { objectId });
   const reload = async () => { await close(); await page.reload(); await page.locator('#game canvas').waitFor(); return ready(); };
+  const returnSession = async label => {
+    if (!returning) return;
+    const before = await ready();
+    const plans = savedPlans();
+    await page.context().close();
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('API restart timed out')), 30000);
+      process.once('message', message => {
+        clearTimeout(timer);
+        if (message.type === 'api-restarted') resolve(); else reject(new Error('API restart failed'));
+      });
+      process.send({ type: 'restart-api' });
+    });
+    page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    observe(page);
+    await page.goto(`${origin}/?story=1`);
+    await page.locator('#game canvas').waitFor();
+    const after = await ready();
+    assert.equal(after.revision, before.revision);
+    assert.deepEqual(after.sceneInput, before.sceneInput, 'Returning session preserves canonical context and mission');
+    assert.deepEqual(savedPlans(), plans, 'API restart preserves original generated plans');
+    returningSessions.push(label);
+    console.log(`PASS returning session: ${label}`);
+  };
   const mission = async (id, status = 'completed') => {
     const state = await ready();
     assert.equal(state.sceneInput.mission.missionId, id); assert.equal(state.sceneInput.mission.status, status);
@@ -116,6 +188,7 @@ try {
   await travel('bridge_bank'); await travel('workshop'); await act('exchange', { characterId: 'woodcutter' });
   await travel('bridge_bank'); await assemble('near_lanterns'); await travel('far_bank'); await assemble('far_lantern');
   await mission('welcome_lights'); await travel('bridge_bank');
+  await returnSession('completed trilogy');
 
   // Clues and a lasting choice. An optional incorrect lead never blocks discovery.
   await act('accept_mission'); await mission('humming_hollow', 'active');
@@ -146,6 +219,7 @@ try {
   assert.equal(JSON.parse(await page.locator('#game').getAttribute('data-story-markers')).find(item => item.id === 'object:corner_frame').shape, alternate ? 'corner-stars' : 'corner-leaves');
   await assemble('corner_frame'); await act('cancel_mission');
   await reload(); await mission('cosy_corner', 'abandoned');
+  await returnSession('paused corner with lasting choice');
   assert.ok(!(await snapshot()).sceneInput.availableActions.some(item => item.action.type === 'assemble'));
   await act('accept_mission');
   assert.equal(JSON.parse(await page.locator('#game').getAttribute('data-story-markers')).find(item => item.id === 'object:corner_cushions').shape, alternate ? 'corner-stars' : 'corner-leaves');
@@ -177,6 +251,7 @@ try {
     await assemble('gathering_music'); await act('invite', { characterId: 'bramble' });
     await assemble('gathering_seats'); await reload(); await act('invite', { characterId: 'pip' });
   }
+  await returnSession('partially prepared gathering');
   await talk('pip', 'welcome_friends');
   const final = await mission('moonlight_gathering');
   await fact('The moonlight gathering has begun.');
@@ -202,8 +277,26 @@ try {
   await page.screenshot({ path: `/tmp/wonderwilds-story-broader-${alternate ? 'alternate' : 'default'}-mobile.png`, fullPage: true });
   assert.deepEqual(await get('/api/v1/game'), originalGame, 'Education state remains separate');
   assert.deepEqual(errors, []);
+  if (returning) {
+    assert.equal(returningSessions.length, 3);
+    assert.ok(lostResponseChecked);
+    const stats = values => {
+      const sorted = [...values].sort((a, b) => a - b);
+      return { count: sorted.length, medianMs: Math.round(sorted[Math.floor(sorted.length / 2)]), p95Ms: Math.round(sorted[Math.ceil(sorted.length * .95) - 1]), maxMs: Math.round(sorted.at(-1)) };
+    };
+    console.log('Combined browser timings:', JSON.stringify({ read: stats(readLatencies), actionThroughRefresh: stats(commandLatencies), returningSessions, note: 'HTTP reads include QA/cache reads; action timings include UI, refresh and injected retry, not isolated model latency.' }));
+  }
   console.log(`PASS: seven playable stories (${alternate ? 'alternate' : 'default'} choices), clues, lasting designs, Bramble escort, parallel gathering, pause/reload, visible outcomes, mobile history and separate education`);
 } catch (error) {
+  console.error('Recent command trace:', JSON.stringify(requestTrace.slice(-12)));
+  console.error('Failure UI:', JSON.stringify(await page.evaluate(() => ({
+    revision: document.querySelector('#game')?.getAttribute('data-story-revision'),
+    buttons: [...document.querySelectorAll('[data-story-handle]')].map(button => ({ handle: button.getAttribute('data-story-handle'), disabled: button.disabled })),
+    status: document.querySelector('#story-world-status')?.textContent,
+  })).catch(() => null)));
   await page.screenshot({ path: '/tmp/wonderwilds-story-broader-failure.png', fullPage: true }).catch(() => {});
   throw error;
-} finally { await browser.close(); }
+} finally {
+  await browser.close();
+  if (process.connected) process.disconnect();
+}

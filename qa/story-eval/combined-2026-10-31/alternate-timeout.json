@@ -1,0 +1,26 @@
+{
+  "branch": "alternate",
+  "model": "wonderwilds",
+  "modelRevision": "Endpoint alias; immutable weight revision unavailable",
+  "apiTimeoutSeconds": 6,
+  "sourceSha256": {
+    "contracts/schemas/v1.json": "e4ec246c770c91ee7f07549a0185ae042d79d09a4014a2622b76e2f0e092012a",
+    "backend/crates/api/src/story/modal.rs": "ba3486414b67d5f8aca5e0fa41703bbab6f56e887d8eb8db6ecfdec39e0a96a2",
+    "backend/crates/api/src/story/modal_prompt.txt": "14cf2a45ae183ba20d5c3f53c471c68ffa372db0529cd03967b8aa4873d70bc3",
+    "backend/crates/director/src/story/prompts/mission_baseline.txt": "1adea8ccad1fd6598cd4d4fc6cdb66ef561f66ca71444c0ea1f7d28541114474",
+    "backend/crates/director/src/story/prompts/mission_dependencies.txt": "b4a9b59e76c29d1d82bbb9e84e4c2fc2b9e60bbb5704d69e0d63753fabffb827",
+    "qa/e2e/story-broader.mjs": "45be0cf7117189ccdb01e25434bd65ce596110d73dc4104563caab99ec2f6225",
+    "qa/e2e/run-training-qa.mjs": "e24dd098907c2dd6521cd46a2d0e1643c83aba778fb0ce76d17158115c8c1d0e"
+  },
+  "acceptedSceneResponses": 7,
+  "fallbackSceneResponses": 3,
+  "staleSceneResponses": 0,
+  "acceptedPlans": 1,
+  "fallbackPlans": 0,
+  "browserExitCode": 1,
+  "acceptedScenesBySession": [
+    7
+  ],
+  "note": "Scene counts include cache hits and QA reads; they are not unique inference counts.",
+  "failure": "Browser revision did not advance within 20 seconds after workshop travel; cause not established in this run."
+}

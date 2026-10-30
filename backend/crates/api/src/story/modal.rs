@@ -108,10 +108,8 @@ fn request_body(input: &Value, canonical: &Value) -> Value {
     json!({"model":"wonderwilds","messages":[
         {"role":"system","content":SYSTEM},
         {"role":"user","content":supplied.to_string()}],
-        "response_format":response_format("StoryScene", &schema["$defs"]["StoryScene"]),
+        "response_format":response_format("story_scene", &schema["$defs"]["StoryScene"]),
         "temperature":0,"max_tokens":2048,"stream":false,
-        "response_format":{"type":"json_schema","json_schema":{
-            "name":"story_scene","schema":schema["$defs"]["StoryScene"],"strict":true}},
         "chat_template_kwargs":{"reasoning_strength":"low"}})
 }
 

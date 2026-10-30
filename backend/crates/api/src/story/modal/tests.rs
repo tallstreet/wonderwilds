@@ -133,7 +133,7 @@ fn introduction_is_preserved_and_metadata_is_not_an_answer() {
     assert_eq!(
         body["response_format"],
         json!({"type":"json_schema", "json_schema":{
-        "name":"StoryScene", "strict":true, "schema":payload["outputSchema"]}})
+        "name":"story_scene", "strict":true, "schema":payload["outputSchema"]}})
     );
     assert_eq!(
         payload["presentation"]["requiredEntries"][0]["entryId"],
