@@ -52,6 +52,7 @@ fn app() -> (Router, Arc<MemoryRepository>) {
         auth: Arc::new(SyntheticAuth),
         story_repository: Arc::new(StoryMemory::new()),
         story_provider: None,
+        story_planner: None,
         content,
         permits: Arc::new(tokio::sync::Semaphore::new(16)),
         configured: true,
@@ -546,6 +547,7 @@ struct StoryRecord {
     owner: String,
     state: wonderwilds_domain::story::State,
     receipts: BTreeMap<String, (Value, Value)>,
+    plans: BTreeMap<String, Value>,
 }
 impl StoryMemory {
     fn new() -> Self {
@@ -556,6 +558,7 @@ impl StoryMemory {
                     owner: "parent-a".into(),
                     state: wonderwilds_domain::story::State::new(),
                     receipts: BTreeMap::new(),
+                    plans: BTreeMap::new(),
                 },
             )])),
         }
@@ -568,9 +571,39 @@ impl crate::story::repository::Repository for StoryMemory {
             .get(&identity.profile_id)
             .filter(|r| r.owner == identity.parent_id)
             .ok_or(Error::Forbidden)?;
-        crate::story::snapshot(&record.state)
+        let mut snapshot = crate::story::snapshot(&record.state)?;
+        if let Some(plan) = record.plans.get(record.state.mission_id()) {
+            crate::story::planning::project(&record.state, plan, &mut snapshot)?;
+        }
+        Ok(snapshot)
+    }
+    fn planning_state(
+        &self,
+        identity: &Identity,
+        request: &Value,
+    ) -> Result<Option<wonderwilds_domain::story::State>, Error> {
+        let profiles = self.profiles.lock().unwrap();
+        let record = profiles
+            .get(&identity.profile_id)
+            .filter(|r| r.owner == identity.parent_id)
+            .ok_or(Error::Forbidden)?;
+        if record
+            .receipts
+            .contains_key(request["commandId"].as_str().unwrap_or(""))
+        {
+            return Ok(None);
+        }
+        crate::story::planning::acceptance(&record.state, request)
     }
     fn execute(&self, identity: &Identity, request: &Value) -> Result<Value, Error> {
+        self.execute_planned(identity, request, None)
+    }
+    fn execute_planned(
+        &self,
+        identity: &Identity,
+        request: &Value,
+        plan: Option<&crate::story::planning::ValidatedPlan>,
+    ) -> Result<Value, Error> {
         wire::validate("StoryCommand", request).map_err(|_| Error::InvalidInput)?;
         let mut profiles = self.profiles.lock().map_err(|_| Error::Unavailable)?;
         let record = profiles
@@ -585,7 +618,15 @@ impl crate::story::repository::Repository for StoryMemory {
                 Err(Error::RevisionConflict)
             };
         }
-        let (next, response) = crate::story::execute(&record.state, request)?;
+        let (next, mut response) = crate::story::execute(&record.state, request)?;
+        if let Some(plan) = plan {
+            record
+                .plans
+                .insert(next.mission_id().into(), plan.for_state(&next)?.clone());
+        }
+        if let Some(plan) = record.plans.get(next.mission_id()) {
+            crate::story::planning::project(&next, plan, &mut response)?;
+        }
         record.state = next;
         record
             .receipts
@@ -958,4 +999,228 @@ async fn expired_session_during_generation_does_not_receive_model_output() {
     )
     .await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
+}
+
+struct TestPlanProvider {
+    calls: Arc<std::sync::atomic::AtomicUsize>,
+    behavior: u8,
+    repository: Arc<StoryMemory>,
+}
+impl crate::story::planning::PlanProvider for TestPlanProvider {
+    fn propose(
+        &self,
+        _: &Value,
+        _: &[String],
+    ) -> Result<Value, wonderwilds_director::story::Error> {
+        self.calls.fetch_add(1, Ordering::SeqCst);
+        if self.behavior == 1 {
+            return Err(wonderwilds_director::story::Error::InvalidPayload(
+                "offline".into(),
+            ));
+        }
+        if self.behavior == 3 {
+            let mut profiles = self.repository.profiles.lock().unwrap();
+            profiles
+                .get_mut("profile-a")
+                .unwrap()
+                .state
+                .apply(&wonderwilds_domain::story::Command {
+                    command_id: "concurrent".into(),
+                    expected_revision: 0,
+                    action: wonderwilds_domain::story::Action::Travel {
+                        destination_id: "workshop".into(),
+                    },
+                })
+                .unwrap();
+        }
+        let mut plan =
+            wonderwilds_director::story::authored_plan(&wonderwilds_domain::story::State::new())
+                .unwrap();
+        plan["goal"] = json!("A planned crossing with Pip");
+        plan["milestones"][0]["label"] = json!("Find wood for our crossing.");
+        if self.behavior == 2 {
+            plan["milestones"].as_array_mut().unwrap().swap(0, 1);
+        }
+        Ok(plan)
+    }
+}
+
+#[tokio::test]
+async fn planner_acceptance_persists_retries_falls_back_and_rejects_races() {
+    for behavior in 0..4 {
+        let repository = Arc::new(StoryMemory::new());
+        let calls = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let mut state = AppState::development(None, "https://game.example".into()).unwrap();
+        state.auth = Arc::new(SyntheticAuth);
+        state.story_repository = repository.clone();
+        state.story_planner = Some(Arc::new(TestPlanProvider {
+            calls: calls.clone(),
+            behavior,
+            repository: repository.clone(),
+        }));
+        let app = router(state);
+        let (_, initial) = send(
+            app.clone(),
+            "/api/v1/story",
+            None,
+            "test-parent-a",
+            "profile-a",
+            false,
+        )
+        .await;
+        assert_eq!(calls.load(Ordering::SeqCst), 0);
+        let accept = cmd(
+            "planned-accept",
+            0,
+            json!({"type":"choose","actionId":initial["sceneInput"]["availableActions"][0]["id"]}),
+        );
+        assert_eq!(
+            send(
+                app.clone(),
+                "/api/v1/story/commands",
+                Some(accept.clone()),
+                "test-parent-a",
+                "profile-a",
+                false
+            )
+            .await
+            .0,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            send(
+                app.clone(),
+                "/api/v1/story/commands",
+                Some(accept.clone()),
+                "test-parent-b",
+                "profile-a",
+                true
+            )
+            .await
+            .0,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(calls.load(Ordering::SeqCst), 0);
+        let response = send(
+            app.clone(),
+            "/api/v1/story/commands",
+            Some(accept.clone()),
+            "test-parent-a",
+            "profile-a",
+            true,
+        )
+        .await;
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+        if behavior == 3 {
+            assert_eq!(response.0, StatusCode::CONFLICT);
+            continue;
+        }
+        assert_eq!(response.0, StatusCode::OK);
+        assert_eq!(
+            response.1["sceneInput"]["mission"]["goal"] == "A planned crossing with Pip",
+            behavior == 0
+        );
+        assert_eq!(
+            send(
+                app.clone(),
+                "/api/v1/story",
+                None,
+                "test-parent-a",
+                "profile-a",
+                false
+            )
+            .await
+            .1,
+            response.1
+        );
+        assert_eq!(
+            send(
+                app.clone(),
+                "/api/v1/story/commands",
+                Some(accept),
+                "test-parent-a",
+                "profile-a",
+                true
+            )
+            .await,
+            response
+        );
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+        let cancel = response.1["sceneInput"]["availableActions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["action"]["type"] == "cancel_mission")
+            .unwrap();
+        let (_, paused) = send(
+            app.clone(),
+            "/api/v1/story/commands",
+            Some(cmd(
+                "pause",
+                1,
+                json!({"type":"choose","actionId":cancel["id"]}),
+            )),
+            "test-parent-a",
+            "profile-a",
+            true,
+        )
+        .await;
+        let resume = paused["sceneInput"]["availableActions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["action"]["type"] == "accept_mission")
+            .unwrap();
+        let (_, resumed) = send(
+            app,
+            "/api/v1/story/commands",
+            Some(cmd(
+                "resume",
+                2,
+                json!({"type":"choose","actionId":resume["id"]}),
+            )),
+            "test-parent-a",
+            "profile-a",
+            true,
+        )
+        .await;
+        assert_eq!(
+            resumed["sceneInput"]["mission"]["goal"],
+            response.1["sceneInput"]["mission"]["goal"]
+        );
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+    }
+}
+
+#[tokio::test]
+async fn planner_rechecks_expired_session_before_committing_acceptance() {
+    let repository = Arc::new(StoryMemory::new());
+    let initial = crate::story::snapshot(&wonderwilds_domain::story::State::new()).unwrap();
+    let mut state = AppState::development(None, "https://game.example".into()).unwrap();
+    state.auth = Arc::new(ExpiringSceneAuth(std::sync::atomic::AtomicUsize::new(0)));
+    state.story_repository = repository.clone();
+    state.story_planner = Some(Arc::new(TestPlanProvider {
+        calls: Arc::new(std::sync::atomic::AtomicUsize::new(0)),
+        behavior: 0,
+        repository: repository.clone(),
+    }));
+    let request = cmd(
+        "expired-plan",
+        0,
+        json!({"type":"choose","actionId":initial["sceneInput"]["availableActions"][0]["id"]}),
+    );
+    let (status, _) = send(
+        router(state),
+        "/api/v1/story/commands",
+        Some(request),
+        "test-parent-a",
+        "profile-a",
+        true,
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    let records = repository.profiles.lock().unwrap();
+    assert_eq!(records["profile-a"].state.revision(), 0);
+    assert!(records["profile-a"].plans.is_empty());
+    assert!(records["profile-a"].receipts.is_empty());
 }

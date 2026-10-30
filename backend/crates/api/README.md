@@ -52,8 +52,21 @@ response even after later progress, so clients refresh before offering new actio
 Story revision, inventory and milestones never update assessed game progress or
 learning records. At the 256-command development cap the snapshot is terminal,
 omits scene/action payloads and preserves the save; old exact retries still work.
-There is no story reset/import endpoint or model call. `/story.html` is the opt-in
-local demo client, with coarse location controls rather than Phaser path traversal.
+There is no story reset/import endpoint. `/story.html` is the inspector; `/?story=1`
+is the Phaser adventure. Optional Modal scene generation enriches authenticated reads.
+
+`WONDERWILDS_MODAL_PLANNER=1` enables a separate provider on new mission acceptance.
+Preparation reads/replays authorized state and releases locks; generation and a
+500 ms bounded domain completion search run outside the transaction. The API
+rechecks session/CSRF, then the repository binds the validated plan to the exact
+post-command checkpoint under the profile lock. Migration `0004_story_mission_plans.sql`
+adds forced-RLS saved briefs with cascading deletion and profile export. Plan,
+checkpoint and original response commit atomically. Retries check receipts first;
+pause/resume and reload never regenerate a plan. Invalid/unavailable plans use
+authored fallback. Snapshot projections feed saved goals, narrative and authoritative
+condition labels to both clients and the optional scene provider. Mechanics and
+available actions remain authored; generated ordering guides presentation rather
+than adding new action gates. The flags do not alter existing saved briefs.
 
 The authored development slice uses the exact skill/template IDs from story and
 friendship packs and real server assessment. It exposes Meadow menu interactions;

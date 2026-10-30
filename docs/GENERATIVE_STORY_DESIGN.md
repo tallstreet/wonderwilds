@@ -1,6 +1,6 @@
 # Mission-led generative storytelling
 
-Status: authored runtime, payload builder, persistence and playable mock-driven world slice implemented; seven authored missions implemented; model integration pending. Revised: 30 October 2026.
+Status: authored runtime, payload builder, persistence and playable mock-driven world slice implemented; seven authored missions implemented; opt-in model scene generation and persisted mission briefs over supported opportunities implemented. Revised: 31 October 2026.
 
 Implementation update: the [story implementation plan](STORY_IMPLEMENTATION_PLAN.md)
 now delivers authored Rust mechanics, deterministic planning/scene payloads,
@@ -15,8 +15,11 @@ changes persist between missions; each next mission is explicitly accepted.
 The broader design below remains a proposal for integration. The
 [builder notes](../backend/crates/director/src/story/README.md) record implemented
 refinements and limits. This separate slice does not integrate
-the existing assessed bridge, player preferences or model generation; source-map
-entries below still identify work needed for that broader live-game design.
+the existing assessed bridge or player preferences. The API now optionally generates
+and validates a plan on new mission acceptance, saves its brief and labels alongside
+the authored mechanics, and passes them to optional scene generation. Broader
+opportunity catalogues and generic generated-mission execution remain proposed;
+source-map entries below still identify work needed for that broader design.
 
 ## Purpose
 

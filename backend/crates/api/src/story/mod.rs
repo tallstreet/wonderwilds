@@ -8,6 +8,7 @@ use wonderwilds_domain::story::{Action, Command, Location, Rejection, State};
 
 pub mod http;
 pub mod modal;
+pub mod planning;
 pub mod repository;
 
 /// Only the woodcutter introduction currently creates a presented-history fact.

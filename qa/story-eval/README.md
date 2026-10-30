@@ -221,3 +221,26 @@ training/validation/test. Its default GPU job performs two optimizer steps, save
 an adapter and verifies a fresh reload. Preparation and the Python dry run are
 local; `modal run` explicitly launches paid cloud work. No model is connected to
 gameplay by these tools.
+
+
+## Current serving endpoint with JSON Schema
+
+The separate explicit inference runner below evaluates the production scene prompt
+and `response_format` payload against the current Modal endpoint. It selects the
+first reachable state per mission/status/location/required-introduction combination
+from the current Rust corpus (36 cases at this revision). It uses synthetic states,
+not the historical training validation split, and does not replace that evaluation.
+
+```sh
+python3 qa/story-eval/endpoint_scene.py \
+  --out qa/story-eval/experiments/NEW-scene-schema-run \
+  --env-file /path/to/local/model.env
+```
+
+It preserves selected corpus, exact requests, raw responses, request/corpus hashes,
+transport failures and real Rust mechanical grades. Only compact game inputs and
+required presentation metadata are sent; checkpoints and reference scenes remain
+local. It performs no response repair, authored substitution, retries, training or
+release approval. The server is asked for strict `StoryScene` JSON Schema output;
+local validation remains authoritative. See
+[measured results and the observed length violation](RESULTS_JSON_SCHEMA_2026-10-31.md).

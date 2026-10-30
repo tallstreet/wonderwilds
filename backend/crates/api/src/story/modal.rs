@@ -1,4 +1,4 @@
-//! Opt-in development-only scene prose. No model credentials or identity reach the browser.
+//! Opt-in development-only scene prose and mission plans. No model credentials or identity reach the browser.
 use serde_json::{Value, json};
 use std::{collections::VecDeque, io::Read, sync::Mutex, time::Duration};
 use wonderwilds_director::story::{Error, SceneProvider};
@@ -22,10 +22,16 @@ fn unavailable() -> Error {
 
 impl ModalSceneProvider {
     pub fn from_env() -> Result<Option<Self>, &'static str> {
-        match std::env::var("WONDERWILDS_MODAL_STORY").as_deref() {
+        Self::configured("WONDERWILDS_MODAL_STORY")
+    }
+    pub fn planner_from_env() -> Result<Option<Self>, &'static str> {
+        Self::configured("WONDERWILDS_MODAL_PLANNER")
+    }
+    fn configured(flag: &str) -> Result<Option<Self>, &'static str> {
+        match std::env::var(flag).as_deref() {
             Err(_) | Ok("0") => return Ok(None),
             Ok("1") => {}
-            _ => return Err("WONDERWILDS_MODAL_STORY must be 0 or 1"),
+            _ => return Err("Modal generation flags must be 0 or 1"),
         }
         let id =
             std::env::var("MODAL_PROXY_TOKEN_ID").map_err(|_| "Missing Modal proxy token ID")?;
@@ -102,8 +108,13 @@ fn request_body(input: &Value, canonical: &Value) -> Value {
     json!({"model":"wonderwilds","messages":[
         {"role":"system","content":SYSTEM},
         {"role":"user","content":supplied.to_string()}],
+        "response_format":response_format("StoryScene", &schema["$defs"]["StoryScene"]),
         "temperature":0,"max_tokens":2048,"stream":false,
         "chat_template_kwargs":{"reasoning_strength":"low"}})
+}
+
+fn response_format(name: &str, schema: &Value) -> Value {
+    json!({"type":"json_schema","json_schema":{"name":name,"strict":true,"schema":schema}})
 }
 
 fn parse_response(envelope: &Value) -> Result<Value, Error> {
@@ -145,3 +156,30 @@ impl SceneProvider for ModalSceneProvider {
 
 #[cfg(test)]
 mod tests;
+
+impl super::planning::PlanProvider for ModalSceneProvider {
+    fn propose(&self, input: &Value, completed: &[String]) -> Result<Value, Error> {
+        wonderwilds_contracts::validate("StoryPlanInput", input).map_err(|_| unavailable())?;
+        let schema: Value =
+            serde_json::from_str(include_str!("../../../../../contracts/schemas/v1.json")).unwrap();
+        let mut output_schema = schema["$defs"]["StoryMissionPlan"].clone();
+        output_schema["$defs"] = json!({"StoryNarrative": schema["$defs"]["StoryNarrative"]});
+        let supplied =
+            json!({"input":input,"completedConditionIds":completed,"outputSchema":output_schema});
+        let system = format!(
+            "{}{}",
+            include_str!("../../../director/src/story/prompts/mission_baseline.txt"),
+            include_str!("../../../director/src/story/prompts/mission_dependencies.txt")
+        );
+        let body = json!({"model":"wonderwilds","messages":[{"role":"system","content":system},
+            {"role":"user","content":supplied.to_string()}], "temperature":0,"max_tokens":2048,
+            "stream":false,"response_format":response_format("StoryMissionPlan", &output_schema),
+            "chat_template_kwargs":{"reasoning_strength":"low"}});
+        // A busy planner falls back immediately. Accepted plans are persisted by
+        // the repository, not cached across player state or command identities.
+        let _guard = self.cache.try_lock().map_err(|_| unavailable())?;
+        let plan = self.request(&body)?;
+        wonderwilds_contracts::validate("StoryMissionPlan", &plan).map_err(|_| unavailable())?;
+        Ok(plan)
+    }
+}

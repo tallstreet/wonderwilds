@@ -168,3 +168,19 @@ uses this module's validator. The pure director and default authored functions
 remain offline. The API rechecks identity/state after generation and retains
 canonical fallback and unchanged command receipts. See the root README for opt-in
 configuration and scope; valid structure does not establish prose safety.
+
+
+## Live mission plans
+
+The API's optional planner uses the same `prompts/mission_baseline.txt` plus
+`prompts/mission_dependencies.txt` bytes as the offline evaluator. The original
+baseline request hashes remain valid. `planning_evaluation::assess` is the shared
+pure completion validator: the offline wrapper checks scenario provenance, while
+the API supplies an authorized post-acceptance state and a short search deadline.
+Deadline exhaustion is unproven and falls back; the model never sets completion.
+
+Accepted plans are stored by the API in a separate profile-owned table alongside
+unchanged domain checkpoints. The API projects plan labels from actual milestone
+receipts and supplies the saved brief to scene generation. This module still does
+not accept arbitrary new mechanics or change domain mission definitions. See the
+root README for activation and persistent-plan behavior.

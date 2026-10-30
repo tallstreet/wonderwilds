@@ -23,10 +23,55 @@ async fn run(
             .as_secs();
         let identity = state.auth.authenticate(&headers, request.is_some(), now)?;
         match request {
-            Some(request) => state
-                .story_repository
-                .execute(&identity, &request)
-                .map(Json),
+            Some(request) => {
+                let mut plan = None;
+                if let Some(provider) = &state.story_planner
+                    && let Some(candidate) =
+                        state.story_repository.planning_state(&identity, &request)?
+                {
+                    let input = wonderwilds_director::story::build_plan_input(&candidate)
+                        .map_err(|_| Error::Unavailable)?;
+                    let completed = candidate
+                        .milestones()
+                        .iter()
+                        .filter(|m| m.complete)
+                        .map(|m| m.condition_id.clone())
+                        .collect::<Vec<_>>();
+                    match provider.propose(&input, &completed) {
+                        Ok(value) => {
+                            plan = super::planning::ValidatedPlan::new(&candidate, value).ok();
+                            eprintln!(
+                                "Modal planner: {}",
+                                if plan.is_some() {
+                                    "validated plan"
+                                } else {
+                                    "validation failed; authored fallback"
+                                }
+                            );
+                        }
+                        Err(_) => eprintln!(
+                            "Modal planner: provider unavailable or malformed; authored fallback"
+                        ),
+                    }
+                    // Provider and bounded search run outside DB locks. Recheck the
+                    // session and CSRF before committing; repository rechecks revision.
+                    let now = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map_err(|_| Error::Unavailable)?
+                        .as_secs();
+                    let fresh = state.auth.authenticate(&headers, true, now)?;
+                    if fresh.parent_id != identity.parent_id
+                        || fresh.profile_id != identity.profile_id
+                        || fresh.session_id != identity.session_id
+                    {
+                        return Err(Error::Forbidden);
+                    }
+                }
+                state
+                    .story_repository
+                    .execute_planned(&identity, &request, plan.as_ref())
+                    .map(Json)
+            }
             None => {
                 let mut snapshot = state.story_repository.read(&identity)?;
                 if let Some(provider) = &state.story_provider

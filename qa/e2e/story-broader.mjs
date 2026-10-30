@@ -2,8 +2,11 @@
 // Run only through run-training-qa.mjs with its fresh disposable database.
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
 const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
 const alternate = process.env.WW_STORY_BRANCHES === 'alternate';
+const expectPlans = process.env.WW_STORY_EXPECT_PLANS === '1';
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 const errors = [];
@@ -15,6 +18,14 @@ try {
   const get = async path => {
     const response = await page.request.get(`${origin}${path}`, { headers: { 'X-Wonderwilds-Profile': bootstrap.profileId } });
     assert.equal(response.status(), 200); return response.json();
+  };
+  const savedPlans = () => {
+    assert.ok(process.env.WW_QA_CLUSTER_DIR, 'Planner evidence must use a disposable QA database');
+    assert.equal(bootstrap.profileId, '10000000-0000-0000-0000-000000000002');
+    return JSON.parse(execFileSync(join(process.env.WONDERWILDS_PG_BIN, 'psql'), [
+      '--dbname', process.env.WW_QA_DATABASE_URL, '-X', '-At', '-c',
+      "SELECT coalesce(jsonb_object_agg(mission_id,plan),'{}'::jsonb) FROM wonderwilds.story_mission_plans WHERE profile_id='10000000-0000-0000-0000-000000000002'"
+    ], { encoding: 'utf8' }).trim());
   };
   const snapshot = () => get('/api/v1/story');
   const originalGame = await get('/api/v1/game');
@@ -66,7 +77,17 @@ try {
       assert.ok(!JSON.parse(await page.locator('#game').getAttribute('data-story-markers')).some(item => item.id === `npc:${fields.characterId}`), 'No stationary duplicate during escort');
     }
     await page.waitForFunction(previous => Number(document.querySelector('#game')?.dataset.storyRevision) > previous, state.revision, { timeout: 20000 });
-    return ready();
+    const result = await ready();
+    if (expectPlans && type === 'accept_mission') {
+      const plan = savedPlans()[result.sceneInput.mission.missionId];
+      assert.ok(plan, 'A model plan must be persisted for each new mission');
+      assert.equal(result.sceneInput.mission.goal, plan.goal);
+      assert.deepEqual(result.sceneInput.mission.narrative, plan.narrative);
+      await close(); await page.locator('#missions').click();
+      assert.equal(await page.locator('#dialog-title').textContent(), plan.goal);
+      await close();
+    }
+    return result;
   };
   const travel = destinationId => act('travel', { destinationId });
   const talk = (characterId, topicId) => act('talk', { characterId, topicId });
@@ -160,6 +181,12 @@ try {
   const final = await mission('moonlight_gathering');
   await fact('The moonlight gathering has begun.');
   assert.equal(final.sceneInput.context.memory.recentMissions.length, 7);
+  if (expectPlans) {
+    const plans = savedPlans();
+    assert.equal(Object.keys(plans).length, 7, 'Exactly one saved plan per mission, including pause/resume');
+    assert.deepEqual((await reload()).sceneInput.mission, final.sceneInput.mission);
+    assert.deepEqual(savedPlans(), plans, 'Reload must preserve all accepted plans');
+  }
   assert.ok(!final.sceneInput.availableActions.some(item => item.action.type === 'accept_mission'));
   const before = await visuals();
   for (const id of ['picnic_table', 'near_lantern_1', 'near_lantern_2', 'far_lantern', 'wind_instrument', 'cosy_corner', 'gathering_seats', 'gathering_music', 'moonlight_gathering'])
