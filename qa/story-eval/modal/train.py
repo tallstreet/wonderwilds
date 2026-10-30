@@ -15,6 +15,7 @@ image = (
     modal.Image.from_registry("nvidia/cuda:13.0.0-devel-ubuntu24.04", add_python="3.12")
     .apt_install("git", "build-essential")
     .env({"CUDA_HOME": "/usr/local/cuda", "TORCH_CUDA_ARCH_LIST": "9.0",
+          "FLASH_ATTN_CUDA_ARCHS": "90",
           "CC": "/usr/bin/gcc", "CXX": "/usr/bin/g++", "HF_HOME": "/data/huggingface",
           "WANDB_MODE": "disabled", "HF_HUB_DISABLE_TELEMETRY": "1"})
     .uv_pip_install("torch==2.12.1", "torchvision==0.27.1",
@@ -23,7 +24,7 @@ image = (
     .uv_pip_install("axolotl==0.19.0", "pyyaml==6.0.3", "packaging", "ninja",
                     "setuptools", "wheel",
                     uv_version=UV_VERSION)
-    .uv_pip_install("flash-attn==2.8.3", extra_options="--no-build-isolation",
+    .uv_pip_install("flash-attn==2.8.3", extra_options="--no-build-isolation --verbose",
                     uv_version=UV_VERSION)
     .uv_pip_install(
         "cut-cross-entropy[transformers] @ git+https://github.com/axolotl-ai-cloud/ml-cross-entropy.git@4dfa52212d0552805aec5a6a2176c0abbea277d2",

@@ -202,8 +202,49 @@ bridge/milestone changes. Pixel movement remains local; server commands verify
 coarse location transitions. The woodcutter temporarily uses existing Cleo art,
 distinct from Bramble.
 This mode does not synchronize the old assessed bridge or generate new missions.
-Model generation is disabled. The earlier [/story.html inspector](http://127.0.0.1:5173/story.html)
+Model generation is disabled by default; the opt-in Modal integration below can
+generate scene prose. The earlier [/story.html inspector](http://127.0.0.1:5173/story.html)
 remains available for checking scenes without walking.
+
+### Optional Modal scene generation
+
+The backend can call the deployed `wonderwilds` model at
+`https://garytafe--ep-wonderwilds-server.us-west.modal.direct/v1/chat/completions`.
+It uses the real scene schema, `speakers-unique-v1` instructions and low reasoning.
+This remains a development experiment: mechanical validation is not approval of
+model-written prose for children. Release/content review gates stay unchanged.
+
+With your existing proxy credentials exported in the terminal, stop the running
+local-demo process with Ctrl-C, then restart it:
+
+```sh
+# MODAL_PROXY_TOKEN_ID and MODAL_PROXY_TOKEN_SECRET must already be exported.
+export WONDERWILDS_MODAL_STORY=1
+sh scripts/local-demo.sh
+```
+
+Open [Pip's Story Adventure](http://127.0.0.1:5173/?story=1), or use its main-game
+entry point. This integration applies to that story mode and `/story.html`, not
+the guest adventure or educational activity text. Initial reads and the existing
+post-action refresh request model prose. Credentials are backend-only; never use
+`VITE_` variables for them. The model receives authored scene context and gameplay
+state, not profile/session IDs, account data, learning records or free-form child
+text. Do not commit credentials or put them in request logs.
+
+The backend validates output with the existing Rust story validator. Failed,
+truncated, oversized or invalid responses fall back to the authored scene. Requests
+have a six-second total timeout and two-second connect timeout; a cold endpoint
+may therefore fall back. One outbound generation runs at a time; busy requests
+fall back immediately. Up to 32 validated scenes are cached in memory against the
+exact prompt/input. Restart clears the cache, including after replacing the model
+behind the same endpoint name.
+
+Generation occurs after the read transaction releases its locks. Authentication
+and state are checked again afterward; changed state discards the generated scene.
+Commands and persisted retry receipts remain authored and unchanged. All actions,
+rewards and progress still come from Rust. `.local-demo/api.log` contains only
+coarse accepted/fallback messages for this integration, without model text or
+credentials. To disable it, unset `WONDERWILDS_MODAL_STORY` and restart the demo.
 
 The [story implementation plan](docs/STORY_IMPLEMENTATION_PLAN.md) starts with an
 isolated Rust mission and deterministic model-input builder. Run Pip's bridge

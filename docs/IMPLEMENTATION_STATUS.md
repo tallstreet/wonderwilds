@@ -5,6 +5,35 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Modal baseline and adapter evaluation — 30 October 2026
+
+The [evaluation runner](../qa/story-eval/modal/EVALUATION.md) selects the verified
+76 validation or 79 final test scenarios and uploads input prompts only. It runs
+the pinned 4-bit base or a completed same-bundle adapter with identical greedy
+settings, preserving raw outputs, generation errors, truncation, timing and tokens.
+Adapter tensors are verified on load. Returned candidates are graded by the
+existing current-runtime Rust story grader locally; invalid generations receive
+no fallback credit. A comparison command checks matching suites, runtime versions
+and grade integrity, reports mechanical improvements/regressions and supports
+paired narrative-criterion counts from the existing judge workflow. No automatic
+judge calls or human approvals are added. Partial results cannot receive a full
+comparison score; recovered complete outputs can be regraded without a GPU.
+
+Validation: 37 Python tests pass, including prompt-only selection, split integrity,
+strict parsing, failure accounting and comparison drift rejection. Local Modal
+preflights select both real splits; SDK CLI loading and Python compilation pass.
+A six-output synthetic integration through the real Rust grader correctly rejects
+malformed/truncated results and identifies one improvement and one regression.
+Those fixture outputs are not model-quality measurements. No GPU inference,
+baseline measurement, remote image build or adapter evaluation was launched here;
+remote compatibility and actual quality/latency remain unverified.
+
+A user-launched evaluation reached the container but failed during entrypoint
+import because the local `train` module was not mounted beside `evaluate.py`.
+Image construction and grading-helper imports are now local-only; remote volume
+handles are declared independently. An isolated entrypoint import regression
+checks the same missing-sibling layout. Remote inference still needs a rerun.
+
 ## Modal QLoRA preparation — 30 October 2026
 
 The opt-in [Modal runner](../qa/story-eval/modal/README.md) and Glimmer Axolotl
@@ -646,3 +675,43 @@ as model-assisted, not independent blind human labels. There are 386 approvals
 and 25 revision decisions. Verified export yields 269 training examples and 114
 held-out examples, excluding three approved input-overlap candidates from training.
 The frozen dataset and original model judgments remain unchanged. No training ran.
+
+The Modal story evaluator now supports an opt-in `speakers-v1` prompt-only
+experiment. It derives explicit allowed speakers from the verified scene's present
+characters and distinguishes them from mission/history mentions, with narration
+only when no characters are present. Original prompts remain the default;
+transformed prompts have distinct versions and suite hashes, and paired comparison
+still requires identical suites. Offline regression checks and validation preflight
+cover the variant; its effect on actual generated-story scores remains unmeasured.
+
+The opt-in `speakers-unique-v1` evaluation variant retains the speaker constraints
+and adds unique presentation entry IDs, reserved required-entry IDs, and no
+repeated optional dialogue/narration. Earlier variants remain unchanged. Local
+regression tests cover version/hash separation, source preservation and inherited
+speaker constraints; the 76-case validation preflight passes. Actual generation
+quality for this variant remains unmeasured; no GPU job was launched here.
+
+A Modal BF16 exporter now merges completed Glimmer adapters onto the pinned
+unquantized base into a separate exports directory. It checks adapter tensors,
+saves full sharded weights and processor/tokenizer assets, and requires a fresh
+checkpoint reload/generation check before marking success. Offline prerequisite
+checks pass; GPU merge, recipe acceptance and BF16 story quality remain unverified.
+
+
+### Optional Modal story endpoint integration
+
+The development API can opt into the deployed `wonderwilds` endpoint using
+`WONDERWILDS_MODAL_STORY=1` and backend-only Modal proxy credentials. Authenticated
+story GET snapshots use the real schema, explicit speaker/unique-entry prompt,
+and low reasoning; the existing story UI already refreshes after actions. Network
+I/O happens outside database transactions. Rust validates every proposal, rechecks
+session/ownership and state, and discards stale generations. Timeouts, invalid
+responses and busy generation use authored fallback. There is one outbound request
+at a time and a bounded exact-prompt cache. Command execution, persistent receipts,
+learning and guest mode are unchanged. No migration or wire-schema change is needed.
+
+Local HTTP fixtures and router tests cover valid results, malformed/oversized/error
+responses, truncation, cache behavior, unavailable endpoints, authentication,
+expired sessions, stale state and unchanged command retries. Live model-backed
+browser play has not been exercised by this implementation; content approval and
+production readiness remain pending.

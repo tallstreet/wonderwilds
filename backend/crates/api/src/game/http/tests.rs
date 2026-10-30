@@ -51,6 +51,7 @@ fn app() -> (Router, Arc<MemoryRepository>) {
         repository: repo.clone(),
         auth: Arc::new(SyntheticAuth),
         story_repository: Arc::new(StoryMemory::new()),
+        story_provider: None,
         content,
         permits: Arc::new(tokio::sync::Semaphore::new(16)),
         configured: true,
@@ -775,4 +776,186 @@ async fn story_routes_share_auth_csrf_ownership_and_closed_command_boundary() {
         game["revision"], 0,
         "Story writes changed assessed-game progress"
     );
+}
+
+struct TestSceneProvider {
+    calls: Arc<std::sync::atomic::AtomicUsize>,
+    behavior: u8,
+    repository: Arc<StoryMemory>,
+}
+impl wonderwilds_director::story::SceneProvider for TestSceneProvider {
+    fn propose(
+        &self,
+        _: &Value,
+        canonical: &Value,
+    ) -> Result<Value, wonderwilds_director::story::Error> {
+        self.calls.fetch_add(1, Ordering::SeqCst);
+        if self.behavior == 2 {
+            return Err(wonderwilds_director::story::Error::InvalidPayload(
+                "offline".into(),
+            ));
+        }
+        if self.behavior == 3 {
+            let mut profiles = self.repository.profiles.lock().unwrap();
+            let record = profiles.get_mut("profile-a").unwrap();
+            record
+                .state
+                .apply(&wonderwilds_domain::story::Command {
+                    command_id: "concurrent-travel".into(),
+                    expected_revision: record.state.revision(),
+                    action: wonderwilds_domain::story::Action::Travel {
+                        destination_id: "workshop".into(),
+                    },
+                })
+                .unwrap();
+        }
+        let mut proposed = canonical.clone();
+        proposed["presentation"][0]["text"] = json!("A generated scene.");
+        if self.behavior == 1 {
+            proposed["choices"] = json!([]);
+        }
+        Ok(proposed)
+    }
+}
+
+fn model_app(behavior: u8) -> (Router, Arc<std::sync::atomic::AtomicUsize>) {
+    let repository = Arc::new(StoryMemory::new());
+    let calls = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let mut state = AppState::development(None, "https://game.example".into()).unwrap();
+    state.auth = Arc::new(SyntheticAuth);
+    state.story_repository = repository.clone();
+    state.story_provider = Some(Arc::new(TestSceneProvider {
+        calls: calls.clone(),
+        behavior,
+        repository,
+    }));
+    (router(state), calls)
+}
+
+#[tokio::test]
+async fn generated_reads_require_auth_and_preserve_command_receipts() {
+    let (app, calls) = model_app(0);
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story",
+            None,
+            "none",
+            "profile-a",
+            false
+        )
+        .await
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    assert_eq!(
+        send(
+            app.clone(),
+            "/api/v1/story",
+            None,
+            "test-parent-b",
+            "profile-a",
+            false
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    assert_eq!(calls.load(Ordering::SeqCst), 0);
+    let (status, scene) = send(
+        app.clone(),
+        "/api/v1/story",
+        None,
+        "test-parent-a",
+        "profile-a",
+        false,
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(
+        scene["scene"]["presentation"][0]["text"],
+        "A generated scene."
+    );
+    let command = cmd(
+        "model-choice",
+        0,
+        json!({"type":"choose","actionId":scene["scene"]["choices"][0]["actionId"]}),
+    );
+    let first = send(
+        app.clone(),
+        "/api/v1/story/commands",
+        Some(command.clone()),
+        "test-parent-a",
+        "profile-a",
+        true,
+    )
+    .await;
+    let retry = send(
+        app,
+        "/api/v1/story/commands",
+        Some(command),
+        "test-parent-a",
+        "profile-a",
+        true,
+    )
+    .await;
+    assert_eq!(first.0, StatusCode::OK);
+    assert_eq!(first, retry);
+    assert_eq!(calls.load(Ordering::SeqCst), 1);
+}
+
+#[tokio::test]
+async fn invalid_failed_and_stale_generations_fall_back_to_current_authored_scene() {
+    for behavior in [1, 2, 3] {
+        let (app, _) = model_app(behavior);
+        let (status, scene) = send(
+            app,
+            "/api/v1/story",
+            None,
+            "test-parent-a",
+            "profile-a",
+            false,
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_ne!(
+            scene["scene"]["presentation"][0]["text"],
+            "A generated scene."
+        );
+        assert_eq!(scene["revision"], if behavior == 3 { 1 } else { 0 });
+        wire::validate("StorySnapshot", &scene).unwrap();
+    }
+}
+
+struct ExpiringSceneAuth(std::sync::atomic::AtomicUsize);
+impl Authenticator for ExpiringSceneAuth {
+    fn authenticate(&self, headers: &HeaderMap, write: bool, now: u64) -> Result<Identity, Error> {
+        if self.0.fetch_add(1, Ordering::SeqCst) > 0 {
+            return Err(Error::Unauthenticated);
+        }
+        SyntheticAuth.authenticate(headers, write, now)
+    }
+}
+
+#[tokio::test]
+async fn expired_session_during_generation_does_not_receive_model_output() {
+    let repository = Arc::new(StoryMemory::new());
+    let mut state = AppState::development(None, "https://game.example".into()).unwrap();
+    state.auth = Arc::new(ExpiringSceneAuth(std::sync::atomic::AtomicUsize::new(0)));
+    state.story_repository = repository.clone();
+    state.story_provider = Some(Arc::new(TestSceneProvider {
+        calls: Arc::new(std::sync::atomic::AtomicUsize::new(0)),
+        behavior: 0,
+        repository,
+    }));
+    let (status, _) = send(
+        router(state),
+        "/api/v1/story",
+        None,
+        "test-parent-a",
+        "profile-a",
+        false,
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
 }

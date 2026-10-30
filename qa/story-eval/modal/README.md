@@ -149,3 +149,44 @@ Local regression checks:
 python3 -m unittest discover -s qa/story-eval -p 'test_*.py'
 python3 -m compileall -q qa/story-eval/modal
 ```
+
+## Measure baseline and adapter quality
+
+Use the [Modal evaluation runner](EVALUATION.md) to generate the 76 validation
+scenes or final 79 test scenes with either the pinned base or a completed adapter.
+It automatically runs the local story grader and supports matched comparisons,
+including optional narrative judgments. This is separate from the training smoke
+run's single-prompt loading check.
+
+## Export a standalone BF16 checkpoint
+
+The exporter loads the pinned original base without bitsandbytes, verifies the
+completed adapter, merges with PEFT safe merging, casts floating weights to BF16,
+and saves sharded safetensors plus processor/tokenizer assets. A fresh process
+checks file hashes, tensor dtypes, configuration and local checkpoint generation.
+This is not a story-quality evaluation or proof that a particular serving recipe
+accepts the export. BF16 behavior may differ from the evaluated NF4 model.
+
+```sh
+modal run --env main qa/story-eval/modal/export_bf16.py --dry-run
+modal run --env main qa/story-eval/modal/export_bf16.py \
+  --adapter-run full-6584b280eaaf \
+  --export-id full-6584b280eaaf-bf16
+```
+
+The actual export requests one H100 with 192 GiB host memory and a two-hour
+maximum runtime. Expect roughly 60 GB of model weights plus cached base files.
+Existing destinations are refused; retries need a new export ID. Original adapter
+files are never overwritten. Do not deploy a partial/failed export: wait for
+`status: completed` and `verification.json` in the export directory.
+
+Deployment values after successful completion:
+
+- Environment: `main`
+- Volume: `wonderwilds-glimmer-runs`
+- Volume-relative model path: `exports/full-6584b280eaaf-bf16/model`
+- With the Volume mounted at `/runs`: `/runs/exports/full-6584b280eaaf-bf16/model`
+- Precision: BF16, unquantized (not NVFP4 or bitsandbytes)
+
+The checkpoint does not bundle the evaluation system prompt. Configure the chosen
+speaker/unique-entry prompt separately in the serving integration.

@@ -1,7 +1,7 @@
 # Authored story payload builder
 
 This is a development projection over `wonderwilds_domain::story::State`.
-It calls only a local deterministic mock provider and reads no profile, account,
+The default path calls a local deterministic mock provider and reads no profile, account,
 learning, browser or free-text user data. Existing `director::core` and Director v1 contracts are unchanged.
 
 Public functions return schema-validated JSON:
@@ -160,3 +160,11 @@ repeating it after acknowledgement. Corpus regressions cover these distinctions.
 
 Earlier sealed inputs and reviews remain historical snapshots. Prepare a fresh
 run after changing authored prose; do not copy approvals onto revised candidates.
+
+
+The API now has an optional development Modal provider in `api/src/story/modal.rs`.
+It enriches authenticated snapshot reads after database locks are released, then
+uses this module's validator. The pure director and default authored functions
+remain offline. The API rechecks identity/state after generation and retains
+canonical fallback and unchanged command receipts. See the root README for opt-in
+configuration and scope; valid structure does not establish prose safety.

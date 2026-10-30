@@ -104,12 +104,27 @@ impl crate::story::repository::Repository for DisabledStoryRepository {
 pub struct AppState {
     repository: Arc<dyn Repository>,
     pub(crate) auth: Arc<dyn Authenticator>,
+    pub(crate) story_provider:
+        Option<Arc<dyn wonderwilds_director::story::SceneProvider + Send + Sync>>,
     pub(crate) story_repository: Arc<dyn crate::story::repository::Repository>,
     content: Content,
     pub(crate) permits: Arc<tokio::sync::Semaphore>,
     configured: bool,
 }
 impl AppState {
+    /// Explicit opt-in; credentials remain in the backend process only.
+    pub fn with_modal_story(mut self) -> Result<Self, &'static str> {
+        self.story_provider =
+            crate::story::modal::ModalSceneProvider::from_env()?.map(|provider| {
+                Arc::new(provider)
+                    as Arc<dyn wonderwilds_director::story::SceneProvider + Send + Sync>
+            });
+        if self.story_provider.is_some() {
+            eprintln!("Modal story generation enabled for development scene reads");
+        }
+        Ok(self)
+    }
+
     /// Development server supports private Unix-socket PostgreSQL only. A
     /// production adapter must configure verified DB TLS and an identity issuer.
     pub fn development(connection: Option<String>, origin: String) -> Result<Self, Error> {
@@ -145,6 +160,7 @@ impl AppState {
             repository,
             auth,
             story_repository,
+            story_provider: None,
             content,
             permits: Arc::new(tokio::sync::Semaphore::new(16)),
             configured,

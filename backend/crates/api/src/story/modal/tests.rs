@@ -1,0 +1,137 @@
+use super::*;
+use std::{io::Write, net::TcpListener, thread};
+use wonderwilds_director::story::{authored_scene, build_scene_input};
+use wonderwilds_domain::story::State;
+
+fn envelope(content: &Value) -> Value {
+    json!({"choices":[{"finish_reason":"stop","message":{"content":content.to_string()}}]})
+}
+
+fn server(status: &str, body: String) -> (String, thread::JoinHandle<Value>) {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let url = format!(
+        "http://{}/v1/chat/completions",
+        listener.local_addr().unwrap()
+    );
+    let status = status.to_owned();
+    let handle = thread::spawn(move || {
+        let (mut socket, _) = listener.accept().unwrap();
+        socket
+            .set_read_timeout(Some(Duration::from_secs(3)))
+            .unwrap();
+        let mut bytes = Vec::new();
+        let (header_end, length) = loop {
+            let mut chunk = [0; 4096];
+            let n = socket.read(&mut chunk).unwrap();
+            assert!(n > 0);
+            bytes.extend_from_slice(&chunk[..n]);
+            if let Some(end) = bytes.windows(4).position(|w| w == b"\r\n\r\n") {
+                let headers = String::from_utf8_lossy(&bytes[..end]).to_lowercase();
+                assert!(headers.contains("authorization: bearer synthetic.id"));
+                let length: usize = headers
+                    .lines()
+                    .find_map(|line| line.strip_prefix("content-length: "))
+                    .unwrap()
+                    .parse()
+                    .unwrap();
+                break (end + 4, length);
+            }
+        };
+        while bytes.len() < header_end + length {
+            let mut chunk = [0; 4096];
+            let n = socket.read(&mut chunk).unwrap();
+            assert!(n > 0);
+            bytes.extend_from_slice(&chunk[..n]);
+        }
+        let request = serde_json::from_slice(&bytes[header_end..header_end + length]).unwrap();
+        write!(socket, "HTTP/1.1 {status}\r\nContent-Length: {}\r\nConnection: close\r\nContent-Type: application/json\r\n\r\n{body}", body.len()).unwrap();
+        request
+    });
+    (url, handle)
+}
+
+#[test]
+fn sends_real_schema_and_caches_only_valid_scenes() {
+    let state = State::new();
+    let input = build_scene_input(&state).unwrap();
+    let canonical = authored_scene(&state).unwrap();
+    let (url, handle) = server("200 OK", envelope(&canonical).to_string());
+    let provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+    assert_eq!(provider.propose(&input, &canonical).unwrap(), canonical);
+    let sent = handle.join().unwrap();
+    assert_eq!(sent["model"], "wonderwilds");
+    assert_eq!(sent["chat_template_kwargs"]["reasoning_strength"], "low");
+    let payload: Value =
+        serde_json::from_str(sent["messages"][1]["content"].as_str().unwrap()).unwrap();
+    assert_eq!(payload["input"], input);
+    assert_eq!(payload["allowedSpeakerIds"], json!(["pip"]));
+    assert!(payload["outputSchema"]["properties"]["choices"].is_object());
+    // Server is gone: identical input is served from the validated cache.
+    assert_eq!(provider.propose(&input, &canonical).unwrap(), canonical);
+    let _busy = provider.cache.lock().unwrap();
+    assert!(provider.propose(&input, &canonical).is_err());
+}
+
+#[test]
+fn errors_oversize_truncation_and_invalid_bindings_are_rejected() {
+    let state = State::new();
+    let input = build_scene_input(&state).unwrap();
+    let canonical = authored_scene(&state).unwrap();
+    let mut invalid = canonical.clone();
+    invalid["choices"] = json!([]);
+    for (status, body) in [
+        ("503 Unavailable", "{}".into()),
+        ("302 Found", "{}".into()),
+        ("200 OK", "x".repeat(MAX_RESPONSE as usize + 1)),
+        ("200 OK", "not JSON".into()),
+        ("200 OK", envelope(&invalid).to_string()),
+        ("200 OK", json!({"choices":[{"finish_reason":"length","message":{"content":canonical.to_string()}}]}).to_string()),
+    ] {
+        let (url, handle) = server(status, body);
+        let provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+        assert!(provider.propose(&input, &canonical).is_err());
+        assert!(provider.cache.lock().unwrap().is_empty());
+        handle.join().unwrap();
+    }
+    assert!(parse_response(&envelope(&json!("not an object"))).is_err());
+}
+
+#[test]
+fn introduction_is_preserved_and_metadata_is_not_an_answer() {
+    let mut state = State::new();
+    state
+        .apply(&wonderwilds_domain::story::Command {
+            command_id: "travel".into(),
+            expected_revision: 0,
+            action: wonderwilds_domain::story::Action::Travel {
+                destination_id: "workshop".into(),
+            },
+        })
+        .unwrap();
+    let input = build_scene_input(&state).unwrap();
+    let canonical = authored_scene(&state).unwrap();
+    let body = request_body(&input, &canonical);
+    let payload: Value =
+        serde_json::from_str(body["messages"][1]["content"].as_str().unwrap()).unwrap();
+    assert_eq!(
+        payload["presentation"]["requiredEntries"][0]["entryId"],
+        "greeting"
+    );
+    assert_eq!(payload["allowedSpeakerIds"], json!(["woodcutter"]));
+    assert!(payload.get("reference").is_none());
+}
+
+#[test]
+fn slow_endpoint_times_out_instead_of_blocking_play() {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let url = format!("http://{}", listener.local_addr().unwrap());
+    let server = thread::spawn(move || {
+        let (_socket, _) = listener.accept().unwrap();
+        thread::sleep(Duration::from_secs(7));
+    });
+    let provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+    let started = std::time::Instant::now();
+    assert!(provider.request(&json!({})).is_err());
+    assert!(started.elapsed() < Duration::from_secs(7));
+    server.join().unwrap();
+}

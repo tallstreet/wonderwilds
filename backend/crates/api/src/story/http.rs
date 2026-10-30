@@ -27,7 +27,47 @@ async fn run(
                 .story_repository
                 .execute(&identity, &request)
                 .map(Json),
-            None => state.story_repository.read(&identity).map(Json),
+            None => {
+                let mut snapshot = state.story_repository.read(&identity)?;
+                if let Some(provider) = &state.story_provider
+                    && snapshot["commandBudgetExhausted"] == false
+                {
+                    let proposal = provider.propose(&snapshot["sceneInput"], &snapshot["scene"]);
+                    // Recheck authentication and current state after potentially slow I/O.
+                    let now = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map_err(|_| Error::Unavailable)?
+                        .as_secs();
+                    let current_identity = state.auth.authenticate(&headers, false, now)?;
+                    if current_identity.parent_id != identity.parent_id
+                        || current_identity.profile_id != identity.profile_id
+                        || current_identity.session_id != identity.session_id
+                    {
+                        return Err(Error::Forbidden);
+                    }
+                    let fresh = state.story_repository.read(&current_identity)?;
+                    if fresh != snapshot {
+                        eprintln!("Modal story: state changed; using current authored scene");
+                        return Ok(Json(fresh));
+                    }
+                    if let Ok(scene) = proposal
+                        && wonderwilds_director::story::validate_scene(
+                            &snapshot["sceneInput"],
+                            &snapshot["scene"],
+                            &scene,
+                        )
+                        .is_ok()
+                    {
+                        snapshot["scene"] = scene;
+                        eprintln!("Modal story: validated scene accepted");
+                    } else {
+                        eprintln!("Modal story: unavailable or invalid; using authored scene");
+                    }
+                }
+                wonderwilds_contracts::validate("StorySnapshot", &snapshot)
+                    .map_err(|_| Error::Unavailable)?;
+                Ok(Json(snapshot))
+            }
         }
     })
     .await

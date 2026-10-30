@@ -7,7 +7,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let origin =
         std::env::var("WONDERWILDS_ORIGIN").unwrap_or_else(|_| "https://wonderwilds.local".into());
     let state = AppState::development(connection, origin)
-        .map_err(|_| "Invalid authored API development configuration")?;
+        .map_err(|_| "Invalid authored API development configuration")?
+        .with_modal_story()?;
     let port: u16 = std::env::var("WONDERWILDS_PORT")
         .unwrap_or_else(|_| "3001".into())
         .parse()?;
