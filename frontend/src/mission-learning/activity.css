@@ -570,3 +570,14 @@
   justify-content: center;
   min-height: 96px;
 }
+
+.ww-mission-activity[hidden] {
+  display: none;
+}
+
+.ww-mission-pair-row::before {
+  content: '◯';
+  color: #8cba80;
+  font-size: 2rem;
+  margin-right: 8px;
+}

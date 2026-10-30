@@ -26,6 +26,9 @@ pub struct MissionState {
     /// Exposure through correct practice or a worked example; never mastery.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub explored_skills: BTreeSet<String>,
+    /// Finished activities, separate from academic readiness.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    pub completed_skills: BTreeSet<String>,
     #[serde(default)]
     pub introduced_skills: BTreeSet<String>,
     #[serde(default)]
@@ -40,6 +43,7 @@ impl Default for MissionState {
             policy_version: POLICY_VERSION.to_owned(),
             last_sequence: 0,
             explored_skills: BTreeSet::new(),
+            completed_skills: BTreeSet::new(),
             introduced_skills: BTreeSet::new(),
             attempted_skills: BTreeSet::new(),
             observations: Vec::new(),
@@ -50,6 +54,8 @@ impl Default for MissionState {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionObservation {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub activity_completed: bool,
     pub evidence: LearningEvidence,
     /// Fingerprint of canonical task content; excludes IDs, labels, mission and session names.
     pub parameter_fingerprint: String,
@@ -337,6 +343,27 @@ const READINESS_SKILLS: [&str; 5] = ["M01", "M03", "M04", "M05", "M06"];
 
 pub fn supported_skill(skill_id: &str) -> bool {
     READINESS_SKILLS.contains(&skill_id) || catalogue::item(skill_id, 0).is_some()
+}
+
+/// New story tasks use meaningful props and a nontrivial matching layout; old saves keep their factory.
+pub fn practice_activity(
+    skill: &str,
+    seed: u64,
+    id: &str,
+) -> Result<MissionActivity, MissionError> {
+    let mut activity = if READINESS_SKILLS.contains(&skill) {
+        let source_seed = if skill == "M01" {
+            2 + seed % 4 + if seed % 8 >= 4 { 6 } else { 0 }
+        } else {
+            seed
+        };
+        authored_activity(skill, source_seed, id)?
+    } else {
+        catalogue::practice_activity(skill, seed, id)?
+    };
+    activity.view.content_version = "mission-practice-draft-3".into();
+    activity.view.variant_id = format!("{skill}-practice-v3-{:02}", seed % 24);
+    Ok(activity)
 }
 
 pub fn authored_activity(
@@ -906,6 +933,9 @@ pub fn record(
         return Err(MissionError::InvalidState);
     }
     state.last_sequence = e.server_sequence;
+    if observation.activity_completed && e.provenance == Provenance::ServerVerified {
+        state.completed_skills.insert(e.skill_id.clone());
+    }
     if !READINESS_SKILLS.contains(&e.skill_id.as_str())
         && e.provenance == Provenance::ServerVerified
         && ((e.event_kind == EventKind::AnswerCheck && e.result == ResultKind::Correct)
@@ -1003,7 +1033,13 @@ pub fn replay(history: &[MissionObservation]) -> Result<MissionState, MissionErr
 
 fn valid_observation(observation: &MissionObservation) -> bool {
     let e = &observation.evidence;
-    !e.event_id.is_empty()
+    (!observation.activity_completed
+        || (e.provenance == Provenance::ServerVerified
+            && ((e.event_kind == EventKind::AnswerCheck && e.result == ResultKind::Correct)
+                || (e.event_kind == EventKind::WorkedExample
+                    && e.result == ResultKind::NotAssessed
+                    && e.support.worked_example))))
+        && !e.event_id.is_empty()
         && !e.encounter_id.is_empty()
         && !e.skill_id.is_empty()
         && !e.variant_id.is_empty()
@@ -1192,12 +1228,21 @@ pub fn all_skill_projections(state: &MissionState) -> Result<Vec<SkillProjection
 }
 
 fn prerequisite_available(skill: &str, prerequisite: &str, state: &MissionState) -> bool {
-    summary(prerequisite, state).is_ok_and(|s| s.status == Status::PracticeReady)
+    activity_completed(prerequisite, state)
+        || summary(prerequisite, state).is_ok_and(|s| s.status == Status::PracticeReady)
         || (!READINESS_SKILLS.contains(&skill)
             && (state.explored_skills.contains(prerequisite)
                 || state.observations.iter().any(|o| {
                     o.evidence.skill_id == prerequisite && o.evidence.result == ResultKind::Correct
                 })))
+}
+
+pub fn activity_completed(skill: &str, state: &MissionState) -> bool {
+    state.completed_skills.contains(skill)
+        || state
+            .observations
+            .iter()
+            .any(|o| o.evidence.skill_id == skill && o.evidence.result == ResultKind::Correct)
 }
 
 pub fn frontier(
@@ -1210,7 +1255,9 @@ pub fn frontier(
         .nodes()
         .filter(|n| subject.is_none_or(|s| n.subject == s) && supported_skill(&n.id))
     {
-        if summary(&node.id, state)?.status == Status::PracticeReady {
+        if activity_completed(&node.id, state)
+            || summary(&node.id, state)?.status == Status::PracticeReady
+        {
             continue;
         }
         if node
@@ -1503,6 +1550,7 @@ mod tests {
 
     fn observation(skill: &str, i: usize, correct: bool) -> MissionObservation {
         MissionObservation {
+            activity_completed: false,
             evidence: LearningEvidence {
                 schema_version: LearningEvidenceSchemaVersion::V10,
                 event_id: format!("event-{i}"),
@@ -1906,6 +1954,7 @@ mod tests {
                 event.evidence.first_check = false;
                 event.evidence.support.worked_example = true;
             }
+            event.activity_completed = true;
             record(&mut state, event.clone()).unwrap();
             history.push(event);
             let summary = summary(&selected.skill_id, &state).unwrap();
@@ -2003,5 +2052,63 @@ mod tests {
             Status::PracticeReady
         );
         assert!(state.observations.is_empty());
+    }
+    #[test]
+    fn completed_activities_advance_without_mastery_and_do_not_return() {
+        let mut state = MissionState::default();
+        let mut seen = BTreeSet::new();
+        let mut history = Vec::new();
+        for i in 0..120 {
+            let selected = select(&state, None, i).unwrap().unwrap();
+            assert!(
+                seen.insert(selected.skill_id.clone()),
+                "repeated {}",
+                selected.skill_id
+            );
+            let task = practice_activity(&selected.skill_id, 0, "practice").unwrap();
+            let mut event = observation(&selected.skill_id, i as usize, true);
+            event.activity_completed = true;
+            if matches!(task.key, AssessmentKey::Review) {
+                event.evidence.event_kind = EventKind::WorkedExample;
+                event.evidence.result = ResultKind::NotAssessed;
+                event.evidence.first_check = false;
+                event.evidence.support.worked_example = true;
+            }
+            record(&mut state, event.clone()).unwrap();
+            history.push(event);
+            assert_ne!(
+                summary(&selected.skill_id, &state).unwrap().status,
+                Status::PracticeReady
+            );
+        }
+        assert!(select(&state, None, 0).unwrap().is_none());
+        assert_eq!(replay(&history).unwrap(), state);
+        assert_eq!(state.completed_skills.len(), 120);
+    }
+
+    #[test]
+    fn every_automatically_marked_activity_has_genuinely_different_questions() {
+        let graph = CurriculumGraph::load().unwrap();
+        for node in graph.nodes() {
+            let first = practice_activity(&node.id, 0, "variants").unwrap();
+            if matches!(first.key, AssessmentKey::Review) {
+                continue;
+            }
+            let variants: BTreeSet<_> = (0..24)
+                .map(|seed| {
+                    let task = practice_activity(&node.id, seed, "variants").unwrap();
+                    let mut wire = serde_json::to_value(&task.view).unwrap();
+                    wire["support"] =
+                        serde_json::json!({"hintCount":0,"workedExample":false,"readAloud":false});
+                    wonderwilds_contracts::validate("MissionActivity", &wire).unwrap();
+                    task.canonical_fingerprint().to_owned()
+                })
+                .collect();
+            assert!(
+                variants.len() >= 2,
+                "{} only shuffles one question",
+                node.id
+            );
+        }
     }
 }

@@ -1,6 +1,7 @@
 /* Warm paper, forest ink, and generous spacing keep the world close at hand. */
 #dialog:has([data-story-missions-panel]),
 #dialog:has([data-story-dialogue]),
+#dialog:has(.story-bag),
 #dialog:has(.quest-dialogue) {
   width: min(620px, calc(100vw - 28px));
   padding: 30px;
@@ -14,12 +15,14 @@
 }
 #dialog:has([data-story-missions-panel])::backdrop,
 #dialog:has([data-story-dialogue])::backdrop,
+#dialog:has(.story-bag)::backdrop,
 #dialog:has(.quest-dialogue)::backdrop {
   background: #203b414d;
   backdrop-filter: blur(3px);
 }
 #dialog:has([data-story-missions-panel]) h2,
 .story-conversation-heading h2,
+.story-bag h2,
 .quest-dialogue h2 {
   color: #304f46;
   font-size: clamp(25px, 4vw, 34px);
@@ -29,6 +32,7 @@
 }
 #dialog:has([data-story-missions-panel]) .pill,
 .story-conversation-heading .pill,
+.story-bag .pill,
 .quest-dialogue .pill {
   color: #537668;
   background: transparent;
@@ -38,6 +42,7 @@
 }
 #dialog:has([data-story-missions-panel]) .close,
 #dialog:has([data-story-dialogue]) .close,
+#dialog:has(.story-bag) .close,
 #dialog:has(.quest-dialogue) .close {
   background: #eeeadd;
   color: #526b60;
@@ -260,6 +265,7 @@
 @media (max-width: 560px) {
   #dialog:has([data-story-missions-panel]),
   #dialog:has([data-story-dialogue]),
+  #dialog:has(.story-bag),
   #dialog:has(.quest-dialogue) {
     padding: 24px 20px;
   }
@@ -296,4 +302,39 @@
 .story-checklist li > div {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.story-bag-items {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+}
+.story-bag-items li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 20px;
+  background: #f5f0e2;
+  border: 1px solid #dfd9bf;
+  border-radius: 16px;
+}
+.story-bag-items strong {
+  text-transform: capitalize;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.story-bag-quantity {
+  flex-shrink: 0;
+  color: #52674e;
+  font-size: 22px;
+  font-weight: 900;
+}
+.story-bag-empty {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f5f0e2;
+  border-radius: 16px;
 }

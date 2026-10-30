@@ -193,6 +193,7 @@ try {
   assert.deepEqual(JSON.parse(await page.locator('#game').getAttribute('data-story-followers')), []);
   await page.reload(); await page.locator('#game canvas').waitFor(); await ready();
   assert.equal((await snapshot()).revision, final.revision);
+  await page.waitForFunction(() => Number(document.querySelector('#game')?.dataset.storyPlayerX) > 770);
   assert.ok((await position()).x > 770, 'Reload restores the authoritative bank');
   assert.deepEqual(await get('/api/v1/game'), originalGame, 'Story never mutates assessed progress');
   assert.equal(await page.evaluate(() => localStorage.getItem('starwhisker.meadow.v1')), guestSave);

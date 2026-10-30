@@ -1238,3 +1238,18 @@ now avoid ordinal labels that reveal collection sizes; the final learning tests
 (32) and learning-crate Clippy passed. Concurrent entry-point and provider
 configuration edits were preserved; the aggregate results above describe the
 learning-integration checkpoint rather than a review of those separate changes.
+
+### Carried supplies bag — 31 October 2026
+
+The playable story HUD replaces the duplicate Explore, Journal and Grown-ups
+shortcuts with one Bag button. Its read-only dialog lists positive quantities from
+the confirmed story inventory, turns item IDs into readable names and explains an
+empty bag. Uncertain story saves identify the supplies as last confirmed and point
+back to Missions for recovery. Missions retains objectives, routes and learning
+progress. Server state and persistence are unchanged.
+
+Validation: frontend checks (123 tests, type/lint/format and production build),
+synthetic desktop/phone bag checks for quantities after reload, empty state,
+keyboard dismissal/focus restoration, Missions access and no progress writes.
+Desktop and phone screenshots were inspected. Node 26 was used; no real database
+journey or live provider call was needed for this display change.

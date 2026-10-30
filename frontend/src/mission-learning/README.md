@@ -45,3 +45,16 @@ CHROMIUM_PATH=/path/to/chromium WW_QA_BROWSER_TEST=qa/e2e/mission-learning.mjs \
 See [curriculum starter decisions](../../../docs/adr/curriculum-starter-practice.md)
 and [activity inventory](../../../docs/ACTIVITY_COVERAGE.md) for the distinction
 between starter coverage, observed exploration and full-skill assessment.
+
+## Completion and wrong-answer flow
+
+Confirmed correct and supported completions hide the task and return to the world
+automatically; there is no Continue confirmation. The journal's optional
+`activityCompleted` field marks finished activities separately from readiness.
+They are not selected again for that profile. Wrong answers keep the encounter
+and its story binding, but Rust issues a different authored question and the host
+mounts fresh controls. Previous selections/transcripts are cleared. Support and
+check history remain cumulative, so a corrected answer cannot become a fresh
+independent first check. Exact lost-response retries return the already issued
+variation instead of generating another. Legacy active tasks retain their frozen
+factory; newly issued tasks use `mission-practice-draft-3`.

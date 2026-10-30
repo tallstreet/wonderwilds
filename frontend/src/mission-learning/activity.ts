@@ -19,6 +19,7 @@ export type MissionLearningActivityCallbacks = {
   hasPending(): boolean;
   onAbandon(): Promise<void>;
   onContinue(): void;
+  onReplace?(snapshot: MissionLearningSnapshot): void;
   onFinishTogether?(): Promise<MissionLearningSnapshot>;
 };
 
@@ -32,12 +33,13 @@ export function mountMissionActivity(
   const document = container.ownerDocument;
   const root = document.createElement('section');
   root.className = 'ww-mission-activity';
+  root.dataset.activityVariant = activity.variantId;
   const heading = document.createElement('h2');
   heading.id = container.closest('dialog')
     ? 'dialog-title'
     : `ww-mission-heading-${crypto.randomUUID()}`;
   heading.tabIndex = -1;
-  heading.textContent = activity.storyStep?.label ?? activity.presentation.title;
+  heading.textContent = activity.presentation.title;
   root.setAttribute('aria-labelledby', heading.id);
 
   const intro = document.createElement('div');
@@ -105,8 +107,7 @@ export function mountMissionActivity(
   const assignments = new Map<string, string>();
   let currentActivity = activity;
   let busy = false;
-  let complete =
-    !initialSnapshot.activeActivity && initialSnapshot.lastFeedback?.completed === true;
+  let complete = false;
   let destroyed = false;
   let retryAvailable = false;
   let refreshAvailable = false;
@@ -300,7 +301,16 @@ export function mountMissionActivity(
       for (const piece of pieces) {
         const button = node('button', 'ww-mission-piece', piece.label);
         button.type = 'button';
-        const token = node('span', 'ww-mission-piece-token', '◆');
+        const token = node(
+          'span',
+          'ww-mission-piece-token',
+          (
+            { acorn: '🌰', berry: '🍓', flower: '🌼', shell: '🐚', seed: '🌱' } as Record<
+              string,
+              string
+            >
+          )[piece.label.split(' ')[0]!] ?? '◆',
+        );
         token.setAttribute('aria-hidden', 'true');
         button.prepend(token);
         button.setAttribute('aria-pressed', 'false');
@@ -548,6 +558,16 @@ export function mountMissionActivity(
 
   function showSnapshot(snapshot: MissionLearningSnapshot) {
     if (destroyed) return;
+    if (
+      snapshot.activeActivity &&
+      (snapshot.activeActivity.id !== activity.id ||
+        snapshot.activeActivity.variantId !== activity.variantId)
+    ) {
+      complete = true;
+      root.hidden = true;
+      callbacks.onReplace?.(snapshot);
+      return;
+    }
     if (snapshot.activeActivity?.id === activity.id) currentActivity = snapshot.activeActivity;
     const feedback = snapshot.lastFeedback;
     if (!feedback)
@@ -556,14 +576,13 @@ export function mountMissionActivity(
         : 'Your idea is ready.';
     if (feedback) {
       status.textContent = feedback.message;
-      if (feedback.completed && !snapshot.activeActivity) {
+      if (feedback.completed && !snapshot.activeActivity && !complete) {
         complete = true;
-        const next = document.createElement('button');
-        next.type = 'button';
-        next.className = 'primary';
-        next.textContent = 'Continue the story';
-        next.addEventListener('click', callbacks.onContinue);
-        help.replaceChildren(next);
+        root.hidden = true;
+        drag.cancel();
+        queueMicrotask(() => {
+          if (!destroyed) callbacks.onContinue();
+        });
       }
     }
     const revealed = snapshot.activeActivity?.revealedSupport;
@@ -638,7 +657,7 @@ export function mountMissionActivity(
       .onRefresh()
       .then((snapshot) => {
         refreshAvailable = false;
-        if (snapshot.activeActivity?.id === activity.id) showSnapshot(snapshot);
+        if (snapshot.activeActivity) showSnapshot(snapshot);
         else callbacks.onContinue();
       })
       .catch(() => {
@@ -673,14 +692,7 @@ export function mountMissionActivity(
     supportText.textContent = initialSnapshot.activeActivity.revealedSupport.text;
   if (initialSnapshot.activeActivity?.revealedSupport) supportText.hidden = false;
   if (initialSnapshot.lastFeedback) showSnapshot(initialSnapshot);
-  if (complete) {
-    const next = document.createElement('button');
-    next.type = 'button';
-    next.className = 'primary';
-    next.textContent = 'Continue the story';
-    next.addEventListener('click', callbacks.onContinue);
-    help.append(next);
-  }
+
   update();
 
   return {

@@ -208,6 +208,8 @@ pub struct MissionSkillProgress {
     pub prerequisites: Vec<String>,
     pub status: MissionSkillProgressStatus,
     pub supported_by_mission: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_completed: Option<bool>,
     pub eligible_checks: u64,
     pub correct_checks: u64,
     pub distinct_variants: u64,

@@ -239,7 +239,7 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     );
     assert_eq!(row_count(&mut admin, "progress", profile), 0);
 
-    // First activity is a one-item pairing. It is introduced, gets support only after commit,
+    // First activity uses three real props, rather than a single marker. It is introduced, gets support only after commit,
     // then a correct supported answer completes it without independent credit.
     let (begin_request, begun) = begin(&repo, &identity_a, &initial, "begin-supported");
     let activity = begun["activeActivity"].clone();
@@ -275,14 +275,23 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         Err(Error::RevisionConflict)
     );
 
-    // A malformed-but-well-shaped non-bijection is assessed incorrect, then support and a
-    // corrected answer complete the activity. Only its first unsupported check is recorded.
+    // A wrong quantity issues a new question of the same skill, then support and
+    // a correct answer complete it. Only the original first check is independent.
     let (_, second_begun) = begin(&repo, &identity_a, &completed, "begin-wrong");
     let second_activity = second_begun["activeActivity"].clone();
-    let objects = second_activity["task"]["objects"].as_array().unwrap();
-    let recipients = second_activity["task"]["recipients"].as_array().unwrap();
-    assert!(objects.len() >= 2);
-    let wrong = json!({"kind":"pairing","assignments":objects.iter().map(|o|json!({"objectId":o["id"],"recipientId":recipients[0]["id"]})).collect::<Vec<_>>()});
+    assert_eq!(
+        second_activity["skillId"], "M03",
+        "completed M01 was offered again"
+    );
+    let count = second_activity["task"]["objects"].as_array().unwrap().len() as u64;
+    let wrong_id = second_activity["task"]["choices"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["value"] != count)
+        .unwrap()["id"]
+        .clone();
+    let wrong = json!({"kind":"choice","choiceId":wrong_id});
     let incorrect_request = command(
         "wrong-first",
         second_begun["revision"].as_u64().unwrap(),
@@ -291,6 +300,20 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     let incorrect = repo.execute(&identity_a, &incorrect_request).unwrap();
     assert_eq!(incorrect["lastFeedback"]["result"], "incorrect");
     assert_eq!(incorrect["activeActivity"]["id"], second_activity["id"]);
+    assert_eq!(incorrect["activeActivity"]["skillId"], "M03");
+    assert_ne!(
+        incorrect["activeActivity"]["variantId"],
+        second_activity["variantId"]
+    );
+    assert_ne!(incorrect["activeActivity"]["task"], second_activity["task"]);
+    assert_eq!(
+        repo.execute(&identity_a, &incorrect_request).unwrap(),
+        incorrect
+    );
+    assert_eq!(
+        repo.read(&identity_a).unwrap()["activeActivity"],
+        incorrect["activeActivity"]
+    );
     let hint = command(
         "hint-second",
         incorrect["revision"].as_u64().unwrap(),
@@ -306,18 +329,18 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     let retry_correct = command(
         "retry-correct",
         hinted["revision"].as_u64().unwrap(),
-        json!({"type":"answer","encounterId":second_activity["id"],"answer":answer_for(&second_activity)}),
+        json!({"type":"answer","encounterId":second_activity["id"],"answer":answer_for(&hinted["activeActivity"])}),
     );
     let second_completed = repo.execute(&identity_a, &retry_correct).unwrap();
     assert_eq!(second_completed["lastFeedback"]["result"], "correct");
-    let m01 = second_completed["skills"]
+    let m03 = second_completed["skills"]
         .as_array()
         .unwrap()
         .iter()
-        .find(|skill| skill["skillId"] == "M01")
+        .find(|skill| skill["skillId"] == "M03")
         .unwrap();
-    assert_eq!(m01["eligibleChecks"], 1);
-    assert_eq!(m01["correctChecks"], 0);
+    assert_eq!(m03["eligibleChecks"], 1);
+    assert_eq!(m03["correctChecks"], 0);
 
     // Fail after the command has staged its receipt/checkpoint/event. Every write rolls back.
     let (_, rollback_active) = begin(&repo, &identity_a, &second_completed, "begin-rollback");
@@ -390,122 +413,58 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     assert_eq!(row_count(&mut admin, "game_events", profile), 0);
     assert_eq!(row_count(&mut admin, "story_command_receipts", profile), 1);
 
-    // Use real generated tasks in two authorized sessions and two story locations.
-    // The API's active skill selection enforces M01 -> M03 -> M04/M05/M06.
-    let mut next_id = 0_u64;
+    // Each remaining original activity completes once, across two verified sessions.
     let mut current_story = story_active;
     let mut practice_attempts = 0_u8;
     let before_journey_event_count = row_count(&mut admin, "mission_learning_events", profile);
-    while practice_attempts < 64 {
+    for index in 0..5 {
         let current = repo.read(&identity_a).unwrap();
-        let Some(skill) = current["frontierSkillId"].as_str().map(str::to_owned) else {
-            break;
-        };
-        if !["M01", "M03", "M04", "M05", "M06"].contains(&skill.as_str()) {
+        let skill = current["activeActivity"]["skillId"]
+            .as_str()
+            .or(current["frontierSkillId"].as_str())
+            .unwrap();
+        if !["M01", "M03", "M04", "M05", "M06"].contains(&skill) {
             break;
         }
-        let mut session_identity = identity_a.clone();
-        let context_revision;
-        let started;
-        if !current["activeActivity"].is_null() {
-            // The racing begin above left one server-issued M01 activity active in context A.
-            assert_eq!(current["activeActivity"]["skillId"], skill);
-            context_revision = current_story["revision"].clone();
-            started = current;
+        let identity = if index % 2 == 0 {
+            &identity_a
         } else {
-            let progress = current["skills"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .find(|item| item["skillId"] == skill)
-                .unwrap();
-            // Real frontier selection can interleave M04/M05/M06. Each skill starts in A,
-            // then its later checks use session/context B.
-            let second_context = progress["eligibleChecks"].as_u64().unwrap() >= 5;
-            let (identity, location) = if second_context {
-                (&identity_b, "workshop")
-            } else {
-                (&identity_a, "bridge_bank")
-            };
-            session_identity = identity.clone();
-            current_story = travel(&story, identity, location);
-            context_revision = current_story["revision"].clone();
-            let snapshot = repo.read(identity).unwrap();
-            assert_eq!(snapshot["frontierSkillId"], skill);
-            started = begin(
-                &repo,
-                identity,
-                &snapshot,
-                &format!("journey-begin-{next_id}"),
-            )
-            .1;
-        }
-        assert_eq!(started["activeActivity"]["skillId"], skill);
-        let answer = answer_for(&started["activeActivity"]);
+            &identity_b
+        };
+        current_story = travel(&story, identity, "workshop");
+        let current = repo.read(identity).unwrap();
+        let started = if current["activeActivity"].is_null() {
+            begin(&repo, identity, &current, &format!("journey-begin-{index}")).1
+        } else {
+            current
+        };
         let response = submit(
             &repo,
-            &session_identity,
+            identity,
             &started,
-            &format!("journey-answer-{next_id}"),
-            answer,
+            &format!("journey-answer-{index}"),
+            answer_for(&started["activeActivity"]),
+        );
+        assert_eq!(response["lastFeedback"]["result"], "correct");
+        assert_ne!(
+            response["frontierSkillId"],
+            started["activeActivity"]["skillId"]
         );
         assert_eq!(
-            response["lastFeedback"]["result"], "correct",
-            "{skill} task {:?}",
-            started["activeActivity"]["task"]["kind"]
+            story.read(identity).unwrap()["revision"],
+            current_story["revision"]
         );
-        assert_eq!(response["lastFeedback"]["completed"], true);
-        assert_eq!(
-            story.read(&session_identity).unwrap()["revision"],
-            context_revision,
-            "mission practice changed story state"
-        );
-        next_id += 1;
         practice_attempts += 1;
     }
-    assert!(
-        practice_attempts < 64,
-        "frontier failed to exhaust the supported graph"
-    );
     let current = repo.read(&identity_b).unwrap();
-    let completed_skills: std::collections::BTreeSet<String> = current["skills"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|item| item["supportedByMission"] == true && item["status"] == "ready_for_next")
-        .map(|item| item["skillId"].as_str().unwrap().to_owned())
-        .collect();
-    assert_eq!(
-        completed_skills,
-        ["M01", "M03", "M04", "M05", "M06"]
-            .into_iter()
-            .map(str::to_owned)
-            .collect()
-    );
-    for skill in &completed_skills {
-        let progress = current["skills"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|item| item["skillId"].as_str() == Some(skill.as_str()))
-            .unwrap();
-        assert_eq!(progress["eligibleChecks"], 8, "{skill}");
-        assert_eq!(progress["distinctSessions"], 2, "{skill}");
-        assert_eq!(progress["distinctContexts"], 2, "{skill}");
-    }
-    assert_eq!(current["available"], true);
-    assert!(current["frontierSkillId"].is_string());
+    assert_eq!(current["skills"].as_array().unwrap().len(), 120);
     assert!(
         current["skills"]
             .as_array()
             .unwrap()
             .iter()
-            .all(|s| s["supportedByMission"] == true)
-    );
-    assert_eq!(current["skills"].as_array().unwrap().len(), 120);
-    assert_eq!(
-        row_count(&mut admin, "story_command_receipts", profile),
-        current_story["revision"].as_i64().unwrap()
+            .all(|s| s["status"] != "ready_for_next"),
+        "activity completion invented mastery"
     );
     assert_eq!(row_count(&mut admin, "progress", profile), 0);
     assert_eq!(row_count(&mut admin, "learning_events", profile), 0);
@@ -537,7 +496,7 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         let abandoned = command(
             &format!("starter-leave-{index}"),
             taught["revision"].as_u64().unwrap(),
-            json!({"type":"abandon","encounterId":activity["id"]}),
+            json!({"type":"finish_together","encounterId":activity["id"]}),
         );
         let after = repo.execute(&identity_b, &abandoned).unwrap();
         let progress = after["skills"]
@@ -554,6 +513,8 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         );
     }
     assert_eq!(explored.len(), 115);
+    assert_eq!(repo.read(&identity_b).unwrap()["available"], false);
+    assert!(repo.read(&identity_b).unwrap()["frontierSkillId"].is_null());
 
     // Durable full event replay agrees with the compact <=60-item checkpoint.
     let loaded = {
@@ -691,11 +652,11 @@ fn exercise_inline_steps(admin: &mut Client, restricted: &str, parent: &str) {
     );
     assert_eq!(
         first["activeActivity"]["storyStep"]["introduction"],
-        "Help organise our discovery markers so we can keep track of the sounds."
+        "Try this activity, then we’ll carry on with the adventure."
     );
     assert_eq!(
         first["activeActivity"]["task"]["objects"][0]["label"],
-        "Discovery marker 1"
+        "flower 1"
     );
     let answer = command(
         "inline-answer-1",
@@ -730,15 +691,23 @@ fn exercise_inline_steps(admin: &mut Client, restricted: &str, parent: &str) {
             &begin_step(&second_story, &correct, "inline-begin-2"),
         )
         .unwrap();
-    assert!(
-        second["activeActivity"]["storyStep"]["introduction"]
-            .as_str()
-            .unwrap()
-            .contains("organise"),
-        "old generated steps use authored joining copy"
+    assert_eq!(
+        second["activeActivity"]["storyStep"]["introduction"],
+        "Try this activity, then we’ll carry on with the adventure."
     );
-    let mut wrong = answer_for(&second["activeActivity"]);
-    wrong["assignments"][1]["recipientId"] = wrong["assignments"][0]["recipientId"].clone();
+    assert_eq!(second["activeActivity"]["skillId"], "M03");
+    let count = second["activeActivity"]["task"]["objects"]
+        .as_array()
+        .unwrap()
+        .len() as u64;
+    let wrong_id = second["activeActivity"]["task"]["choices"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["value"] != count)
+        .unwrap()["id"]
+        .clone();
+    let wrong = json!({"kind":"choice","choiceId":wrong_id});
     let incorrect = submit(&repo, &identity, &second, "inline-wrong", wrong);
     assert_eq!(incorrect["lastFeedback"]["result"], "incorrect");
     assert_eq!(story.read(&identity).unwrap(), second_story);

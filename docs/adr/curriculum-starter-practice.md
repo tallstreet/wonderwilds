@@ -17,15 +17,30 @@ and collaboration need human observation. Speech-to-text is neither decoding nor
 pronunciation assessment. Adult review is an instruction to review the work, not
 an invented approval record or a server-certified review workflow.
 
-The original five-skill readiness path is selected first. Thereafter, new starters
-follow prerequisite exposure: a correct practice answer or viewing a committed
-worked example records that starter as explored. Hints and abandonment alone do
-not record exploration. Its successors may then be offered as practice; this does
-not mark the prerequisite ready, mastered or educator-approved. Original skills
-still require their original readiness policy. Previously recorded original
-correct-answer observations can establish exposure for a new starter's prerequisite.
-Within the available new starters, unexplored skills and earlier year bands take
-priority. When all reachable starters are explored, selection offers review.
+Story activity completion now advances the practice journey immediately. A correct
+answer or explicit together-completion records a bounded `completedSkills` set;
+completed activities are excluded from selection rather than repeated until a
+multi-session readiness threshold is reached. This completion record is separate
+from academic readiness and mastery. Completion can unlock prerequisite-related
+practice for every skill. Original qualifying correct observations can establish
+legacy activity completion; original checkpoints and evidence are not rewritten.
+Viewing a worked example still records starter exposure but does not itself finish
+an activity. Hints and abandonment do not complete an activity. Once all activities
+are complete, the story continues through its existing non-academic routes.
+
+Incorrect answers freeze a different canonical question of the same skill in the
+same transaction, using a persisted seed and the existing encounter/story binding.
+The encounter identity and cumulative checks/support are retained, preventing a
+corrected answer from becoming an independent first check. Authored alternate
+items cover previously single-example card tasks. Receipts replay the exact new
+question; reload does not choose a further variant. A default-omitted internal
+`activityCompleted` observation flag lets completion be replayed without changing
+historical event projections. A default-omitted `modernTasks` active-task flag
+preserves old frozen factories while new tasks use draft-3 props and variants.
+Confirmed completion closes the panel automatically. New panels use the activity
+title and illustrated props instead of repeating the world objective and generic
+discovery-marker copy. The optional public `activityCompleted` skill flag drives
+journal completion labels without inventing academic mastery.
 
 The optional `exploredSkills` checkpoint set is bounded by the finite graph. It is
 omitted while empty, so historical five-skill checkpoints and event replay retain

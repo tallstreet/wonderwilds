@@ -963,6 +963,7 @@
         "prerequisites": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 10 }, "maxItems": 20, "uniqueItems": true },
         "status": { "type": "string", "enum": ["locked", "available", "practising", "ready_for_next", "unavailable"] },
         "supportedByMission": { "type": "boolean" },
+        "activityCompleted": { "type": "boolean" },
         "eligibleChecks": { "type": "integer", "minimum": 0, "maximum": 8 },
         "correctChecks": { "type": "integer", "minimum": 0, "maximum": 8 },
         "distinctVariants": { "type": "integer", "minimum": 0, "maximum": 8 },

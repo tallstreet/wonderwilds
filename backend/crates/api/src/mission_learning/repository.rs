@@ -22,7 +22,7 @@ use wonderwilds_learning::mission::{
 
 const STORAGE_FORMAT: &str = "mission-learning-storage-v1";
 const ZERO_DIGEST: &str = "0000000000000000000000000000000000000000000000000000000000000000";
-const POLICY_EXPLANATION: &str = "The original five skills retain their varied, two-session readiness checks. New starters follow prerequisite exposure through correct practice or worked examples. Exposure is not full-skill readiness or mastery; open responses need adult review.";
+const POLICY_EXPLANATION: &str = "Completed activities are not offered again. Incorrect answers receive a different variation of the same skill. Completion unlocks related practice, separately from academic readiness or mastery. Open responses need adult review.";
 
 pub trait Repository: Send + Sync {
     fn readiness(&self) -> Result<(), Error> {
@@ -42,6 +42,8 @@ pub struct PostgresRepository {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct ActiveActivity {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    modern_tasks: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     inline_step: Option<InlineStep>,
     id: String,
@@ -290,22 +292,31 @@ impl PostgresRepository {
                 invitation(&active.mission_id, &active.location_id).ok_or(Error::Unavailable)?;
             format!("{} — {}", invite.title, invite.relation)
         };
-        let activity = mission::authored_activity_in_context(
-            &active.skill_id,
-            active.seed,
-            &active.id,
-            &context_id,
-            &context_text,
-        )
-        .map_err(|_| Error::Unavailable)?;
-        let activity = if active.inline_step.is_some() {
-            mission::discovery_activity(activity)
+        let activity = if active.modern_tasks {
+            let mut task = mission::practice_activity(&active.skill_id, active.seed, &active.id)
+                .map_err(|_| Error::Unavailable)?;
+            task.view.context_id = context_id;
+            task.view.presentation.context =
+                "A little challenge before we carry on with our adventure.".into();
+            task
         } else {
-            activity
+            let task = mission::authored_activity_in_context(
+                &active.skill_id,
+                active.seed,
+                &active.id,
+                &context_id,
+                &context_text,
+            )
+            .map_err(|_| Error::Unavailable)?;
+            if active.inline_step.is_some() {
+                mission::discovery_activity(task)
+            } else {
+                task
+            }
         };
         let mut view = serde_json::to_value(&activity.view).map_err(|_| Error::Unavailable)?;
         if let Some(step) = &active.inline_step {
-            view["storyStep"] = json!({"label":step.label,"introduction":step.introduction});
+            view["storyStep"] = json!({"label":step.label,"introduction":if active.modern_tasks { "Try this activity, then we’ll carry on with the adventure." } else { step.introduction.as_str() }});
         }
         view["support"] = json!({"hintCount":active.hint_count,"workedExample":active.worked_example,"readAloud":active.read_aloud});
         if let (Some(kind), Some(text)) = (&active.revealed_kind, &active.revealed_text) {
@@ -405,7 +416,7 @@ impl PostgresRepository {
                     "Not available in this mission slice.".to_owned(),
                 )
             };
-            skills.push(json!({"skillId":node.skill_id,"objective":node.objective,"prerequisites":node.prerequisites,"status":status,"supportedByMission":node.supported_by_mission,"eligibleChecks":eligible,"correctChecks":correct,"distinctVariants":variants,"distinctContexts":contexts,"distinctRepresentations":representations,"distinctSessions":sessions,"blockers":blockers,"nextStep":next_step}));
+            skills.push(json!({"skillId":&node.skill_id,"objective":node.objective,"prerequisites":node.prerequisites,"status":status,"supportedByMission":node.supported_by_mission,"activityCompleted":mission::activity_completed(&node.skill_id, &state.policy),"eligibleChecks":eligible,"correctChecks":correct,"distinctVariants":variants,"distinctContexts":contexts,"distinctRepresentations":representations,"distinctSessions":sessions,"blockers":blockers,"nextStep":next_step}));
         }
         let seed = state.revision.saturating_add(1);
         let frontier_skill_id = mission::select(&state.policy, None, seed)
@@ -576,6 +587,7 @@ impl Repository for PostgresRepository {
                     seed
                 );
                 state.active = Some(ActiveActivity {
+                    modern_tasks: true,
                     inline_step: step,
                     id,
                     skill_id: selected.skill_id,
@@ -625,6 +637,7 @@ impl Repository for PostgresRepository {
                     first_check,
                 );
                 let observation = MissionObservation {
+                    activity_completed: outcome.correct,
                     evidence,
                     parameter_fingerprint: activity.canonical_fingerprint().to_owned(),
                 };
@@ -639,7 +652,7 @@ impl Repository for PostgresRepository {
                 let event_id = observation.evidence.event_id.clone();
                 event = Some((sequence, event_id, record));
                 state.last_feedback = Some(
-                    json!({"result":if outcome.correct {"correct"} else {"incorrect"},"message":if outcome.correct {"That works!"} else {"Try another way, or ask for a hint."},"completed":outcome.correct}),
+                    json!({"result":if outcome.correct {"correct"} else {"incorrect"},"message":if outcome.correct {"That works!"} else {"Let’s try a different one. You can ask for a hint."},"completed":outcome.correct}),
                 );
                 if outcome.correct {
                     if let Some(step) = &active.inline_step {
@@ -651,6 +664,28 @@ impl Repository for PostgresRepository {
                         )?;
                     }
                     state.active = None;
+                } else {
+                    let previous = activity.canonical_fingerprint();
+                    let issued = state
+                        .issued_by_skill
+                        .entry(active.skill_id.clone())
+                        .or_default();
+                    let mut replacement = None;
+                    for _ in 0..48 {
+                        let next_seed = *issued;
+                        *issued = issued.saturating_add(1);
+                        let next =
+                            mission::practice_activity(&active.skill_id, next_seed, &active.id)
+                                .map_err(|_| Error::Unavailable)?;
+                        if next.canonical_fingerprint() != previous {
+                            replacement = Some(next_seed);
+                            break;
+                        }
+                    }
+                    active.seed = replacement.ok_or(Error::Unavailable)?;
+                    active.modern_tasks = true;
+                    active.revealed_kind = None;
+                    active.revealed_text = None;
                 }
             }
             "support" => {
@@ -699,6 +734,7 @@ impl Repository for PostgresRepository {
                     false,
                 );
                 let observation = MissionObservation {
+                    activity_completed: false,
                     evidence,
                     parameter_fingerprint: activity.canonical_fingerprint().to_owned(),
                 };
@@ -724,13 +760,14 @@ impl Repository for PostgresRepository {
                 }
                 if together {
                     active.worked_example = true;
-                    let step = active.inline_step.as_ref().ok_or(Error::InvalidInput)?;
-                    complete_inline_step(
-                        &mut tx,
-                        identity,
-                        step,
-                        request["commandId"].as_str().ok_or(Error::InvalidInput)?,
-                    )?;
+                    if let Some(step) = active.inline_step.as_ref() {
+                        complete_inline_step(
+                            &mut tx,
+                            identity,
+                            step,
+                            request["commandId"].as_str().ok_or(Error::InvalidInput)?,
+                        )?;
+                    }
                 }
                 let (activity, _) = Self::active_activity(&active)?;
                 let sequence = state.policy.last_sequence.saturating_add(1);
@@ -748,6 +785,7 @@ impl Repository for PostgresRepository {
                     !together && active.checks == 0,
                 );
                 let observation = MissionObservation {
+                    activity_completed: together,
                     evidence,
                     parameter_fingerprint: activity.canonical_fingerprint().to_owned(),
                 };

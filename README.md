@@ -165,8 +165,9 @@ Talk to Pip after each completion to accept the next story. Earlier world change
 remain visible, and Missions remembers the completed stories. Restart an already
 running local demo after updating the backend; existing bridge saves continue
 without a reset.
-Missions offers paths to the current characters/resources and shows inventory and
-milestones. Click a nearby character or press Space to read the returned dialogue.
+Missions offers paths to the current characters/resources and shows objectives and
+milestones. The HUD’s **Bag** button opens your carried supplies and quantities;
+it replaces the duplicate Explore, Journal and Grown-ups controls. Click a nearby character or press Space to read the returned dialogue.
 Reload restores the server's location/progress. If saving is uncertain, open
 Missions and use **Retry the same action**; the exact command survives reloads.
 
@@ -255,8 +256,13 @@ The other 115 have focused answer-card starters or guided human-review workshops
 Matching and counting support drag/tap/keyboard; answer cards support drag/tap and
 optional reviewed speech-to-text. Writing workshops offer a local draft pad and
 optional dictation, with human review and supported completion. There is no TTS.
-These starters do not establish full-skill readiness or mastery. After the original
-five-skill path, Rust offers new starters by prerequisite exposure and year band.
+A correct answer or explicit together-completion closes the activity automatically
+and marks it finished for that profile. Finished activities are not offered again,
+including after reload. A wrong answer issues a different question of the same
+skill, retaining help/check history and the same story binding. Completing an
+activity unlocks related practice separately from academic readiness or mastery.
+Rust selects unfinished prerequisite-ready activities by year band; the original
+evidence policy remains available for assessment diagnostics.
 See the [activity inventory and research limits](docs/ACTIVITY_COVERAGE.md) and
 [selection/evidence decisions](docs/adr/curriculum-starter-practice.md). New profile-owned practice progress
 and exact retry receipts persist separately from story and assessed-adventure

@@ -132,6 +132,7 @@ fn actual_items_advance_the_graph_and_replay_the_same_bounded_progress() {
                 .unwrap();
             assert!(outcome.correct, "{skill} seed {seed}");
             let observation = MissionObservation {
+                activity_completed: false,
                 evidence: serde_json::from_value(json!({
                     "schemaVersion":"1.0", "eventId":format!("event-{sequence}"),
                     "encounterId":activity.view.id, "skillId":skill,

@@ -8,9 +8,10 @@ not an educator-approved mastery instrument or released curriculum.
 
 All 120 nodes now have a code-authored activity factory. The original five-skill
 assessment path remains; the other 115 provide focused card starters or guided
-human-review workshops. They are not full objective/transfer assessments. New
-starters progress through prerequisite exposure with Foundation/earlier year
-priority, without awarding mastery or changing the original readiness evidence.
+human-review workshops. They are not full objective/transfer assessments. Completed activities close automatically and are not offered again. Wrong
+answers issue a different same-skill question, preserving support and first-check
+history. Completion unlocks related practice with Foundation/earlier-year priority,
+separately from academic readiness and mastery.
 See [coverage and research limits](ACTIVITY_COVERAGE.md) and the
 [starter-practice decision](adr/curriculum-starter-practice.md). The historical
 first-slice description below records the original implementation.
@@ -32,8 +33,8 @@ separate practice-launch button in the playable story world.
 
 The player can try, ask for a concrete hint, learn with a worked example, complete
 the step together with a server-authored solution, or put the task aside. Answers and support update server-owned practice evidence.
-When the experimental readiness criteria are satisfied, the next supported
-prerequisite-ready skill becomes available. Missions remain accessible through
+Finishing an activity records practice completion and unlocks related activities.
+The experimental readiness criteria remain a separate evidence diagnostic. Missions remain accessible through
 supported routes without independent academic mastery.
 
 ## Existing graph and first activity coverage

@@ -71,6 +71,7 @@ try {
       window.mount = (activity, voice = false) => {
         window.component?.destroy();
         window.calls = [];
+        window.continued = 0;
         window.cancelCount = 0;
         window.pending = false;
         const snapshot = { revision: 1, activeActivity: activity };
@@ -94,7 +95,9 @@ try {
             onAbandon: async () => {},
             onRetry: async () => snapshot,
             onRefresh: async () => snapshot,
-            onContinue: () => {},
+            onContinue: () => {
+              window.continued++;
+            },
             onFinishTogether: async () => {
               window.calls.push('together');
               return {
@@ -250,10 +253,8 @@ try {
     });
     await page.getByRole('button', { name: 'Let’s do it together', exact: true }).click();
     assert.deepEqual(await page.evaluate(() => window.calls), ['together']);
-    assert.equal(
-      await page.getByRole('button', { name: 'Continue the story', exact: true }).isVisible(),
-      true,
-    );
+    assert.equal(await page.evaluate(() => window.continued), 1);
+    assert.equal(await page.locator('.ww-mission-activity').isVisible(), false);
     await mount({ ...cards(), skillId: 'E07' }, true);
     assert.equal(
       await page.getByRole('button', { name: 'Say my answer', exact: true }).count(),

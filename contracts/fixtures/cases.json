@@ -12936,5 +12936,67 @@
     "adultReview": false,
     "correctId": "card-a"
   }
+},
+{
+  "name": "activity completion is separate from readiness",
+  "contract": "MissionLearningSnapshot",
+  "valid": true,
+  "value": {
+    "schemaVersion": "1.0",
+    "contentVersion": "mission-maths-draft-1",
+    "policyVersion": "provisional-mission-v1",
+    "policyExplanation": "Activity completion does not establish mastery.",
+    "revision": 1,
+    "available": false,
+    "skills": [
+      {
+        "skillId": "M01",
+        "objective": "Match one object to each recipient",
+        "prerequisites": [],
+        "status": "practising",
+        "supportedByMission": true,
+        "eligibleChecks": 1,
+        "correctChecks": 1,
+        "distinctVariants": 1,
+        "distinctContexts": 1,
+        "distinctRepresentations": 1,
+        "distinctSessions": 1,
+        "blockers": [],
+        "nextStep": "Try the next activity.",
+        "activityCompleted": true
+      }
+    ]
+  }
+},
+{
+  "name": "activity completion rejects text",
+  "contract": "MissionLearningSnapshot",
+  "valid": false,
+  "value": {
+    "schemaVersion": "1.0",
+    "contentVersion": "mission-maths-draft-1",
+    "policyVersion": "provisional-mission-v1",
+    "policyExplanation": "Activity completion does not establish mastery.",
+    "revision": 1,
+    "available": false,
+    "skills": [
+      {
+        "skillId": "M01",
+        "objective": "Match one object to each recipient",
+        "prerequisites": [],
+        "status": "practising",
+        "supportedByMission": true,
+        "eligibleChecks": 1,
+        "correctChecks": 1,
+        "distinctVariants": 1,
+        "distinctContexts": 1,
+        "distinctRepresentations": 1,
+        "distinctSessions": 1,
+        "blockers": [],
+        "nextStep": "Try the next activity.",
+        "activityCompleted": "yes"
+      }
+    ]
+  }
 }
 ]

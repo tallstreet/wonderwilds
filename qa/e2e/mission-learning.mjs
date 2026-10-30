@@ -305,163 +305,92 @@ try {
   assert.equal(await page.locator('.ww-mission-support-text').isVisible(), false);
   await page.screenshot({ path: '/tmp/wonderwilds-mission-learning-desktop.png', fullPage: true });
 
-  // The first authored pairing has one object; the server completes it, not the client.
-  assert.equal(await page.locator('.ww-mission-pair-row').count(), 1);
-  await page.locator('.ww-mission-piece').first().click();
-  await page.locator('.ww-mission-pair-row').first().click();
-  await page.getByRole('button', { name: 'Check my idea' }).click();
-  await page.getByRole('status').filter({ hasText: 'That works!' }).waitFor();
-  const firstCorrect = await learningSnapshot();
-  await page.waitForFunction((revision) => Number(document.querySelector('#game')?.dataset.storyRevision) === revision, (await storySnapshot()).revision);
-  assert.equal(firstCorrect.lastFeedback.result, 'correct');
-  assert.equal(firstCorrect.lastFeedback.completed, true);
-  assert.equal(firstCorrect.skills.find((skill) => skill.skillId === 'M01').correctChecks, 1);
-  await page.getByRole('button', { name: 'Continue the story' }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
-  assert.ok((await storySnapshot()).sceneInput.context.inventory.some((item) => item.itemId === 'wood'));
-  // Move to the workshop through its normal authoritative travel action.
-  let currentStory = await storySnapshot();
-  const travel = currentStory.sceneInput.availableActions.find((a) => a.action.type === 'travel' && a.action.destinationId === 'workshop');
-  const sendStory = async (snapshot, payload, id) => {
-    const result = await page.request.post(`${origin}/api/v1/story/commands`, {
-      headers: commandHeaders, data: { schemaVersion: '1.0', commandId: id, expectedRevision: snapshot.revision, payload },
-    });
-    assert.equal(result.status(), 200);
-    return result.json();
-  };
-  currentStory = await sendStory(currentStory, { type: 'choose', actionId: travel.id }, 'inline-travel-workshop');
-  if (currentStory.acknowledgeableEntryIds.length) {
-    currentStory = await sendStory(currentStory, { type: 'acknowledge', sceneId: currentStory.scene.sceneId, entryId: currentStory.acknowledgeableEntryIds[0] }, 'inline-greet-woodcutter');
+  assert.ok(activity.task.objects.length >= 3);
+  for (let index = 0; index < activity.task.objects.length; index++) {
+    await page.locator('.ww-mission-piece').nth(index).click();
+    await page.locator('.ww-mission-pair-row').nth(index).click();
   }
+  await page.getByRole('button', {name:'Check my idea',exact:true}).click();
+  await page.locator('dialog').waitFor({state:'hidden'});
+  assert.equal(await page.getByRole('button',{name:'Continue the story',exact:true}).count(),0);
+  const firstCorrect = await learningSnapshot();
+  assert.equal(firstCorrect.activeActivity,undefined);
+  assert.equal(firstCorrect.skills.find(s=>s.skillId==='M01').activityCompleted,true);
+  assert.notEqual(firstCorrect.frontierSkillId,'M01');
+  const sendStory = async (snapshot,payload,id) => {
+    const response = await page.request.post(`${origin}/api/v1/story/commands`,{headers:commandHeaders,data:{schemaVersion:'1.0',commandId:id,expectedRevision:snapshot.revision,payload}});
+    assert.equal(response.status(),200); return response.json();
+  };
+  let currentStory = await storySnapshot();
+  const travel = currentStory.sceneInput.availableActions.find(a=>a.action.type==='travel' && a.action.destinationId==='workshop');
+  currentStory = await sendStory(currentStory,{type:'choose',actionId:travel.id},'travel-workshop');
+  if(currentStory.acknowledgeableEntryIds.length) currentStory = await sendStory(currentStory,{type:'acknowledge',sceneId:currentStory.scene.sceneId,entryId:currentStory.acknowledgeableEntryIds[0]},'greet-woodcutter');
   await page.reload();
   await page.locator('#game canvas').waitFor();
   await page.locator('#missions').click();
   await page.locator('[data-story-visit="npc:woodcutter"]').click();
   await page.locator('dialog[open] [data-story-action="exchange"]').click();
   await page.locator('.ww-mission-activity').waitFor();
-  const secondTask = (await learningSnapshot()).activeActivity;
-  assert.equal(secondTask.task.kind, 'pairing');
-  assert.ok(secondTask.storyStep);
-  const beforeSecond = (await storySnapshot()).revision;
-
-  // Direct malformed matching still reaches Rust; the new UI prevents duplicate pieces.
-  const wrongState = await learningSnapshot();
-  const wrong = await page.request.post(`${origin}/api/v1/mission-learning/commands`, {
-    headers: commandHeaders,
-    data: { schemaVersion: '1.0', commandId: 'browser-non-bijective', expectedRevision: wrongState.revision,
-      payload: { type: 'answer', encounterId: secondTask.id, answer: { kind: 'pairing',
-        assignments: secondTask.task.objects.map((o) => ({ objectId: o.id, recipientId: secondTask.task.recipients[0].id })),
-      } },
-    },
-  });
-  assert.equal(wrong.status(), 200);
+  const second = (await learningSnapshot()).activeActivity;
+  assert.equal(second.skillId,'M03','The completed matching skill must not return');
+  const beforeWrong = (await storySnapshot()).revision;
+  const wrong = second.task.choices.find(c=>c.value!==second.task.objects.length);
+  await page.locator(`input[value="${wrong.id}"]`).check();
+  let wrongBody;
+  await page.route('**/api/v1/mission-learning/commands',async route=>{
+    wrongBody=route.request().postData(); const response=await route.fetch();
+    assert.equal(response.status(),200); await route.abort('failed');
+  },{times:1});
+  await page.getByRole('button',{name:'Check my idea',exact:true}).click();
+  await page.getByRole('button',{name:'Retry the same saved action',exact:true}).waitFor();
+  const replaced=(await learningSnapshot()).activeActivity;
+  assert.equal(replaced.skillId,second.skillId);
+  assert.notEqual(replaced.variantId,second.variantId);
+  assert.notDeepEqual(replaced.task,second.task);
+  assert.equal((await storySnapshot()).revision,beforeWrong,'Wrong answer cannot advance the story');
   await page.reload();
   await page.locator('#game canvas').waitFor();
   await page.locator('#missions').click();
-  await page.getByRole('button', { name: 'Resume the mission task' }).click();
-  await page
-    .getByRole('status')
-    .filter({ hasText: 'Try another way, or ask for a hint.' })
-    .waitFor();
-  const incorrect = await learningSnapshot();
-  assert.equal(incorrect.lastFeedback.result, 'incorrect');
-  assert.equal(incorrect.lastFeedback.completed, false);
-  assert.equal(incorrect.activeActivity.id, secondTask.id);
-  const m01 = incorrect.skills.find((skill) => skill.skillId === 'M01');
-  assert.equal(m01.correctChecks, 1, 'A wrong independent check does not add correct progress');
-  assert.equal(m01.status, 'practising');
-
-  // Simulate a lost support response after the server commits it; reload must retry exact bytes.
-  let originalSupportBody;
-  await page.route(
-    '**/api/v1/mission-learning/commands',
-    async (route) => {
-      originalSupportBody = route.request().postData();
-      const response = await route.fetch();
-      assert.equal(response.status(), 200);
-      await route.abort('failed');
-    },
-    { times: 1 },
-  );
-  await page.getByRole('button', { name: 'Ask for a hint' }).click();
-  await page.getByRole('button', { name: 'Retry the same saved action' }).waitFor();
-  assert.equal(await page.locator('.ww-mission-support-text').isVisible(), false);
-  await page.reload();
-  await page.locator('#game canvas').waitFor();
-  await page.locator('#missions').click();
-  await page.getByRole('button', { name: 'Retry the same practice save' }).waitFor();
-  const retryRequest = page.waitForRequest((request) =>
-    request.url().endsWith('/api/v1/mission-learning/commands'),
-  );
-  await page.getByRole('button', { name: 'Retry the same practice save' }).click();
-  assert.equal(
-    (await retryRequest).postData(),
-    originalSupportBody,
-    'Reload retries the identical command body',
-  );
-  await page.locator('.ww-mission-activity').waitFor();
-  const supported = await learningSnapshot();
-  assert.equal(supported.activeActivity.support.hintCount, 1);
-  assert.equal(supported.activeActivity.revealedSupport.kind, 'hint');
-  assert.equal(supported.skills.find((skill) => skill.skillId === 'M01').correctChecks, 1);
-  await page.getByText(supported.activeActivity.revealedSupport.text, { exact: true }).waitFor();
-  await page.setViewportSize({ width: 390, height: 844 });
-  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-  await page.screenshot({ path: '/tmp/wonderwilds-mission-learning-mobile.png', fullPage: true });
-
-  // The supported route commits this mission step without independent success.
-  await page.getByRole('button', { name: 'Let’s do it together', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue the story' }).waitFor();
-  const assisted = await learningSnapshot();
-  assert.equal(assisted.lastFeedback.result, 'assisted');
-  assert.equal(assisted.activeActivity, undefined);
-  assert.equal(assisted.skills.find((skill) => skill.skillId === 'M01').correctChecks, 1);
-  assert.equal((await storySnapshot()).revision, beforeSecond + 1);
-  await page.getByRole('button', { name: 'Continue the story' }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
-  const afterStory = await storySnapshot();
-  assert.ok(afterStory.sceneInput.context.inventory.some((item) => item.itemId === 'planks'));
-  // Lose a response that atomically completed both the learning task and bridge.
-  currentStory = await storySnapshot();
-  const home = currentStory.sceneInput.availableActions.find((a) => a.action.type === 'travel' && a.action.destinationId === 'bridge_bank');
-  await sendStory(currentStory, { type: 'choose', actionId: home.id }, 'inline-return-to-bridge');
-  await page.reload();
-  await page.locator('#game canvas').waitFor();
+  const request=page.waitForRequest(r=>r.url().endsWith('/mission-learning/commands'));
+  await page.getByRole('button',{name:'Retry the same practice save',exact:true}).click();
+  assert.equal((await request).postData(),wrongBody);
+  await page.locator(`[data-activity-variant="${replaced.variantId}"]`).waitFor();
+  assert.deepEqual((await learningSnapshot()).activeActivity,replaced,'Retry must not issue another question');
+  assert.equal(await page.locator('.ww-mission-task input:checked').count(),0);
+  assert.equal(await page.getByRole('button',{name:'Check my idea',exact:true}).isDisabled(),true);
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:'/tmp/wonderwilds-mission-learning-mobile.png',fullPage:true});
+  const correct=replaced.task.choices.find(c=>c.value===replaced.task.objects.length);
+  await page.locator(`input[value="${correct.id}"]`).check();
+  await page.getByRole('button',{name:'Check my idea',exact:true}).click();
+  await page.locator('dialog').waitFor({state:'hidden'});
+  const done=await learningSnapshot();
+  assert.equal(done.skills.find(s=>s.skillId==='M03').activityCompleted,true);
+  assert.equal(done.skills.find(s=>s.skillId==='M03').correctChecks,0,'A corrected answer must not become independent evidence');
+  assert.notEqual(done.frontierSkillId,'M01'); assert.notEqual(done.frontierSkillId,'M03');
+  currentStory=await storySnapshot();
+  const home=currentStory.sceneInput.availableActions.find(a=>a.action.type==='travel' && a.action.destinationId==='bridge_bank');
+  await sendStory(currentStory,{type:'choose',actionId:home.id},'travel-home');
+  await page.reload(); await page.locator('#game canvas').waitFor();
   await page.locator('#missions').click();
   await page.locator('[data-story-visit="object:bridge"]').click();
   await page.locator('[data-story-action="assemble"]').click();
   await page.locator('.ww-mission-activity').waitFor();
-  let completionBody;
-  await page.route('**/api/v1/mission-learning/commands', async (route) => {
-    completionBody = route.request().postData();
-    const result = await route.fetch();
-    assert.equal(result.status(), 200);
-    await route.abort('failed');
-  }, { times: 1 });
-  await page.getByRole('button', { name: 'Let’s do it together', exact: true }).click();
-  await page.getByRole('button', { name: 'Retry the same saved action' }).waitFor();
-  const completedRevision = (await storySnapshot()).revision;
-  await page.reload();
-  await page.locator('#game canvas').waitFor();
-  await page.locator('#missions').click();
-  const completionRetry = page.waitForRequest((request) => request.url().endsWith('/mission-learning/commands'));
-  await page.getByRole('button', { name: 'Retry the same practice save' }).click();
-  assert.equal((await completionRetry).postData(), completionBody);
-  await page.getByRole('button', { name: 'Retry the same practice save' }).waitFor({ state: 'hidden' });
-  assert.equal((await storySnapshot()).revision, completedRevision);
-  assert.equal(await page.locator('#game').getAttribute('data-story-bridge'), 'repaired');
-  assert.equal((await learningSnapshot()).skills.find((skill) => skill.skillId === 'M01').correctChecks, 1);
+  const third=(await learningSnapshot()).activeActivity;
+  assert.ok(!['M01','M03'].includes(third.skillId));
+  await page.getByRole('button',{name:'Let’s do it together',exact:true}).click();
+  await page.locator('dialog').waitFor({state:'hidden'});
+  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).activityCompleted,true);
+  assert.equal(await page.locator('#game').getAttribute('data-story-bridge'),'repaired');
+  await page.reload(); await page.locator('#game canvas').waitFor();
+  const restored=await learningSnapshot();
+  assert.equal(restored.activeActivity,undefined);
+  assert.ok(!['M01','M03',third.skillId].includes(restored.frontierSkillId));
+  assert.deepEqual(await get('/api/v1/game'),originalGame);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('starwhisker.meadow.v1')),guestSave);
+  assert.deepEqual(errors,[]);
+  console.log('PASS: completed activities close automatically and stay completed; incorrect answers get a new same-skill variant; exact retry/reload preserve the issued question and story atomicity.');
 
-  assert.deepEqual(
-    await get('/api/v1/game'),
-    originalGame,
-    'Practice never mutates educational adventure progress',
-  );
-  assert.equal(await page.evaluate(() => localStorage.getItem('starwhisker.meadow.v1')), guestSave);
-  assert.deepEqual(errors, []);
-  console.log(
-    'PASS: inline mission tasks, atomic story progression, M01 assessment, support, exact reload retry, assisted completion and isolated guest/game saves',
-  );
 } catch (error) {
   console.error(
     'Mission-learning story:',

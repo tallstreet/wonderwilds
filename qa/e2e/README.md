@@ -208,3 +208,10 @@ PostgreSQL cluster. It checks generated people and multiple steps, exact retry,
 archive/resume, stable reloads, malformed-model fallback and a fresh story after
 returning to a completed area. It makes no paid model calls. The ordinary database
 suite additionally checks eight generations, rollback and full durable replay.
+
+
+Story bag presentation: with Vite running on port 5189, run
+`node qa/e2e/story-bag.mjs` (or set `WONDERWILDS_TEST_URL`). Set `CHROMIUM_PATH`
+when needed. Synthetic responses cover empty and populated bags, updated quantities
+after reload, desktop/phone fit, keyboard opening/dismissal and focus restoration,
+Missions access and no progress writes. No demo database or provider is used.
