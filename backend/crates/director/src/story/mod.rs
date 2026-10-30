@@ -27,7 +27,7 @@ pub enum Error {
 }
 
 fn ensure_budget(state: &State) -> Result<(), Error> {
-    if state.revision() >= wonderwilds_domain::story::MAX_COMMANDS as u64 {
+    if state.command_budget_exhausted() {
         Err(Error::CommandBudgetExhausted)
     } else {
         Ok(())

@@ -5,6 +5,52 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Long-play persistence — 31 October 2026
+
+Migration `0005_long_play.sql` implements durable API/domain receipts, archived
+encounters and reconstruction metadata, bounded current snapshots and two verified
+checkpoints for both assessed adventure and story. PostgreSQL play no longer
+stops at 2,000/256 commands. Exact retries retain original responses, including
+old terminal story responses; the standalone CLI retains its cap. Lazy migration
+preserves supported pending training and legacy story versions. Guest saves are
+unchanged.
+
+Current reads verify checksums and the latest transition. Offline `persistence`
+audit/recovery replays from the preserved origin to the latest committed revision;
+missing history fails closed. Adventure audit independently recomputes learning
+from retained evidence. The incremental projection is restricted to the current
+no-transfer authored policy, with golden comparisons across support and sessions.
+New records participate in forced RLS, export and deletion. A renewable committed
+command budget and 64 KiB current-snapshot bound replace lifetime play budgets.
+
+Verification: `bash scripts/check.sh` passed, including 123 shared contract
+fixtures, frontend build/tests and legacy guest-save checks. Final API regression
+coverage passed 33 tests (the three database tests are exercised separately),
+with workspace Clippy, formatting, JavaScript syntax and diff checks passing.
+The >2,000-command browser adventure passed supported pending training across an
+API restart and a lost completion response/exact retry after another restart.
+Both >256-command story branches passed seven missions, exact lost-response retry
+and all three fresh API/browser returning sessions. Authored providers were used;
+this storage delivery does not add live model-quality or latency evidence.
+Default/alternate story read medians were 17/16 ms, with 32/20 ms p95 on this local
+synthetic run. These are HTTP timings, not production capacity targets.
+
+The final `sh scripts/check-postgres.sh` run passed all three real-database
+integration tests and migration drift checks. Adventure reached revision 2,104:
+hot snapshot size 1,662 → 1,672 bytes across 2,100 additional writes (66.14 s).
+Story reached revision 307: 1,970 → 1,954 bytes across 300 additional writes
+(3.33 s). Both retained exactly two checkpoints. Checks also passed for legacy
+terminal-at-256 continuation, supported pending training migration/rollback,
+exact old responses, races/unique grants, full audit and independent learning
+recomputation, damaged-checkpoint recovery, refusal of missing/corrupt history,
+rate limits with retry exemption, forced RLS, export and deletion. These are
+local synthetic measurements, not constant total storage or production-load
+claims. See [storage design and operator commands](LONG_PLAY_STORAGE_PLAN.md) for formats,
+compatibility and reproduction. Tests used Node 26.12.0 rather than the documented
+Node 24. The persistent `.local-demo` was not migrated. Total archive growth,
+production backup operations, retention approval and human content/release review
+remain open.
+
 ## Combined-model returning-session verification — 31 October 2026
 
 The existing seven-story Phaser journey now has opt-in combined-provider QA and
@@ -454,9 +500,8 @@ database/browser CI remain unverified; see [CI scope](CI.md).
 Remaining gameplay work: character-specific optional roles, personal quests,
 distinct higher-level rewards, directional/transformation art, automatic verified
 friendship participation, discovery and regional story integration, and the full
-supported ending. The 2,000-command limit remains. The concrete
-[storage/checkpoint design](LONG_PLAY_STORAGE_PLAN.md) is a proposal, not an
-implemented scalability claim. Account/import/lifecycle/parent-view work, human
+supported ending. The subsequent [long-play implementation](LONG_PLAY_STORAGE_PLAN.md)
+replaces the PostgreSQL lifetime command limit; archive operations remain planned. Account/import/lifecycle/parent-view work, human
 content/accessibility/security review and deployment/backup operations remain
 public-release gates. No release or content approval is implied by this delivery.
 

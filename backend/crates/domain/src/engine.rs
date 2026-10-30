@@ -44,3 +44,17 @@ fn valid_id(id: &str) -> bool {
             .bytes()
             .all(|b| b.is_ascii_alphanumeric() || b"-_:./".contains(&b))
 }
+
+/// Execute only after the caller's durable receipt lookup. Original responses and
+/// command identity must be committed with this state in the same transaction.
+/// The standalone `apply` API retains its receipt semantics unchanged.
+pub fn apply_checkpointed(
+    state: &State,
+    command: &Command,
+    content: &Content,
+    context: &Context,
+) -> Result<Applied, Rejection> {
+    let mut applied = apply(&state.compact(), command, content, context)?;
+    applied.state = applied.state.compact();
+    Ok(applied)
+}

@@ -2,3 +2,5 @@
 pub mod game;
 pub mod identity;
 pub mod story;
+
+mod persistence;

@@ -147,6 +147,7 @@ pub(super) struct CharacterProgression {
 
 #[derive(Clone, Debug)]
 pub struct Content {
+    source: serde_json::Value,
     pub(super) version: String,
     pub(super) chapters: BTreeMap<String, Chapter>,
     pub(super) beats: BTreeMap<String, Beat>,
@@ -157,6 +158,10 @@ pub struct Content {
     pub(super) character_progression: CharacterProgression,
 }
 impl Content {
+    /// Canonical authored inputs for persistence compatibility checks.
+    pub fn canonical_source(&self) -> &serde_json::Value {
+        &self.source
+    }
     /// Explicit development loader. Pending author/educator reviews cannot be
     /// mistaken for production activation; use `released` at a release boundary.
     pub fn development(
@@ -185,6 +190,12 @@ impl Content {
         fn parse<T: for<'a> Deserialize<'a>>(s: &str) -> Result<T, Rejection> {
             serde_json::from_str(s).map_err(|e| Rejection::InvalidContent(e.to_string()))
         }
+        let source = serde_json::json!([
+            parse::<serde_json::Value>(story)?,
+            parse::<serde_json::Value>(help)?,
+            parse::<serde_json::Value>(creatures)?,
+            parse::<serde_json::Value>(progression)?
+        ]);
         let story: StoryPack = parse(story)?;
         let help: HelpPack = parse(help)?;
         let creatures: CreaturePack = parse(creatures)?;
@@ -229,6 +240,7 @@ impl Content {
         let nh = help.quests.len();
         let nf = creatures.creatures.len();
         let content = Self {
+            source,
             version: story.content_version,
             chapters: story
                 .chapters

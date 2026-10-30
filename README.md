@@ -115,8 +115,8 @@ Server-authoritative regional travel, companion exploration roles, personal
 quests, distinct transformation art, director integration, identity-provider
 login, save import and parent lifecycle screens remain outstanding. The 75-map
 exploration library does not establish regional story eligibility. No
-spatial/measurement task is reachable in Meadow. The development API retains its
-2,000-command cap; see the [long-play storage design](docs/LONG_PLAY_STORAGE_PLAN.md).
+spatial/measurement task is reachable in Meadow. The PostgreSQL API now uses durable receipts and bounded checkpoints for long play;
+see [storage, migration and recovery](docs/LONG_PLAY_STORAGE_PLAN.md).
 Hints currently repeat the authored instruction and suggest helper support;
 worked-example text and narration are not yet supplied by the API.
 
@@ -321,8 +321,9 @@ after it. The normal scripted journey records the woodcutter introduction explic
 
 The CLI remains a developer harness. Local checkpoints verify
 replay consistency, not authenticity; never import them as trusted server progress.
-Both CLI and server retain the 256-command development limit. At that limit the
-browser shows a terminal view and preserves the save; there is no reset endpoint.
+The standalone CLI retains its 256-command development limit. PostgreSQL story
+play uses durable receipts and compact checkpoints, including compatible migration
+of exhausted old saves. There is no browser reset endpoint.
 Broader mission catalogues and shared-adventure integration remain later stages. Content review gates are unchanged.
 See the [payload builder notes](backend/crates/director/src/story/README.md) for
 field sources, contracts and implementation limits.

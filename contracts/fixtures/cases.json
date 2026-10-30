@@ -5470,5 +5470,311 @@
       },
       "mode": "continue_story"
     }
+  },
+  {
+    "name": "StorySnapshot long-play revision",
+    "contract": "StorySnapshot",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "contentVersion": "pip-bridge-1",
+      "revision": 4096,
+      "locationId": "workshop",
+      "commandBudgetExhausted": false,
+      "acknowledgeableEntryIds": [
+        "greeting"
+      ],
+      "sceneInput": {
+        "availableActions": [
+          {
+            "action": {
+              "type": "cancel_mission"
+            },
+            "description": "Pause the mission; keep items and world changes.",
+            "id": "story-3-0"
+          },
+          {
+            "action": {
+              "destinationId": "bridge_bank",
+              "type": "travel"
+            },
+            "description": "Travel to bridge_bank.",
+            "id": "story-3-1"
+          },
+          {
+            "action": {
+              "itemId": "wood",
+              "quantity": 3,
+              "sourceId": "spare_wood",
+              "type": "collect"
+            },
+            "description": "Collect 3 wood from spare_wood.",
+            "id": "story-3-2"
+          },
+          {
+            "action": {
+              "characterId": "woodcutter",
+              "recipeId": "wood_to_planks",
+              "type": "exchange"
+            },
+            "description": "Give 3 wood to the woodcutter and receive 3 planks.",
+            "id": "story-3-3"
+          }
+        ],
+        "context": {
+          "inventory": [
+            {
+              "itemId": "wood",
+              "quantity": 3
+            }
+          ],
+          "locationId": "workshop",
+          "memory": {
+            "facts": [
+              "The bridge is broken.",
+              "Pip is at bridge_bank."
+            ],
+            "recentEvents": [
+              "The player accepted the mission to cross the bridge with Pip.",
+              "The player collected 3 wood from fallen_wood.",
+              "The player arrived at workshop."
+            ],
+            "recentMissions": []
+          },
+          "player": {
+            "avoid": [],
+            "interests": [],
+            "language": "short_simple"
+          },
+          "trigger": "The player arrived at workshop."
+        },
+        "here": {
+          "characters": [
+            {
+              "description": "A patient neighbour who shapes wood.",
+              "id": "woodcutter",
+              "relationship": "No recorded presentation of the woodcutter's introduction."
+            }
+          ],
+          "description": "An open-air workshop beside the stream path.",
+          "objects": [
+            {
+              "id": "workbench",
+              "state": "ready"
+            },
+            {
+              "id": "spare_wood",
+              "state": "3 wood available"
+            }
+          ]
+        },
+        "mission": {
+          "completed": [
+            "Find suitable wood."
+          ],
+          "current": "Get the planks ready.",
+          "goal": "Help Pip cross the stream.",
+          "narrative": {
+            "participantIds": [
+              "pip",
+              "woodcutter"
+            ],
+            "payoff": "Cross the repaired bridge with Pip and celebrate reaching the far bank.",
+            "premise": "Pip wants to explore the far bank with the player. Help make a way across together."
+          },
+          "remaining": [
+            "Bring the planks to the bridge.",
+            "Repair the bridge.",
+            "Cross with Pip."
+          ],
+          "status": "active"
+        },
+        "mode": "continue_story"
+      },
+      "scene": {
+        "sceneId": "pip-bridge-scene-3",
+        "presentation": [
+          {
+            "type": "dialogue",
+            "entryId": "greeting",
+            "speakerId": "woodcutter",
+            "text": "Hello! I can shape wood into planks."
+          }
+        ],
+        "choices": [
+          {
+            "label": "Make planks",
+            "actionId": "story-3-3"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "StoryCommand long-play revision",
+    "contract": "StoryCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "long-play",
+      "expectedRevision": 4096,
+      "payload": {
+        "type": "choose",
+        "actionId": "story-4096-0"
+      }
+    }
+  },
+  {
+    "name": "StorySnapshot unsafe revision",
+    "contract": "StorySnapshot",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "contentVersion": "pip-bridge-1",
+      "revision": 1000000001,
+      "locationId": "workshop",
+      "commandBudgetExhausted": false,
+      "acknowledgeableEntryIds": [
+        "greeting"
+      ],
+      "sceneInput": {
+        "availableActions": [
+          {
+            "action": {
+              "type": "cancel_mission"
+            },
+            "description": "Pause the mission; keep items and world changes.",
+            "id": "story-3-0"
+          },
+          {
+            "action": {
+              "destinationId": "bridge_bank",
+              "type": "travel"
+            },
+            "description": "Travel to bridge_bank.",
+            "id": "story-3-1"
+          },
+          {
+            "action": {
+              "itemId": "wood",
+              "quantity": 3,
+              "sourceId": "spare_wood",
+              "type": "collect"
+            },
+            "description": "Collect 3 wood from spare_wood.",
+            "id": "story-3-2"
+          },
+          {
+            "action": {
+              "characterId": "woodcutter",
+              "recipeId": "wood_to_planks",
+              "type": "exchange"
+            },
+            "description": "Give 3 wood to the woodcutter and receive 3 planks.",
+            "id": "story-3-3"
+          }
+        ],
+        "context": {
+          "inventory": [
+            {
+              "itemId": "wood",
+              "quantity": 3
+            }
+          ],
+          "locationId": "workshop",
+          "memory": {
+            "facts": [
+              "The bridge is broken.",
+              "Pip is at bridge_bank."
+            ],
+            "recentEvents": [
+              "The player accepted the mission to cross the bridge with Pip.",
+              "The player collected 3 wood from fallen_wood.",
+              "The player arrived at workshop."
+            ],
+            "recentMissions": []
+          },
+          "player": {
+            "avoid": [],
+            "interests": [],
+            "language": "short_simple"
+          },
+          "trigger": "The player arrived at workshop."
+        },
+        "here": {
+          "characters": [
+            {
+              "description": "A patient neighbour who shapes wood.",
+              "id": "woodcutter",
+              "relationship": "No recorded presentation of the woodcutter's introduction."
+            }
+          ],
+          "description": "An open-air workshop beside the stream path.",
+          "objects": [
+            {
+              "id": "workbench",
+              "state": "ready"
+            },
+            {
+              "id": "spare_wood",
+              "state": "3 wood available"
+            }
+          ]
+        },
+        "mission": {
+          "completed": [
+            "Find suitable wood."
+          ],
+          "current": "Get the planks ready.",
+          "goal": "Help Pip cross the stream.",
+          "narrative": {
+            "participantIds": [
+              "pip",
+              "woodcutter"
+            ],
+            "payoff": "Cross the repaired bridge with Pip and celebrate reaching the far bank.",
+            "premise": "Pip wants to explore the far bank with the player. Help make a way across together."
+          },
+          "remaining": [
+            "Bring the planks to the bridge.",
+            "Repair the bridge.",
+            "Cross with Pip."
+          ],
+          "status": "active"
+        },
+        "mode": "continue_story"
+      },
+      "scene": {
+        "sceneId": "pip-bridge-scene-3",
+        "presentation": [
+          {
+            "type": "dialogue",
+            "entryId": "greeting",
+            "speakerId": "woodcutter",
+            "text": "Hello! I can shape wood into planks."
+          }
+        ],
+        "choices": [
+          {
+            "label": "Make planks",
+            "actionId": "story-3-3"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "StoryCommand unsafe revision",
+    "contract": "StoryCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "long-play",
+      "expectedRevision": 1000000001,
+      "payload": {
+        "type": "choose",
+        "actionId": "story-4096-0"
+      }
+    }
   }
 ]

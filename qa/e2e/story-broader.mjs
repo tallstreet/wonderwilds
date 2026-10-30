@@ -53,6 +53,24 @@ try {
   const snapshot = () => get('/api/v1/story');
   const originalGame = await get('/api/v1/game');
   assert.equal((await snapshot()).revision, 0, 'Use a fresh disposable QA profile');
+  if (process.env.WW_LONG_PLAY === '1') {
+    let state = await snapshot();
+    let original;
+    for (let n = 0; n < 300; n++) {
+      const action = state.sceneInput.availableActions.find(row => row.action.type === 'travel');
+      assert.ok(action);
+      const body = { schemaVersion: '1.0', commandId: `long-story-${n}`, expectedRevision: state.revision, payload: { type: 'choose', actionId: action.id } };
+      const response = await page.request.post(`${origin}/api/v1/story/commands`, { headers: { 'X-Wonderwilds-Profile': bootstrap.profileId, 'X-CSRF-Token': bootstrap.csrf, Origin: origin }, data: body });
+      assert.equal(response.status(), 200);
+      state = await response.json();
+      original ??= { body, state };
+    }
+    assert.ok(state.revision > 256);
+    const retry = await page.request.post(`${origin}/api/v1/story/commands`, { headers: { 'X-Wonderwilds-Profile': bootstrap.profileId, 'X-CSRF-Token': bootstrap.csrf, Origin: origin }, data: original.body });
+    assert.deepEqual(await retry.json(), original.state);
+    await page.reload(); await page.locator('#game canvas').waitFor();
+    console.log('PASS >256 story commands before seven-mission returning-session journey');
+  }
   const close = async () => { if (await page.locator('dialog[open]').count()) await page.getByRole('button', { name: 'Close dialog', exact: true }).click(); };
   const ready = async () => {
     const state = await snapshot();

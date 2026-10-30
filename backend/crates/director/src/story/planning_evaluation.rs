@@ -119,6 +119,8 @@ fn key(state: &State, cursor: usize) -> String {
     let fields = projection.as_object_mut().unwrap();
     fields.remove("revision");
     fields.remove("events");
+    fields.remove("history");
+    fields.remove("receipts");
     json!([projection, cursor]).to_string()
 }
 
@@ -207,6 +209,7 @@ pub fn assess(
     if !result.failures.is_empty() {
         return Ok(result);
     }
+    let initial = state.clone();
     let mut visited = BTreeSet::from([key(state, 0)]);
     let mut queue = VecDeque::from([(state.clone(), 0, Vec::<Action>::new())]);
     let mut bounded = false;
@@ -217,15 +220,24 @@ pub fn assess(
         }
         result.explored_states += 1;
         if cursor == pending.len() && state.mission_status() == MissionStatus::Completed {
-            State::from_checkpoint(&state.checkpoint())
-                .map_err(|e| format!("Witness replay: {e:?}"))?;
+            let mut replay = initial.clone();
+            for (index, action) in path.iter().enumerate() {
+                replay
+                    .apply(&Command {
+                        command_id: format!("witness-{index}-{}", replay.revision()),
+                        expected_revision: replay.revision(),
+                        action: action.clone(),
+                    })
+                    .map_err(|e| format!("Witness replay: {e:?}"))?;
+            }
+            if replay.compact().durable_checkpoint() != state.compact().durable_checkpoint() {
+                return Err("Witness replay mismatch".into());
+            }
             result.passed = true;
             result.witness = path;
             return Ok(result);
         }
-        if path.len() >= MAX_DEPTH
-            || state.revision() >= wonderwilds_domain::story::MAX_COMMANDS as u64
-        {
+        if path.len() >= MAX_DEPTH || state.command_budget_exhausted() {
             bounded = true;
             continue;
         }
@@ -238,7 +250,7 @@ pub fn assess(
                 continue;
             }
             let mut next = state.clone();
-            let command_id = (0..=state.revision())
+            let command_id = (state.revision()..=state.revision() + 256)
                 .map(|n| format!("planning-eval-{n}"))
                 .find(|id| state.checkpoint()["receipts"].get(id).is_none())
                 .unwrap();

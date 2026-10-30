@@ -247,8 +247,109 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
         0
     );
 
+    let initial_size:i32=admin.query_one("SELECT octet_length(checkpoint::text) FROM wonderwilds.story_progress WHERE profile_id=$1::text::uuid", &[&profile]).unwrap().get(0);
+    let timer = std::time::Instant::now();
+    for n in 0..300 {
+        let destination = if current["locationId"] == "bridge_bank" {
+            "workshop"
+        } else {
+            "bridge_bank"
+        };
+        let request = choose(
+            &current,
+            &format!("long-travel-{n}"),
+            "travel",
+            Some(destination),
+        );
+        current = repo.execute(&identity, &request).unwrap();
+        if n == 0 || n == 299 {
+            assert_eq!(repo.execute(&identity, &accept).unwrap(), first);
+            assert_eq!(
+                PostgresRepository::new(restricted.clone())
+                    .read(&identity)
+                    .unwrap(),
+                current
+            );
+        }
+    }
+    assert!(current["revision"].as_u64().unwrap() > 256);
+    assert_eq!(current["commandBudgetExhausted"], false);
+    let size:i32=admin.query_one("SELECT octet_length(checkpoint::text) FROM wonderwilds.story_progress WHERE profile_id=$1::text::uuid", &[&profile]).unwrap().get(0);
+    assert!(
+        size < initial_size + 1024,
+        "Hot checkpoint grew with history"
+    );
+    assert_eq!(count(&mut admin, "story_checkpoints", profile), 2);
+    eprintln!(
+        "long-play story: {} commands; hot bytes {initial_size}->{size}; 300 writes {:?}",
+        current["revision"],
+        timer.elapsed()
+    );
+
+    assert_eq!(repo.verify_history(&identity).unwrap(), current);
+    admin
+        .execute(
+            "UPDATE wonderwilds.story_progress SET checkpoint='{}' WHERE profile_id=$1::text::uuid",
+            &[&profile],
+        )
+        .unwrap();
+    admin.execute("UPDATE wonderwilds.story_checkpoints SET digest=repeat('0',64) WHERE profile_id=$1::text::uuid", &[&profile]).unwrap();
+    assert_eq!(repo.read(&identity), Err(Error::Unavailable));
+    assert_eq!(repo.recover_current(&identity).unwrap(), current);
+    assert_eq!(repo.read(&identity).unwrap(), current);
+    assert_eq!(repo.execute(&identity, &accept).unwrap(), first);
+    admin.execute("UPDATE wonderwilds.command_windows SET window_minute=floor(extract(epoch FROM clock_timestamp())/60)::bigint,commands=4096 WHERE profile_id=$1::text::uuid AND kind='story'", &[&profile]).unwrap();
+    let limited = choose(&current, "limited", "travel", None);
+    assert_eq!(repo.execute(&identity, &limited), Err(Error::RateLimited));
+    assert_eq!(repo.execute(&identity, &accept).unwrap(), first);
+    let archived:Value=admin.query_one("SELECT domain_command FROM wonderwilds.story_command_receipts WHERE profile_id=$1::text::uuid AND revision=200", &[&profile]).unwrap().get(0);
+    admin.execute("UPDATE wonderwilds.story_command_receipts SET domain_command='{}' WHERE profile_id=$1::text::uuid AND revision=200", &[&profile]).unwrap();
+    assert_eq!(repo.verify_history(&identity), Err(Error::Unavailable));
+    assert_eq!(repo.recover_current(&identity), Err(Error::Unavailable));
+    admin.execute("UPDATE wonderwilds.story_command_receipts SET domain_command=$2 WHERE profile_id=$1::text::uuid AND revision=200", &[&profile,&archived]).unwrap();
+    // New tables enforce the same ownership predicate even for direct SQL.
+    let mut outsider = Client::connect(&restricted, NoTls).unwrap();
+    outsider
+        .execute(
+            "SELECT set_config('app.parent_id',$1,false)",
+            &[&other_parent],
+        )
+        .unwrap();
+    for table in [
+        "command_receipts",
+        "domain_command_receipts",
+        "game_encounters",
+        "game_checkpoints",
+        "story_checkpoints",
+        "persistence_origins",
+        "command_windows",
+    ] {
+        assert_eq!(
+            outsider
+                .query_one(
+                    &format!(
+                        "SELECT count(*) FROM wonderwilds.{table} WHERE profile_id=$1::text::uuid"
+                    ),
+                    &[&profile]
+                )
+                .unwrap()
+                .get::<_, i64>(0),
+            0
+        );
+        assert_eq!(
+            outsider
+                .execute(
+                    &format!("DELETE FROM wonderwilds.{table} WHERE profile_id=$1::text::uuid"),
+                    &[&profile]
+                )
+                .unwrap(),
+            0
+        );
+        assert!(admin.query_one("SELECT relrowsecurity AND relforcerowsecurity FROM pg_class WHERE oid=$1::text::regclass", &[&format!("wonderwilds.{table}")]).unwrap().get::<_,bool>(0));
+    }
     legacy_series_upgrade(&mut admin, &repo, &other);
     v2_series_upgrade(&mut admin, &repo, &other);
+    exhausted_upgrade(&mut admin, &repo, &other);
 
     let mut lifecycle = PostgresIdentity::new(Client::connect(&restricted, NoTls).unwrap());
     let verified = VerifiedContext {
@@ -258,7 +359,7 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
     };
     let export = lifecycle.export_profile(&verified, 11).unwrap();
     assert_eq!(
-        export["storyProgress"]["state"]["missionStatus"],
+        export["storyProgress"]["state"]["state"]["mission_status"],
         "completed"
     );
     assert_eq!(
@@ -266,6 +367,12 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
         current["revision"].as_u64().unwrap() as usize
     );
     assert_eq!(export["learningEvents"], json!([]));
+    assert_eq!(export["story_checkpoints"].as_array().unwrap().len(), 2);
+    assert_eq!(export["persistence_origins"].as_array().unwrap().len(), 1);
+    assert_eq!(
+        export["storyReplay"].as_array().unwrap().len(),
+        current["revision"].as_u64().unwrap() as usize
+    );
     assert_eq!(export["storyMissionPlans"][0]["plan"], plan);
     assert_eq!(
         current["sceneInput"]["context"]["memory"]["recentMissions"][0],
@@ -281,6 +388,13 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
     assert_eq!(repo.execute(&identity, &accept), Err(Error::Forbidden));
     assert_eq!(count(&mut admin, "story_progress", profile), 0);
     assert_eq!(count(&mut admin, "story_command_receipts", profile), 0);
+    for table in [
+        "story_checkpoints",
+        "persistence_origins",
+        "command_windows",
+    ] {
+        assert_eq!(count(&mut admin, table, profile), 0);
+    }
     assert_eq!(count(&mut admin, "deletion_tombstones", profile), 1);
     assert_eq!(count(&mut admin, "story_mission_plans", profile), 0);
 
@@ -312,6 +426,14 @@ fn legacy_series_upgrade(admin: &mut Client, repo: &PostgresRepository, identity
     ))
     .unwrap();
     let profile = &identity.profile_id;
+    for table in ["story_checkpoints", "persistence_origins"] {
+        admin
+            .execute(
+                &format!("DELETE FROM wonderwilds.{table} WHERE profile_id=$1::text::uuid"),
+                &[profile],
+            )
+            .unwrap();
+    }
     admin.execute("INSERT INTO wonderwilds.story_progress(profile_id,revision,checkpoint) VALUES($1::text::uuid,7,$2)", &[profile,&legacy]).unwrap();
     // Synthetic v1 public response receipts accompany the literal legacy checkpoint.
     // Save exact old-format responses, including the ambiguous old completion handle.
@@ -416,6 +538,14 @@ fn legacy_series_upgrade(admin: &mut Client, repo: &PostgresRepository, identity
 fn v2_series_upgrade(admin: &mut Client, repo: &PostgresRepository, identity: &Identity) {
     // Reuse only this disposable test profile after the separate v1 assertions.
     let profile = &identity.profile_id;
+    for table in ["story_checkpoints", "persistence_origins"] {
+        admin
+            .execute(
+                &format!("DELETE FROM wonderwilds.{table} WHERE profile_id=$1::text::uuid"),
+                &[profile],
+            )
+            .unwrap();
+    }
     admin
         .execute(
             "DELETE FROM wonderwilds.story_command_receipts WHERE profile_id::text=$1",
@@ -558,4 +688,46 @@ fn v2_series_upgrade(admin: &mut Client, repo: &PostgresRepository, identity: &I
     for (request, response) in originals {
         assert_eq!(repo.execute(identity, &request).unwrap(), response);
     }
+}
+
+fn exhausted_upgrade(admin: &mut Client, repo: &PostgresRepository, identity: &Identity) {
+    for table in [
+        "story_progress",
+        "story_command_receipts",
+        "story_mission_plans",
+        "story_checkpoints",
+        "persistence_origins",
+    ] {
+        admin
+            .execute(
+                &format!("DELETE FROM wonderwilds.{table} WHERE profile_id=$1::text::uuid"),
+                &[&identity.profile_id],
+            )
+            .unwrap();
+    }
+    let mut state = State::new();
+    let mut last = None;
+    for n in 0..256 {
+        let request = choose(
+            &super::super::snapshot(&state).unwrap(),
+            &format!("old-cap-{n}"),
+            "travel",
+            None,
+        );
+        let (next, response) = super::super::execute(&state, &request).unwrap();
+        admin.execute("INSERT INTO wonderwilds.story_command_receipts(profile_id,command_id,revision,request,response) VALUES($1::text::uuid,$2,$3,$4,$5)", &[&identity.profile_id,&request["commandId"].as_str().unwrap(),&((n+1) as i64),&request,&response]).unwrap();
+        state = next;
+        last = Some((request, response));
+    }
+    let (request, terminal) = last.unwrap();
+    assert_eq!(terminal["commandBudgetExhausted"], true);
+    admin.execute("INSERT INTO wonderwilds.story_progress(profile_id,revision,checkpoint) VALUES($1::text::uuid,256,$2)", &[&identity.profile_id,&state.checkpoint()]).unwrap();
+    let resumed = repo.read(identity).unwrap();
+    assert_eq!(resumed["revision"], 256);
+    assert_eq!(resumed["commandBudgetExhausted"], false);
+    assert_eq!(repo.execute(identity, &request).unwrap(), terminal);
+    let next = choose(&resumed, "beyond-old-cap", "travel", None);
+    let current = repo.execute(identity, &next).unwrap();
+    assert_eq!(current["revision"], 257);
+    assert_eq!(repo.verify_history(identity).unwrap(), current);
 }

@@ -7,6 +7,18 @@ const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
 const errors = [];
+const longPlay = process.env.WW_LONG_PLAY === '1';
+const restartApi = async () => {
+  assert.ok(process.send, 'Long play requires the disposable runner');
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('API restart timed out')), 30000);
+    process.once('message', message => {
+      clearTimeout(timer);
+      if (message.type === 'api-restarted') resolve(); else reject(new Error('API restart failed'));
+    });
+    process.send({ type: 'restart-api' });
+  });
+};
 page.setDefaultTimeout(15000);
 page.on('pageerror', error => errors.push(error.message));
 page.on('response', response => {
@@ -57,6 +69,16 @@ try {
   }
   assert.deepEqual([...(await snapshot()).ownedCreatures].sort(), ['flutter', 'nib', 'pip', 'tansy']);
   console.log('Recruitment through real assessment passed');
+  let firstLong;
+  if (longPlay) {
+    for (let n = 0; n < 1005; n++) {
+      const started = await command({ type: 'start_encounter', beatId: 'training-pip-1' });
+      firstLong ??= started;
+      await command({ type: 'abandon', encounterId: started.state.pendingEncounters[0].id });
+    }
+    assert.ok((await snapshot()).revision > 2000);
+    console.log('PASS >2,000 real HTTP commands before browser training');
+  }
   await page.reload();
   await page.waitForSelector('#game canvas');
   const click = name => page.getByRole('button', { name, exact: true }).click();
@@ -86,6 +108,13 @@ try {
   await page.locator('#missions').click();
   await click('Continue your activity');
   await page.getByRole('heading', { name: 'Training with Pip', exact: true }).waitFor();
+  if (longPlay) {
+    const before = await snapshot();
+    await restartApi();
+    assert.deepEqual(await snapshot(), before);
+    const old = await page.request.post(`${origin}/api/v1/commands`, { headers, data: firstLong.body });
+    assert.deepEqual(await old.json(), firstLong.state, 'Original pre-checkpoint response survives process restart');
+  }
   const resumed = (await snapshot()).pendingEncounters[0];
   assert.equal(resumed.id, firstEncounter.id);
   assert.equal(resumed.support.hintCount, 1);
@@ -104,10 +133,27 @@ try {
   for (let i = 0; i < training.parameters.total - training.parameters.given; i++) await click('Add one object');
   // Capture the exact completion request, then replay it after reload.
   const requestPromise = page.waitForRequest(request => request.url().endsWith('/api/v1/commands') && request.method() === 'POST' && request.postDataJSON().payload.type === 'attempt');
+  if (longPlay) await page.route('**/api/v1/commands', async route => {
+    const committed = await route.fetch();
+    assert.equal(committed.status(), 200);
+    await route.abort('failed');
+  }, { times: 1 });
   await click('Check my answer');
   const completedBody = (await requestPromise).postDataJSON();
-  await page.getByRole('heading', { name: 'Pip reached level 2!', exact: true }).waitFor();
-  assert.ok(await page.locator('.training-celebration').isVisible());
+  if (longPlay) {
+    await page.getByRole('button', { name: 'Retry saving', exact: true }).waitFor();
+    const committed = await snapshot();
+    await restartApi();
+    const retryRequest = page.waitForRequest(request => request.url().endsWith('/api/v1/commands'));
+    await click('Retry saving');
+    assert.deepEqual((await retryRequest).postDataJSON(), completedBody);
+    await page.getByRole('button', { name: 'Retry saving', exact: true }).waitFor({ state: 'hidden' });
+    assert.deepEqual(await snapshot(), committed);
+    console.log('PASS uncertain training write: process restart and exact browser retry');
+  } else {
+    await page.getByRole('heading', { name: 'Pip reached level 2!', exact: true }).waitFor();
+    assert.ok(await page.locator('.training-celebration').isVisible());
+  }
   const earned = progression(await snapshot(), 'pip');
   assert.equal(earned.level, 2);
   assert.ok(earned.xp > 0);

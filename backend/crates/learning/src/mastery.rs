@@ -36,6 +36,17 @@ pub enum EvidenceError {
     SequenceOrder,
 }
 
+/// Exact public explanation for the authored API's no-transfer factory. The
+/// factory must stay pinned to novel_transfer=false; this is not a general
+/// replacement for recompute or a qualification counter.
+pub fn authored_summary(attempted: bool) -> &'static str {
+    if attempted {
+        "Practised; support and repeated items do not establish independent understanding."
+    } else {
+        "Introduced; no qualifying independent answer checks yet."
+    }
+}
+
 /// Recompute from ordered, immutable server history. No elapsed-time demotion.
 /// Representations are a reviewed per-node choice: use one only where a second is invalid.
 pub fn recompute(
@@ -162,10 +173,8 @@ pub fn recompute(
             Status::Secure => {
                 "Secure in these activities under the experimental transfer policy; optional enrichment is available."
             }
-            Status::Practising => {
-                "Practised; support and repeated items do not establish independent understanding."
-            }
-            Status::Introduced => "Introduced; no qualifying independent answer checks yet.",
+            Status::Practising => authored_summary(true),
+            Status::Introduced => authored_summary(false),
             Status::Unseen => "No verified server evidence; imported practice remains unverified.",
         },
     })

@@ -67,6 +67,27 @@ impl Aggregate {
     }
 
     fn learner_summaries(&self) -> Result<Vec<wire::LearnerSummary>, Error> {
+        if let Some(policy) = &self.compact_policy {
+            if policy != Self::COMPACT_POLICY {
+                return Err(Error::Unavailable);
+            }
+            return Ok(self
+                .authored_mastery
+                .iter()
+                .map(|(skill, attempted)| {
+                    let summary = mastery::authored_summary(*attempted);
+                    wire::LearnerSummary {
+                        skill_id: skill.clone(),
+                        status: if *attempted {
+                            wire::LearnerSummaryStatus::Practising
+                        } else {
+                            wire::LearnerSummaryStatus::Introduced
+                        },
+                        explanation: summary.into(),
+                    }
+                })
+                .collect());
+        }
         let mut observations = Vec::new();
         let mut skills = BTreeSet::new();
         for evidence in &self.evidence {

@@ -441,3 +441,62 @@ fn public_projection_preserves_legacy_shape_and_persisted_receipts() {
     .unwrap();
     assert_eq!(snapshots, golden);
 }
+
+#[test]
+fn compact_authored_summaries_match_full_history_across_support_and_sessions() {
+    let content = development_content().unwrap();
+    let mut full = recruited_pip(&content);
+    let mut hot = full.compact().unwrap();
+    let mut serial = 0;
+    let mut compare = |full: &mut Aggregate, hot: &mut Aggregate, payload: Value| {
+        serial += 1;
+        let command = request(full, &format!("golden-{serial}"), payload);
+        let session = format!("session-{}", serial % 3);
+        let now = serial * 86400; // Returning after delays must not demote summaries.
+        let original = full.execute(&command, &content, now, &session).unwrap();
+        assert_eq!(
+            hot.execute(&command, &content, now, &session).unwrap(),
+            original
+        );
+        *hot = hot.compact().unwrap();
+        assert_eq!(hot.snapshot(&content).unwrap(), original);
+    };
+    for n in 0..24 {
+        compare(
+            &mut full,
+            &mut hot,
+            json!({"type":"start_encounter","beatId":"training-pip-1"}),
+        );
+        let pending = full.snapshot(&content).unwrap()["pendingEncounters"][0].clone();
+        if n % 4 < 3 {
+            compare(
+                &mut full,
+                &mut hot,
+                json!({"type":"hint","encounterId":pending["id"],"supportKind":(["hint","worked_example","read_aloud"][n%4])}),
+            );
+        }
+        if n % 5 == 0 {
+            compare(
+                &mut full,
+                &mut hot,
+                json!({"type":"abandon","encounterId":pending["id"]}),
+            );
+        } else {
+            compare(
+                &mut full,
+                &mut hot,
+                json!({"type":"attempt","encounterId":pending["id"],"answer":{"kind":"quantity","value":0}}),
+            );
+            let answer = pending["parameters"]["total"].as_u64().unwrap()
+                - pending["parameters"]["given"].as_u64().unwrap();
+            compare(
+                &mut full,
+                &mut hot,
+                json!({"type":"attempt","encounterId":pending["id"],"answer":{"kind":"quantity","value":answer}}),
+            );
+        }
+    }
+    assert!(full.evidence.len() > 50);
+    assert!(hot.evidence.is_empty());
+    assert!(hot.receipts.is_empty());
+}

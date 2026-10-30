@@ -85,7 +85,7 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
   const test = spawn(process.execPath, [process.env.WW_QA_BROWSER_TEST || 'qa/e2e/training-browser.mjs'], { cwd: root, env: { ...env, WW_DEMO_TEST_URL: 'http://127.0.0.1:5180' }, stdio: ['inherit', 'inherit', 'inherit', 'ipc'] });
   children.push(test);
   test.on('message', async message => {
-    if (message?.type !== 'restart-api' || !(env.WW_STORY_COMBINED === '1' || env.WW_STORY_RETURNING === '1')) return;
+    if (message?.type !== 'restart-api' || !(env.WW_STORY_COMBINED === '1' || env.WW_STORY_RETURNING === '1' || env.WW_LONG_PLAY === '1')) return;
     try {
       const stopped = once(api, 'exit');
       api.kill('SIGTERM');

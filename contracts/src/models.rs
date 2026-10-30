@@ -832,8 +832,20 @@ pub enum SkillNodeSubject {
 pub enum SkillNodeBand {
     #[serde(rename = "foundation-candidate")]
     FoundationCandidate,
+    #[serde(rename = "year-1")]
+    Year1,
     #[serde(rename = "year-1-extension")]
     Year1Extension,
+    #[serde(rename = "year-2")]
+    Year2,
+    #[serde(rename = "year-3")]
+    Year3,
+    #[serde(rename = "year-4")]
+    Year4,
+    #[serde(rename = "year-5")]
+    Year5,
+    #[serde(rename = "year-6")]
+    Year6,
     #[serde(rename = "extension")]
     Extension,
 }

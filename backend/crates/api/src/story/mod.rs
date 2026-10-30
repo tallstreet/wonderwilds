@@ -17,7 +17,7 @@ pub mod repository;
 fn acknowledgeable_entries(state: &State) -> Vec<&'static str> {
     if state.location() == Location::Workshop
         && !state.met_woodcutter()
-        && state.revision() < wonderwilds_domain::story::MAX_COMMANDS as u64
+        && !state.command_budget_exhausted()
     {
         vec!["greeting"]
     } else {
@@ -26,7 +26,7 @@ fn acknowledgeable_entries(state: &State) -> Vec<&'static str> {
 }
 
 pub fn snapshot(state: &State) -> Result<Value, Error> {
-    let exhausted = state.revision() >= wonderwilds_domain::story::MAX_COMMANDS as u64;
+    let exhausted = state.command_budget_exhausted();
     let mut value = json!({
         "schemaVersion":"1.0",
         "contentVersion":wonderwilds_domain::story::CONTENT_VERSION,
@@ -52,7 +52,7 @@ pub fn execute(state: &State, request: &Value) -> Result<(State, Value), Error> 
     if command.expected_revision != state.revision() {
         return Err(Error::RevisionConflict);
     }
-    if state.revision() >= wonderwilds_domain::story::MAX_COMMANDS as u64 {
+    if state.command_budget_exhausted() {
         return Err(Error::RateLimited);
     }
     let action = match command.payload {

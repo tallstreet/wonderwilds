@@ -165,3 +165,22 @@ For an offline rehearsal of the same restarts and retry checks, use
 `WW_STORY_RETURNING=1` with both provider flags set to `0` and omit
 `WW_STORY_COMBINED`/`WW_STORY_EXPECT_PLANS`. Repeat both branches. An authored
 rehearsal cannot satisfy combined-model acceptance.
+
+
+## Long-play persistence
+
+The disposable runner accepts `WW_LONG_PLAY=1`. With its default training test,
+it executes more than 2,000 HTTP commands before exercising training, pending
+support across an API restart, and an uncertain completion retried with the exact
+body after another restart. No persistent demo data is used.
+
+For story, use `WW_LONG_PLAY=1 WW_STORY_RETURNING=1
+WW_QA_BROWSER_TEST=qa/e2e/story-broader.mjs node qa/e2e/run-training-qa.mjs` on one
+shell line. It adds 300 travel commands before the seven-mission journey and its
+three returning-session restarts. Repeat with `WW_STORY_BRANCHES=alternate`.
+Leave the Modal providers disabled for storage-only QA. Set `CHROMIUM_PATH` for
+local Chromium; the runner discovers PostgreSQL or accepts `WONDERWILDS_PG_BIN`.
+
+The separate `sh scripts/check-postgres.sh` suite verifies migration, exact old
+receipts, audit/recovery, missing-history refusal, snapshot sizes and ownership.
+See [storage formats and recovery](../../docs/LONG_PLAY_STORAGE_PLAN.md).

@@ -1,159 +1,162 @@
-# Long-running companion profiles
+# Long-running companion and story profiles
 
-Status: proposed engineering design; not implemented or validated. The existing
-2,000-command limit remains in force. This design is a prerequisite for sustained
-training, rather than a reason to remove the guard now.
-
-## Current constraint
-
-`backend/crates/api/src/game/mod.rs` stores every API receipt, encounter,
-learning observation and domain event inside one serialized aggregate. Each
-receipt includes its original response, so repeated snapshots amplify growth.
-`backend/crates/domain/src/engine.rs` independently retains domain-command
-receipts. `repository.rs` clones/deserializes the aggregate, writes its whole
-JSON document and also appends evidence/events to PostgreSQL tables.
-
-The API derives evidence sequence numbers from the aggregate vector length.
-Snapshot mastery recomputation resolves historical encounter parameters through
-the aggregate encounter map. Removing old vectors or encounters would therefore
-change sequencing or break mastery. Dropping either receipt map would allow old
-command IDs to lose their original result. Increasing the cap alone leaves these
-costs and retry hazards unresolved.
+Status: implemented for the development PostgreSQL API, 31 October 2026.
+Verification results and operational limitations are recorded in
+[implementation status](IMPLEMENTATION_STATUS.md). Migration `0005_long_play.sql`
+replaces the server's 2,000-command adventure and 256-command story lifetime
+budgets with durable journals and bounded current state. The standalone, replay-log
+CLI and in-memory test executors keep their original limits.
 
 ## Storage boundary
 
-Add a new numbered migration after the migrations present at implementation
-time; do not edit applied migrations. The migration and adapter must introduce:
-
-| Record | Key and required contents | Lifetime |
+| Record | Contents | Retention |
 | --- | --- | --- |
-| `command_receipts` | `(profile_id, command_id)`; validated original request JSON, exact response JSON, API revision, receipt-format version | Until profile deletion; never evict a receipt merely because the hot cache is full |
-| `domain_command_receipts` | `(profile_id, command_id)`; original versioned command and returned event sequence range | Until profile deletion; reconstruct original returned events from durable `game_events` |
-| `game_encounters` | `(profile_id, encounter_id)`; quest/training ID, recipient, skill, seed, rules/content versions, support/check count, lifecycle state and issuing session | Pending records retained; completed records retained while evidence/replay requires them |
-| `game_checkpoints` | `(profile_id, api_revision)`; checkpoint-format version, domain state, domain/event/evidence high-water marks, rules/content versions and integrity digest | Latest verified checkpoint plus previous recovery checkpoint; older checkpoints removable only after durable replay verification |
-| `progress` | Existing owned profile row and versioned compact current snapshot with explicit sequence counters and checkpoint reference | Current state; no embedded full receipt/history copies |
+| `command_receipts` | Original adventure request/response, revision, replay clock/session, integrity digest | Until profile deletion |
+| `domain_command_receipts` | Versioned domain command, trusted context and resulting events; legacy receipts preserved | Until profile deletion |
+| `game_encounters` | Issued skill/seed/session, support/check count, lifecycle and bound training recipient | Until profile deletion |
+| `learning_events` | Original ordered evidence plus versioned canonical-parameter fingerprint, content fingerprint and no-transfer policy metadata | Until profile deletion |
+| `game_events`, `reward_grants`, `game_outbox` | Original events, unique reward keys and delivery records | Existing lifecycle unchanged |
+| `game_checkpoints`, `story_checkpoints` | Format/version, current state and SHA-256 digest | Current and previous revision only |
+| `persistence_origins` | Original validated pre-conversion save and digest; adventure content fingerprint | Until profile deletion |
+| `story_command_receipts` | Original wire request/response and revision, resolved domain command, integrity digest | Until profile deletion |
+| `story_mission_plans` | Original versioned accepted mission briefs | Existing lifecycle unchanged |
+| `command_windows` | Per-profile/per-mode minute and committed command count | One renewable row per mode |
 
-All new profile-owned tables require foreign keys with `ON DELETE CASCADE`,
-enabled and forced RLS using the existing ownership predicate, no public grants,
-and explicit runtime-role grants in provisioning. Runtime SQL uses the same
-verified parent setting and profile lock as existing commands. No request may
-choose the parent identity. Extend readiness checks for the new required schema.
+Every new profile-owned table has cascading foreign keys, enabled **and forced**
+RLS, the existing parent ownership predicate, and no public table grants. Existing
+runtime roles receive explicit grants during migration; provisioning also grants
+newly created runtime roles access. Readiness checks require the new tables.
+Parent export includes origins, checkpoints, receipts, encounter context,
+reconstruction metadata and domain events. Deletion cascades through all of them.
+No authentication secrets are added to exports.
 
-Preserve existing `learning_events`, `game_events`, unique `reward_grants` and
-`game_outbox`. These are durable records, not a second copy in every snapshot.
-Add versioned assessment-reconstruction metadata alongside learning events or
-their encounter references, including canonical parameter fingerprints. Never
-label repeated draft practice as novel-transfer evidence.
+The bounded part is working state, not total database size. Adventure snapshots
+retain finite gameplay state, the pending encounter, explicit evidence/event
+high-water marks and a versioned learner projection. Story snapshots retain
+current mission/world/choice state and the latest eight events, without full
+command history or response maps. There is no hot receipt cache or replay suffix:
+a checkpoint is written on **every** successful command. This trades a second
+small indexed write for a simpler verified boundary. Each current snapshot is
+limited to 64 KiB; current and previous checkpoints are retained.
 
-The bounded part is the loaded working state: one active encounter, explicit
-sequence counters, a finite recent receipt cache (initial target 128), and a
-checkpoint plus bounded event suffix (initial target 256 domain events). Durable
-receipts and learning history still grow with use. Their storage budget,
-monitoring and approved retention policy remain separate operational work;
-this design does not claim constant total database size.
+Archived receipts, encounters, evidence and events continue to grow. Storage
+monitoring, quotas, backup operations and an approved retention policy remain
+separate operational work. No records are evicted to make an old retry disappear.
+The wire revision ceiling is 1,000,000,000, shared with the existing adventure
+contract; it is an integer compatibility boundary, not the old play budget.
 
-## Atomic execution and retry order
+## Transactions, verification and retries
 
-1. Validate the closed command schema, verify session/profile ownership, set
-   transaction-local RLS identity and lock the same owned profile row used by
-   deletion and all other writers.
-2. Look up the durable API receipt **before checking the submitted revision**.
-   Equal parsed JSON returns the exact stored response without side effects;
-   the same ID with any changed body returns revision conflict. A hash may speed
-   lookup but must not replace equality of stored JSON.
-3. Load a compatible checkpoint/current state and the bounded required suffix.
-   Validate format, counters, pending encounter bindings and versions. Corruption
-   or missing necessary history fails closed; never reset a profile.
-4. For a new command, enforce current revision, eligibility and bounded request
-   rate. Apply the pure domain transition. Persist domain receipts outside the
-   checkpoint through a repository-supported receipt boundary; do not clear a
-   domain receipt map while retaining the old standalone apply semantics.
-5. Commit the new current state, encounter changes, monotonic evidence/events,
-   unique rewards, outbox and both receipt records together. Derive sequences
-   from explicit persisted high-water counters, never retained-vector lengths.
-6. When the suffix reaches the checkpoint threshold, write and verify a new
-   checkpoint in this same transaction. Do not delete receipts, grant keys,
-   pending encounters or durable events at the boundary. Publish the response
-   only after commit. A lost response remains recoverable by the original command.
+1. Validate the command, set transaction-local verified parent identity and lock
+   the owned profile row shared by game, story and deletion.
+2. Migrate a legacy save atomically if needed; otherwise read the current and
+   previous checkpoints through their profile/revision indexes. Verify digests,
+   supported versions and content fingerprint. Replay the latest committed
+   command from the previous checkpoint and compare the resulting current state.
+   Adventure also compares the original response and indexed evidence/event
+   high-water marks. A sole initial checkpoint must match the preserved origin.
+3. Look up the durable command ID **before checking its submitted revision**.
+   Equal parsed JSON returns the original response after digest/schema checks;
+   changed JSON returns conflict. Current corruption still fails closed, including
+   for retries. Old responses are never regenerated with a new model or plan.
+4. New commands consume a renewable budget of 4,096 committed commands per minute
+   per profile/mode. Retries are exempt. Rollback does not consume the budget.
+   Existing HTTP concurrency/body limits remain in force.
+5. Apply authoritative assessment/domain transitions, then atomically commit the
+   response receipt, resolved domain input/context, encounter/evidence/events,
+   unique rewards/outbox, new current state and checkpoint. Failure rolls all of
+   them back. Sequence counters come from persisted high-water marks.
+6. Retain the latest two verified checkpoints. No receipt, evidence, grant or
+   pending binding is deleted at this boundary. Publish only after commit.
 
-The pure engine needs an explicit checkpoint executor API whose caller guarantees
-durable receipt lookup/insertion. Preserve the current receipt-retaining API for
-standalone replay callers until they migrate. Domain idempotency must not become
-an undocumented assumption in the HTTP layer.
+`engine::apply_checkpointed` is the explicit executor for callers that own durable
+receipt lookup/insertion. The original `engine::apply` retains standalone
+idempotency semantics. Story `State::compact` and `from_durable_checkpoint` form a
+separate trusted repository boundary; the untrusted CLI `from_checkpoint` still
+requires full replay and does not accept compact server state.
 
-## Learning summaries and replay
+Checksums detect accidental corruption, not hostile modification by a database
+administrator who can rewrite both records and checksums. Normal reads verify the
+latest transition, not the entire archive. Offline audit detects older missing or
+changed journal/evidence records. Missing required history never resets a profile.
 
-First move mastery queries to durable learning/encounter records and persist
-explicit evidence counters; retain full evidence until a separately tested,
-versioned summary is proven sufficient. Current snapshot recomputation depends
-on canonical parameter identity, support history, session context and evidence
-ordering. A simple latest-score or rolling average is insufficient.
+## Learning policy and compatible replay
 
-Only introduce incremental mastery checkpoints after golden comparisons against
-the existing complete recomputation, including delayed review and context/session
-boundaries. Policy upgrades must support rebuild from retained evidence. Fetching
-all evidence per request can be a safe intermediate migration but does not meet
-the final bounded-work acceptance gate; benchmark and report it honestly.
+The authored assessment factory always supplies `novel_transfer=false`. Under
+`independent-transfer-v1`, its public projection therefore has only introduced or
+practising states: seen verified evidence and seen answer checks are sufficient
+statistics. `authored-no-transfer-independent-transfer-v1` explicitly pins this
+restricted projection. It is **not** a general mastery checkpoint or an eligible
+check counter. Repeated draft practice never becomes transfer evidence.
 
-Store the versioned command and trusted facts needed for domain replay alongside
-event history. Events alone currently do not supply every `ReplayEntry` input.
-Pin original content/rules versions and retain their readers; replay must not
-silently substitute newly authored training or change a pending recipient.
+Golden tests compare every response against full recomputation across supported
+and independent practice, wrong answers, worked examples, read-aloud, abandonment,
+repeated items, delayed play and multiple server sessions. Offline adventure audit
+also reconstructs all observations using durable encounters and recomputes the
+complete public snapshot independently. Existing learning-policy tests cover
+transfer, session/context diversity and corrupt evidence ordering.
 
-## Existing-save migration and rollback
+New metadata records canonical parameter fingerprints and content/policy versions.
+Current content/rules or summary-policy mismatches fail closed. Content changes
+require an explicit compatible reader/rebuild; this implementation does not
+silently evaluate old records with changed content or claim support for arbitrary
+future mastery policies. Training recipient and issuing session remain bound to
+the original pending encounter when teams or sessions change.
 
-Migrate lazily under the profile lock or with an owner-controlled offline job.
-Detect the old format explicitly. Validate the full old aggregate, insert all API
-and domain receipts, encounter bindings and reconstruction metadata, and compare
-existing durable event/evidence rows with embedded copies. Duplicate equal data
-is allowed; a mismatch aborts. Preserve revisions, counters, grants, support,
-friendship, appearances, pending sessions and exact old responses.
+## Existing saves and recovery
 
-Write the first new checkpoint and format marker only after every copied record
-is consistent, in the same transaction. Restarting migration must be harmless.
-Do not run migration against the persistent demo while developing it.
+Migration is lazy, owner-locked and transactional. Adventure compares embedded
+learning/events against their durable rows, validates old receipts and compares
+full versus compact public projections before changing the save. Story replays
+legacy v1/v2/v3 checkpoints and checks their receipt revisions, IDs and wire
+schemas. Both preserve the original save as an integrity-checked origin. A failed
+conversion leaves the original save intact. Existing terminal-at-256 responses
+remain valid receipts, while the migrated live story can continue beyond 256.
+Guest saves and legacy-unverified imports are unchanged.
 
-Deploy compatible readers before writing the new format. Once compact snapshots
-are written, the old binary cannot safely load them. Rollback must use a compatible
-binary or an explicit transactional reconstruction of the old aggregate from
-durable records; it must never restore a stale pre-migration snapshot over newer
-progress. Exercise this reconstruction in a disposable database before enabling
-the format for persistent profiles.
+Offline maintenance uses the same profile lock and ownership predicate:
 
-Extend parent export to include encounter/evidence context and durable replay
-records as appropriate; avoid exporting authentication secrets. Profile deletion
-must cascade through new tables and retain existing tombstone/outbox behavior.
-Do not infer approved retention periods from this engineering proposal.
+```sh
+# Explicitly configure the intended database; this tool has no default database.
+# audit performs no recovery; recover is an explicit transactional repair.
+cargo run -p wonderwilds-api --bin persistence --locked -- audit game PARENT_UUID PROFILE_UUID
+cargo run -p wonderwilds-api --bin persistence --locked -- audit story PARENT_UUID PROFILE_UUID
+cargo run -p wonderwilds-api --bin persistence --locked -- recover game PARENT_UUID PROFILE_UUID
+cargo run -p wonderwilds-api --bin persistence --locked -- recover story PARENT_UUID PROFILE_UUID
+```
 
-## Delivery and acceptance
+`WONDERWILDS_DATABASE_URL` supplies the operator's connection. Audit replays the
+journal in pages of 256 from the preserved origin, verifies response/input digests
+and reaches the latest committed revision. Adventure additionally compares domain
+records, evidence/reconstruction metadata, events and full mastery recomputation.
+Recovery uses that same verification before transactionally replacing the current
+and previous checkpoints and current snapshot. It refuses gaps and cannot replace
+newer progress with the origin or an older backup. Full learning recomputation is
+intentionally an offline, history-sized operation. Large audits hold the profile
+lock and should run during a maintenance window.
 
-1. Add schema, RLS/ownership/deletion/export fixtures and backward-compatible
-   record readers; keep the command cap.
-2. Externalize API/domain receipts and encounters, introduce explicit counters
-   and migrate synthetic old profiles. Preserve every old retry result.
-3. Add verified checkpoints, durable learning reads and sufficient versioned
-   mastery summaries; benchmark bounded hot state and per-command work.
-4. Only then replace the lifetime cap with independent request-rate and storage
-   limits that do not permanently strand a healthy active profile.
+Rollback means deploying a **compatible** reader or using this verified current
+state reconstruction. An old binary cannot read compact saves or play beyond its
+old caps; downgrading to it is unsupported. No reset or repair endpoint is exposed
+to the browser. Development verification uses disposable databases only; it does
+not migrate `.local-demo` or establish production backup readiness.
 
-Required disposable-PostgreSQL tests:
+## Reproducible acceptance checks
 
-- Execute more than 2,000 distinct valid commands across several checkpoints;
-  restart the process and verify progress and monotonic evidence/event sequences.
-- Retry commands from before and after every checkpoint and migration boundary;
-  verify exact old response, no new evidence/reward/outbox entry, and rejection of
-  changed bodies under the same ID.
-- Race equal and conflicting commands through separate database connections;
-  verify one commit and existing revision-conflict behavior.
-- Inject failures before each durable insert/checkpoint commit and verify complete
-  rollback, including both receipt layers and unique training grants.
-- Resume a supported pending training encounter through migration/checkpoint and
-  restart; changing team must not change its bound recipient or reward.
-- Compare replay and complete mastery recomputation before/after compaction and
-  across rules/content versions; corrupt or missing records must fail closed.
-- Verify non-owner RLS denial, deletion cascades, export completeness and compatible
-  rollback/reconstruction. Exercise browser uncertain-write retry after restart.
+- `bash scripts/check.sh`: Rust/contract/content/frontend suites, including golden
+  compact/full-history projection comparison and standalone cap compatibility.
+- `sh scripts/check-postgres.sh`: >2,000 adventure and >256 story commands, exact
+  old retries, supported pending-save migration/rollback, team binding, concurrency,
+  unique rewards, bounded snapshot/checkpoint counts, full audit, corrupt-checkpoint
+  recovery, missing-history refusal, rate budget/retry exemption, RLS/export/delete,
+  and continuation of a migrated story previously exhausted at revision 256.
+- `WW_LONG_PLAY=1 node qa/e2e/run-training-qa.mjs`: >2,000 HTTP commands followed
+  by browser training, supported pending encounter across process restart and
+  lost-response exact retry after another API restart.
+- `WW_LONG_PLAY=1 WW_STORY_RETURNING=1 WW_QA_BROWSER_TEST=qa/e2e/story-broader.mjs
+  node qa/e2e/run-training-qa.mjs`: >256 HTTP story commands followed by seven
+  missions, branch decisions, lost-response retry and three actual API/browser
+  restarts. Repeat with `WW_STORY_BRANCHES=alternate` for the other branch.
 
-Until these checks pass and measured hot-state bounds are recorded, the current
-cap is an explicit development limitation. Passing the first companion training
-journey does not complete this storage work.
+Set `CHROMIUM_PATH` and `WONDERWILDS_PG_BIN` as required by the local environment.
+Storage QA uses authored story/plans; live model latency/quality is a separate gate.

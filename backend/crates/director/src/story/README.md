@@ -72,7 +72,8 @@ fields, educational leakage, free-text preference injection and invalid actions.
 The developer runtime caps history at 256 commands (including acknowledgements).
 At that bound the builder and action resolver return `CommandBudgetExhausted`
 instead of emitting a supposedly playable payload. Checkpoints and historical plan
-inspection remain available. This is not a sustained-play storage implementation.
+inspection remain available. PostgreSQL callers use a separate compact state/receipt boundary and can continue
+past 256; see [long-play storage](../../../../../docs/LONG_PLAY_STORAGE_PLAN.md).
 
 ## Mock scene provider
 

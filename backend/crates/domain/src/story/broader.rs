@@ -2,7 +2,7 @@
 use super::*;
 use std::collections::BTreeSet;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(super) struct BroaderProgress {
     pub flags: BTreeSet<String>,

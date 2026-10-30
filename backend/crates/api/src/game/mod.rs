@@ -17,6 +17,7 @@ mod companion_tests;
 pub mod http;
 pub mod repository;
 mod snapshot;
+mod storage;
 
 pub const MAX_COMMANDS: usize = 2000;
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -60,6 +61,14 @@ struct Receipt {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Aggregate {
     revision: u64,
+    #[serde(default)]
+    evidence_sequence: u64,
+    #[serde(default)]
+    compact_policy: Option<String>,
+    #[serde(default)]
+    authored_mastery: BTreeMap<String, bool>,
+    #[serde(skip)]
+    domain_records: Vec<Value>,
     domain: State,
     encounters: BTreeMap<String, SavedEncounter>,
     receipts: BTreeMap<String, Receipt>,
@@ -93,12 +102,50 @@ impl Aggregate {
     pub fn new(content: &Content) -> Self {
         Self {
             revision: 0,
+            evidence_sequence: 0,
+            compact_policy: None,
+            authored_mastery: BTreeMap::new(),
+            domain_records: Vec::new(),
             domain: State::new(content),
             encounters: BTreeMap::new(),
             receipts: BTreeMap::new(),
             evidence: Vec::new(),
             events: Vec::new(),
         }
+    }
+    const COMPACT_POLICY: &str = "authored-no-transfer-independent-transfer-v1";
+    fn update_authored_mastery(&mut self) -> Result<(), Error> {
+        if self.compact_policy.is_none() {
+            return Ok(());
+        }
+        if self.compact_policy.as_deref() != Some(Self::COMPACT_POLICY) {
+            return Err(Error::Unavailable);
+        }
+        // This API factory always supplies novel_transfer=false. Under the pinned
+        // policy secure is impossible; the public projection needs only these two
+        // sufficient statistics. Full observations remain durable for policy replay.
+        for e in &self.evidence {
+            if e.provenance == wire::LearningEvidenceProvenance::ServerVerified {
+                let attempted = self.authored_mastery.entry(e.skill_id.clone()).or_default();
+                *attempted |= e.event_kind == wire::LearningEvidenceEventKind::AnswerCheck;
+            }
+        }
+        Ok(())
+    }
+    fn compact(&self) -> Result<Self, Error> {
+        let mut state = self.clone();
+        state.compact_policy = Some(Self::COMPACT_POLICY.into());
+        state.update_authored_mastery()?;
+        state.evidence_sequence = state
+            .evidence_sequence
+            .max(state.evidence.last().map_or(0, |e| e.server_sequence));
+        state.receipts.clear();
+        state.events.clear();
+        state.evidence.clear();
+        state.domain_records.clear();
+        state.encounters.retain(|_, e| !e.completed && !e.abandoned);
+        state.domain = state.domain.compact();
+        Ok(state)
     }
     fn domain_apply(
         &mut self,
@@ -113,16 +160,16 @@ impl Aggregate {
             expected_revision: self.domain.revision(),
             action,
         };
-        let applied = engine::apply(
-            &self.domain,
-            &command,
-            content,
-            &Context {
-                unix_millis: now.saturating_mul(1000),
-                recorded_random_choice: 0,
-                facts,
-            },
-        )
+        let context = Context {
+            unix_millis: now.saturating_mul(1000),
+            recorded_random_choice: 0,
+            facts,
+        };
+        let applied = if self.compact_policy.is_some() {
+            engine::apply_checkpointed(&self.domain, &command, content, &context)
+        } else {
+            engine::apply(&self.domain, &command, content, &context)
+        }
         .map_err(|e| match e {
             engine::Rejection::RevisionConflict | engine::Rejection::CommandIdReused => {
                 Error::RevisionConflict
@@ -131,6 +178,7 @@ impl Aggregate {
             engine::Rejection::Locked | engine::Rejection::UnverifiedEncounter => Error::Forbidden,
             _ => Error::InvalidInput,
         })?;
+        self.domain_records.push(json!({"command":command,"context":context,"events":applied.events,"rulesVersion":engine::RULES_VERSION,"contentVersion":content.version()}));
         self.domain = applied.state;
         self.events.extend(applied.events);
         Ok(())
@@ -155,7 +203,7 @@ impl Aggregate {
                 Err(Error::RevisionConflict)
             };
         }
-        if self.receipts.len() >= MAX_COMMANDS {
+        if self.compact_policy.is_none() && self.receipts.len() >= MAX_COMMANDS {
             return Err(Error::RateLimited);
         }
         if command.expected_revision != self.revision {
@@ -305,6 +353,7 @@ impl Aggregate {
             }
         }
         next.revision = next.revision.checked_add(1).ok_or(Error::Unavailable)?;
+        next.update_authored_mastery()?;
         let response = next.snapshot(content)?;
         next.receipts.insert(
             id.into(),
@@ -427,7 +476,10 @@ impl Aggregate {
                 )
             }
         };
-        let sequence = self.evidence.len() as u64 + 1;
+        let sequence = self
+            .evidence_sequence
+            .max(self.evidence.last().map_or(0, |e| e.server_sequence))
+            + 1;
         let value = json!({"schemaVersion":"1.0","eventId":format!("evidence-{sequence}-{}",digest_id(&format!("{session_id}:{id}"))),"encounterId":saved.id,"skillId":saved.skill,"variantId":format!("authored-{}",saved.seed),"itemFamily":encounter.template_id,"contextId":saved.quest,"representation":representation(&saved.skill),"result":result,"eventKind":kind,"firstCheck":kind=="answer_check"&&saved.checks==1,"support":saved.support,"sessionId":saved.session_id,"serverSequence":sequence,"provenance":"server_verified"});
         wire::validate("LearningEvidence", &value).map_err(|_| Error::Unavailable)?;
         self.evidence
@@ -440,11 +492,15 @@ impl Aggregate {
             ));
             completion["eventKind"] = json!("completion");
             completion["firstCheck"] = json!(false);
-            completion["serverSequence"] = json!(self.evidence.len() as u64 + 1);
+            completion["serverSequence"] = json!(sequence + 1);
             wire::validate("LearningEvidence", &completion).map_err(|_| Error::Unavailable)?;
             self.evidence
                 .push(serde_json::from_value(completion).map_err(|_| Error::Unavailable)?);
         }
+        self.evidence_sequence = self
+            .evidence
+            .last()
+            .map_or(self.evidence_sequence, |e| e.server_sequence);
         self.encounters.insert(saved.id.clone(), saved);
         Ok(())
     }

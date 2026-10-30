@@ -47,7 +47,7 @@ pub enum Action {
     },
 }
 /// Server-owned, persisted encounter completion, not a request body.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct VerifiedCompletion {
     pub quest_id: String,
     pub supported: bool,
@@ -55,13 +55,13 @@ pub struct VerifiedCompletion {
 /// Trusted transaction inputs. Assessment/factory adapters must verify profile,
 /// encounter/session ownership, hint history, and server correctness first.
 /// `reachable_quests` comes from server world/path validation, never browser XY.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct TrustedFacts {
     pub issued_encounters: BTreeMap<String, String>,
     pub completed_encounters: BTreeMap<String, VerifiedCompletion>,
     pub reachable_quests: BTreeSet<String>,
 }
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Context {
     pub unix_millis: u64,
     pub recorded_random_choice: u32,
@@ -124,6 +124,19 @@ impl State {
             last_discovery: BTreeMap::new(),
             receipts: BTreeMap::new(),
         }
+    }
+    /// Compact trusted persistence boundary. The repository must retain original
+    /// receipts and check them before invoking apply_checkpointed.
+    pub fn compact(&self) -> Self {
+        let mut state = self.clone();
+        state.receipts.clear();
+        state
+    }
+    pub fn event_sequence(&self) -> u64 {
+        self.sequence
+    }
+    pub fn archived_receipts(&self) -> serde_json::Value {
+        serde_json::to_value(&self.receipts).expect("serializable receipts")
     }
     pub fn character_xp(&self, id: &str) -> u32 {
         *self.character_xp.get(id).unwrap_or(&0)

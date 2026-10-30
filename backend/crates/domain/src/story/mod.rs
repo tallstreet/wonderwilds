@@ -148,7 +148,7 @@ pub struct InitialConditions {
     pub bridge_repaired: bool,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Milestone {
     pub condition_id: String,
@@ -164,7 +164,7 @@ impl Milestone {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Event {
     pub revision: u64,
@@ -183,8 +183,11 @@ pub struct Presentation {
     pub entries: Vec<PresentationEntry>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct State {
+    #[serde(default)]
+    durable: bool,
     initial: InitialConditions,
     revision: u64,
     location: Location,
@@ -228,6 +231,7 @@ impl State {
             return Err(Rejection::InvalidCheckpoint);
         }
         Ok(Self {
+            durable: false,
             initial,
             revision: 0,
             location: Location::BridgeBank,
@@ -390,13 +394,20 @@ impl State {
         if command.expected_revision != self.revision {
             return Err(Rejection::RevisionConflict);
         }
-        if self.history.len() >= MAX_COMMANDS {
+        if self.command_budget_exhausted() {
             return Err(Rejection::LimitReached);
         }
         let mut candidate = self.clone();
+        if candidate.durable {
+            candidate.history.clear();
+            candidate.receipts.clear();
+        }
         let description = candidate.transition(&command.action)?;
         candidate.evaluate_milestones();
-        candidate.revision += 1;
+        candidate.revision = candidate
+            .revision
+            .checked_add(1)
+            .ok_or(Rejection::LimitReached)?;
         let receipt = Receipt {
             command_id: command.command_id.clone(),
             revision: candidate.revision,
@@ -406,6 +417,9 @@ impl State {
             revision: candidate.revision,
             description: receipt.description.clone(),
         });
+        if candidate.durable && candidate.events.len() > 8 {
+            candidate.events.remove(0);
+        }
         candidate.history.push(command.clone());
         candidate
             .receipts
@@ -1016,8 +1030,49 @@ impl State {
             .collect()
     }
 
+    pub fn command_budget_exhausted(&self) -> bool {
+        if self.durable {
+            self.revision >= 1_000_000_000
+        } else {
+            self.revision >= MAX_COMMANDS as u64
+        }
+    }
+    /// Only for a trusted repository with durable command receipts. This is not a
+    /// browser/import checkpoint and is never accepted by from_checkpoint.
+    pub fn compact(&self) -> Self {
+        let mut state = self.clone();
+        state.durable = true;
+        state.history.clear();
+        state.receipts.clear();
+        let keep = state.events.len().saturating_sub(8);
+        state.events.drain(..keep);
+        state
+    }
+    pub fn durable_checkpoint(&self) -> Value {
+        json!({"format":"story-current-1","contentVersion":CONTENT_VERSION,"state":self.compact()})
+    }
+    pub fn from_durable_checkpoint(value: &Value) -> Result<Self, Rejection> {
+        if value["format"] != "story-current-1" || value["contentVersion"] != CONTENT_VERSION {
+            return Err(Rejection::InvalidCheckpoint);
+        }
+        let state: Self = serde_json::from_value(value["state"].clone())
+            .map_err(|_| Rejection::InvalidCheckpoint)?;
+        if state.durable_checkpoint() != *value
+            || state.events.len() > 8
+            || state.revision > 1_000_000_000
+        {
+            return Err(Rejection::InvalidCheckpoint);
+        }
+        Ok(state)
+    }
+    pub fn last_command(&self) -> Option<&Command> {
+        self.history.last()
+    }
     /// Local developer checkpoint containing a replay log plus checked final projection.
     pub fn checkpoint(&self) -> Value {
+        if self.durable {
+            return self.durable_checkpoint();
+        }
         json!({"version":CONTENT_VERSION,"initial":self.initial,"commands":self.history,"receipts":self.receipts,"state":self.projection()})
     }
     pub fn from_checkpoint(value: &Value) -> Result<Self, Rejection> {

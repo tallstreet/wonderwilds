@@ -1518,7 +1518,13 @@
           "type": "string",
           "enum": [
             "foundation-candidate",
+            "year-1",
             "year-1-extension",
+            "year-2",
+            "year-3",
+            "year-4",
+            "year-5",
+            "year-6",
             "extension"
           ]
         },
@@ -2848,7 +2854,7 @@
         "expectedRevision": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 256
+          "maximum": 1000000000
         },
         "payload": {
           "oneOf": [
@@ -2925,7 +2931,7 @@
         "revision": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 256
+          "maximum": 1000000000
         },
         "locationId": {
           "type": "string",
@@ -2986,7 +2992,7 @@
               "scene": {},
               "revision": {
                 "type": "integer",
-                "maximum": 255
+                "maximum": 999999999
               }
             }
           },
@@ -2995,7 +3001,10 @@
               "sceneInput": false,
               "scene": false,
               "revision": {
-                "const": 256
+                "enum": [
+                  256,
+                  1000000000
+                ]
               },
               "acknowledgeableEntryIds": {
                 "type": "array",

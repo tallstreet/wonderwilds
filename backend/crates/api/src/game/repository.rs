@@ -25,15 +25,52 @@ impl PostgresRepository {
             fail_before_commit: false,
         }
     }
+    /// Operator audit: full durable replay and independent mastery recomputation.
+    /// No HTTP route exposes this maintenance operation.
+    pub fn verify_history(&self, identity: &Identity) -> Result<Value, Error> {
+        let mut client = self.connect()?;
+        let mut tx = client.transaction().map_err(|_| Error::Unavailable)?;
+        own(&mut tx, identity)?;
+        let rebuilt = super::storage::rebuild(&mut tx, &identity.profile_id, &self.content, false)?;
+        let current = super::storage::load(&mut tx, &identity.profile_id, &self.content)?;
+        let snapshot = rebuilt.snapshot(&self.content)?;
+        if super::storage::encode(&rebuilt, &self.content)?
+            != super::storage::encode(&current, &self.content)?
+        {
+            return Err(Error::Unavailable);
+        }
+        tx.commit().map_err(|_| Error::Unavailable)?;
+        Ok(snapshot)
+    }
+    /// Compatible recovery rebuilds the latest revision, never a stale backup.
+    pub fn recover_current(&self, identity: &Identity) -> Result<Value, Error> {
+        let mut client = self.connect()?;
+        let mut tx = client.transaction().map_err(|_| Error::Unavailable)?;
+        own(&mut tx, identity)?;
+        let snapshot = super::storage::recover(&mut tx, &identity.profile_id, &self.content)?;
+        tx.commit().map_err(|_| Error::Unavailable)?;
+        Ok(snapshot)
+    }
     fn connect(&self) -> Result<Client, Error> {
         Client::connect(&self.connection, NoTls).map_err(|_| Error::Unavailable)
     }
 }
+fn own(tx: &mut postgres::Transaction<'_>, identity: &Identity) -> Result<(), Error> {
+    tx.batch_execute("SET LOCAL statement_timeout='2000ms'; SET LOCAL lock_timeout='1000ms';")
+        .map_err(|_| Error::Unavailable)?;
+    tx.query_one(
+        "SELECT set_config('app.parent_id',$1,true)",
+        &[&identity.parent_id],
+    )
+    .map_err(|_| Error::Unavailable)?;
+    if tx.query_opt("SELECT id FROM wonderwilds.profiles WHERE id=$1::text::uuid AND parent_id=$2::text::uuid FOR UPDATE", &[&identity.profile_id,&identity.parent_id]).map_err(|_|Error::Unavailable)?.is_none() { return Err(Error::Forbidden); }
+    Ok(())
+}
 impl Repository for PostgresRepository {
     fn readiness(&self) -> Result<(), Error> {
         let mut client = self.connect()?;
-        let row=client.query_one("SELECT to_regclass('wonderwilds.progress') IS NOT NULL AND to_regclass('wonderwilds.game_events') IS NOT NULL AND to_regclass('wonderwilds.game_outbox') IS NOT NULL AND to_regclass('wonderwilds.reward_grants') IS NOT NULL AND to_regclass('wonderwilds.sessions') IS NOT NULL",&[]).map_err(|_|Error::Unavailable)?;
-        if row.get::<_, bool>(0) {
+        let ready: bool=client.query_one("SELECT to_regclass('wonderwilds.command_receipts') IS NOT NULL AND to_regclass('wonderwilds.game_checkpoints') IS NOT NULL AND to_regclass('wonderwilds.domain_command_receipts') IS NOT NULL AND to_regclass('wonderwilds.game_encounters') IS NOT NULL AND to_regclass('wonderwilds.persistence_origins') IS NOT NULL AND to_regclass('wonderwilds.command_windows') IS NOT NULL",&[]).map_err(|_|Error::Unavailable)?.get(0);
+        if ready {
             Ok(())
         } else {
             Err(Error::Unavailable)
@@ -42,86 +79,39 @@ impl Repository for PostgresRepository {
     fn read(&self, identity: &Identity) -> Result<Aggregate, Error> {
         let mut client = self.connect()?;
         let mut tx = client.transaction().map_err(|_| Error::Unavailable)?;
-        tx.batch_execute("SET LOCAL statement_timeout='2000ms'; SET LOCAL lock_timeout='1000ms';")
-            .map_err(|_| Error::Unavailable)?;
-        tx.query_one(
-            "SELECT set_config('app.parent_id', $1, true)",
-            &[&identity.parent_id],
-        )
-        .map_err(|_| Error::Unavailable)?;
-        let row=tx.query_opt("SELECT p.id FROM wonderwilds.profiles p WHERE p.id::text=$1 AND p.parent_id::text=$2",&[&identity.profile_id,&identity.parent_id]).map_err(|_|Error::Unavailable)?;
-        if row.is_none() {
-            return Err(Error::Forbidden);
-        }
-        let saved = tx
-            .query_opt(
-                "SELECT snapshot FROM wonderwilds.progress WHERE profile_id::text=$1",
-                &[&identity.profile_id],
-            )
-            .map_err(|_| Error::Unavailable)?;
-        let aggregate = match saved {
-            Some(row) => serde_json::from_value(row.get(0)).map_err(|_| Error::Unavailable)?,
-            None => Aggregate::new(&self.content),
-        };
+        own(&mut tx, identity)?;
+        let state = super::storage::load(&mut tx, &identity.profile_id, &self.content)?;
         tx.commit().map_err(|_| Error::Unavailable)?;
-        Ok(aggregate)
+        Ok(state)
     }
     fn execute(&self, identity: &Identity, request: &Value, now: u64) -> Result<Value, Error> {
+        wire::validate("GameCommand", request).map_err(|_| Error::InvalidInput)?;
+        let id = request["commandId"].as_str().ok_or(Error::InvalidInput)?;
         let mut client = self.connect()?;
         let mut tx = client.transaction().map_err(|_| Error::Unavailable)?;
-        tx.batch_execute("SET LOCAL statement_timeout='2000ms'; SET LOCAL lock_timeout='1000ms';")
-            .map_err(|_| Error::Unavailable)?;
-        tx.query_one(
-            "SELECT set_config('app.parent_id', $1, true)",
-            &[&identity.parent_id],
-        )
-        .map_err(|_| Error::Unavailable)?;
-        // All writers and deletion lock this same owner-scoped row. Never load
-        // state, validate a revision, then save outside this transaction.
-        let row=tx.query_opt("SELECT p.id FROM wonderwilds.profiles p WHERE p.id::text=$1 AND p.parent_id::text=$2 FOR UPDATE",&[&identity.profile_id,&identity.parent_id]).map_err(|_|Error::Unavailable)?;
-        if row.is_none() {
-            return Err(Error::Forbidden);
+        own(&mut tx, identity)?;
+        let mut aggregate = super::storage::load(&mut tx, &identity.profile_id, &self.content)?;
+        // Validate current checkpoint integrity, then lookup original receipts
+        // before any submitted-revision check. Migration is committed on retries.
+        if let Some(row)=tx.query_opt("SELECT request,response,replay,digest FROM wonderwilds.command_receipts WHERE profile_id=$1::text::uuid AND command_id=$2", &[&identity.profile_id,&id]).map_err(|_|Error::Unavailable)? {
+            if row.get::<_,Value>(0)!=*request {return Err(Error::RevisionConflict);}
+            let response:Value=row.get(1);
+            if row.get::<_,String>(3)!=crate::persistence::receipt(request,&response,&row.get(2)) {return Err(Error::Unavailable);}
+            wire::validate("GameSnapshot",&response).map_err(|_|Error::Unavailable)?;
+            tx.commit().map_err(|_|Error::Unavailable)?;
+            return Ok(response);
         }
-        let saved = tx
-            .query_opt(
-                "SELECT snapshot FROM wonderwilds.progress WHERE profile_id::text=$1",
-                &[&identity.profile_id],
-            )
-            .map_err(|_| Error::Unavailable)?;
-        let mut aggregate = match saved {
-            Some(row) => serde_json::from_value(row.get(0)).map_err(|_| Error::Unavailable)?,
-            None => Aggregate::new(&self.content),
-        };
-        let old_evidence = aggregate.evidence.len();
-        let old_events = aggregate.events.len();
+        crate::persistence::take_budget(&mut tx, &identity.profile_id, "game")?;
         let response = aggregate.execute(request, &self.content, now, &identity.session_id)?;
-        let value = serde_json::to_value(&aggregate).map_err(|_| Error::Unavailable)?;
-        tx.execute("INSERT INTO wonderwilds.progress(profile_id,snapshot) VALUES($1::text::uuid,$2) ON CONFLICT(profile_id) DO UPDATE SET snapshot=EXCLUDED.snapshot",&[&identity.profile_id,&value]).map_err(|_|Error::Unavailable)?;
-        let revision = i64::try_from(aggregate.revision).map_err(|_| Error::Unavailable)?;
-        tx.execute(
-            "UPDATE wonderwilds.profiles SET revision=$1 WHERE id::text=$2 AND parent_id::text=$3",
-            &[&revision, &identity.profile_id, &identity.parent_id],
-        )
-        .map_err(|_| Error::Unavailable)?;
-        for evidence in &aggregate.evidence[old_evidence..] {
-            let sequence =
-                i64::try_from(evidence.server_sequence).map_err(|_| Error::Unavailable)?;
-            let value = serde_json::to_value(evidence).map_err(|_| Error::Unavailable)?;
-            tx.execute("INSERT INTO wonderwilds.learning_events(profile_id,sequence,evidence) VALUES($1::text::uuid,$2,$3)",&[&identity.profile_id,&sequence,&value]).map_err(|_|Error::Unavailable)?;
-        }
-        for event in &aggregate.events[old_events..] {
-            let sequence = i64::try_from(event.sequence).map_err(|_| Error::Unavailable)?;
-            let value = serde_json::to_value(event).map_err(|_| Error::Unavailable)?;
-            tx.execute("INSERT INTO wonderwilds.game_events(profile_id,sequence,event) VALUES($1::text::uuid,$2,$3)",&[&identity.profile_id,&sequence,&value]).map_err(|_|Error::Unavailable)?;
-            tx.execute("INSERT INTO wonderwilds.game_outbox(profile_id,sequence,event) VALUES($1::text::uuid,$2,$3)",&[&identity.profile_id,&sequence,&value]).map_err(|_|Error::Unavailable)?;
-            if let engine::Outcome::RewardGranted {
-                reward_id,
-                quest_id,
-            } = &event.outcome
-            {
-                tx.execute("INSERT INTO wonderwilds.reward_grants(profile_id,reward_definition,quest_instance) VALUES($1::text::uuid,$2,$3)",&[&identity.profile_id,&reward_id,&quest_id]).map_err(|_|Error::Unavailable)?;
-            }
-        }
+        super::storage::commit(
+            &mut tx,
+            identity,
+            &aggregate,
+            &self.content,
+            request,
+            &response,
+            now,
+        )?;
         #[cfg(test)]
         if self.fail_before_commit {
             return Err(Error::Unavailable);
@@ -193,7 +183,7 @@ mod tests {
             config.get_dbname().unwrap()
         );
         let content = development_content().unwrap();
-        let repo = PostgresRepository::new(restricted, content.clone());
+        let repo = PostgresRepository::new(restricted.clone(), content.clone());
         let identity = Identity {
             parent_id: parent.into(),
             profile_id: profile.into(),
@@ -240,11 +230,12 @@ mod tests {
         let ended = repo.execute(&identity, &abandon, 10).unwrap();
         assert_eq!(ended["pendingEncounters"], json!([]));
         let restored = repo.read(&identity).unwrap();
-        assert_eq!(restored.evidence.len(), 1);
-        assert_eq!(
-            restored.evidence[0].event_kind,
-            wire::LearningEvidenceEventKind::Abandonment
+        assert!(
+            restored.evidence.is_empty(),
+            "Hot state contains no historical evidence"
         );
+        let evidence: Value=admin.query_one("SELECT evidence FROM wonderwilds.learning_events WHERE profile_id=$1::text::uuid AND sequence=1", &[&profile]).unwrap().get(0);
+        assert_eq!(evidence["eventKind"], "abandonment");
         assert_eq!(repo.execute(&identity, &abandon, 10).unwrap(), ended);
         assert!(restored.domain.completed().is_empty());
         let restart = command(
@@ -317,8 +308,44 @@ mod tests {
         // profile: failed commits publish neither XP, evidence nor reward grants.
         let training_profile = "52000000-0000-0000-0000-000000000003";
         admin.execute("INSERT INTO wonderwilds.profiles(id,parent_id,ability_band) VALUES($1::text::uuid,$2::text::uuid,'beginning')", &[&training_profile, &parent]).unwrap();
-        let recruited = super::super::companion_tests::recruited_pip(&content);
+        let mut recruited = super::super::companion_tests::recruited_pip(&content);
+        let old_start = command(
+            "db-training-start",
+            0,
+            json!({"type":"start_encounter","beatId":"training-pip-1"}),
+        );
+        let old_response = recruited
+            .execute(&old_start, &content, 18, "original-session")
+            .unwrap();
+        let old_hint = command(
+            "old-hint",
+            1,
+            json!({"type":"hint","encounterId":old_response["pendingEncounters"][0]["id"],"supportKind":"hint"}),
+        );
+        let old_supported = recruited
+            .execute(&old_hint, &content, 19, "original-session")
+            .unwrap();
+        for evidence in &recruited.evidence {
+            admin.execute("INSERT INTO wonderwilds.learning_events(profile_id,sequence,evidence) VALUES($1::text::uuid,$2,$3)", &[&training_profile,&(evidence.server_sequence as i64),&serde_json::to_value(evidence).unwrap()]).unwrap();
+        }
+        for record in recruited
+            .domain
+            .archived_receipts()
+            .as_object()
+            .unwrap()
+            .values()
+        {
+            for event in record["events"].as_array().unwrap() {
+                admin.execute("INSERT INTO wonderwilds.game_events(profile_id,sequence,event) VALUES($1::text::uuid,$2,$3)", &[&training_profile,&event["sequence"].as_i64().unwrap(),event]).unwrap();
+            }
+        }
         let seeded = serde_json::to_value(recruited).unwrap();
+        admin
+            .execute(
+                "UPDATE wonderwilds.profiles SET revision=2 WHERE id=$1::text::uuid",
+                &[&training_profile],
+            )
+            .unwrap();
         admin
             .execute(
                 "INSERT INTO wonderwilds.progress(profile_id,snapshot) VALUES($1::text::uuid,$2)",
@@ -329,23 +356,53 @@ mod tests {
             profile_id: training_profile.into(),
             ..identity.clone()
         };
-        let started = repo
-            .execute(
-                &training_identity,
-                &command(
-                    "db-training-start",
-                    0,
-                    json!({"type":"start_encounter","beatId":"training-pip-1"}),
-                ),
-                20,
-            )
-            .unwrap();
+        let change_team = command(
+            "returning-team",
+            2,
+            json!({"type":"select_team","creatureIds":[]}),
+        );
+        assert_eq!(
+            faulty.execute(&training_identity, &change_team, 20),
+            Err(Error::Unavailable)
+        );
+        assert_eq!(
+            admin
+                .query_one(
+                    "SELECT snapshot FROM wonderwilds.progress WHERE profile_id=$1::text::uuid",
+                    &[&training_profile]
+                )
+                .unwrap()
+                .get::<_, Value>(0),
+            seeded,
+            "Failed lazy migration leaves original save intact"
+        );
+        assert_eq!(
+            repo.read(&training_identity)
+                .unwrap()
+                .snapshot(&content)
+                .unwrap(),
+            old_supported
+        );
+        assert_eq!(
+            repo.execute(&training_identity, &old_start, 20).unwrap(),
+            old_response
+        );
+        assert_eq!(
+            repo.execute(&training_identity, &old_hint, 20).unwrap(),
+            old_supported
+        );
+        let started = repo.execute(&training_identity, &change_team, 20).unwrap();
+        assert_eq!(started["pendingEncounters"][0]["support"]["hintCount"], 1);
+        assert_eq!(
+            started["pendingEncounters"][0]["training"]["creatureId"],
+            "pip"
+        );
         let encounter = &started["pendingEncounters"][0];
         let answer = encounter["parameters"]["total"].as_u64().unwrap()
             - encounter["parameters"]["given"].as_u64().unwrap();
         let attempt = command(
             "db-training-answer",
-            1,
+            3,
             json!({"type":"attempt","encounterId":encounter["id"],"answer":{"kind":"quantity","value":answer}}),
         );
         assert_eq!(
@@ -391,7 +448,154 @@ mod tests {
             )
             .unwrap()
             .get(0);
-        assert_eq!(count, 2);
+        assert_eq!(count, 3);
+        // More than the old lifetime cap, using real persisted encounters and
+        // evidence. Every command reconnects, and checkpoints retain no history.
+        let initial_size: i32=admin.query_one("SELECT octet_length(snapshot::text) FROM wonderwilds.progress WHERE profile_id=$1::text::uuid", &[&training_profile]).unwrap().get(0);
+        let timer = std::time::Instant::now();
+        let mut latest = earned.clone();
+        for n in 0..1050 {
+            let start = command(
+                &format!("long-start-{n}"),
+                latest["revision"].as_u64().unwrap(),
+                json!({"type":"start_encounter","beatId":"training-pip-1"}),
+            );
+            latest = repo
+                .execute(&training_identity, &start, 100 + n * 2)
+                .unwrap();
+            let abandon = command(
+                &format!("long-abandon-{n}"),
+                latest["revision"].as_u64().unwrap(),
+                json!({"type":"abandon","encounterId":latest["pendingEncounters"][0]["id"]}),
+            );
+            latest = repo
+                .execute(&training_identity, &abandon, 101 + n * 2)
+                .unwrap();
+            if n == 0 || n == 1049 {
+                assert_eq!(
+                    repo.execute(&training_identity, &attempt, 2300).unwrap(),
+                    earned
+                );
+                assert_eq!(
+                    repo.read(&training_identity)
+                        .unwrap()
+                        .snapshot(&content)
+                        .unwrap(),
+                    latest
+                );
+            }
+        }
+        assert!(latest["revision"].as_u64().unwrap() > 2000);
+        assert_eq!(
+            latest["characterProgression"],
+            earned["characterProgression"]
+        );
+        assert_eq!(latest["learnerSummaries"], earned["learnerSummaries"]);
+        let size:i32=admin.query_one("SELECT octet_length(snapshot::text) FROM wonderwilds.progress WHERE profile_id=$1::text::uuid", &[&training_profile]).unwrap().get(0);
+        assert!(
+            size < initial_size + 256,
+            "Hot snapshot grew with history: {initial_size} -> {size}"
+        );
+        assert_eq!(admin.query_one("SELECT count(*) FROM wonderwilds.game_checkpoints WHERE profile_id=$1::text::uuid", &[&training_profile]).unwrap().get::<_,i64>(0),2);
+        eprintln!(
+            "long-play adventure: 2104 commands; hot bytes {initial_size}->{size}; 2100 writes {:?}",
+            timer.elapsed()
+        );
+        assert_eq!(repo.verify_history(&training_identity).unwrap(), latest);
+        // The compatible recovery path replays to the current revision. Both
+        // hot copies may be damaged; the origin and journals remain authoritative.
+        admin
+            .execute(
+                "UPDATE wonderwilds.progress SET snapshot='{}' WHERE profile_id=$1::text::uuid",
+                &[&training_profile],
+            )
+            .unwrap();
+        admin.execute("UPDATE wonderwilds.game_checkpoints SET digest=repeat('0',64) WHERE profile_id=$1::text::uuid", &[&training_profile]).unwrap();
+        assert!(matches!(
+            repo.read(&training_identity),
+            Err(Error::Unavailable)
+        ));
+        assert_eq!(repo.recover_current(&training_identity).unwrap(), latest);
+        assert_eq!(
+            repo.read(&training_identity)
+                .unwrap()
+                .snapshot(&content)
+                .unwrap(),
+            latest
+        );
+        assert_eq!(
+            repo.execute(&training_identity, &attempt, 2400).unwrap(),
+            earned
+        );
+        admin.execute("UPDATE wonderwilds.command_windows SET window_minute=floor(extract(epoch FROM clock_timestamp())/60)::bigint,commands=4096 WHERE profile_id=$1::text::uuid AND kind='game'", &[&training_profile]).unwrap();
+        let limited = command(
+            "limited",
+            latest["revision"].as_u64().unwrap(),
+            json!({"type":"start_encounter","beatId":"training-pip-1"}),
+        );
+        assert_eq!(
+            repo.execute(&training_identity, &limited, 2401),
+            Err(Error::RateLimited)
+        );
+        assert_eq!(
+            repo.execute(&training_identity, &attempt, 2401).unwrap(),
+            earned
+        );
+        admin
+            .query_one("SELECT set_config('app.parent_id',$1,false)", &[&parent])
+            .unwrap();
+        let exported: Value = admin
+            .query_one(
+                "SELECT wonderwilds.export_profile($1::text::uuid)",
+                &[&training_profile],
+            )
+            .unwrap()
+            .get(0);
+        assert_eq!(
+            exported["command_receipts"].as_array().unwrap().len(),
+            latest["revision"].as_u64().unwrap() as usize
+        );
+        assert!(exported["game_encounters"].as_array().unwrap().len() > 1000);
+        assert_eq!(exported["game_checkpoints"].as_array().unwrap().len(), 2);
+        assert!(
+            exported["learningReconstruction"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|row| row["reconstruction"]["novelTransfer"] == false)
+        );
+        let mut outsider = Client::connect(&restricted, NoTls).unwrap();
+        outsider
+            .query_one(
+                "SELECT set_config('app.parent_id',$1,false)",
+                &[&foreign.parent_id],
+            )
+            .unwrap();
+        for table in [
+            "command_receipts",
+            "domain_command_receipts",
+            "game_encounters",
+            "game_checkpoints",
+            "persistence_origins",
+            "command_windows",
+        ] {
+            assert_eq!(outsider.query_one(&format!("SELECT count(*) FROM wonderwilds.{table} WHERE profile_id=$1::text::uuid"), &[&training_profile]).unwrap().get::<_,i64>(0),0);
+            assert_eq!(
+                outsider
+                    .execute(
+                        &format!("DELETE FROM wonderwilds.{table} WHERE profile_id=$1::text::uuid"),
+                        &[&training_profile]
+                    )
+                    .unwrap(),
+                0
+            );
+        }
+        // Lost history must not roll recovery back to an older revision.
+        admin.execute("DELETE FROM wonderwilds.command_receipts WHERE profile_id=$1::text::uuid AND revision=2000", &[&training_profile]).unwrap();
+        assert_eq!(
+            repo.recover_current(&training_identity),
+            Err(Error::Unavailable)
+        );
         admin
             .execute(
                 "DELETE FROM wonderwilds.profiles WHERE id::text=$1",
@@ -405,6 +609,12 @@ mod tests {
             "game_events",
             "game_outbox",
             "reward_grants",
+            "command_receipts",
+            "domain_command_receipts",
+            "game_encounters",
+            "game_checkpoints",
+            "persistence_origins",
+            "command_windows",
         ] {
             let count: i64 = admin
                 .query_one(
