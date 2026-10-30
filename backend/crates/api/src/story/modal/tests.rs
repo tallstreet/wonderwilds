@@ -222,6 +222,13 @@ fn exploration_requests_closed_schema_and_validates_model_created_characters_and
         "GeneratedNeighbourhood"
     );
     assert_eq!(body["response_format"]["json_schema"]["strict"], true);
+    assert!(body["response_format"]["json_schema"]["schema"]["properties"]["steps"]["items"]["required"].as_array().unwrap().contains(&json!("learningBridge")));
+    assert!(
+        body["messages"][0]["content"]
+            .as_str()
+            .unwrap()
+            .contains("learningBridge")
+    );
     let prompt = body["messages"][1]["content"].as_str().unwrap();
     assert!(!prompt.contains("profile"));
     assert!(!prompt.contains("session"));

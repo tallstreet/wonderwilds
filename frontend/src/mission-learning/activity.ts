@@ -14,6 +14,7 @@ export type MissionLearningActivityCallbacks = {
   hasPending(): boolean;
   onAbandon(): Promise<void>;
   onContinue(): void;
+  onFinishTogether?(): Promise<MissionLearningSnapshot>;
 };
 
 /** Render the server-authored lesson and typed task without assessing or revealing answers locally. */
@@ -31,7 +32,7 @@ export function mountMissionActivity(
     ? 'dialog-title'
     : `ww-mission-heading-${crypto.randomUUID()}`;
   heading.tabIndex = -1;
-  heading.textContent = activity.presentation.title;
+  heading.textContent = activity.storyStep?.label ?? activity.presentation.title;
   root.setAttribute('aria-labelledby', heading.id);
 
   const intro = document.createElement('div');
@@ -43,8 +44,8 @@ export function mountMissionActivity(
   lesson.textContent = activity.presentation.lessonText;
   const context = document.createElement('p');
   context.className = 'ww-mission-context';
-  context.textContent = activity.presentation.context;
-  intro.append(objective, lesson, context);
+  context.textContent = activity.storyStep?.introduction ?? activity.presentation.context;
+  intro.append(context, objective, lesson);
 
   const prompt = document.createElement('p');
   prompt.className = 'ww-mission-prompt';
@@ -81,8 +82,13 @@ export function mountMissionActivity(
   const abandon = document.createElement('button');
   abandon.type = 'button';
   abandon.className = 'text-button';
-  abandon.textContent = 'Leave practice';
-  actions.append(check, hint, example, abandon);
+  abandon.textContent = activity.storyStep ? 'Put this task aside' : 'Leave practice';
+  const together = document.createElement('button');
+  together.type = 'button';
+  together.className = 'secondary';
+  together.textContent = 'Let’s do it together';
+  together.hidden = !callbacks.onFinishTogether;
+  actions.append(check, hint, example, together, abandon);
   root.append(heading, intro, prompt, form, status, help, actions);
   container.replaceChildren(root);
 
@@ -145,6 +151,7 @@ export function mountMissionActivity(
     hint.disabled = busy || complete || pending || currentActivity.support.hintCount >= 20;
     example.disabled = busy || complete || pending || currentActivity.support.workedExample;
     abandon.disabled = busy || complete || pending;
+    together.disabled = busy || complete || pending;
     retry.hidden = !retryAvailable;
     retry.disabled = busy || !retryAvailable;
     refresh.hidden = !refreshAvailable;
@@ -306,9 +313,9 @@ export function mountMissionActivity(
       );
       item.textContent = flowerSequence ? '' : String(value);
       if (flowerSequence) {
-        item.setAttribute('aria-label', `${value} flowers`);
+        item.setAttribute('aria-label', `${value} ${activity.storyStep ? 'markers' : 'flowers'}`);
         for (let index = 0; index < value; index++)
-          item.append(node('span', 'ww-mission-flower', '✿'));
+          item.append(node('span', 'ww-mission-flower', activity.storyStep ? '◆' : '✿'));
         item.append(node('span', 'ww-mission-flower-count', String(value)));
       }
       path.append(item);
@@ -318,18 +325,23 @@ export function mountMissionActivity(
       flowerSequence ? 'ww-mission-flower-group' : 'ww-mission-path-number',
       '?',
     );
-    if (flowerSequence) missingStep.setAttribute('aria-label', 'Next group of flowers');
+    if (flowerSequence)
+      missingStep.setAttribute(
+        'aria-label',
+        activity.storyStep ? 'Next group of markers' : 'Next group of flowers',
+      );
     path.append(missingStep);
     form.append(path);
     renderChoices(task.choices);
   } else {
     const countable = activity.representation === 'countable_planks';
+    const material = activity.storyStep ? 'discovery markers' : 'planks';
     const equation = node('div', countable ? 'ww-mission-plank-part' : 'ww-mission-part-equation');
     if (countable) {
       equation.setAttribute('role', 'group');
       equation.setAttribute(
         'aria-label',
-        `${task.shownPart} of ${task.whole} planks are ready. Choose how many are missing.`,
+        `${task.shownPart} of ${task.whole} ${material} are ready. Choose how many are missing.`,
       );
       for (let index = 0; index < task.whole; index++)
         equation.append(
@@ -373,7 +385,7 @@ export function mountMissionActivity(
     const feedback = snapshot.lastFeedback;
     if (feedback) {
       status.textContent = feedback.message;
-      if (feedback.result === 'correct' && feedback.completed) {
+      if (feedback.completed && !snapshot.activeActivity) {
         complete = true;
         const next = document.createElement('button');
         next.type = 'button';
@@ -395,7 +407,7 @@ export function mountMissionActivity(
   async function perform(operation: () => Promise<MissionLearningSnapshot>) {
     if (busy || destroyed || complete) return;
     busy = true;
-    status.textContent = 'Saving your practice…';
+    status.textContent = 'Saving your mission task…';
     update();
     try {
       showSnapshot(await operation());
@@ -415,6 +427,9 @@ export function mountMissionActivity(
     const answer = selectedAnswer();
     if (!answer) return;
     void perform(() => callbacks.onAttempt(answer));
+  });
+  together.addEventListener('click', () => {
+    if (callbacks.onFinishTogether) void perform(callbacks.onFinishTogether);
   });
   hint.addEventListener('click', () => void perform(() => callbacks.onSupport('hint')));
   example.addEventListener(

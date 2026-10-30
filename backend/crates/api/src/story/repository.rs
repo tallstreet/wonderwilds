@@ -31,6 +31,127 @@ pub(crate) fn mission_learning_context(
     }))
 }
 
+/// Frozen, server-resolved joining point. It is never accepted from browser prose.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct InlineStep {
+    pub action_id: String,
+    pub revision: u64,
+    pub mission_id: String,
+    pub location_id: String,
+    pub label: String,
+    pub introduction: String,
+}
+
+pub(crate) fn inline_step(
+    tx: &mut Transaction<'_>,
+    identity: &Identity,
+    action_id: &str,
+    revision: u64,
+) -> Result<InlineStep, Error> {
+    let state = load(tx, identity)?;
+    if state.revision() != revision {
+        return Err(Error::RevisionConflict);
+    }
+    let action = wonderwilds_director::story::resolve_action(&state, action_id)
+        .map_err(|_| Error::RevisionConflict)?;
+    if !matches!(
+        action,
+        wonderwilds_domain::story::Action::Inspect { .. }
+            | wonderwilds_domain::story::Action::Collect { .. }
+            | wonderwilds_domain::story::Action::Exchange { .. }
+            | wonderwilds_domain::story::Action::Assemble { .. }
+    ) {
+        return Err(Error::InvalidInput);
+    }
+    let neighbour = if matches!(&action, wonderwilds_domain::story::Action::Inspect { object_id } if object_id.starts_with("neighbour_"))
+    {
+        Some(
+            state
+                .current_neighbour()
+                .filter(|q| q.status == "open")
+                .ok_or(Error::NotFound)?,
+        )
+    } else {
+        if state.mission_status() != wonderwilds_domain::story::MissionStatus::Active {
+            return Err(Error::NotFound);
+        }
+        None
+    };
+    let snapshot = saved_snapshot(tx, identity, &state)?;
+    let label = snapshot["sceneInput"]["availableActions"]
+        .as_array()
+        .ok_or(Error::Unavailable)?
+        .iter()
+        .find(|a| a["id"] == action_id)
+        .and_then(|a| a["description"].as_str())
+        .ok_or(Error::Unavailable)?
+        .to_owned();
+    let introduction = neighbour
+        .and_then(|q| {
+            q.story
+                .as_ref()
+                .and_then(|s| s.content.steps.get(q.step as usize))
+        })
+        .and_then(|step| step.learning_bridge.clone())
+        .unwrap_or_else(|| {
+            match action {
+                wonderwilds_domain::story::Action::Collect { .. } => {
+                    "Let's organise discovery markers so we can mark where we found these supplies."
+                }
+                wonderwilds_domain::story::Action::Exchange { .. } => {
+                    "Help organise our discovery markers so we can keep track of the workshop jobs."
+                }
+                wonderwilds_domain::story::Action::Assemble { .. } => {
+                    "Let's organise discovery markers to plan where the pieces will go."
+                }
+                _ => "Let's organise our discovery markers to keep track of what we notice here.",
+            }
+            .to_owned()
+        });
+    Ok(InlineStep {
+        action_id: action_id.to_owned(),
+        revision,
+        mission_id: neighbour.map_or_else(
+            || state.mission_id().to_owned(),
+            |q| format!("neighbour-{}-{}", q.character, q.generation),
+        ),
+        location_id: state.location().as_str().to_owned(),
+        label,
+        introduction,
+    })
+}
+
+/// Commit the bound story action in the caller's learning transaction. A stale
+/// joining point cannot become a different task, even after travel or regeneration.
+pub(crate) fn complete_inline_step(
+    tx: &mut Transaction<'_>,
+    identity: &Identity,
+    step: &InlineStep,
+    learning_command_id: &str,
+) -> Result<(), Error> {
+    let current = inline_step(tx, identity, &step.action_id, step.revision)?;
+    if current != *step {
+        return Err(Error::RevisionConflict);
+    }
+    let state = load(tx, identity)?;
+    let id = format!(
+        "learning-step-{}",
+        crate::persistence::digest(&serde_json::json!(learning_command_id))
+    );
+    let request = serde_json::json!({"schemaVersion":"1.0","commandId":id,"expectedRevision":step.revision,"payload":{"type":"choose","actionId":step.action_id}});
+    crate::persistence::take_budget(tx, &identity.profile_id, "story")?;
+    let (next, _) = super::execute(&state, &request)?;
+    let response = saved_snapshot(tx, identity, &next)?;
+    save_state(tx, identity, &next)?;
+    let command = serde_json::to_value(next.last_command().ok_or(Error::Unavailable)?)
+        .map_err(|_| Error::Unavailable)?;
+    let digest = crate::persistence::receipt(&request, &response, &command);
+    tx.execute("INSERT INTO wonderwilds.story_command_receipts(profile_id,command_id,revision,request,response,domain_command,digest) VALUES($1::text::uuid,$2,$3,$4,$5,$6,$7)",
+        &[&identity.profile_id,&id,&(next.revision() as i64),&request,&response,&command,&digest]).map_err(|_| Error::Unavailable)?;
+    Ok(())
+}
+
 pub trait Repository: Send + Sync {
     fn readiness(&self) -> Result<(), Error> {
         Err(Error::Unavailable)

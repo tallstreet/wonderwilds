@@ -11,7 +11,7 @@ pub fn input(state: &State) -> Result<Value, Error> {
     Ok(
         json!({"area":p.name,"visitStoryNumber":previous.map_or(1, |q| q.generation + 1),
         "previousStory":previous.and_then(|q| q.story.as_ref()).map(|s| json!({"name":s.content.name,"title":s.content.title,"payoff":s.content.payoff})),
-        "capabilities":"One new character. One to three sequential look/listen/investigate tasks at reachable local objects, then return and share with the character. No inventory, combat, currency, academic assessment, travel tasks or invented game commands.",
+        "capabilities":"One new character. One to three sequential look/listen/investigate tasks at reachable local objects, then return and share with the character. Each step may include learningBridge: an invitation to organise discovery markers for that investigation. The server supplies and assesses the preparation activity; do not invent its questions, quantities or outcome. No inventory, combat, currency, travel tasks or invented game commands.",
         "editorialBrief":"Ages 6–8, short warm sentences, concrete discoveries, gentle variety. No personal data, external links, threats, manipulation or unsafe activities."}),
     )
 }

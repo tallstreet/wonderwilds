@@ -263,11 +263,23 @@ Modal authorization header; leave it unset for the existing deployed model.
 
 ### Curriculum practice in story missions
 
-In `/?story=1`, accept a mission and open **Missions → Practice this story skill**.
-The server selects practice from the profile's prerequisite-ready skills and
-binds it to the active story. Instructions, hints and worked examples are authored;
-Rust checks answers. Leave practice to continue the story at any time, or close
-the panel and resume the saved activity later.
+In `/?story=1`, gathering supplies, workshop jobs, building and investigation
+steps open a learning interaction as part of that action. There is no separate
+practice-launch button. Generated neighbourhood steps can provide a short
+`learningBridge` invitation explaining why organising discovery markers helps
+with their investigation. Existing stories use authored joining text. Rust
+selects a prerequisite-ready activity; generated prose never chooses answers,
+assessment rules or rewards.
+
+A correct answer commits the learning evidence and bound story action together.
+**Let’s do it together** supplies a server-authored explanation and completes the
+same step with supported, unassessed evidence rather than independent success.
+Hints and examples remain available. Closing the panel preserves the task;
+Missions offers resume and exact-save recovery. **Put this task aside** closes
+it without completing the story action. Travel or another tab can invalidate a
+joining point; put that task aside and reopen the current step. Unsupported
+frontiers retain the normal story action. The diagnostic story inspector and
+original direct story commands remain available without an academic gate.
 
 The combined Foundation/Years 1–6 graph contains 120 draft nodes. This first
 activity slice supports **M01 → M03 → M04/M05/M06**: one-to-one matching,
@@ -281,8 +293,7 @@ on restart; disposable QA must use its own database.
 transfer-based secure-mastery assessment. It requires varied independent first
 checks across two story contexts and two authenticated server sessions; reloading
 a page alone is not a new session. Restarting the local demo launcher issues a
-new synthetic server session while preserving the profile. Helpers remain available without blocking
-story progress. Original activities use public IXL patterns as references; content
+new synthetic server session while preserving the profile. Helpers remain available without requiring independent success. Original activities use public IXL patterns as references; content
 review and release gates remain pending. See the [integration plan](docs/CURRICULUM_MISSION_PLAN.md)
 for the policy and remaining activity coverage.
 

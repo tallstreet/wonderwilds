@@ -12738,5 +12738,100 @@
       ],
       "payoff": "You shared a woodland discovery."
     }
+  },
+  {
+    "name": "Inline mission step begins with a revision-bound handle",
+    "contract": "MissionLearningCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "inline-1",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "begin_step",
+        "actionId": "story-v3-1",
+        "storyRevision": 2
+      }
+    }
+  },
+  {
+    "name": "Inline mission step rejects missing story revision",
+    "contract": "MissionLearningCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "inline-1",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "begin_step",
+        "actionId": "story-v3-1"
+      }
+    }
+  },
+  {
+    "name": "Inline help completion is explicit",
+    "contract": "MissionLearningCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "inline-2",
+      "expectedRevision": 1,
+      "payload": {
+        "type": "finish_together",
+        "encounterId": "activity-1"
+      }
+    }
+  },
+  {
+    "name": "Assisted mission feedback does not claim correctness",
+    "contract": "MissionLearningFeedback",
+    "valid": true,
+    "value": {
+      "result": "assisted",
+      "message": "We did it together.",
+      "completed": true
+    }
+  },
+  {
+    "name": "Generated step accepts a narrative learning bridge",
+    "contract": "GeneratedNeighbourhood",
+    "valid": true,
+    "value": {
+      "name": "Wren",
+      "personality": "A curious neighbour.",
+      "sprite": "flutter",
+      "greeting": "Hello! Shall we listen to the woods?",
+      "title": "A whisper in the leaves",
+      "premise": "Notice small sounds and share them.",
+      "steps": [
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow",
+          "learningBridge": "Help organise our discovery markers to keep track of the sounds."
+        }
+      ],
+      "payoff": "You shared a woodland discovery."
+    }
+  },
+  {
+    "name": "Generated step rejects oversized learning bridge",
+    "contract": "GeneratedNeighbourhood",
+    "valid": false,
+    "value": {
+      "name": "Wren",
+      "personality": "A curious neighbour.",
+      "sprite": "flutter",
+      "greeting": "Hello! Shall we listen to the woods?",
+      "title": "A whisper in the leaves",
+      "premise": "Notice small sounds and share them.",
+      "steps": [
+        {
+          "label": "Listen beside the hollow branch.",
+          "shape": "hollow",
+          "learningBridge": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      ],
+      "payoff": "You shared a woodland discovery."
+    }
   }
 ]

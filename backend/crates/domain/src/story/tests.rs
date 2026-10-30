@@ -1069,10 +1069,12 @@ fn generated_stories_repeat_without_replacing_unfinished_work_and_replay_every_s
                 payoff: "You shared a discovery.".into(),
                 steps: vec![
                     GeneratedStep {
+                        learning_bridge: None,
                         label: "Listen to the hollow branch.".into(),
                         shape: "hollow".into(),
                     },
                     GeneratedStep {
+                        learning_bridge: None,
                         label: "Look at the rustling leaf.".into(),
                         shape: "leaf".into(),
                     },

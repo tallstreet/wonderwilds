@@ -241,6 +241,21 @@ impl MissionActivity {
         &self.canonical_fingerprint
     }
 
+    /// Reveal this only after committing a supported completion. It is teaching
+    /// material, never independent answer-check evidence.
+    pub fn discovery_solution(&self) -> String {
+        match &self.view.task {
+            PublicTask::Pairing { .. } => "We put one marker at each spot and checked that no spot was missed. Now let's discover together!".to_owned(),
+            PublicTask::CountCollection { objects, .. } => format!("We counted each marker once: {} altogether. Now let's discover together!", objects.len()),
+            PublicTask::CompareCollections { collections, prompt_mode, .. } => {
+                let target = if prompt_mode == "more" { collections.iter().max_by_key(|c| c.items.len()) } else { collections.iter().min_by_key(|c| c.items.len()) };
+                format!("{} has {} markers. We can pair the groups to check. Now let's discover together!", target.map_or("This group", |c| c.label.as_str()), prompt_mode)
+            }
+            PublicTask::NumberPath { shown, direction, .. } => format!("We count {} by one, so {} comes next. Now let's discover together!", direction, shown.last().copied().unwrap_or(0) + if direction == "forward" { 1 } else { -1 }),
+            PublicTask::PartWhole { whole, shown_part, .. } => format!("{} markers and {} more make {} altogether. Now let's discover together!", shown_part, whole - shown_part, whole),
+        }
+    }
+
     pub fn assess(
         &self,
         answer: &MissionAnswer,
@@ -555,6 +570,58 @@ pub fn authored_activity_in_context(
     activity.view.context_id = context_id.to_owned();
     activity.view.presentation.context = context_text.to_owned();
     Ok(activity)
+}
+
+/// Reuse assessed shapes with a consistent mission prop. IDs, quantities,
+/// representation and canonical fingerprint remain unchanged.
+pub fn discovery_activity(mut activity: MissionActivity) -> MissionActivity {
+    fn markers(items: &mut [NamedItem]) {
+        for (index, item) in items.iter_mut().enumerate() {
+            item.label = format!("Discovery marker {}", index + 1);
+        }
+    }
+    let prompt = match &mut activity.view.task {
+        PublicTask::Pairing {
+            objects,
+            recipients,
+            ..
+        } => {
+            markers(objects);
+            for (i, item) in recipients.iter_mut().enumerate() {
+                item.label = format!("Discovery spot {}", i + 1);
+            }
+            "Put one discovery marker at each spot."
+        }
+        PublicTask::CountCollection { objects, .. } => {
+            markers(objects);
+            "How many discovery markers are ready?"
+        }
+        PublicTask::CompareCollections {
+            collections,
+            choices,
+            prompt_mode,
+        } => {
+            for (i, collection) in collections.iter_mut().enumerate() {
+                collection.label = format!("Marker group {}", i + 1);
+                markers(&mut collection.items);
+                choices[i].label = collection.label.clone();
+            }
+            if prompt_mode == "more" {
+                "Which group has more discovery markers?"
+            } else {
+                "Which group has fewer discovery markers?"
+            }
+        }
+        PublicTask::NumberPath { .. } => {
+            "Our discovery markers follow this number trail. Which number comes next?"
+        }
+        PublicTask::PartWhole { .. } => {
+            "Some discovery markers are ready. How many more complete the set?"
+        }
+    };
+    activity.view.presentation.title = "Get ready for our next discovery".to_owned();
+    activity.view.presentation.prompt = prompt.to_owned();
+    activity
 }
 
 fn canonical_fingerprint(skill_id: &str, task: &PublicTask) -> String {
@@ -1139,6 +1206,58 @@ mod tests {
         LearningEvidenceProvenance, LearningEvidenceResult, LearningEvidenceSchemaVersion,
         SupportState,
     };
+
+    #[test]
+    fn discovery_markers_preserve_assessment_shape_and_evidence_fingerprint() {
+        for skill in SUPPORTED_SKILLS {
+            for seed in 0..12 {
+                let original = authored_activity(skill, seed, "original").unwrap();
+                let themed = discovery_activity(original.clone());
+                assert_eq!(
+                    original.canonical_fingerprint(),
+                    themed.canonical_fingerprint()
+                );
+                assert_eq!(original.view.representation, themed.view.representation);
+                let support = Support {
+                    hint_count: 0,
+                    worked_example: false,
+                    read_aloud: false,
+                };
+                match &original.key {
+                    AssessmentKey::Choice { choice_ids, .. } => {
+                        for id in choice_ids {
+                            let answer = MissionAnswer::Choice {
+                                choice_id: id.clone(),
+                            };
+                            assert_eq!(
+                                original.assess(&answer, support),
+                                themed.assess(&answer, support)
+                            );
+                        }
+                    }
+                    AssessmentKey::Pairing {
+                        object_ids,
+                        recipient_ids,
+                    } => {
+                        let answer = MissionAnswer::Pairing {
+                            assignments: object_ids
+                                .iter()
+                                .zip(recipient_ids)
+                                .map(|(o, r)| PairAssignment {
+                                    object_id: o.clone(),
+                                    recipient_id: r.clone(),
+                                })
+                                .collect(),
+                        };
+                        assert_eq!(
+                            original.assess(&answer, support),
+                            themed.assess(&answer, support)
+                        );
+                    }
+                }
+            }
+        }
+    }
 
     #[test]
     fn mission_answer_deserializes_camel_case_choice_ids_from_the_wire() {

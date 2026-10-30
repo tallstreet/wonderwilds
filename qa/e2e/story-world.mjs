@@ -1,6 +1,7 @@
 // Actual Phaser journey against a fresh disposable API/PostgreSQL profile.
 // Run with WW_QA_BROWSER_TEST=qa/e2e/story-world.mjs via run-training-qa.mjs.
 import assert from 'node:assert/strict';
+import { finishInlineStep } from './inline-step.mjs';
 import { chromium } from 'playwright';
 const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
 const source = process.env.WW_STORY_SOURCE ?? 'bank';
@@ -62,6 +63,7 @@ try {
   const choose = async type => {
     const previous = (await snapshot()).revision;
     await page.locator(`[data-story-action="${type}"]`).click();
+    await finishInlineStep(page, type);
     await page.waitForFunction(revision => Number(document.querySelector('#game')?.dataset.storyRevision) > revision, previous, { timeout: 20000 });
     return ready();
   };
@@ -88,16 +90,19 @@ try {
   if (source === 'workshop') { await visit('resource:spare_wood'); await choose('collect'); }
   assert.deepEqual((await snapshot()).sceneInput.context.inventory, [{ itemId: 'wood', quantity: 3 }]);
   await visit('npc:woodcutter');
+  await page.locator('[data-story-action="exchange"]').click();
+  await finishInlineStep(page, 'exchange');
+  await page.locator('#missions').click();
   let originalBody;
   await page.route('**/api/v1/story/commands', async route => {
     originalBody = route.request().postData();
     const response = await route.fetch(); assert.equal(response.status(), 200);
     await route.abort('failed');
   }, { times: 1 });
-  await page.locator('[data-story-action="exchange"]').click();
+  await page.locator('[data-story-action="cancel_mission"]').click();
   await page.getByRole('button', { name: 'Retry the same action', exact: true }).waitFor();
   const committedRevision = (await snapshot()).revision;
-  // A second tab advances the real server via UI, while this tab retains the lost exchange.
+  // A second tab advances the real server via UI, while this tab retains the lost pause.
   const other = await page.context().newPage();
   other.on('pageerror', error => errors.push(error.message));
   await other.goto(`${origin}/?story=1`);
@@ -135,6 +140,10 @@ try {
   await ready();
   assert.equal((await snapshot()).revision, advancedRevision);
   assert.deepEqual((await snapshot()).sceneInput.context.inventory, [{ itemId: 'planks', quantity: 3 }]);
+  await page.locator('#missions').click();
+  await page.locator('[data-story-action="accept_mission"]').click();
+  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await ready();
   if ((await snapshot()).locationId !== 'bridge_bank') { await visit('route:bridge_bank'); await choose('travel'); }
   await page.setViewportSize({ width: 390, height: 844 });
   await visit('object:bridge');

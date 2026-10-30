@@ -213,10 +213,17 @@ impl super::generation::ExplorationProvider for ModalSceneProvider {
     fn propose(&self, input: &Value) -> Result<Value, Error> {
         let schema: Value =
             serde_json::from_str(include_str!("../../../../../contracts/schemas/v1.json")).unwrap();
+        // New generations must supply the join. The storage/wire schema keeps
+        // it optional so historical content and offline fallbacks still load.
+        let mut output_schema = schema["$defs"]["GeneratedNeighbourhood"].clone();
+        output_schema["properties"]["steps"]["items"]["required"]
+            .as_array_mut()
+            .expect("step required fields")
+            .push(json!("learningBridge"));
         let body = json!({"model":"wonderwilds","messages":[
             {"role":"system","content":include_str!("exploration_prompt.txt")},
             {"role":"user","content":input.to_string()}],
-            "response_format":response_format("GeneratedNeighbourhood", &schema["$defs"]["GeneratedNeighbourhood"]),
+            "response_format":response_format("GeneratedNeighbourhood", &output_schema),
             "temperature":0.8,"max_tokens":1600,"stream":false,
             "chat_template_kwargs":{"reasoning_strength":"low"}});
         let _guard = self.cache.try_lock().map_err(|_| unavailable())?;

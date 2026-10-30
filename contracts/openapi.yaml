@@ -789,12 +789,13 @@
             }
           }
         },
-        "description": "Read graph frontier and durable activity state. Mission and location context come from the authenticated profile's active story save. Reading does not issue or alter an activity."
+        "description": "Read graph frontier and durable activity state. Inline activities carry a frozen server-resolved story step, including generated neighbourhood investigations. Reading does not issue or alter an activity."
       }
     },
     "/api/v1/mission-learning/commands": {
       "post": {
         "operationId": "executeMissionLearningCommand",
+        "description": "begin_step binds a supported story actionId and storyRevision. Correct answers or finish_together atomically commit learning evidence and that story action. Assisted completion is not a correct independent answer. Stale story bindings conflict; abandon puts the task aside without story progress. Exact retries return the original response.",
         "responses": {
           "200": {
             "description": "Successful response. A repeated exact command returns its original snapshot.",

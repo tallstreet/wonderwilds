@@ -12,8 +12,15 @@ An activity belongs to the current mission: preparing bridge materials, counting
 picnic supplies, arranging lights or organising the gathering. The mission gives
 the work a purpose; it does not choose an arbitrary harder skill to fit a prop.
 
-The player can try, ask for a concrete hint, learn with a worked example, or
-return to the story. Answers and support update server-owned practice evidence.
+The player reaches an activity by gathering, investigating, exchanging or
+assembling within a mission. Generated investigation steps may author a short
+`learningBridge` joining line around the server's discovery-marker interaction;
+old content uses a mechanic-specific authored fallback. The same assessed task
+shapes and fingerprints are reused with consistent prop labels. There is no
+separate practice-launch button in the playable story world.
+
+The player can try, ask for a concrete hint, learn with a worked example, complete
+the step together with a server-authored solution, or put the task aside. Answers and support update server-owned practice evidence.
 When the experimental readiness criteria are satisfied, the next supported
 prerequisite-ready skill becomes available. Missions remain accessible through
 supported routes without independent academic mastery.
@@ -80,9 +87,19 @@ Neither the browser nor LLM supplies skill readiness, answer keys or rewards.
   Bound current state; retained receipts/evidence may grow and need operational
   retention planning. Do not modify applied migrations or persistent demo data
   during destructive QA.
-- No learner history is added to the external story-provider prompt. Practice
-  completion does not fabricate story resources, XP, friendship or mission
-  milestones. Future shared rewards need a separate atomic orchestration design.
+- No learner history is added to the external story-provider prompt. `begin_step`
+  resolves a legal story action and revision under the profile lock and freezes
+  its mission/generation, location, label and joining text in the activity.
+- Correct answers and explicit `finish_together` commands execute that bound
+  story action in the same transaction as evidence, checkpoints and both receipt
+  logs. Rust derives the actual story effects; learning does not invent resources
+  or rewards. Together-completion records a worked example with `not_assessed`,
+  not a successful answer. Exact retries return the original learning response
+  without repeating the story action. Stale bindings fail atomically; abandonment
+  can still put them aside. Direct story/inspector commands remain compatible.
+- Browser completion and retry recovery refresh authoritative story state. A
+  failed refresh retains the confirmed learning receipt and locks world actions
+  until story recovery, rather than rendering a historical receipt as current.
 
 ## Progression and mastery distinction
 

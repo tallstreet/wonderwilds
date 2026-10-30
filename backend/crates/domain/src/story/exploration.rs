@@ -90,6 +90,8 @@ pub struct GeneratedContent {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct GeneratedStep {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub learning_bridge: Option<String>,
     pub label: String,
     pub shape: String,
 }

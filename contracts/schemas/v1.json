@@ -73,6 +73,10 @@
                 "maxLength": 60,
                 "pattern": "^[^<>\\u0000-\\u001f]+$"
               },
+              "learningBridge": {
+                "type": "string", "minLength": 1, "maxLength": 160,
+                "pattern": "^[^<>\\u0000-\\u001f]+$"
+              },
               "shape": {
                 "type": "string",
                 "enum": [
@@ -689,6 +693,23 @@
       "oneOf": [
         {
           "type": "object",
+          "properties": {
+            "type": { "const": "begin_step", "type": "string" },
+            "actionId": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "storyRevision": { "type": "integer", "minimum": 0, "maximum": 1000000000 }
+          },
+          "required": ["type", "actionId", "storyRevision"], "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "finish_together", "type": "string" },
+            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 }
+          },
+          "required": ["type", "encounterId"], "additionalProperties": false
+        },
+        {
+          "type": "object",
           "properties": { "type": { "const": "begin", "type": "string" } },
           "required": ["type"],
           "additionalProperties": false
@@ -889,7 +910,7 @@
     "MissionLearningFeedback": {
       "type": "object",
       "properties": {
-        "result": { "type": "string", "enum": ["correct", "incorrect"] },
+        "result": { "type": "string", "enum": ["correct", "incorrect", "assisted"] },
         "message": { "type": "string", "minLength": 1, "maxLength": 160 },
         "completed": { "type": "boolean" }
       },
@@ -909,7 +930,15 @@
         "presentation": { "$ref": "#/$defs/MissionPresentation" },
         "task": { "$ref": "#/$defs/MissionTask" },
         "support": { "$ref": "#/$defs/SupportState" },
-        "revealedSupport": { "$ref": "#/$defs/MissionSupportContent" }
+        "revealedSupport": { "$ref": "#/$defs/MissionSupportContent" },
+        "storyStep": {
+          "type": "object",
+          "properties": {
+            "label": { "type": "string", "minLength": 1, "maxLength": 240 },
+            "introduction": { "type": "string", "minLength": 1, "maxLength": 240 }
+          },
+          "required": ["label", "introduction"], "additionalProperties": false
+        }
       },
       "required": ["schemaVersion", "id", "skillId", "contentVersion", "variantId", "contextId", "representation", "presentation", "task", "support"],
       "additionalProperties": false

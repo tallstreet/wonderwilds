@@ -1,6 +1,7 @@
 // Seven stories, including clues, lasting choices, a new escort and parallel preparations.
 // Run only through run-training-qa.mjs with its fresh disposable database.
 import assert from 'node:assert/strict';
+import { finishInlineStep } from './inline-step.mjs';
 import { chromium } from 'playwright';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -109,7 +110,7 @@ try {
       await visit(target);
     }
     const selected = findAction(state, type, fields);
-    const loseResponse = returning && !lostResponseChecked && type === 'exchange';
+    const loseResponse = returning && !lostResponseChecked && type === 'invite';
     let originalBody;
     if (loseResponse) await page.route('**/api/v1/story/commands', async route => {
       originalBody = route.request().postData();
@@ -119,6 +120,7 @@ try {
     }, { times: 1 });
     const started = performance.now();
     await page.locator(`[data-story-handle="${selected.id}"]`).click();
+    await finishInlineStep(page, type);
     if (loseResponse) {
       await page.locator('[data-story-retry]').waitFor();
       const committed = await snapshot();

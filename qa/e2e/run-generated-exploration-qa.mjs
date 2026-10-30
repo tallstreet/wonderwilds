@@ -17,7 +17,7 @@ const server = createServer(async (req, res) => {
     name: `Visitor ${requests}`, personality: 'A curious neighbour who enjoys quiet discoveries.',
     sprite: 'glimmer', greeting: `Hello! Let us listen for little sounds in ${input.area}.`,
     title: `The little sounds of ${input.area}`, premise: 'Investigate two places and return to share your discoveries.',
-    steps: [{ label: 'Listen beside the hollow branch.', shape: 'hollow' }, { label: 'Look closely at the rustling leaves.', shape: 'leaf' }],
+    steps: [{ label: 'Listen beside the hollow branch.', shape: 'hollow', learningBridge: 'Help organise our discovery markers so we can keep track of the sounds.' }, { label: 'Look closely at the rustling leaves.', shape: 'leaf' }],
     payoff: 'You shared the sounds of the woodland with your new friend.'
   };
   res.writeHead(200, { 'Content-Type': 'application/json' });

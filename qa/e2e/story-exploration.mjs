@@ -1,5 +1,6 @@
 // Real world, API, and disposable PostgreSQL regression. Never run against demo data.
 import assert from 'node:assert/strict';
+import { finishInlineStep } from './inline-step.mjs';
 import { chromium } from 'playwright';
 const generated = process.env.WW_GENERATED_STORIES === '1';
 const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
@@ -38,6 +39,7 @@ try {
   const choose = async type => {
     const previous = (await snapshot()).revision;
     await page.locator(`[data-story-action="${type}"]`).click();
+    await finishInlineStep(page, type);
     await page.waitForFunction(revision => Number(document.querySelector('#game')?.dataset.storyRevision) > revision, previous, { timeout: 20000 });
     return ready();
   };

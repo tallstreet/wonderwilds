@@ -1,6 +1,7 @@
 // Three connected authored missions through actual Phaser interactions and a disposable API.
 // WW_QA_BROWSER_TEST=qa/e2e/story-series.mjs node qa/e2e/run-training-qa.mjs
 import assert from 'node:assert/strict';
+import { finishInlineStep } from './inline-step.mjs';
 import { chromium } from 'playwright';
 const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
@@ -36,6 +37,7 @@ try {
   const choose = async type => {
     const revision = (await snapshot()).revision;
     await page.locator(`[data-story-action="${type}"]`).click();
+    await finishInlineStep(page, type);
     await page.waitForFunction(previous => Number(document.querySelector('#game')?.dataset.storyRevision) > previous, revision, { timeout: 20000 });
     return ready();
   };
@@ -102,15 +104,18 @@ try {
   await mission('welcome_lights', 'active');
   await travel('far_bank'); await act('resource:glow_stones', 'collect');
   await travel('bridge_bank'); await travel('workshop');
-  // Lose an actual committed exchange response, reload, then replay its original body.
+  // Lose an actual committed pause response, reload, then replay its original body.
   await visit('npc:woodcutter');
+  await page.locator('[data-story-action="exchange"]').click();
+  await finishInlineStep(page, 'exchange');
+  await page.locator('#missions').click();
   let originalBody;
   await page.route('**/api/v1/story/commands', async route => {
     originalBody = route.request().postData();
     const response = await route.fetch(); assert.equal(response.status(), 200);
     await route.abort('failed');
   }, { times: 1 });
-  await page.locator('[data-story-action="exchange"]').click();
+  await page.locator('[data-story-action="cancel_mission"]').click();
   await page.locator('[data-story-retry]').waitFor();
   const committedRevision = (await snapshot()).revision;
   await reload(); await page.locator('#missions').click();
@@ -120,6 +125,10 @@ try {
   assert.equal((await retry).postData(), originalBody);
   await page.locator('dialog').waitFor({ state: 'hidden' });
   assert.equal((await ready()).revision, committedRevision);
+  await page.locator('#missions').click();
+  await page.locator('[data-story-action="accept_mission"]').click();
+  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await ready();
   assert.deepEqual((await snapshot()).sceneInput.context.inventory, [{ itemId: 'lanterns', quantity: 3 }]);
   await travel('bridge_bank'); await act('object:near_lanterns', 'assemble');
   assert.deepEqual((await snapshot()).sceneInput.context.inventory, [{ itemId: 'lanterns', quantity: 1 }]);

@@ -165,6 +165,8 @@ fn all_authored_mission_activities_match_closed_wire_contracts_without_answer_ke
             validate("MissionActivity", &value)
                 .unwrap_or_else(|error| panic!("{skill}/{seed}: {error:?}"));
             assert!(!value.to_string().contains("answerKey"));
+            let themed = mission::discovery_activity(activity.clone());
+            validate("MissionLearningFeedback", &json!({"result":"assisted","message":themed.discovery_solution(),"completed":true})).unwrap();
             validate("MissionLearningAnswer", &answer_for(&value)).unwrap();
         }
         assert!(
@@ -537,6 +539,8 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     );
     assert_eq!(repo.execute(&identity_a, &begin_request).unwrap(), begun);
 
+    exercise_inline_steps(&mut admin, &restricted, parent);
+
     // Export includes the mission checkpoint, immutable events, and command receipts; delete cascades them.
     let verified = VerifiedContext {
         parent_id: parent.into(),
@@ -568,4 +572,187 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
             "profile delete left rows in {table}"
         );
     }
+}
+
+fn exercise_inline_steps(admin: &mut Client, restricted: &str, parent: &str) {
+    let profile = "72000000-0000-0000-0000-000000000003";
+    admin.execute("INSERT INTO wonderwilds.profiles(id,parent_id,ability_band) VALUES($1::text::uuid,$2::text::uuid,'beginning')", &[&profile,&parent]).unwrap();
+    let identity = Identity {
+        parent_id: parent.into(),
+        profile_id: profile.into(),
+        session_id: "inline-synthetic-session".into(),
+    };
+    let repo = PostgresRepository::new(restricted.into());
+    let story = StoryRepository::new(restricted.into());
+    travel(&story, &identity, "workshop");
+    let at_workshop = story.read(&identity).unwrap();
+    let arrival = story_action(&at_workshop, "travel", Some("cove"));
+    let candidate = story
+        .generation_state(&identity, &arrival)
+        .unwrap()
+        .unwrap();
+    let content = json!({"name":"Lumi","personality":"A curious listener.","sprite":"flutter","greeting":"Shall we listen?","title":"The quiet hollow","premise":"Find what makes the hollow hum.","steps":[
+        {"label":"Listen at the hollow.","shape":"hollow","learningBridge":"Help organise our discovery markers so we can keep track of the sounds."},
+        {"label":"Look beneath the leaves.","shape":"leaf"},
+        {"label":"Notice the smooth stones.","shape":"stones"}
+    ],"payoff":"Lumi and you shared the hollow's song."});
+    let plan = crate::story::planning::ValidatedPlan::generated(&candidate, content, true).unwrap();
+    let offered = story
+        .execute_planned(&identity, &arrival, Some(&plan))
+        .unwrap();
+    let start = offered["sceneInput"]["availableActions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|a| a["action"]["topicId"] == "start_neighbour_story")
+        .unwrap();
+    let accepted = story
+        .execute(
+            &identity,
+            &command(
+                "inline-accept",
+                offered["revision"].as_u64().unwrap(),
+                json!({"type":"choose","actionId":start["id"]}),
+            ),
+        )
+        .unwrap();
+    let begin_step = |story_snapshot: &Value, learning: &Value, id: &str| {
+        let action = story_snapshot["sceneInput"]["availableActions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["action"]["type"] == "inspect")
+            .unwrap();
+        command(
+            id,
+            learning["revision"].as_u64().unwrap(),
+            json!({"type":"begin_step","actionId":action["id"],"storyRevision":story_snapshot["revision"]}),
+        )
+    };
+    let initial = repo.read(&identity).unwrap();
+    let begin_request = begin_step(&accepted, &initial, "inline-begin-1");
+    let mut stale_begin = begin_request.clone();
+    stale_begin["payload"]["storyRevision"] = json!(0);
+    assert_eq!(
+        repo.execute(&identity, &stale_begin),
+        Err(Error::RevisionConflict)
+    );
+    let first = repo.execute(&identity, &begin_request).unwrap();
+    assert_eq!(repo.execute(&identity, &begin_request).unwrap(), first);
+    assert_eq!(
+        repo.read(&identity).unwrap()["activeActivity"],
+        first["activeActivity"]
+    );
+    assert_eq!(
+        first["activeActivity"]["storyStep"]["introduction"],
+        "Help organise our discovery markers so we can keep track of the sounds."
+    );
+    assert_eq!(
+        first["activeActivity"]["task"]["objects"][0]["label"],
+        "Discovery marker 1"
+    );
+    let answer = command(
+        "inline-answer-1",
+        first["revision"].as_u64().unwrap(),
+        json!({"type":"answer","encounterId":first["activeActivity"]["id"],"answer":answer_for(&first["activeActivity"])}),
+    );
+    let failing = PostgresRepository {
+        connection: restricted.into(),
+        fail_before_commit: true,
+    };
+    assert_eq!(failing.execute(&identity, &answer), Err(Error::Unavailable));
+    assert_eq!(
+        story.read(&identity).unwrap(),
+        accepted,
+        "story advancement rolled back with learning"
+    );
+    assert_eq!(repo.read(&identity).unwrap(), first);
+    let correct = repo.execute(&identity, &answer).unwrap();
+    assert_eq!(correct["lastFeedback"]["result"], "correct");
+    let second_story = story.read(&identity).unwrap();
+    assert_eq!(
+        second_story["revision"].as_u64().unwrap(),
+        accepted["revision"].as_u64().unwrap() + 1
+    );
+    assert_eq!(repo.execute(&identity, &answer).unwrap(), correct);
+    assert_eq!(story.read(&identity).unwrap(), second_story);
+    story.verify_history(&identity).unwrap();
+
+    let second = repo
+        .execute(
+            &identity,
+            &begin_step(&second_story, &correct, "inline-begin-2"),
+        )
+        .unwrap();
+    assert!(
+        second["activeActivity"]["storyStep"]["introduction"]
+            .as_str()
+            .unwrap()
+            .contains("organise"),
+        "old generated steps use authored joining copy"
+    );
+    let mut wrong = answer_for(&second["activeActivity"]);
+    wrong["assignments"][1]["recipientId"] = wrong["assignments"][0]["recipientId"].clone();
+    let incorrect = submit(&repo, &identity, &second, "inline-wrong", wrong);
+    assert_eq!(incorrect["lastFeedback"]["result"], "incorrect");
+    assert_eq!(story.read(&identity).unwrap(), second_story);
+    let together = command(
+        "inline-together",
+        incorrect["revision"].as_u64().unwrap(),
+        json!({"type":"finish_together","encounterId":incorrect["activeActivity"]["id"]}),
+    );
+    let assisted = repo.execute(&identity, &together).unwrap();
+    assert_eq!(assisted["lastFeedback"]["result"], "assisted");
+    assert_eq!(
+        assisted["skills"][0]["correctChecks"],
+        correct["skills"][0]["correctChecks"]
+    );
+    let third_story = story.read(&identity).unwrap();
+    assert_eq!(
+        third_story["revision"].as_u64().unwrap(),
+        second_story["revision"].as_u64().unwrap() + 1
+    );
+    assert_eq!(repo.execute(&identity, &together).unwrap(), assisted);
+    assert_eq!(story.read(&identity).unwrap(), third_story);
+    story.verify_history(&identity).unwrap();
+
+    let third = repo
+        .execute(
+            &identity,
+            &begin_step(&third_story, &assisted, "inline-begin-3"),
+        )
+        .unwrap();
+    let moved = travel(&story, &identity, "workshop");
+    let stale_finish = command(
+        "inline-stale-finish",
+        third["revision"].as_u64().unwrap(),
+        json!({"type":"finish_together","encounterId":third["activeActivity"]["id"]}),
+    );
+    assert_eq!(
+        repo.execute(&identity, &stale_finish),
+        Err(Error::RevisionConflict)
+    );
+    assert_eq!(story.read(&identity).unwrap(), moved);
+    assert_eq!(
+        repo.read(&identity).unwrap()["activeActivity"],
+        third["activeActivity"]
+    );
+    let abandoned = repo
+        .execute(
+            &identity,
+            &command(
+                "inline-put-aside",
+                third["revision"].as_u64().unwrap(),
+                json!({"type":"abandon","encounterId":third["activeActivity"]["id"]}),
+            ),
+        )
+        .unwrap();
+    assert!(abandoned.get("activeActivity").is_none());
+    assert_eq!(story.read(&identity).unwrap(), moved);
+    let mut client = Client::connect(restricted, NoTls).unwrap();
+    let mut tx = client.transaction().unwrap();
+    PostgresRepository::own_profile(&mut tx, &identity).unwrap();
+    let loaded = PostgresRepository::load(&mut tx, profile).unwrap();
+    PostgresRepository::verify_history(&mut tx, profile, &loaded).unwrap();
+    tx.commit().unwrap();
 }

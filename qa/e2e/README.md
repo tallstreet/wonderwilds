@@ -71,9 +71,12 @@ WW_QA_BROWSER_TEST=qa/e2e/mission-learning.mjs node qa/e2e/run-training-qa.mjs
 ```
 
 This uses the same fresh synthetic cluster and ports. It accepts a story mission,
-opens its practice invitation, submits a wrong one-to-one assignment, records
-help, retries an uncertain save after reload and checks continued story access
-and separate guest/assessed-adventure saves. The mission practice client tests
+opens an inline task by gathering mission supplies, submits a correct and then
+wrong one-to-one assignment, records help, retries an uncertain save after reload
+and completes a workshop step together. It checks atomic story advancement,
+independent versus assisted evidence, desktop/phone controls and separate
+guest/assessed-adventure saves. Full story journeys use `inline-step.mjs` to
+complete these interactions through the supported route. The mission practice client tests
 cover exact retry and stale-revision recovery; learning-engine tests cover the
 five supported skills, evidence diversity and graph progression. This is not
 full 120-skill activity coverage or educator approval. Keep model providers
@@ -164,7 +167,7 @@ during gathering preparation. A fresh browser context resumes the same synthetic
 profile/session credential; this does not test production login or session renewal.
 It compares revision, full canonical scene input and persisted plans before and
 after each restart, then completes all seven missions. It also loses one committed
-exchange response and checks reload plus exact-body retry without duplicate progress.
+story-action response and checks reload plus exact-body retry without duplicate progress.
 
 Both providers must be enabled; all seven accepted missions must have persisted
 model plans and the API must report accepted scene responses in each of the four sessions. The JSON summary

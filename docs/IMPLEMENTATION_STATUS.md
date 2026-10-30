@@ -1087,3 +1087,33 @@ keyboard/dismissal, viewport bounds and no implicit progress writes. Desktop and
 phone screenshots were inspected. No server/domain/persistence change was made;
 real database story journeys and live generated prose were not rerun. Local Node
 26 was used; the existing bundle-size warning remains.
+
+
+### Inline learning in authored and generated mission steps — 31 October 2026
+
+The playable story world now opens prerequisite-ready activities directly from
+collect, inspect, exchange and assemble interactions. The separate practice
+launch has been removed; Missions retains learning progress, resume and exact
+save recovery. Discovery-marker task labels reuse the existing five maths
+skills and preserve task parameters, representations and evidence fingerprints.
+New generated neighbourhood requests require a short `learningBridge` invitation
+relating markers to the investigation. Saved-content schemas keep it optional;
+existing generated missions use authored joining text without regeneration.
+No learner history or assessment keys enter the generation prompt.
+
+A server-resolved binding freezes the legal story action, revision, mission /
+neighbourhood generation, location and joining text. Correct answers execute the
+bound story action in the same profile-locked transaction as learning evidence,
+checkpoints and both receipt logs. **Let’s do it together** reveals a server-authored
+solution and completes the action with worked-example / not-assessed evidence,
+never independent success. Putting a task aside records abandonment without story
+progress. Stale bindings conflict rather than silently attaching to another task.
+The browser refreshes authoritative story state after completion and recovery;
+a failed story read retains the confirmed learning receipt and requires refresh.
+
+The diagnostic inspector and original story commands remain compatible without
+academic gates. No migration, demo reset, new skill coverage, reviewed mastery
+claim or release activation is introduced. The reusable marker preparation is an
+initial joining mechanism; narrative fit and frequency still need human playtesting.
+See [joining decisions](adr/mission-learning-joins.md) and the updated
+[curriculum mission plan](CURRICULUM_MISSION_PLAN.md).
