@@ -1,0 +1,47 @@
+{
+  "format": "story-dataset-1",
+  "datasetId": "pilot-2026-10-30",
+  "parentDataset": null,
+  "changeDescription": "Archive original synthetic subagent candidate generation and independent model review; no human approvals or training.",
+  "archiveBaseCommit": "cfa7ab84731f04ae6057d1b4287b390425893c51",
+  "generationCommit": null,
+  "provenanceNote": "Generation-time commit and exact session model IDs were not recorded for the original pilot. See per-row provenance; archiveBaseCommit is not proof of generation version.",
+  "files": {
+    "run/corpus.jsonl": "eb53fd2fa7bea416b1721736c7a3ad154586812614627c2f38c89dfcdae973fb",
+    "run/generation-requests.jsonl": "4391072909471098b7fc20b935459ea668d4ee94ac62391e055c7574dbc89f92",
+    "run/manifest.json": "984d4c4d778315eff441688e3cb51108b7f457680a7a9dfe6e2210c861d0ef05",
+    "run/reference-candidates.jsonl": "b2bd3e1cfcdabbae63370a959ca1e1f4f792edcd18dec0107ff07e1bea2d9871",
+    "candidates.jsonl": "f9026d946811b1c8c38ca249fe418351d48f29193d5c999cb7d9c71bbbbcb93c",
+    "judgments.jsonl": "c60585620571ce11a7a96f55f2ee43fe1a8857ad5dbc202d5b917865a2d476f4",
+    "recommendations.jsonl": "411eb5d899a53c23d82484ae392e50bc4dffb5c07cbb980395757ad9b974fa23",
+    "hard-results.jsonl": "5322c301a393133d999c154bc3ca4b045a0eef50a068e38ad7c3b8623748e2cc",
+    "assessments.tsv": "41d04aa60e5037edb19915e599413b2b205c4ef2a33282c11289341a8bcb508f",
+    "rubric.json": "6b152db7c8256dec0e1b26a1991dc39c2331b706be2a8ee1bb62bf03d455a2f5",
+    "quality-review.md": "d12adec2d63263864f5c26989d9a3de070db02bed3d8ce32d4db58b933ec4810",
+    "generation-provenance.json": "e5e58200612717e5e583f68ab390bf8431256fc9515542912a260e10e196da0c",
+    "recommended-train-candidates.jsonl": "c8166189497f7708af99f5ffb370203325cba7255662b5324705898fef8134a9",
+    "recommended-eval-candidates.jsonl": "71317972edf956fb8dc497b84d0402f16db35d96135b7534f4f5fda8c9d6482a"
+  },
+  "summary": {
+    "scenarios": 137,
+    "candidates": 411,
+    "judged": 411,
+    "recommendations": {
+      "keep": 386,
+      "revise": 25
+    },
+    "preferred": 137,
+    "shortlist": {
+      "train": 96,
+      "eval": 40
+    },
+    "excludedForEvalOverlap": [
+      {
+        "scenarioId": "bank-series-000",
+        "candidateId": "sample-2"
+      }
+    ],
+    "humanApproved": false,
+    "trainingPerformed": false
+  }
+}

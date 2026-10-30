@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wonderwilds · Story review</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#scene-heading">Skip to the scene</a>
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Wonderwilds · Human review</p>
+        <h1>A good story starts with a careful read.</h1>
+        <p class="intro">
+          Read the situation and scene, make your own decision, then compare the model’s feedback.
+        </p>
+      </div>
+      <a id="download" class="button secondary" href="/api/export" download="human-reviews.jsonl"
+        >Download decisions</a
+      >
+    </header>
+    <main>
+      <div id="connection-error" class="notice error" role="alert" hidden></div>
+      <button id="reconnect" class="secondary" hidden>Retry connection</button>
+      <p id="loading" role="status">Loading your review workspace…</p>
+      <div id="workspace" hidden>
+        <section class="toolbar" aria-label="Review workspace">
+          <label
+            >Reviewer name<input
+              id="reviewer"
+              name="reviewer"
+              autocomplete="name"
+              maxlength="100"
+              placeholder="Your name"
+          /></label>
+          <label
+            >Review queue<select id="queue">
+              <option value="train">Training shortlist</option>
+              <option value="eval">Held-out evaluation</option>
+              <option value="all">All candidates</option>
+            </select></label
+          >
+          <label
+            >Review status<select id="review-filter">
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="decided">Decided</option>
+            </select></label
+          >
+          <div class="progress-block">
+            <p id="progress" role="status"></p>
+            <progress id="progress-bar" value="0" max="1" aria-label="Review progress"></progress>
+            <p id="dataset" class="small"></p>
+          </div>
+        </section>
+        <p id="brief" class="brief"></p>
+        <div class="navigation">
+          <p id="position" class="small"></p>
+          <div>
+            <button id="previous" class="secondary">Previous</button
+            ><button id="next" class="secondary">Next</button
+            ><button id="next-pending" class="secondary">Next unreviewed</button>
+          </div>
+        </div>
+        <div id="empty" class="card empty" hidden>
+          <h2>No scenes in this view</h2>
+          <p>Choose another queue or review status to continue.</p>
+        </div>
+        <div id="candidate-view">
+          <div class="review-grid">
+            <section class="card situation" aria-labelledby="situation-heading">
+              <p class="eyebrow">1 · Understand the situation</p>
+              <h2 id="situation-heading">Where the player is</h2>
+              <div id="state-summary"></div>
+              <details>
+                <summary>Recent events and world facts</summary>
+                <div id="history"></div>
+              </details>
+              <details>
+                <summary>Raw model input</summary>
+                <pre id="raw-input"></pre>
+              </details>
+            </section>
+            <section class="card scene" aria-labelledby="scene-heading">
+              <p class="eyebrow">2 · Read what the child sees</p>
+              <h2 id="scene-heading" tabindex="-1">The proposed scene</h2>
+              <p id="candidate-id" class="small"></p>
+              <p id="split-notice" class="notice subtle"></p>
+              <div id="scene-entries"></div>
+              <h3>Choices shown to the child</h3>
+              <ul id="scene-choices" class="choices"></ul>
+              <div id="hard-warning" class="notice error" hidden>
+                This candidate failed the mechanical checks. It cannot be approved unchanged.
+              </div>
+            </section>
+          </div>
+          <section class="card decision-card" aria-labelledby="decision-heading">
+            <p class="eyebrow">3 · Make your decision</p>
+            <h2 id="decision-heading">Would you want the model to imitate this?</h2>
+            <p class="checklist">
+              Check truth, clear next steps, character voice, continuity and child-friendly wording.
+              A model recommendation is not your approval.
+            </p>
+            <div class="decision-fields">
+              <label
+                >Review notes<textarea
+                  id="notes"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="What works, or what needs changing? Required for revision or rejection."
+                ></textarea>
+              </label>
+              <label
+                >Suggested replacement text <span class="small">(optional, for a revision)</span
+                ><textarea
+                  id="suggested"
+                  rows="3"
+                  maxlength="6000"
+                  placeholder="Describe or draft the change. This does not edit or approve the original scene."
+                ></textarea>
+              </label>
+            </div>
+            <p id="revision-help" class="small">
+              Suggested text is a revision proposal. It must become a new candidate and pass
+              validation and review before training.
+            </p>
+            <div class="decision-buttons">
+              <button id="approve" class="approve">Approve unchanged</button
+              ><button id="revise" class="revise">Needs revision</button
+              ><button id="reject" class="reject">Reject</button>
+            </div>
+            <p id="decision-status" class="save-status" role="status" aria-live="polite"></p>
+            <div id="save-error" class="notice error" role="alert" hidden></div>
+          </section>
+          <section class="card feedback-card" aria-labelledby="feedback-heading">
+            <p class="eyebrow">4 · Compare after deciding</p>
+            <h2 id="feedback-heading">Model feedback</h2>
+            <p id="feedback-locked" class="locked">
+              Hidden until you save your own decision. There is no model score to guide your first
+              impression.
+            </p>
+            <div id="model-feedback" hidden></div>
+            <p id="feedback-error" class="notice error" role="alert" hidden></p>
+            <button id="retry-feedback" class="secondary" hidden>Retry model feedback</button>
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer>
+      Decisions are saved by the local review server. Download a copy for the training-export
+      workflow. Held-out examples stay separate from training.
+    </footer>
+  </body>
+</html>

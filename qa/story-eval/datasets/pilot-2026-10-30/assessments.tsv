@@ -1,0 +1,137 @@
+0	2	Broken bridge precedes proposed crossing; direct invitation	Exploration motivates repairing the broken bridge; concise invitation	Pip correctly remains beside broken bridge; helping is understandable
+1	3	Fallen wood correctly starts active mission; warm but nonspecific quantity	Three wood become future planks; clear resource purpose	Offers two available routes, gathering or workshop; concrete options
+2	1	One held and two remaining accurately guide gathering	Two still needed after some found; clearly connects to planks	More wood and workshop are available; broad but understandable
+3	1	Paused plan retains one wood; invites resuming when ready	Rest metaphor preserves wood and proposes continuing; understandable	Explicitly gates more gathering on resuming; clear but mechanical
+4	3	Resumption keeps first wood and leaves two; gentle invitation	Accurate retained wood and two remaining; clear continuation	One found and two at fallen branches; shortest concrete guidance
+5	1	Three held wood need workshop conversion; exact next destination	Enough wood collected; empty source and woodcutter next are supported	Three wood ready for workshop; welcome back loosely reflects resumed history
+6	2	Introduction followed by optional three-wood exchange; concrete	Introduction and sufficient wood connect exchange to return to Pip	Introduction plus correct optional conversion; exchange phrasing slightly formal
+7	2	Three held wood can become three planks; accurate offer	Wood ready for offered plank exchange; short warm question	Enough held wood prevents redundant gathering; informative direction
+8	1	Three planks held; bridge return correctly precedes fitting	Conversion finished and Pip at bank; clear next travel	Planks sufficient while spare wood remains; understandable but tangential
+9	1	Three planks returned; repair precedes shared walk	Planks present and fitting is available; clear invitation	Prepared planks at broken bridge; clear repair prerequisite
+10	3	Bridge repaired, Pip present; invites pending joint crossing	Repaired bridge enables final shared walk; accurate sequence	Repair done and crossing still optional; concise warm invitation
+11	3	Joint crossing completed; picnic offered as next mission	Far bank reached, picnic still prospective; concrete invitation	Crossing complete; offers picnic or available return route
+12	2	Crossing history motivates gathering three berries here	Three berries available; gathering precedes woodcutter packing	New picnic mission needs three berries before packing; clear
+13	1	One held berry and two on bush; exact next gathering	One plus two yields enough to pack; resource counting, not lesson	Crossing recalled briefly to frame picking two remaining berries
+14	1	Paused picnic retains berry; continuation remains a choice	Paused mission and berry retained; pick it up means resume plan	One gathered and two remain; explicitly invites continuing
+15	2	Resumed picnic preserves first berry and two at bush	Starts where paused, not reset; held berry and two to pick	Active again with one gathered and two nearby; clear though mechanical
+16	1	Three berries gathered; bank then workshop matches route	Gathering complete after pause; woodcutter packing follows	No more berries needed; clear bank then workshop directions
+17	2	Three berries at bank; workshop packing remains next	Unpacked berries require workshop path; crisp next action	Pip across stream, berries held; workshop route accurately offered
+18	1	Three berries held; offers optional packing for picnic	Three berries can be packed here then carried back	Gathering complete and packing optional; clear but impersonal
+19	1	Basket packed; carry to bank before laying out picnic	Ready basket travels to bridge before picnic preparation	Packing finished, layout pending; concise with destination implicit in bridge
+20	1	Basket at bank; setting table precedes fetching Pip	Empty table and packed basket support available setup	Packed berries now basket; accurately directs preparation at bridge
+21	1	Table ready, Pip far bank; directs travel to fetch friend	Prepared not shared; locating Pip is the next step	Past preparation briefly framed; bridge leads to Pip before joining
+22	1	Pip present on far bank; invites joint return to ready picnic	Ready picnic remains across bridge; proposes shared return	Pip has not joined; explicitly asks accompaniment rather than solo walk
+23	1	Shared picnic complete; invites both-bank lantern mission	Crossing and picnic history justify new lights for friends	Picnic complete; welcome lights or available stroll are optional
+24	2	Picnic shared; pebbles correctly across bridge for new lights	Far-bank visit explicitly starts lantern resource gathering	Preserved picnic and bridge; new glow-pebble objective correctly located
+25	2	Shared picnic motivates three pebbles available here	Pip correctly across stream; concrete three-pebble collection	Prior world preserved; collecting here starts lights
+26	1	One held, two remain; gathering before return clearly directed	Unlit far bank and two remaining supplies; workshop goal clear	First held pebble plus remaining pair; clear collection invitation
+27	1	Paused with retained pebble; resume or return both available	Break preserves one pebble; continuation explicitly conditional	Paused status and two left accurate; no immediate collection directed
+28	3	Resumed with one held and two remaining; explicit continuation	Preserved progress followed by legal gathering of two	One held and two here; direct concise next step
+29	2	All three gathered; workshop route correctly via bridge bank	Enough gathered; cross back before woodcutter visit	Gathering finished but manufacture pending; correct first travel leg
+30	1	Three pebbles returned; workshop path identified clearly	Pebbles not lanterns yet; workshop direction clear despite awkward Shall you	Three held at bank; workshop conversion correctly next
+31	1	Offers future three-lantern exchange for three pebbles	Supplies sufficient; ask for lanterns before placement	Gathered pebbles can become both-bank lights; choice label supplies concrete exchange
+32	1	Three lanterns made; bank return precedes placement	Exact two-near one-far plan; placements correctly pending	Lanterns ready; return or break are both available
+33	2	Three held; near placement or far-bank travel both available	Made lights await two-near placement; warm concrete invitation	Neither bank lit, two here and one across; exact sequence
+34	1	Two placed, one held; cross to far bank next	Near lit and one left across stream; concise direction	Picnic preserved; remaining lantern completes far bank
+35	2	Near two lit; final held lantern at correct far-bank location	Final placement offered with optional break; clear and gentle	Last lantern carried across; far bank still unlit and completion prospective
+36	2	Both lit with bridge and picnic preserved; Pip correctly across	One here two across completed; direct optional return to Pip	Completion accurate, but keeping earlier bridge and picnic part of world is abstract developer-like prose
+37	1	Broken bridge needs fixing before exploration; warm invitation	Future exploration motivates bridge help; harmless personification	Pip here; help or workshop before decision accurately offered
+38	1	Authored greeting then two available choices with Pip at bank	Greeting then conditional future plank help; no immediate exchange claimed	Spare wood exists but mission not begun; explicitly asks choosing start
+39	1	Prior introduction acknowledged once; optional crossing help	Bridge still needs work; help or return available	Introduction over and mission unstarted are accurate but overtly interface-focused prose
+40	1	Return from workshop with bridge still broken; clear invitation	Met woodcutter; choosing help precedes crossing	No pressure; broken bridge and open workshop route correctly described
+41	2	Accepted help; wood gathering or revisiting workshop available	Three fallen wood here; concrete first resource step	Crossing planned, repair pending; gathering starts it
+42	2	Return to workshop with three spare wood; invites legal collection	Three spare wood gathered before preparing planks	Three spare wood present and none held; accurate concise narration
+43	2	One spare wood held and two here for planks	Two remaining finish supply before future shaping; direct next step	Retained first wood and two here; gentle collection prompt
+44	1	Paused bridge work retains one wood; continuation optional	Paused with wood preserved; resume precedes plank work	Gathering preserved; explicitly conditions continuation on helping again
+45	2	Resumed plan retains first wood and two spares	No restart needed; gather remaining two to join held one	Resumed at workshop, one found two needed; clear state summary
+46	1	Three wood sufficient; optional plank conversion offered	Spare wood gathering done; shaping available now	All wood held; workbench greeting loose but no incorrect state
+47	3	Resumed and gathered rest in history; three planks now return	Wood converted; bridge bank next destination	Pip at bank; three planks travel before repair
+48	2	Three planks from workshop sufficient; discourages needless wood gathering	Planks returned; repair explicitly precedes shared crossing	Broken bridge with held planks; repair available despite spare resource
+49	2	Spare wood to repaired bridge summary; joint crossing future	Repair finished but crossing pending; clear invitation	Both still near side; accompany choice explicitly reaches far bank
+50	1	Crossing complete; picnic proposed as next mission	Joint crossing occurred; picnic or solo return available	Hoped-for far bank reached; picnic remains proposed
+51	1	Picnic accepted after crossing; gather three before packing	Crossing history motivates available berry gathering	Prior bridge complete, new picnic active; three berries here
+52	1	One held and two here; clear gathering question	Crossing history true; bush helps picnic but ignores partial-progress detail	Two left finish gathering; concrete next action
+53	2	Paused picnic retains berry without restart	One held; explicitly choose continuation before gathering others	Paused with berry still contributing; patient waiting fits Pip
+54	1	Resumed picnic preserves one berry and two remain	First berry kept; gathering other two available	Resumed at bush, one held two remaining; third-person player is mechanical prose
+55	3	Three gathered; return across bridge starts woodcutter route	Break preserved berries; packing at workshop next	Pip stays; bank then workshop accurately gives complete route
+56	3	Three berries at bank, table empty; packing pending	Workshop route offered while Pip stays across	Gathering complete; concrete travel to packing destination
+57	1	Return to familiar woodcutter with three berries; offers packing	Packing here precedes setting basket out by bridge	New purpose packing accurate; exchange wording technical but understandable
+58	2	Berries now packed basket; bridge bank next	Packing done; carry basket to bridge before layout	Basket ready, Pip across; prepare picnic by bridge first
+59	2	Packed basket held; set out table before Pip joins	Packed berries need table preparation before fetching Pip	Bridge brought you back misstates recent workshop-to-bank route; basket and Pip state otherwise correct
+60	2	Basket unpacked; Pip far bank reached via repaired bridge	Food ready but Pip absent; clear optional crossing	Bring Pip back still pending; table preserved while travelling
+61	2	Picnic across river; joint return clearly proposed	Prepared picnic then fetched Pip; crossing together is available	Prior joint crossing recalled to motivate return to prepared picnic
+62	3	Picnic shared; optional lights on both sides next	Picnic finished with bridge retained; lantern plan proposed	Thanks for completed return; invites exact both-bank lights goal
+63	3	Shared picnic precedes accepted lights; pebbles far side	Bridge and picnic preserved; gathering goal across stream	Picnic complete; far-bank pebbles for future woodcutter lanterns
+64	1	Three pebbles here; collection starts both-bank lights	Berry source empty; glow pebbles serve current mission	Picnic preserved across stream; collect current resources here
+65	1	One collected and two remain to finish gathering	One plus remaining two; gather before workshop journey	Two remain at unlit far lantern; collection supplies next step
+66	1	Paused with one held; explicitly resume before collecting two	Pause preserves first pebble; continue or bank travel available	Two here and first gathered; future work conditioned on resuming
+67	2	Resumed lights retain first pebble and two remain	No restart; legal two-pebble collection finishes gathering	Bridge picnic and pebble preserved; next two resources identified
+68	1	Three held, gathering complete; bank first toward workshop	Enough gathered; cross back before woodcutter help	Source exhausted; workshop route correctly begins with bank
+69	1	Rest gathered; three to workshop for making lanterns	Pebbles held, woodcutter destination clear; no premature lights	Gathering complete after pause; bank-to-workshop route correct
+70	2	Three pebbles here; three lanterns can now be made	Offers exchange from gathered pebbles to carried lanterns	Exchange supported; choosing either bank first is not established by current near-first mission input
+71	2	All three made and held; bank next before placement	Pebbles transformed; direct gentle return to bridge	Three made but placement pending; put out could mean extinguish lights
+72	2	Three ready; near placement or far visit both available	Picnic preserved; explicit optional two-lantern placement	All three held, both unlit; near placement correct but player phrasing mechanical
+73	2	Three held on far side; one here before near placement	Place one here leaves two for near side; exact quantities	Neither lit; far light placement possible even with near mission step
+74	1	Far lit; two held need crossing back	One bank lit; two needed at bridge bank with Pip	Mission unfinished; return with remaining lanterns correctly directed
+75	2	Far lit, last two here can finish both banks	Far-first history acknowledged; two held finish near side	Far one lit, two held and near unlit; accurate current state
+76	1	Both lit and bridge/picnic preserved; completion true	Crossing picnic lights complete; choose available walking routes	Last two near placed and far lit; exact completion
+77	1	Three already held; accept help before repair and crossing	Carried planks could fix bridge after choosing mission	Broken bridge imagined as gap; planks held and mission offered
+78	2	Mission accepted with planks held; repair skips more gathering	Planks already here; repair before crossing together	Active mission permits direct repair; mechanical player phrasing
+79	1	Planks consumed repair; crossing now invited	Fixed bridge, Pip beside player; future walk accurate	No more repair wood; joint crossing correctly next
+80	1	Held planks enabled repair and completed crossing; picnic proposed	Repair and shared arrival completed; picnic remains optional	Crossed bridge can be used again; picnic across bank is consistent goal
+81	2	Shared crossing done; three berries start accepted picnic	Pick berries before woodcutter packing; clear warm question	Crossing complete, gather before upcoming workshop visit
+82	3	One berry found, two on bush; accurate next gathering	Crossing history true; remaining bush berries serve picnic	One held, pick two before packing; concrete gentle sequence
+83	1	Paused picnic with one berry; work explicitly gated on resume	No hurry; held berry and available bridge travel	Paused picnic; continue from retained berry rather than reset
+84	2	Resumed picnic retains first berry; two ready to gather	Rest then two remaining berries; concise gentle instruction	First retained and two gatherable before packing; accurate sequence
+85	1	All berries gathered; bridge return before workshop packing	Berries ready but basket still needed; woodcutter goal clear	Enough berries, but workshop called next stop omits necessary bridge-bank leg
+86	2	Three berries returned; workshop path to packing helper	Collected berries go to workshop before picnic layout	Pip across stream; packing goal accurate, destination supplied by choice
+87	2	First authored greeting then optional three-berry packing	Greeting then packing offer and future return to bridge	No prior intro recorded; first meeting phrasing and player narration are mechanical
+88	1	Three berries held; offers packing now	Packing pending before bridge table preparation	Pack basket available; ready for carrying is ordinary packing language despite prior berry travel
+89	1	Berries now basket; return to bank before layout	Packing complete, bridge table still pending	Ready basket goes back for setup before fetching Pip
+90	2	Basket at bank, Pip across; table setup available	Packed berries and empty table; setup before Pip return	Basket held beside empty table; preparation precedes sharing
+91	1	Prepared picnic, Pip far bank; cross to fetch friend	Basket unpacked; returning with Pip still pending	Set table not shared; find Pip for joint return
+92	1	Pip fetched on far bank; invites return to ready picnic	Pip can join only after bring-across choice	Pip beside player, picnic across stream; optional joint return
+93	1	Picnic shared after return; exact both-bank lighting invitation	Completed picnic thanked; welcome lights remain optional	Completed sharing, next mission unaccepted; accurate but explanatory interface prose
+94	3	Shared picnic completed; pebbles across stream for lights	New plan on far side; gathering there correctly future	Preserved world plus explicit visit across bridge for pebbles
+95	1	Three pebbles here; first lantern supplies ready to gather	Arrived clearing; gather three begins lights project	Picnic behind and lights ahead is harmless framing; collect here
+96	2	One held two here; finish supplies before workshop visit	First pebble and two remaining; optional collection clearly stated	One carried two available; accurate but third-person player prose
+97	1	Paused retains pebble; resume before gathering	Break okay; later continuation retains pebble and prior changes	Resume or return while paused are both available
+98	3	Active again with first retained and two remaining	Break preserves progress; collect remaining two	Resumed choice acknowledged; last two on this bank
+99	1	Three gathered; exact bank then workshop route	Gathering done, lantern conversion pending; woodcutter direction	All three held; no more collecting, bank is immediate travel
+100	2	Three returned; workshop conversion correctly next	Gathering finished; direct workshop path with pebbles	Bridge picnic preserved; pebbles future lights but immediate step less explicit
+101	2	Three held; offers optional three-lantern making	Workbench ready and pebbles gathered; asks for exchange	Pebbles held; make or pause both valid choices
+102	1	Three held; bank route and two-near one-far plan exact	Three made; free bank ordering not established by current near-first input	Three held after workshop work; accurate but player-supplies prose mechanical
+103	2	Made lanterns, future two-near one-far placement	Three returned; optional two-lantern placement here	Near two placement or far-bank travel both available
+104	2	Far-first placement offered with three held; two saved for near	Neither bank lit, three held; one here supported despite mission current near	Far unlit, one to place here and two across; precise distribution
+105	1	Far lit; carry two back across to near side	Far placed, two held and near unlit; accurate distribution	One side done; return to bank with remaining pair next
+106	2	Far lit and last two here finish both sides	One across, two held here; clear placement invitation	Far-first history true; two carried finish lights
+107	1	Both lit and bridge/picnic preserved; optional walk available	Lights finished after shared crossing/picnic; warm earned celebration	Near two and far one lit; Shall you explore is awkward phrasing
+108	1	Already repaired bridge, no repair credit claimed; offers company	No repairs needed; invites choosing joint walk, with explore alternative	Repaired bridge enables help without new wood/planks
+109	1	Bridge ready; joint crossing invited without false repair credit	No repair needed; current task is shared walk	Mission chosen, Pip here, bridge repaired; crossing still prospective
+110	1	Joint crossing complete; picnic or return both offered	Thanks for crossing only; mission complete and picnic optional	Far bank reached, crossing done; picnic clearly new optional goal
+111	1	Crossed together; three berries start accepted picnic	Walk reached berries; pick three before woodcutter packing	Crossing complete, three berries available for new picnic
+112	1	One gathered; other two here can be picked	Prior crossing motivates current two remaining berries	One held and two finish gathering; clear sequence
+113	3	Paused not lost; held berry and conditional continuation	Patient break acknowledgment; bridge open and berry retained	Explicit resume-before-gathering and available return alternative
+114	1	Resumed picnic, first berry retained and two remain	Plan resumed with one held, no restart needed	Active again, one held and two on bush; accurate state
+115	1	All gathered; bridge then workshop packing route	Resumed and finished picking three; woodcutter next goal	Packing not picking; bank crossing precedes workshop
+116	1	Three berries at bank; workshop path to pending packing	Gathering complete; take berries to woodcutter next	Pip across, berries held; workshop immediate next stop
+117	1	Authored greeting then optional three-berry packing	Greeting then packing request before bank return	Greeting plus correct three held and packing next; player narration mechanical
+118	3	Three picnic berries held; packing offered	Packing here followed by bridge layout correctly pending	Three ready; ask for basket is direct available exchange
+119	1	Packed basket ready; carry to bank before layout	Packed berries, Pip across; bridge preparation first	Packing done; return then set out when ready
+120	2	Packed basket at empty table; Pip far bank and setup available	Arrived but not laid out; unpack before fetching Pip	Workshop complete; basket can become prepared picnic; player prose mechanical
+121	3	Picnic laid out; Pip across ready for return	Ready table, Pip absent; far-bank trip before joint return	Clear two-step cross to Pip then choose accompaniment back
+122	1	Prepared picnic and return for Pip; joint crossing proposed	Picnic across bridge, Pip here; choose bringing along	Prior crossing motivates return to prepared picnic; optional
+123	2	Shared return complete; lights invitation has redundant consent wording	Picnic complete; exact both-bank lights or explore offered	Picnic shared, lights unaccepted; accurate but interface-status narration
+124	2	Shared picnic complete; pebbles across bridge for lights	Exact both-bank mission; explicit first walk to far bank	Picnic preserved; other-side pebbles begin lights
+125	3	Far bank has three pebbles before woodcutter visit	Unlit place, pebbles nearby; collection starts both-bank lighting	Picnic shared; three-pebble collection or break available
+126	2	One gathered two here; bridge open for later return	One held two here; gathering or break available	Remaining two here finish resource step
+127	2	Pause retains pebble and world changes, but preserved world changes is technical prose	Paused with one held; resume explicitly before rest of collection	Pause preserves picnic/crossing; continuation or travel available
+128	2	Mission resumed, first retained, two gatherable	Two remaining collect here before eventual workshop visit	Already resumed but break is over when you choose creates temporal ambiguity
+129	1	Three gathered; return to bank toward workshop	Pause followed by gathering complete; making lanterns next	Source empty and three held; carry back across repaired bridge
+130	1	All three returned; workshop is manufacturing destination	Enough gathered; workshop path next	Bridge return with pebbles matches far-bank route; woodcutter for three lanterns
+131	2	Three pebbles ready; ask manufacture before taking lights	All supplies here; optional three-light conversion	At workshop with pebbles; making still future, clear though redundant final clause
+132	1	Three made from pebbles; take back before placement	Finished lanterns; bank path returns to Pip and placement	Lanterns replace pebbles, placement pending; player prose mechanical
+133	1	Three made; two near and one across exact plan	Workshop done; two-near placement available	Near placement or crossing available, but begin on other side implies unestablished future placement order
+134	1	Two near glowing, one held; take across then place	One bank lit and last held; other-side travel before finishing	Bridge/picnic retained with near lights; carried lantern needed far side
+135	1	Near two lit; held one placed here will finish both banks	Far unlit, last held, opposite two glowing; precise state	Last far placement pending; Pip correctly stays near lights
+136	2	Far placed, both lit and earlier world retained	Last placement completes mission; direct available return to Pip	Three completed story arcs remain reflected in world; abstract ending lacks concrete return direction

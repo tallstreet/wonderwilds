@@ -253,6 +253,19 @@ bindings and immediate action executability, not prose quality or new-mission
 playability. The authored references are smoke-test candidates, not approved
 training examples.
 
+The [versioned scene dataset](qa/story-eval/datasets/pilot-2026-10-30/README.md)
+preserves all 411 generated candidates and independent quality judgments for future
+iterations. Run `python3 qa/story-eval/dataset.py verify` to check its integrity, or
+`python3 qa/story-eval/dataset.py review --out qa/story-eval/experiments/pilot-review`
+to regenerate the report and training/evaluation shortlists. Training remains a
+separate step after human review.
+
+Start the human review screen with `python3 qa/story-eval/review_server.py`, then
+open [http://127.0.0.1:5182/](http://127.0.0.1:5182/). Approve, request revision or
+reject each scene; progress saves locally and model grades appear only after your
+decision saves. Download the decisions for training export. See the
+[review workflow](qa/story-eval/README.md#human-review-and-export) for details.
+
 Run story browser QA against a fresh disposable database (never `.local-demo/`):
 
 ```sh

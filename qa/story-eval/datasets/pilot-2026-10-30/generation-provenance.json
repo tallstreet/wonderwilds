@@ -1,0 +1,25 @@
+{
+  "runManifest": {
+    "version": "story-scene-eval-1",
+    "corpusSha256": "65d69242d7ab55ee5a3c1750c265a72fdc1c2e6cab0a1b4d67a0d873f361a519",
+    "splits": {
+      "workshop-series": "eval",
+      "bank-series": "train",
+      "repaired-series": "train",
+      "supplied-series": "train"
+    },
+    "requestsSha256": "eb78c45063b130a93bbceb936c2c8e1259c148e9aeec7f61b9c496afc8cae094",
+    "schemaSha256": "64a414f2e56ffaf174762f38348ae205f66e57e02b8e8015130994962567b193",
+    "editorialBrief": "Ages 6\u20138; short, warm sentences; concrete next steps; no frightening or manipulative content.",
+    "scenarioCount": 137,
+    "warning": "Synthetic authored pilot; held-out journeys are not unseen mission families."
+  },
+  "candidateCount": 411,
+  "scenarioCount": 137,
+  "candidateFileSha256": "f9026d946811b1c8c38ca249fe418351d48f29193d5c999cb7d9c71bbbbcb93c",
+  "generationMethod": "Subagent-authored scenario-specific prose; scripts may bind supplied IDs, required entries and action labels. Not raw independent full-JSON API generations.",
+  "referenceAnswersProvided": false,
+  "qualityJudged": false,
+  "humanApproved": false,
+  "note": "Exact session model identifier unavailable. All examples synthetic. Hard checks do not establish semantic quality."
+}

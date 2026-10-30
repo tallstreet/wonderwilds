@@ -6,6 +6,15 @@ judge requests, and exports human-approved supervised examples. It does not call
 model, upload data, train, change gameplay, or validate newly invented missions.
 Use Python 3 and the repository's pinned Rust toolchain. No Python dependencies.
 
+The [versioned pilot dataset](datasets/pilot-2026-10-30/README.md) preserves the
+137 inputs, 411 generated candidates, independent quality review and 96/40
+training/evaluation shortlists. It includes commands for verifying, reviewing,
+revising and preparing later training experiments without relying on temporary files.
+
+The user's subsequent [acceptance of the pilot recommendations](approvals/pilot-2026-10-30-user-acceptance/README.md)
+approves the 386 keep candidates and leaves 25 revisions unapproved. That acceptance
+is recorded separately from the original model judgments and frozen snapshot.
+
 ## Run the local workflow
 
 From the repository root, choose new output directories (existing outputs are
@@ -75,8 +84,52 @@ improve the rubric. No model judgment establishes child safety or actual enjoyme
 
 ## Human review and export
 
+Use the local review screen on macOS or Linux:
+
+```sh
+python3 qa/story-eval/review_server.py
+```
+
+Open [http://127.0.0.1:5182/](http://127.0.0.1:5182/). Enter your reviewer name,
+read the state and scene, then choose **Approve unchanged**, **Needs revision** or
+**Reject**. Revision/rejection require a reason. Approve records that you reviewed
+the unchanged scene; an optional note can explain your choice. Model grades and
+recommendations are fetched only after a decision has successfully saved. Returning
+to a decided scene reveals them again. The original decision/time is retained if
+you later change your mind after seeing feedback.
+
+The default queue contains the 96 training-shortlist candidates. Separate queues
+cover the 40 held-out examples or all 411 candidates; filters show pending/decided
+items. Last position/filters are remembered when browser storage is available.
+Decisions themselves are saved on disk, independent of browser storage, and survive
+server restarts. Notes still being edited are drafts: navigation warns before
+discarding them. Failed saves remain visible and do not unlock grades.
+
+Progress defaults to
+`qa/story-eval/experiments/human-review/pilot-2026-10-30/progress.json` (ignored by Git).
+Back it up or use **Download decisions** to obtain `human-reviews.jsonl` for the
+existing export command. The internal progress JSON is not the JSONL export.
+Use separate progress files for independent reviewers:
+
+```sh
+python3 qa/story-eval/review_server.py --port 5183 \
+  --progress qa/story-eval/experiments/second-reviewer/progress.json
+```
+
+`--dataset PATH` selects another verified snapshot. A saved progress file cannot
+silently move to changed candidate data. Only one server may write a progress file.
+This is a loopback-only developer tool, not a hosted multi-user review service.
+
+Suggested replacement text is saved with a **Needs revision** decision. It does
+not modify the frozen candidate. To use an edit, create a new dataset candidate,
+validate it, and review its new hash. The screen disables approval while replacement
+text is present, and the server/exporter also reject such an approval. Revised and
+rejected examples do not enter training exports.
+
+To use JSONL directly instead of the screen:
+
 Copy `reviews-template.jsonl` to a separate file. Set selected records' decision
-to `approve` or `reject`, add a reviewer identifier and explanatory notes. Leave
+to `approve`, `revise` or `reject`, add a reviewer identifier and explanatory notes. Leave
 unreviewed records `pending`. Approvals require both reviewer and notes; document
 any disagreement with the judge. Do not approve an entire generated batch solely
 because its JSON passed. Hard failures cannot be approved for export.
@@ -132,8 +185,12 @@ authored missions; this harness is not a generic mission planner or solver.
 ```sh
 cargo test -p wonderwilds-director --locked
 python3 -m unittest discover -s qa/story-eval -p 'test_*.py'
+CHROMIUM_PATH=/path/to/chromium node qa/e2e/story-human-review.mjs
 ```
 
-Keep generated runs outside the repository and use synthetic game state only.
+Use synthetic game state only. Keep working runs outside the repository or in
+ignored `qa/story-eval/experiments/`. Preserve selected versioned datasets under
+`datasets/`, including their provenance and checksums; avoid committing disposable
+HTML/build outputs or provider credentials.
 The normal root check includes the workflow's Python tests. A small real CLI run
 as above checks Rust/Python integration without PostgreSQL, a browser or API keys.

@@ -98,6 +98,20 @@ class WorkflowTests(unittest.TestCase):
             reviews=graded / "reviews-template.jsonl", out=out))
         self.assertEqual(runner.rows(out / "train.jsonl"), [])
 
+    def test_revisions_are_not_exported_and_edited_approvals_fail(self):
+        graded = self.grade()
+        reviews = runner.rows(graded / "reviews-template.jsonl")
+        for row in reviews:
+            row.update(decision="revise", reviewer="test", notes="Needs clearer prose", suggestedText="Replacement")
+        path = self.root / "reviews.jsonl"
+        runner.write_rows(path, reviews)
+        runner.export(SimpleNamespace(run=self.run, graded=graded, reviews=path, out=self.root / "export"))
+        self.assertEqual(runner.rows(self.root / "export/train.jsonl"), [])
+        reviews[0]["decision"] = "approve"
+        path.write_text("\n".join(map(json.dumps, reviews)) + "\n")
+        with self.assertRaisesRegex(ValueError, "Suggested edits"):
+            runner.export(SimpleNamespace(run=self.run, graded=graded, reviews=path, out=self.root / "export2"))
+
     def test_invalid_candidate_cannot_be_human_approved(self):
         candidates = runner.rows(self.run / "reference-candidates.jsonl")
         candidates[0]["candidateId"] = "bad"

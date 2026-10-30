@@ -1,5 +1,11 @@
 # Local browser checks
 
+Human story review: `node qa/e2e/story-human-review.mjs` starts an isolated Python
+review server on an ephemeral loopback port and uses a disposable progress file.
+It checks blind grades, all three decisions, reload/server-restart persistence,
+failed-save recovery, revision gating, JSONL export, request protections and mobile
+layout. Set `CHROMIUM_PATH` as below. No actual human decisions or demo data are used.
+
 Use the existing isolated checkout; no worktree is needed. From `frontend/`,
 start `npm run dev -- --host 127.0.0.1`. From this directory run `npm ci` then
 `npm test`. Chromium is available at `/usr/bin/chromium` in the prepared cloud

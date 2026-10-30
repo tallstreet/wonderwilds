@@ -509,3 +509,53 @@ Actual CLI integration produced 137/137 authored-reference hard passes; an unrev
 batch exported zero examples. These are pipeline checks, not model quality results.
 No live provider calls, human-quality calibration, actual training or new-mission
 generation were performed. Existing gameplay and educational state are unchanged.
+
+### Versioned story dataset (30 October 2026)
+
+The synthetic pilot is preserved in `qa/story-eval/datasets/pilot-2026-10-30/`:
+137 replayable inputs, exact generation requests, 411 generated scenes, archived
+hard checks, seven-criterion independent model judgments and recommendation notes.
+The judge recommended 386 keep and 25 revise; these are not human approvals.
+One preferred scene per situation yields 96 training candidates and 40 held-out
+candidates after excluding one exact input overlap.
+
+`dataset.py verify` checks file digests, complete record coverage, candidate-bound
+judgments/recommendations and shortlist consistency. `dataset.py review` reruns
+the current Rust grader and regenerates the report, pending human-review template
+and shortlists using only repository inputs. New dataset versions can be sealed
+without overwriting an existing snapshot. Disposable experiment outputs are ignored;
+the frozen data, provenance and a training-experiment record template are in the repo.
+Exact original session model IDs and generation commit were unavailable and remain
+explicitly unknown. Sixteen Python workflow/dataset tests passed; the repository-only
+review run graded all 411 candidates successfully. No actual training or upload ran.
+
+### Human review screen (30 October 2026)
+
+`python3 qa/story-eval/review_server.py` serves a separate local review workspace
+at `127.0.0.1:5182`. The UI subagent implemented readable state/scene cards,
+training/evaluation queues, approve/revise/reject controls and keyboard/mobile
+layouts. The integration owner implemented/reviewed persistence, grade gating,
+export integration and real browser checks.
+
+The server omits model judgments/recommendations from initial payloads and denies
+grade requests until that candidate has a saved decision. Atomic local progress,
+snapshot/candidate binding and a single-writer file lock preserve decisions through
+reloads/restarts. Original decisions remain recorded after later edits. Optional
+browser storage remembers navigation only. Revision suggestions do not edit or
+approve frozen candidates; exports skip revise/reject and refuse edited approvals.
+The UI can download compatible human-review JSONL. It is a single-user loopback
+developer tool on macOS/Linux, not production identity or multi-user hosting.
+
+Twenty-four Python tests passed. Real Chromium checks covered hidden grades,
+approve/revise/reject, reload/restart, failed saves without premature reveal,
+revision gating, exports, Host/Origin/token behavior and mobile layout. Desktop
+and mobile screenshots were reviewed. No user decisions were made by the agent,
+and no training or model calls were performed.
+
+User follow-up: the user explicitly accepted all pilot model recommendations.
+The separate `qa/story-eval/approvals/pilot-2026-10-30-user-acceptance/` record
+preserves 17 prior decisions and records the remaining batch acceptance honestly
+as model-assisted, not independent blind human labels. There are 386 approvals
+and 25 revision decisions. Verified export yields 269 training examples and 114
+held-out examples, excluding three approved input-overlap candidates from training.
+The frozen dataset and original model judgments remain unchanged. No training ran.

@@ -10,6 +10,13 @@ explicitly after this foundation is verified.
 
 ## Fifth delivery: offline scene evaluation
 
+Follow-up: [the versioned pilot](../qa/story-eval/datasets/pilot-2026-10-30/README.md)
+now preserves the inputs, all generated candidates, independent judgments, review
+notes and derived shortlists in Git-ready repository files. Checksum verification,
+portable review regeneration and new-version sealing support future iterations.
+The experiment template records data/model/settings/results for future training;
+model recommendations remain separate from human approvals and held-out data.
+
 Implemented the [offline harness](../qa/story-eval/README.md), ahead of any paid
 generation or training. The Rust subagent supplied replayable scenario capture,
 scene/binding grading and independent action simulation. The integration owner
