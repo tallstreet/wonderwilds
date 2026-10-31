@@ -1,10 +1,70 @@
-# Wonderwilds development
+# Wonderwilds
 
-The Phaser story adventure runs in `frontend/`. The Rust
-workspace adds versioned contracts, pure gameplay and assessment, an experimental
-mastery policy, an authored director, and a PostgreSQL-backed development API.
-The expansion is **not a completed release**. See
-[implementation status](docs/IMPLEMENTATION_STATUS.md) for integration and review gates.
+**A world children help imagine, where learning moves the adventure forward.**
+
+Wonderwilds is an educational adventure game for young learners. Children explore
+a colourful world, meet characters, collect treasures and help solve problems.
+Along the way, they practise skills that help them make progress in the adventure.
+
+![Wonderwilds at Acorn Trail, with the player character, Hazel and a path to Owl Grove](docs/screenshots/world.png)
+
+*Explore colourful neighbourhoods, meet friends and discover things to do.*
+
+Getting children to use educational apps can feel like a chore, especially when
+the activities become repetitive. Wonderwilds is built around a simple idea:
+give children an adventure they want to return to, and make learning a meaningful
+part of the journey.
+
+## An adventure shaped by imagination
+
+Meta AI helps make the world personal and keeps it full of new stories:
+
+- **Become a character you imagine.** Click the Wonderwilds title and describe
+  your character—a fluffy cat in a red adventurer’s outfit, for example. Meta’s
+  Muse Image API creates the artwork, which becomes an animated character you
+  can play in the game.
+- **Discover fresh stories and missions.** We fine-tuned Meta’s Glimmer model
+  and deployed it on Modal, which provides the computing power to run it. The
+  model uses what is happening in the game to create dialogue and missions.
+  Finish a neighbourhood story, leave and return to discover another adventure.
+- **Find AI-illustrated treasures.** Meta’s image API also creates artwork for
+  the game’s supplies and collectibles, bringing discoveries to life in the
+  world and in your bag.
+
+The current world has a set of places, items and actions, with new stories
+generated around them. The aim is an adventure that keeps offering something
+fresh to discover.
+
+![The supplies bag showing a wooden plank collected for an adventure](docs/screenshots/supplies-bag.png)
+
+*Gather supplies and keep what you need for the next step of your adventure.*
+
+## Learning with a purpose
+
+Learning activities are woven into the things children do in the world, such as
+gathering supplies, investigating discoveries and helping characters build
+something. Completing an activity can also complete a step in a mission, giving
+the learning an immediate purpose.
+
+A connected learning map spans Foundation through Year Six. The game tracks
+completed activities and uses the skills they build on to guide the next practice.
+Hints, worked examples and a “Let’s do it together” option help learners keep
+moving when they need support. The game checks answers and saves progress;
+AI creates the surrounding stories and artwork.
+
+![A learning activity asking the player to give one gift to each friend, with movable gift pieces and help controls](docs/screenshots/learning-activity.png)
+
+*Hands-on activities let learners practise skills, with hints and support close by.*
+
+Wonderwilds is a working hackathon prototype, not a finished educational product.
+Curriculum review and testing with children are still ahead. See
+[implementation status](docs/IMPLEMENTATION_STATUS.md) for current capabilities
+and limitations.
+
+## Development
+
+The game runs in `frontend/`, with a Rust backend and PostgreSQL database for
+saved progress and learning activities.
 The active work follows the [implementation plan](docs/IMPLEMENTATION_PLAN.md) and
 [curriculum mission integration](docs/CURRICULUM_MISSION_PLAN.md): profile-owned
 practice through the existing curriculum graph inside story missions. The
