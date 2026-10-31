@@ -86,6 +86,9 @@ reload, a nonplayable save-limit response, untouched assessed progress and uncha
 Screenshots are written under `/tmp/wonderwilds-story-world-*.png`; no persistent
 demo data is used. The mock changes only initial display prose and a choice label;
 all progress changes use real UI commands and the authoritative server runtime.
+Route visits wait for either a travel choice or the saved destination when walking
+automatically crosses an area exit. Travel must advance the story revision exactly
+once; the second-tab recovery path also accepts automatic arrival.
 
 All three connected stories against a fresh API/PostgreSQL profile:
 
