@@ -62,7 +62,8 @@ wrong one-to-one assignment, records help, retries an uncertain save after reloa
 and completes a workshop step together. It checks atomic story advancement,
 independent versus assisted evidence, desktop/phone controls and separate
 guest/assessed-adventure saves. Full story journeys use `inline-step.mjs` to
-complete these interactions through the supported route. The mission practice client tests
+complete these interactions through the supported route, including **Ready to share**
+for human-reviewed workshops. The mission practice client tests
 cover exact retry and stale-revision recovery; learning-engine tests cover the
 five supported skills, evidence diversity and graph progression. This is not
 full 120-skill activity coverage or educator approval. Keep model providers
