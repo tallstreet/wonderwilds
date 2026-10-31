@@ -52,7 +52,12 @@ test('Muse request uses fixed model, layout and server credentials; invalid imag
     assert.match(body.images[0].image_url, /^data:image\/png;base64,iVBOR/);
     assert.equal(body.reasoning_strength, 'high');
     assert.match(body.prompt, /rounded 3D animated toy-like forms/);
-    assert.match(body.prompt, /12% blank magenta margin/);
+    assert.match(body.prompt, /20% blank magenta margin on ALL four sides of EVERY cell/);
+    assert.match(body.prompt, /central 60% of BOTH cell width and cell height/);
+    assert.match(body.prompt, /feet at 78% of cell height/);
+    assert.match(body.prompt, /row 2, column 3 the nose points to the LEFT edge/);
+    assert.match(body.prompt, /row 3, column 3 the nose points to the RIGHT edge/);
+    assert.match(body.prompt, /Changing the foot phase must NEVER turn or mirror the character/);
     assert.equal(body.output_format, 'png');
     assert.equal(body.tool_enablement.enable_web_search, false);
     assert.match(body.prompt, /3 equal columns and 4 equal rows/);

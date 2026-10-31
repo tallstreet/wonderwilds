@@ -1400,6 +1400,16 @@ but the first pose extends past the fixed 448px row boundary; visual inspection
 also found an incorrectly facing walking pose. This confirms a layout/alignment
 failure rather than API unavailability. A rejected sheet is never applied.
 
+Character-sheet padding/direction follow-up: generation now requests 20% empty
+margin on every side of each cell (previously 12%), a central 60% safe area for
+the entire silhouette, and a consistent foot baseline at 78% of cell height.
+An explicit twelve-cell direction map separates walking phases A/B from screen
+direction and reinforces the third-column poses in both side-facing rows.
+Normalization and rejection checks remain unchanged. Frontend checks (137 tests,
+type/lint/format and production build), mocked HTTP bridge checks and
+`git diff --check` passed using Node 26. Live provider compliance with the revised
+instructions remains unverified; existing generated sheets require regeneration.
+
 The style follow-up replaces the earlier flat/painterly text-only request with
 Meta's image-edit endpoint and the existing hero atlas as a style-only reference.
 A live follow-up produced a dimensional 3D-looking cat that passed the pixel/cell
