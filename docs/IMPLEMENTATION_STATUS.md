@@ -5,6 +5,32 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Activity control review examples — 31 October 2026
+
+`/activity-review.html` provides seven standalone UI examples: direct single
+choice, multiple choice, numeric entry, word entry, ordered cards, gift assignment
+and a human-reviewed writing workshop. The review uses bundled art and a shared
+question layout, explicit checking, optional hints, native input controls and
+tap/keyboard alternatives to dragging. Switching examples preserves in-page
+answers; Start again clears the current example and reload clears everything.
+The writing example has an explicit local-draft notice and Ready to share action.
+
+This is a review surface, not the replacement mission assessment implementation.
+It collects and displays sample answers without marking correctness, making API
+or provider calls, recording evidence, awarding rewards or modifying the database.
+The 120-skill implementation plan remains planned. The page has its own Vite
+production entry and requires only the frontend development server.
+
+Validation: full frontend check passed, including 137 unit/API tests and the
+production build. The new browser regression passed all seven controls at 1280,
+390 and 320px, including keyboard, touch taps, mouse dragging, undo, occupied-slot
+replacement, field validity, safe text, hint toggling, draft retention/reset and
+no write requests. Desktop/phone screenshots were inspected. The existing browser
+smoke, six-family activity suite and mission activity suite passed. Node 26 was
+available; the existing adventure bundle-size warning remains. No backend or
+database changes were needed; educator, assistive-technology and child playtesting
+remain outstanding.
+
 ## Reconcile activity conflicts before showing recovery — 31 October 2026
 
 The activity's former generic “Progress changed” message conflated stale

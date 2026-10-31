@@ -63,6 +63,15 @@ preview or production deployment is created. See the feature READMEs under
 `frontend/src/api/`, `frontend/src/learning/`, `content/`, and
 `backend/crates/api/` for trust boundaries and limitations.
 
+## Activity control UI review
+
+Run `npm run dev -- --host 127.0.0.1` from `frontend/`, then open
+[the activity playground](http://127.0.0.1:5173/activity-review.html).
+Try single/multiple choices, number/word entry, ordering, gift assignment and
+a writing workshop. This standalone review collects sample answers without
+marking them or saving learning progress; it needs no backend or database.
+See [review controls](frontend/src/activity-review/README.md) for browser checks.
+
 ## Local browser + backend demo (macOS)
 
 Install PostgreSQL 17 (`brew install postgresql@17`) and locked frontend

@@ -143,6 +143,7 @@ jobs:
           npm test --prefix qa/e2e
           node frontend/src/learning/activity.browser.mjs
           node frontend/src/mission-learning/activity.browser.mjs
+          node qa/e2e/activity-review.mjs
       - name: Check default authored world with real API and disposable PostgreSQL
         if: matrix.suite == 'browser'
         run: node qa/e2e/run-training-qa.mjs

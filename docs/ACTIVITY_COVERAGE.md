@@ -1,5 +1,10 @@
 # Activity coverage and public IXL references
 
+Planned replacement work is specified in the
+[activity implementation plan](ACTIVITY_IMPROVEMENT_PLAN.md) and
+[120-skill checklist](ACTIVITY_SKILL_CHECKLIST.md). Those documents describe
+future work; the inventory below records the current implementation.
+
 Updated 31 October 2026. All **120** draft graph nodes have original, code-authored
 practice: five existing assessed maths activities, 93 additional card starters and
 22 guided human-review workshops. This is activity availability, not complete
