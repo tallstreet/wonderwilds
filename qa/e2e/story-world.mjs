@@ -2,6 +2,7 @@
 // Run with WW_QA_BROWSER_TEST=qa/e2e/story-world.mjs via run-training-qa.mjs.
 import assert from 'node:assert/strict';
 import { finishInlineStep } from './inline-step.mjs';
+import { waitForStoryVisit } from './story-visit.mjs';
 import { chromium } from 'playwright';
 const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
 const source = process.env.WW_STORY_SOURCE ?? 'bank';
@@ -53,7 +54,7 @@ try {
     await close();
     await page.locator('#missions').click();
     await page.locator(`[data-story-visit="${id}"]`).click();
-    await page.locator('dialog[open] [data-story-action], dialog[open] [data-story-continue]').first().waitFor({ timeout: 20000 });
+    await waitForStoryVisit(page, id);
   };
   const choose = async type => {
     const previous = (await snapshot()).revision;
@@ -61,6 +62,14 @@ try {
     await finishInlineStep(page, type);
     await page.waitForFunction(revision => Number(document.querySelector('#game')?.dataset.storyRevision) > revision, previous, { timeout: 20000 });
     return ready();
+  };
+  const travel = async destination => {
+    const previous = (await snapshot()).revision;
+    await visit(`route:${destination}`);
+    if ((await snapshot()).locationId !== destination) await choose('travel');
+    const state = await ready();
+    assert.equal(state.locationId, destination);
+    assert.equal(state.revision, previous + 1, 'Travel commits exactly once');
   };
   const initialPosition = await position();
   await visit('npc:pip');
@@ -72,7 +81,7 @@ try {
   await choose('accept_mission');
   await page.screenshot({ path: '/tmp/wonderwilds-story-world-desktop.png', fullPage: true });
   if (source === 'bank') { await visit('resource:fallen_wood'); await choose('collect'); }
-  await visit('route:workshop'); await choose('travel');
+  await travel('workshop');
   assert.equal((await snapshot()).locationId, 'workshop');
   await visit('npc:woodcutter');
   const beforeAck = (await snapshot()).revision;
@@ -106,7 +115,10 @@ try {
   assert.equal(await other.evaluate(() => Object.keys(sessionStorage).some(key => key.startsWith('wonderwilds.story.pending.'))), false);
   await other.locator('#missions').click();
   await other.locator('[data-story-visit="route:bridge_bank"]').click();
-  await other.locator('dialog[open] [data-story-action="travel"]').click();
+  await waitForStoryVisit(other, 'route:bridge_bank');
+  if (await other.locator('#game').getAttribute('data-story-location') !== 'bridge_bank') {
+    await other.locator('dialog[open] [data-story-action="travel"]').click();
+  }
   await other.waitForFunction(revision => Number(document.querySelector('#game')?.dataset.storyRevision) > revision, committedRevision);
   const advancedRevision = (await snapshot()).revision;
   assert.equal((await snapshot()).locationId, 'bridge_bank');
@@ -138,7 +150,7 @@ try {
   await visit('npc:pip');
   await choose('accept_mission');
   await close();
-  if ((await snapshot()).locationId !== 'bridge_bank') { await visit('route:bridge_bank'); await choose('travel'); }
+  if ((await snapshot()).locationId !== 'bridge_bank') await travel('bridge_bank');
   await page.setViewportSize({ width: 390, height: 844 });
   await visit('object:bridge');
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));

@@ -2,6 +2,7 @@
 // WW_QA_BROWSER_TEST=qa/e2e/story-series.mjs node qa/e2e/run-training-qa.mjs
 import assert from 'node:assert/strict';
 import { finishInlineStep } from './inline-step.mjs';
+import { waitForStoryVisit } from './story-visit.mjs';
 import { chromium } from 'playwright';
 const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
@@ -29,7 +30,8 @@ try {
   const visit = async id => {
     await close(); await page.locator('#missions').click();
     await page.locator(`[data-story-visit="${id}"]`).click();
-    await page.locator('dialog[open] [data-story-action], dialog[open] [data-story-continue]').first().waitFor({ timeout: 20000 });
+    await waitForStoryVisit(page, id);
+    if (id.startsWith('route:') && (await snapshot()).locationId === id.slice(6)) return;
     const marker = JSON.parse(await page.locator('#game').getAttribute('data-story-markers')).find(marker => marker.id === id);
     const point = await page.locator('#game').evaluate(node => ({ x: Number(node.dataset.storyPlayerX), y: Number(node.dataset.storyPlayerY) }));
     assert.ok(Math.hypot(point.x - marker.x, point.y - marker.y) < 110, `${id} requires actual approach`);
@@ -43,7 +45,15 @@ try {
   };
   const act = async (marker, type) => {
     if (type === 'cancel_mission') { await close(); await page.locator('#missions').click(); }
-    else await visit(marker);
+    else {
+      const previous = (await snapshot()).revision;
+      await visit(marker);
+      if (type === 'travel' && (await snapshot()).locationId === marker.slice(6)) {
+        const state = await ready();
+        assert.equal(state.revision, previous + 1, 'Walking travel commits exactly once');
+        return state;
+      }
+    }
     return choose(type);
   };
   const travel = destination => act(`route:${destination}`, 'travel');
