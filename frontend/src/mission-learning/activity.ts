@@ -5,6 +5,8 @@ import type {
   MissionChoice,
 } from '../../../contracts/generated/contracts.ts';
 import './activity.css';
+import { mountQuestionControl } from './question-control.ts';
+import { activityIcon } from './icons.ts';
 import { pointerMoves } from '../learning/drag.ts';
 import type { AnswerRecorder } from '../learning/voice.ts';
 import { voiceEntry } from './voice.ts';
@@ -34,6 +36,8 @@ export function mountMissionActivity(
   const document = container.ownerDocument;
   const root = document.createElement('section');
   root.className = 'ww-mission-activity';
+  const modern = activity.task.kind === 'question';
+  if (modern) root.classList.add('ww-question-shell');
   root.dataset.activityVariant = activity.variantId;
   const heading = document.createElement('h2');
   heading.id = container.closest('dialog')
@@ -54,11 +58,23 @@ export function mountMissionActivity(
   context.className = 'ww-mission-context';
   context.textContent = activity.storyStep?.introduction ?? activity.presentation.context;
   if (activity.storyStep) intro.append(context);
-  else intro.append(objective, lesson, context);
+  else if (!modern) intro.append(objective, lesson, context);
+  else intro.append(context);
 
   const prompt = document.createElement('p');
   prompt.className = 'ww-mission-prompt';
   prompt.textContent = activity.presentation.prompt;
+  if (modern) {
+    const emphasis = ['one more', 'one less', 'all', 'in order', 'one gift'].find((word) =>
+      activity.presentation.prompt.includes(word),
+    );
+    if (emphasis) {
+      const [before, after] = activity.presentation.prompt.split(emphasis);
+      const strong = document.createElement('strong');
+      strong.textContent = emphasis;
+      prompt.replaceChildren(before!, strong, after!);
+    }
+  }
   const form = document.createElement('form');
   form.className = 'ww-mission-task';
   form.addEventListener('submit', (event) => event.preventDefault());
@@ -77,17 +93,21 @@ export function mountMissionActivity(
   const actions = document.createElement('div');
   actions.className = 'ww-mission-actions';
   const check = document.createElement('button');
-  check.type = 'button';
+  check.type = modern ? 'submit' : 'button';
+  if (modern) {
+    form.id = `question-form-${crypto.randomUUID()}`;
+    check.setAttribute('form', form.id);
+  }
   check.className = 'primary';
-  check.textContent = 'Check my idea';
+  check.textContent = modern ? 'Check answer' : 'Check my idea';
   const hint = document.createElement('button');
   hint.type = 'button';
   hint.className = 'secondary';
-  hint.textContent = 'Ask for a hint';
+  hint.textContent = modern ? 'Hint' : 'Ask for a hint';
   const example = document.createElement('button');
   example.type = 'button';
   example.className = 'secondary';
-  example.textContent = 'Show a worked example';
+  example.textContent = modern ? 'Show me' : 'Show a worked example';
   const abandon = document.createElement('button');
   abandon.type = 'button';
   abandon.className = 'text-button';
@@ -97,13 +117,27 @@ export function mountMissionActivity(
   together.className = 'secondary';
   together.textContent = 'Let’s do it together';
   together.hidden = !callbacks.onFinishTogether;
+  if (modern) {
+    check.prepend(activityIcon('check'));
+    hint.prepend(activityIcon('hint'));
+    example.prepend(activityIcon('example'));
+    together.prepend(activityIcon('together'));
+  }
   actions.append(check, hint, example, together, abandon);
   const welcome = document.createElement('header');
   welcome.className = 'ww-mission-welcome';
-  welcome.append(art(document, 'pip', 'hero'), heading);
+  if (modern) {
+    const titles = document.createElement('div');
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'ww-question-eyebrow';
+    eyebrow.textContent = activity.skillId;
+    titles.append(eyebrow, heading);
+    welcome.append(art(document, 'pip', 'hero'), titles);
+  } else welcome.append(art(document, 'pip', 'hero'), heading);
   root.append(welcome, intro, prompt, form, status, help, actions);
   container.replaceChildren(root);
 
+  let questionControl: ReturnType<typeof mountQuestionControl> | undefined;
   let choiceId: string | undefined;
   const assignments = new Map<string, string>();
   let currentActivity = activity;
@@ -159,6 +193,7 @@ export function mountMissionActivity(
   }
 
   function selectedAnswer(): MissionLearningAnswer | undefined {
+    if (modern) return questionControl?.answer();
     if (activity.task.kind === 'pairing') return pairAnswer();
     return choiceId ? { kind: 'choice', choiceId } : undefined;
   }
@@ -179,6 +214,7 @@ export function mountMissionActivity(
     refresh.hidden = !refreshAvailable;
     refresh.disabled = busy || !refreshAvailable;
     inputs.forEach((input) => (input.disabled = busy || recording || complete || pending));
+    questionControl?.update();
     voice?.update();
     if (busy || complete || pending) drag.cancel();
     root.setAttribute('aria-busy', String(busy));
@@ -258,7 +294,64 @@ export function mountMissionActivity(
   }
 
   const task = activity.task;
-  if (task.kind === 'pairing') {
+  if (task.kind === 'question') {
+    gestureHelp.hidden = true;
+    const controlRoot = document.createElement('div');
+    form.append(controlRoot);
+    questionControl = mountQuestionControl(
+      controlRoot,
+      task.interaction,
+      task.stimuli,
+      () => editable() && !recording,
+      () => queueMicrotask(update),
+    );
+    if (task.interaction.kind === 'workshop') {
+      check.hidden = true;
+      together.replaceChildren(activityIcon('together'), document.createTextNode('Ready to share'));
+    }
+    if (
+      callbacks.recorder &&
+      ((task.interaction.kind === 'number_entry' && task.interaction.fields.length === 1) ||
+        (task.interaction.kind === 'single_choice' &&
+          ![
+            'E03',
+            'E04',
+            'E05',
+            'E06',
+            'E07',
+            'E08',
+            'E09',
+            'E10',
+            'E12',
+            'EY101',
+            'EY102',
+            'EY106',
+            'EY201',
+            'EY204',
+            'EY303',
+            'EY403',
+          ].includes(activity.skillId)) ||
+        (task.interaction.kind === 'workshop' &&
+          !['E01', 'E03', 'E04', 'E05', 'E06', 'E11', 'EY101', 'EY107', 'EY201', 'EY605'].includes(
+            activity.skillId,
+          )))
+    ) {
+      voice = voiceEntry(
+        form,
+        callbacks.recorder,
+        task.interaction.kind === 'single_choice' ? task.interaction.options : [],
+        editable,
+        (id) => questionControl?.selectChoice(id),
+        (active) => {
+          recording = active;
+          update();
+        },
+        task.interaction.kind === 'single_choice'
+          ? undefined
+          : (text) => questionControl?.useText(text),
+      );
+    }
+  } else if (task.kind === 'pairing') {
     if (task.objects.length !== task.recipients.length) {
       status.textContent = 'This pairing task is not available right now.';
       check.disabled = true;
@@ -581,6 +674,24 @@ export function mountMissionActivity(
       (snapshot.activeActivity.id !== activity.id ||
         snapshot.activeActivity.variantId !== activity.variantId)
     ) {
+      if (modern && snapshot.lastFeedback?.result === 'incorrect') {
+        status.textContent = snapshot.lastFeedback.explanation ?? snapshot.lastFeedback.message;
+        form.hidden = true;
+        actions.hidden = true;
+        const next = document.createElement('button');
+        next.type = 'button';
+        next.className = 'primary';
+        next.textContent = 'Try another';
+        next.addEventListener('click', () => {
+          if (destroyed) return;
+          root.hidden = true;
+          callbacks.onReplace?.(snapshot);
+        });
+        root.append(next);
+        next.focus();
+        complete = true;
+        return;
+      }
       complete = true;
       root.hidden = true;
       callbacks.onReplace?.(snapshot);
@@ -602,6 +713,7 @@ export function mountMissionActivity(
     if (revealed) {
       supportText.textContent = revealed.text;
       supportText.hidden = false;
+      hint.setAttribute('aria-expanded', 'true');
     }
     if (feedback) retryAvailable = false;
     update();
@@ -613,6 +725,10 @@ export function mountMissionActivity(
     if (retryAvailable) {
       // The outcome is uncertain: only retry the original prepared command.
       status.textContent = 'We could not confirm that save. The same action is ready to retry.';
+      return;
+    }
+    if (modern && error instanceof ApiFailure && error.code === 'INVALID_INPUT') {
+      status.textContent = 'Check the format of your answer, then try again.';
       return;
     }
     if (!(error instanceof ApiFailure) || error.code !== 'REVISION_CONFLICT') {
@@ -662,7 +778,13 @@ export function mountMissionActivity(
     }
   }
 
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const answer = selectedAnswer();
+    if (modern && answer && !check.disabled) void perform(() => callbacks.onAttempt(answer));
+  });
   check.addEventListener('click', () => {
+    if (modern) return;
     const answer = selectedAnswer();
     if (!answer) return;
     void perform(() => callbacks.onAttempt(answer));
@@ -670,7 +792,17 @@ export function mountMissionActivity(
   together.addEventListener('click', () => {
     if (callbacks.onFinishTogether) void perform(callbacks.onFinishTogether);
   });
-  hint.addEventListener('click', () => void perform(() => callbacks.onSupport('hint')));
+  hint.setAttribute('aria-controls', 'ww-mission-support');
+  supportText.id = 'ww-mission-support';
+  hint.setAttribute('aria-expanded', String(!supportText.hidden));
+  hint.addEventListener('click', () => {
+    if (modern && !supportText.hidden) {
+      supportText.hidden = true;
+      hint.setAttribute('aria-expanded', 'false');
+      return;
+    }
+    void perform(() => callbacks.onSupport('hint'));
+  });
   example.addEventListener(
     'click',
     () => void perform(() => callbacks.onSupport('worked_example')),
@@ -741,6 +873,7 @@ export function mountMissionActivity(
   return {
     destroy() {
       destroyed = true;
+      questionControl?.destroy();
       voice?.destroy();
       drag.destroy();
       root.remove();

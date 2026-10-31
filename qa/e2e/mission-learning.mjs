@@ -2,6 +2,7 @@
 // Run with WW_QA_BROWSER_TEST=qa/e2e/mission-learning.mjs via run-training-qa.mjs.
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import { enterAnswer,fixtureAnswer } from './mission-question-answer.mjs';
 
 const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5180';
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
@@ -299,17 +300,13 @@ try {
   const activity = started.activeActivity;
   assert.ok(activity.storyStep, 'The task is bound to the selected mission action');
   assert.equal(activity.skillId, 'M01');
-  assert.equal(activity.task.kind, 'pairing');
+  assert.equal(activity.task.kind, 'question');
   assert.equal(await page.locator('.ww-mission-context').textContent(), activity.storyStep.introduction);
   assert.equal((await storySnapshot()).revision, acceptedResponse.ok() ? initialStory.revision + 1 : -1);
   assert.equal(await page.locator('.ww-mission-support-text').isVisible(), false);
   await page.screenshot({ path: '/tmp/wonderwilds-mission-learning-desktop.png', fullPage: true });
 
-  assert.ok(activity.task.objects.length >= 3);
-  for (let index = 0; index < activity.task.objects.length; index++) {
-    await page.locator('.ww-mission-piece').nth(index).click();
-    await page.locator('.ww-mission-pair-row').nth(index).click();
-  }
+  await enterAnswer(page,activity);
   let conflictAttempts = 0;
   await page.route('**/api/v1/mission-learning/commands', async route => {
     conflictAttempts++;
@@ -318,7 +315,7 @@ try {
     // Model another writer having already completed the activity when this client sees a 409.
     await route.fulfill({status:409,json:{code:'REVISION_CONFLICT',schemaVersion:'1.0',correlationId:'synthetic-conflict'}});
   }, {times:1});
-  await page.getByRole('button', {name:'Check my idea',exact:true}).click();
+  await page.getByRole('button', {name:'Check answer',exact:true}).click();
   await page.locator('dialog').waitFor({state:'hidden'});
   assert.equal(conflictAttempts,1);
   assert.equal((await learningSnapshot()).revision,2,'Read-only conflict recovery must not add another command');
@@ -344,14 +341,14 @@ try {
   const second = (await learningSnapshot()).activeActivity;
   assert.equal(second.skillId,'M03','The completed matching skill must not return');
   const beforeWrong = (await storySnapshot()).revision;
-  const wrong = second.task.choices.find(c=>c.value!==second.task.objects.length);
-  await page.locator(`input[value="${wrong.id}"]`).check();
+  const wrong=fixtureAnswer(second);wrong.values[0].value='99';
+  await enterAnswer(page,second,wrong);
   let wrongBody;
   await page.route('**/api/v1/mission-learning/commands',async route=>{
     wrongBody=route.request().postData(); const response=await route.fetch();
     assert.equal(response.status(),200); await route.abort('failed');
   },{times:1});
-  await page.getByRole('button',{name:'Check my idea',exact:true}).click();
+  await page.getByRole('button',{name:'Check answer',exact:true}).click();
   await page.getByRole('button',{name:'Retry the same saved action',exact:true}).waitFor();
   const replaced=(await learningSnapshot()).activeActivity;
   assert.equal(replaced.skillId,second.skillId);
@@ -393,18 +390,17 @@ try {
   assert.equal((await request).postData(),wrongBody);
   await walkWhileSaving();
   releaseRetry();
-  await page.waitForFunction(profile=>sessionStorage.getItem(`wonderwilds.mission-learning.pending.v1:${profile}`)===null,bootstrap.profileId);
+  await page.waitForFunction(profile=>sessionStorage.getItem(`wonderwilds.mission-learning.pending.v2:${profile}`)===null,bootstrap.profileId);
   await page.locator('#missions').click();
   await page.getByRole('button',{name:'Resume the mission task',exact:true}).click();
   await page.locator(`[data-activity-variant="${replaced.variantId}"]`).waitFor();
   assert.deepEqual((await learningSnapshot()).activeActivity,replaced,'Retry must not issue another question');
   assert.equal(await page.locator('.ww-mission-task input:checked').count(),0);
-  assert.equal(await page.getByRole('button',{name:'Check my idea',exact:true}).isDisabled(),true);
+  assert.equal(await page.getByRole('button',{name:'Check answer',exact:true}).isDisabled(),true);
   await page.setViewportSize({width:390,height:844});
   await page.screenshot({path:'/tmp/wonderwilds-mission-learning-mobile.png',fullPage:true});
-  const correct=replaced.task.choices.find(c=>c.value===replaced.task.objects.length);
-  await page.locator(`input[value="${correct.id}"]`).check();
-  await page.getByRole('button',{name:'Check my idea',exact:true}).click();
+  await enterAnswer(page,replaced);
+  await page.getByRole('button',{name:'Check answer',exact:true}).click();
   await page.locator('dialog').waitFor({state:'hidden'});
   const done=await learningSnapshot();
   assert.equal(done.skills.find(s=>s.skillId==='M03').activityCompleted,true);
@@ -427,12 +423,8 @@ try {
   moved = await sendStory(moved,{type:'choose',actionId:away.id},'stale-task-away');
   const back = moved.sceneInput.availableActions.find(a=>a.action.type==='travel' && a.action.destinationId==='bridge_bank');
   moved = await sendStory(moved,{type:'choose',actionId:back.id},'stale-task-back');
-  const target = third.task.promptMode === 'more'
-    ? Math.max(...third.task.collections.map(c=>c.items.length))
-    : Math.min(...third.task.collections.map(c=>c.items.length));
-  const group = third.task.collections.find(c=>c.items.length===target);
-  await page.locator(`input[value="${group.id}"]`).check();
-  await page.getByRole('button',{name:'Check my idea',exact:true}).click();
+  await enterAnswer(page,third);
+  await page.getByRole('button',{name:'Check answer',exact:true}).click();
   await page.locator('dialog').waitFor({state:'hidden'});
   assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).activityCompleted,true);
   assert.equal((await storySnapshot()).revision,moved.revision+1);

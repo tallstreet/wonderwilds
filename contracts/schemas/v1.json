@@ -763,16 +763,189 @@
         {
           "type": "object",
           "properties": {
-            "kind": { "const": "pairing", "type": "string" },
-            "assignments": { "type": "array", "items": { "$ref": "#/$defs/MissionPairingAssignment" }, "minItems": 1, "maxItems": 12 }
+            "kind": {
+              "const": "pairing",
+              "type": "string"
+            },
+            "assignments": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionPairingAssignment"
+              },
+              "minItems": 1,
+              "maxItems": 12
+            }
           },
-          "required": ["kind", "assignments"],
+          "required": [
+            "kind",
+            "assignments"
+          ],
           "additionalProperties": false
         },
         {
           "type": "object",
-          "properties": { "kind": { "const": "choice", "type": "string" }, "choiceId": { "type": "string", "minLength": 1, "maxLength": 80 } },
-          "required": ["kind", "choiceId"],
+          "properties": {
+            "kind": {
+              "const": "choice",
+              "type": "string"
+            },
+            "choiceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "kind",
+            "choiceId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "choices"
+            },
+            "choiceIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minItems": 1,
+              "maxItems": 6,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "kind",
+            "choiceIds"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "numbers"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "fieldId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  }
+                },
+                "required": [
+                  "fieldId",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 3
+            }
+          },
+          "required": [
+            "kind",
+            "values"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "text"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "order"
+            },
+            "itemIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minItems": 2,
+              "maxItems": 8,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "kind",
+            "itemIds"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "assign"
+            },
+            "assignments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "objectId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "targetId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "objectId",
+                  "targetId"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 20
+            }
+          },
+          "required": [
+            "kind",
+            "assignments"
+          ],
           "additionalProperties": false
         }
       ]
@@ -828,64 +1001,282 @@
         {
           "type": "object",
           "properties": {
-            "kind": { "const": "practice_cards", "type": "string" },
-            "stimulus": { "type": "string", "minLength": 1, "maxLength": 2000 },
-            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "maxItems": 5 },
-            "adultReview": { "type": "boolean" }
+            "kind": {
+              "const": "practice_cards",
+              "type": "string"
+            },
+            "stimulus": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "choices": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionObject"
+              },
+              "maxItems": 5
+            },
+            "adultReview": {
+              "type": "boolean"
+            }
           },
-          "required": ["kind", "stimulus", "choices", "adultReview"],
-          "allOf": [{ "if": { "properties": { "adultReview": { "const": false } } }, "then": { "properties": { "choices": { "type": "array", "minItems": 2 } } }, "else": { "properties": { "choices": { "type": "array", "maxItems": 0 } } } }],
+          "required": [
+            "kind",
+            "stimulus",
+            "choices",
+            "adultReview"
+          ],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "adultReview": {
+                    "const": false
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "choices": {
+                    "type": "array",
+                    "minItems": 2
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "choices": {
+                    "type": "array",
+                    "maxItems": 0
+                  }
+                }
+              }
+            }
+          ],
           "additionalProperties": false
         },
         {
           "type": "object",
           "properties": {
-            "kind": { "const": "pairing", "type": "string" },
-            "layout": { "type": "string", "enum": ["object_cards", "recipient_slots"] },
-            "objects": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "minItems": 1, "maxItems": 12 },
-            "recipients": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "minItems": 1, "maxItems": 12 }
+            "kind": {
+              "const": "pairing",
+              "type": "string"
+            },
+            "layout": {
+              "type": "string",
+              "enum": [
+                "object_cards",
+                "recipient_slots"
+              ]
+            },
+            "objects": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionObject"
+              },
+              "minItems": 1,
+              "maxItems": 12
+            },
+            "recipients": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionObject"
+              },
+              "minItems": 1,
+              "maxItems": 12
+            }
           },
-          "required": ["kind", "layout", "objects", "recipients"], "additionalProperties": false
+          "required": [
+            "kind",
+            "layout",
+            "objects",
+            "recipients"
+          ],
+          "additionalProperties": false
         },
         {
           "type": "object",
           "properties": {
-            "kind": { "const": "count_collection", "type": "string" },
-            "layout": { "type": "string", "minLength": 1, "maxLength": 80 },
-            "objects": { "type": "array", "items": { "$ref": "#/$defs/MissionObject" }, "minItems": 1, "maxItems": 20 },
-            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionChoice" }, "minItems": 2, "maxItems": 5 }
+            "kind": {
+              "const": "count_collection",
+              "type": "string"
+            },
+            "layout": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "objects": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionObject"
+              },
+              "minItems": 1,
+              "maxItems": 20
+            },
+            "choices": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionChoice"
+              },
+              "minItems": 2,
+              "maxItems": 5
+            }
           },
-            "required": ["kind", "layout", "objects", "choices"], "additionalProperties": false
+          "required": [
+            "kind",
+            "layout",
+            "objects",
+            "choices"
+          ],
+          "additionalProperties": false
         },
         {
           "type": "object",
           "properties": {
-            "kind": { "const": "compare_collections", "type": "string" },
-            "collections": { "type": "array", "items": { "$ref": "#/$defs/MissionCollection" }, "minItems": 2, "maxItems": 3 },
-            "promptMode": { "type": "string", "enum": ["more", "fewer"] },
-            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionChoice" }, "minItems": 2, "maxItems": 3 }
+            "kind": {
+              "const": "compare_collections",
+              "type": "string"
+            },
+            "collections": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionCollection"
+              },
+              "minItems": 2,
+              "maxItems": 3
+            },
+            "promptMode": {
+              "type": "string",
+              "enum": [
+                "more",
+                "fewer"
+              ]
+            },
+            "choices": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionChoice"
+              },
+              "minItems": 2,
+              "maxItems": 3
+            }
           },
-          "required": ["kind", "collections", "promptMode", "choices"], "additionalProperties": false
+          "required": [
+            "kind",
+            "collections",
+            "promptMode",
+            "choices"
+          ],
+          "additionalProperties": false
         },
         {
           "type": "object",
           "properties": {
-            "kind": { "const": "number_path", "type": "string" },
-            "shown": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 20 }, "minItems": 2, "maxItems": 8 },
-            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionChoice" }, "minItems": 2, "maxItems": 5 },
-            "direction": { "type": "string", "enum": ["forward", "backward"] }
+            "kind": {
+              "const": "number_path",
+              "type": "string"
+            },
+            "shown": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 20
+              },
+              "minItems": 2,
+              "maxItems": 8
+            },
+            "choices": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionChoice"
+              },
+              "minItems": 2,
+              "maxItems": 5
+            },
+            "direction": {
+              "type": "string",
+              "enum": [
+                "forward",
+                "backward"
+              ]
+            }
           },
-          "required": ["kind", "shown", "choices", "direction"], "additionalProperties": false
+          "required": [
+            "kind",
+            "shown",
+            "choices",
+            "direction"
+          ],
+          "additionalProperties": false
         },
         {
           "type": "object",
           "properties": {
-            "kind": { "const": "part_whole", "type": "string" },
-            "whole": { "type": "integer", "minimum": 1, "maximum": 20 },
-            "shownPart": { "type": "integer", "minimum": 0, "maximum": 20 },
-            "choices": { "type": "array", "items": { "$ref": "#/$defs/MissionChoice" }, "minItems": 2, "maxItems": 5 }
+            "kind": {
+              "const": "part_whole",
+              "type": "string"
+            },
+            "whole": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "shownPart": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "choices": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionChoice"
+              },
+              "minItems": 2,
+              "maxItems": 5
+            }
           },
-          "required": ["kind", "whole", "shownPart", "choices"], "additionalProperties": false
+          "required": [
+            "kind",
+            "whole",
+            "shownPart",
+            "choices"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "question"
+            },
+            "exerciseId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "interaction": {
+              "$ref": "#/$defs/QuestionInteraction"
+            },
+            "stimuli": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/QuestionStimulus"
+              },
+              "minItems": 0,
+              "maxItems": 6
+            }
+          },
+          "required": [
+            "kind",
+            "exerciseId",
+            "interaction",
+            "stimuli"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -924,37 +1315,132 @@
     "MissionLearningFeedback": {
       "type": "object",
       "properties": {
-        "result": { "type": "string", "enum": ["correct", "incorrect", "assisted"] },
-        "message": { "type": "string", "minLength": 1, "maxLength": 160 },
-        "completed": { "type": "boolean" }
+        "result": {
+          "type": "string",
+          "enum": [
+            "correct",
+            "incorrect",
+            "assisted"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "completed": {
+          "type": "boolean"
+        },
+        "exerciseId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "variantId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        }
       },
-      "required": ["result", "message", "completed"],
+      "required": [
+        "result",
+        "message",
+        "completed"
+      ],
       "additionalProperties": false
     },
     "MissionActivity": {
       "type": "object",
       "properties": {
-        "schemaVersion": { "const": "1.0", "type": "string" },
-        "id": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "skillId": { "type": "string", "minLength": 1, "maxLength": 10 },
-        "contentVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "variantId": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "contextId": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "representation": { "type": "string", "minLength": 1, "maxLength": 80 },
-        "presentation": { "$ref": "#/$defs/MissionPresentation" },
-        "task": { "$ref": "#/$defs/MissionTask" },
-        "support": { "$ref": "#/$defs/SupportState" },
-        "revealedSupport": { "$ref": "#/$defs/MissionSupportContent" },
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "skillId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "variantId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "representation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "presentation": {
+          "$ref": "#/$defs/MissionPresentation"
+        },
+        "task": {
+          "$ref": "#/$defs/MissionTask"
+        },
+        "support": {
+          "$ref": "#/$defs/SupportState"
+        },
+        "revealedSupport": {
+          "$ref": "#/$defs/MissionSupportContent"
+        },
         "storyStep": {
           "type": "object",
           "properties": {
-            "label": { "type": "string", "minLength": 1, "maxLength": 240 },
-            "introduction": { "type": "string", "minLength": 1, "maxLength": 240 }
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 240
+            },
+            "introduction": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 240
+            }
           },
-          "required": ["label", "introduction"], "additionalProperties": false
+          "required": [
+            "label",
+            "introduction"
+          ],
+          "additionalProperties": false
+        },
+        "exerciseId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
         }
       },
-      "required": ["schemaVersion", "id", "skillId", "contentVersion", "variantId", "contextId", "representation", "presentation", "task", "support"],
+      "required": [
+        "schemaVersion",
+        "id",
+        "skillId",
+        "contentVersion",
+        "variantId",
+        "contextId",
+        "representation",
+        "presentation",
+        "task",
+        "support"
+      ],
       "additionalProperties": false
     },
     "MissionSkillProgress": {
@@ -3525,6 +4011,825 @@
               }
             }
           }
+        }
+      ]
+    },
+    "QuestionOption": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "picture": {
+          "type": "string",
+          "enum": [
+            "triangle",
+            "square",
+            "circle",
+            "star",
+            "leaf",
+            "flower",
+            "berry",
+            "hat",
+            "seed",
+            "sprout",
+            "cup",
+            "cat",
+            "dog",
+            "sun",
+            "map",
+            "cake",
+            "bike",
+            "cube",
+            "home",
+            "plane",
+            "flag",
+            "snail",
+            "cloud",
+            "clock",
+            "grape",
+            "flame"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "QuestionField": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "integer",
+            "decimal",
+            "fraction"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "maxLength": 30
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "format"
+      ],
+      "additionalProperties": false
+    },
+    "QuestionInteraction": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "single_choice"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/QuestionOption"
+              },
+              "minItems": 2,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "kind",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "multi_choice"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/QuestionOption"
+              },
+              "minItems": 2,
+              "maxItems": 6
+            }
+          },
+          "required": [
+            "kind",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "number_entry"
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/QuestionField"
+              },
+              "minItems": 1,
+              "maxItems": 3
+            }
+          },
+          "required": [
+            "kind",
+            "fields"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "text_entry"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "maxLength": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 120
+            }
+          },
+          "required": [
+            "kind",
+            "label",
+            "maxLength"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "order"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/QuestionOption"
+              },
+              "minItems": 2,
+              "maxItems": 8
+            }
+          },
+          "required": [
+            "kind",
+            "items"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "assign"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/QuestionOption"
+              },
+              "minItems": 1,
+              "maxItems": 20
+            },
+            "targets": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/MissionObject"
+              },
+              "minItems": 1,
+              "maxItems": 6
+            },
+            "capacity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            }
+          },
+          "required": [
+            "kind",
+            "items",
+            "targets",
+            "capacity"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "workshop"
+            },
+            "scaffold": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            "rubric": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "minItems": 2,
+              "maxItems": 6
+            }
+          },
+          "required": [
+            "kind",
+            "scaffold",
+            "rubric"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "QuestionStimulus": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "text"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            }
+          },
+          "required": [
+            "kind",
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "passage"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            }
+          },
+          "required": [
+            "kind",
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "collection"
+            },
+            "counts": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 20
+              },
+              "minItems": 1,
+              "maxItems": 3
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minItems": 1,
+              "maxItems": 3
+            },
+            "layout": {
+              "type": "string",
+              "enum": [
+                "scattered",
+                "ten_frame",
+                "rows"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "counts",
+            "labels",
+            "layout"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "clock"
+            },
+            "hour": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "minute": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 59
+            }
+          },
+          "required": [
+            "kind",
+            "hour",
+            "minute"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "fraction"
+            },
+            "numerator": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 24
+            },
+            "denominator": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 24
+            }
+          },
+          "required": [
+            "kind",
+            "numerator",
+            "denominator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "table"
+            },
+            "headings": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minItems": 1,
+              "maxItems": 6
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 160
+                },
+                "minItems": 1,
+                "maxItems": 6
+              },
+              "minItems": 1,
+              "maxItems": 24
+            }
+          },
+          "required": [
+            "kind",
+            "headings",
+            "rows"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "graph"
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minItems": 2,
+              "maxItems": 20
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000
+              },
+              "minItems": 2,
+              "maxItems": 20
+            },
+            "scale": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "style": {
+              "type": "string",
+              "enum": [
+                "bar",
+                "line"
+              ]
+            },
+            "baseline": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            }
+          },
+          "required": [
+            "kind",
+            "labels",
+            "values",
+            "scale",
+            "style"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "measure"
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minItems": 1,
+              "maxItems": 3
+            },
+            "lengths": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "minItems": 1,
+              "maxItems": 3
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            }
+          },
+          "required": [
+            "kind",
+            "labels",
+            "lengths",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "number_line"
+            },
+            "min": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32
+              },
+              "minItems": 2,
+              "maxItems": 12
+            }
+          },
+          "required": [
+            "kind",
+            "min",
+            "max",
+            "labels"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "place_value"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32
+            },
+            "places": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 7
+            },
+            "blocks": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "value",
+            "places"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "picture"
+            },
+            "name": {
+              "type": "string",
+              "enum": [
+                "triangle",
+                "square",
+                "circle",
+                "star",
+                "leaf",
+                "flower",
+                "berry",
+                "hat",
+                "seed",
+                "sprout",
+                "cup",
+                "cat",
+                "dog",
+                "sun",
+                "map",
+                "cake",
+                "bike",
+                "cube",
+                "home",
+                "plane",
+                "flag",
+                "snail",
+                "cloud",
+                "clock",
+                "grape",
+                "flame"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "required": [
+            "kind",
+            "name",
+            "description"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "grid"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 10
+            },
+            "x": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "y": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10
+            }
+          },
+          "required": [
+            "kind",
+            "size",
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "angle"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 180
+              },
+              "minItems": 1,
+              "maxItems": 3
+            },
+            "triangle": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "values",
+            "triangle"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "fraction_line"
+            },
+            "numerator": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 24
+            },
+            "denominator": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 24
+            }
+          },
+          "required": [
+            "kind",
+            "numerator",
+            "denominator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "composite"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 3,
+              "maximum": 30
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 3,
+              "maximum": 30
+            },
+            "cut": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            }
+          },
+          "required": [
+            "kind",
+            "width",
+            "height",
+            "cut"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "prism"
+            },
+            "length": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            }
+          },
+          "required": [
+            "kind",
+            "length",
+            "width",
+            "height"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "audio"
+            },
+            "assetId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^ww-audio-[a-z0-9-]+$"
+            }
+          },
+          "required": [
+            "kind",
+            "assetId"
+          ],
+          "additionalProperties": false
         }
       ]
     }

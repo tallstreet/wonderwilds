@@ -53,3 +53,12 @@ test('spoken cards reject ambiguous, inferred and malformed answers', () => {
   );
   assert.equal(spokenCard('zero', [{ id: 'a', label: '0' }]), 'a');
 });
+
+import { spokenNumber } from './answer.ts';
+test('numeric transcripts match bounded explicit forms without guessing an answer', () => {
+  assert.equal(spokenNumber('seven'), '7');
+  assert.equal(spokenNumber('one half'), '1/2');
+  assert.equal(spokenNumber('0.125'), '0.125');
+  assert.equal(spokenNumber('maybe seven or eight'), undefined);
+  assert.equal(spokenNumber('1/0'), undefined);
+});

@@ -972,7 +972,7 @@
       },
       "MissionTask": {
         "$ref": "./schemas/v1.json#/$defs/MissionTask",
-        "description": "Server-authored activity, including focused practice cards and unassessed adult-review workshops. Assessment keys are never public."
+        "description": "Server-authored question with bounded stimuli and single/multiple choice, numeric/text entry, ordering, assignment or human-review workshop interaction. Full seed and exercise identity bind answers to issued variants. Assessment keys are never public."
       },
       "MissionLearningAnswer": {
         "$ref": "./schemas/v1.json#/$defs/MissionLearningAnswer"

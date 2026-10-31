@@ -1,5 +1,24 @@
 # Draft deterministic activities
 
+## Current mission questions
+
+`skill-exercises-v1.json` is the server-private bank for all 120 skill-map nodes.
+It contains seven interaction types and bounded visual stimuli; public responses
+contain the selected question only, with option IDs shuffled/remapped by Rust.
+Never expose the bank, `answer`, explanations or solution keys before submission.
+Rebuild with `python3 scripts/build-activities.py`; validate with
+`python3 content/activities/validate.py` and
+`python3 -m unittest discover -s content/activities -p 'test_*.py'`.
+Authoring modules live in `scripts/activity_content/`; Rust selection and marking
+live in `backend/crates/learning/src/mission/exercises/`.
+
+`audio-v1.json` intentionally contains no approved recordings. Missing assets
+produce an explicit supported route, never a silent automatic listening mark.
+All review/release flags remain pending/disabled. See
+[coverage and manual review limits](../../docs/ACTIVITY_COVERAGE.md).
+
+## Earlier diagnostic activities
+
 `draft-v1.json` contains six original activity-family packs, each with three solution fixtures, two contexts and a three-step hint ladder. These are server-internal authoring fixtures: never serve the `solution`, `accepted`, target relation or canonical event order as encounter parameters. Approved instructions are resolved from authored templates; visible manipulatives alone must not disclose internal acceptance lists.
 
 The Rust implementation is `backend/crates/learning/src/assessment/`. `generate(family, recorded_seed)` creates bounded reproducible tasks; `Task::validate_skill` binds a task to the current draft node bounds; `Task::validate_representation` rejects unsupported representations. Call both before persisting an encounter. `assess` consumes a typed answer and server-loaded support state. Clients cannot assert independent evidence or supply the support history. The API integration must enforce this boundary.

@@ -44,6 +44,7 @@ fn travel(story: &StoryRepository, identity: &Identity, destination: &str) -> Va
 fn answer_for(activity: &Value) -> Value {
     let task = &activity["task"];
     match task["kind"].as_str().unwrap() {
+        "question" => current_answer_for(activity),
         "pairing" => {
             let objects = task["objects"].as_array().unwrap();
             let recipients = task["recipients"].as_array().unwrap();
@@ -110,6 +111,99 @@ fn answer_for(activity: &Value) -> Value {
     }
 }
 
+fn current_answer_for(activity: &Value) -> Value {
+    let bank: Value = serde_json::from_str(include_str!(
+        "../../../../../../content/activities/skill-exercises-v1.json"
+    ))
+    .unwrap();
+    let skill = bank["skills"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|s| s["skillId"] == activity["skillId"])
+        .unwrap();
+    let exercise = skill["exercises"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["id"] == activity["task"]["exerciseId"])
+        .unwrap();
+    let seed = activity["variantId"]
+        .as_str()
+        .unwrap()
+        .rsplit('-')
+        .next()
+        .unwrap()
+        .parse::<usize>()
+        .unwrap();
+    let item = &exercise["items"][(seed / skill["exercises"].as_array().unwrap().len())
+        % exercise["items"].as_array().unwrap().len()];
+    let mut answer = item["answer"].clone();
+    let interaction = &activity["task"]["interaction"];
+    if answer["rule"] == "equal" {
+        let targets = interaction["targets"].as_array().unwrap();
+        return json!({"kind":"assign","assignments":interaction["items"].as_array().unwrap().iter().enumerate().map(|(i,o)|json!({"objectId":o["id"],"targetId":targets[i%targets.len()]["id"]})).collect::<Vec<_>>()});
+    }
+    if answer["kind"] == "order" {
+        let mut used = std::collections::BTreeSet::new();
+        answer["itemIds"] = json!(
+            answer["itemIds"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|id| {
+                    let label = &item["interaction"]["items"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .find(|i| i["id"] == *id)
+                        .unwrap()["label"];
+                    let matched = interaction["items"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .find(|i| i["label"] == *label && !used.contains(i["id"].as_str().unwrap()))
+                        .unwrap()["id"]
+                        .as_str()
+                        .unwrap()
+                        .to_owned();
+                    used.insert(matched.clone());
+                    matched
+                })
+                .collect::<Vec<_>>()
+        );
+    }
+    let remap = |id: &Value| {
+        let label = &item["interaction"]["options"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|o| o["id"] == *id)
+            .unwrap()["label"];
+        interaction["options"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|o| o["label"] == *label)
+            .unwrap()["id"]
+            .clone()
+    };
+    if answer["kind"] == "choice" {
+        answer["choiceId"] = remap(&answer["choiceId"]);
+    }
+    if answer["kind"] == "choices" {
+        answer["choiceIds"] = json!(
+            answer["choiceIds"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(remap)
+                .collect::<Vec<_>>()
+        );
+    }
+    answer
+}
+
 fn begin(
     repo: &PostgresRepository,
     identity: &Identity,
@@ -121,7 +215,12 @@ fn begin(
         snapshot["revision"].as_u64().unwrap(),
         json!({"type":"begin"}),
     );
-    let response = repo.execute(identity, &request).unwrap();
+    let response = repo.execute(identity, &request).unwrap_or_else(|error| {
+        panic!(
+            "begin {id}: {error:?}; frontier={}",
+            snapshot["frontierSkillId"]
+        )
+    });
     (request, response)
 }
 
@@ -283,15 +382,8 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         second_activity["skillId"], "M03",
         "completed M01 was offered again"
     );
-    let count = second_activity["task"]["objects"].as_array().unwrap().len() as u64;
-    let wrong_id = second_activity["task"]["choices"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|c| c["value"] != count)
-        .unwrap()["id"]
-        .clone();
-    let wrong = json!({"kind":"choice","choiceId":wrong_id});
+    let mut wrong = answer_for(&second_activity);
+    wrong["values"][0]["value"] = json!("99");
     let incorrect_request = command(
         "wrong-first",
         second_begun["revision"].as_u64().unwrap(),
@@ -492,6 +584,7 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
 
     // Every new starter can be issued, taught, resumed and persisted without inventing mastery.
     let mut explored = std::collections::BTreeSet::new();
+    let mut checked_interactions = std::collections::BTreeSet::new();
     for index in 0..115 {
         let before = repo.read(&identity_b).unwrap();
         let skill = before["frontierSkillId"].as_str().unwrap().to_owned();
@@ -504,7 +597,7 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         );
         let activity = &started["activeActivity"];
         assert_eq!(activity["skillId"], skill);
-        assert_eq!(activity["task"]["kind"], "practice_cards");
+        assert_eq!(activity["task"]["kind"], "question");
         assert_eq!(repo.read(&identity_b).unwrap()["activeActivity"], *activity);
         let support = command(
             &format!("starter-help-{index}"),
@@ -513,12 +606,19 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         );
         let taught = repo.execute(&identity_b, &support).unwrap();
         assert_eq!(repo.execute(&identity_b, &support).unwrap(), taught);
-        let abandoned = command(
-            &format!("starter-leave-{index}"),
+        let kind = activity["task"]["interaction"]["kind"].as_str().unwrap();
+        checked_interactions.insert(kind.to_owned());
+        let completion = command(
+            &format!("starter-complete-{index}"),
             taught["revision"].as_u64().unwrap(),
-            json!({"type":"finish_together","encounterId":activity["id"]}),
+            if kind == "workshop" {
+                json!({"type":"finish_together","encounterId":activity["id"]})
+            } else {
+                json!({"type":"answer","encounterId":activity["id"],"variantId":activity["variantId"],"answer":answer_for(activity)})
+            },
         );
-        let after = repo.execute(&identity_b, &abandoned).unwrap();
+        let after = repo.execute(&identity_b, &completion).unwrap();
+        assert_eq!(repo.execute(&identity_b, &completion).unwrap(), after);
         let progress = after["skills"]
             .as_array()
             .unwrap()
@@ -533,6 +633,21 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
         );
     }
     assert_eq!(explored.len(), 115);
+    assert_eq!(
+        checked_interactions,
+        [
+            "single_choice",
+            "multi_choice",
+            "number_entry",
+            "text_entry",
+            "order",
+            "assign",
+            "workshop"
+        ]
+        .into_iter()
+        .map(str::to_owned)
+        .collect()
+    );
     assert_eq!(repo.read(&identity_b).unwrap()["available"], false);
     assert!(repo.read(&identity_b).unwrap()["frontierSkillId"].is_null());
 
@@ -672,11 +787,11 @@ fn exercise_inline_steps(admin: &mut Client, restricted: &str, parent: &str) {
     );
     assert_eq!(
         first["activeActivity"]["storyStep"]["introduction"],
-        "Try this activity, then we’ll carry on with the adventure."
+        "Pip has a little challenge for you."
     );
     assert_eq!(
-        first["activeActivity"]["task"]["objects"][0]["label"],
-        "flower 1"
+        first["activeActivity"]["task"]["interaction"]["items"][0]["label"],
+        "Gift 1"
     );
     let answer = command(
         "inline-answer-1",
@@ -713,21 +828,11 @@ fn exercise_inline_steps(admin: &mut Client, restricted: &str, parent: &str) {
         .unwrap();
     assert_eq!(
         second["activeActivity"]["storyStep"]["introduction"],
-        "Try this activity, then we’ll carry on with the adventure."
+        "Pip has a little challenge for you."
     );
     assert_eq!(second["activeActivity"]["skillId"], "M03");
-    let count = second["activeActivity"]["task"]["objects"]
-        .as_array()
-        .unwrap()
-        .len() as u64;
-    let wrong_id = second["activeActivity"]["task"]["choices"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|c| c["value"] != count)
-        .unwrap()["id"]
-        .clone();
-    let wrong = json!({"kind":"choice","choiceId":wrong_id});
+    let mut wrong = answer_for(&second["activeActivity"]);
+    wrong["values"][0]["value"] = json!("99");
     let incorrect = submit(&repo, &identity, &second, "inline-wrong", wrong);
     assert_eq!(incorrect["lastFeedback"]["result"], "incorrect");
     assert_eq!(story.read(&identity).unwrap(), second_story);

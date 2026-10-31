@@ -2,6 +2,34 @@
 
 Status: development, 31 October 2026; educator and release gates remain pending.
 
+## Current question replacement — 31 October 2026
+
+The live mission repository now uses `mission-exercises-draft-1` questions with
+exercise IDs, full recorded seeds and the seven reviewed controls. Rust loads an
+internal authored inventory, marks all closed answer types, and supplies help for
+the exact issued item. New public IDs describe positions rather than correct-first
+authoring order; ordering and sharing accept equivalent placements of identical
+pieces. Numeric comparison uses exact rational/scaled-decimal arithmetic.
+
+Wrong answers commit their explanation and the replacement question atomically.
+The UI shows that explanation before a local Try another action; reload resumes
+the committed replacement. Successful/supported completion still ends a story
+activity after one item. Completion, academic readiness and secure mastery remain
+separate. No new adaptive or mastery algorithm is introduced.
+
+This prelaunch replacement deliberately does not regenerate retired question
+banks. The active checkpoint uses `mission-learning-storage-v2`; pending browser
+commands use the v2 namespace. The operator may clear synthetic mission learning
+state/events/receipts together while preserving story and inventory, as explicitly
+authorised for this work. Exact retries and stale-question recovery continue for
+current-format issued questions and validated owned receipts.
+
+Reviewed audio remains unavailable, and productive/open responses keep explicit
+human-review routes. The [coverage inventory](../ACTIVITY_COVERAGE.md) records
+actual families and limitations; educator/release gates remain pending.
+
+## Earlier starter implementation
+
 All 120 graph nodes now have an activity factory. The original five maths factories
 and their evidence/readiness policy stay unchanged. Another 115 factories provide
 focused card exercises or guided workshops. Their short texts, sample sizes and

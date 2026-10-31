@@ -13100,5 +13100,412 @@
         "variantId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
       }
     }
+  },
+  {
+    "name": "Mission choices answer valid",
+    "contract": "MissionLearningAnswer",
+    "valid": true,
+    "value": {
+      "kind": "choices",
+      "choiceIds": [
+        "one",
+        "two"
+      ]
+    }
+  },
+  {
+    "name": "Mission numbers answer valid",
+    "contract": "MissionLearningAnswer",
+    "valid": true,
+    "value": {
+      "kind": "numbers",
+      "values": [
+        {
+          "fieldId": "n",
+          "value": "2/4"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Mission text answer valid",
+    "contract": "MissionLearningAnswer",
+    "valid": true,
+    "value": {
+      "kind": "text",
+      "value": "hat"
+    }
+  },
+  {
+    "name": "Mission order answer valid",
+    "contract": "MissionLearningAnswer",
+    "valid": true,
+    "value": {
+      "kind": "order",
+      "itemIds": [
+        "b",
+        "a"
+      ]
+    }
+  },
+  {
+    "name": "Mission assign answer valid",
+    "contract": "MissionLearningAnswer",
+    "valid": true,
+    "value": {
+      "kind": "assign",
+      "assignments": [
+        {
+          "objectId": "a",
+          "targetId": "pip"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Mission duplicate choices invalid",
+    "contract": "MissionLearningAnswer",
+    "valid": false,
+    "value": {
+      "kind": "choices",
+      "choiceIds": [
+        "one",
+        "one"
+      ]
+    }
+  },
+  {
+    "name": "Mission oversized numeric invalid",
+    "contract": "MissionLearningAnswer",
+    "valid": false,
+    "value": {
+      "kind": "numbers",
+      "values": [
+        {
+          "fieldId": "n",
+          "value": "111111111111111111111111111111111"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Mission duplicate order invalid",
+    "contract": "MissionLearningAnswer",
+    "valid": false,
+    "value": {
+      "kind": "order",
+      "itemIds": [
+        "a",
+        "a"
+      ]
+    }
+  },
+  {
+    "name": "Mission answer keys invalid",
+    "contract": "MissionLearningAnswer",
+    "valid": false,
+    "value": {
+      "kind": "text",
+      "value": "hat",
+      "correct": true
+    }
+  },
+  {
+    "name": "Mission no numeric field invalid",
+    "contract": "MissionLearningAnswer",
+    "valid": false,
+    "value": {
+      "kind": "numbers",
+      "values": []
+    }
+  },
+  {
+    "name": "Current question assign valid",
+    "contract": "MissionTask",
+    "valid": true,
+    "value": {
+      "kind": "question",
+      "exerciseId": "M01.one_for_each",
+      "interaction": {
+        "kind": "assign",
+        "items": [
+          {
+            "id": "object-0",
+            "label": "Gift 1"
+          },
+          {
+            "id": "object-1",
+            "label": "Gift 2"
+          },
+          {
+            "id": "object-2",
+            "label": "Gift 3"
+          }
+        ],
+        "targets": [
+          {
+            "id": "target-0",
+            "label": "Friend 1"
+          },
+          {
+            "id": "target-1",
+            "label": "Friend 2"
+          },
+          {
+            "id": "target-2",
+            "label": "Friend 3"
+          }
+        ],
+        "capacity": 1
+      },
+      "stimuli": []
+    }
+  },
+  {
+    "name": "Current question single_choice valid",
+    "contract": "MissionTask",
+    "valid": true,
+    "value": {
+      "kind": "question",
+      "exerciseId": "M02.tiny_groups",
+      "interaction": {
+        "kind": "single_choice",
+        "options": [
+          {
+            "id": "option-0",
+            "label": "1"
+          },
+          {
+            "id": "option-1",
+            "label": "2"
+          },
+          {
+            "id": "option-2",
+            "label": "3"
+          }
+        ]
+      },
+      "stimuli": [
+        {
+          "kind": "collection",
+          "counts": [
+            1
+          ],
+          "labels": [
+            "Dots"
+          ],
+          "layout": "rows"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Current question number_entry valid",
+    "contract": "MissionTask",
+    "valid": true,
+    "value": {
+      "kind": "question",
+      "exerciseId": "M03.scattered",
+      "interaction": {
+        "kind": "number_entry",
+        "fields": [
+          {
+            "id": "value-0",
+            "label": "Your answer",
+            "format": "integer"
+          }
+        ]
+      },
+      "stimuli": [
+        {
+          "kind": "collection",
+          "counts": [
+            1
+          ],
+          "labels": [
+            "Objects"
+          ],
+          "layout": "scattered"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Current question order valid",
+    "contract": "MissionTask",
+    "valid": true,
+    "value": {
+      "kind": "question",
+      "exerciseId": "M04.order",
+      "interaction": {
+        "kind": "order",
+        "items": [
+          {
+            "id": "card-1",
+            "label": "4"
+          },
+          {
+            "id": "card-2",
+            "label": "7"
+          },
+          {
+            "id": "card-0",
+            "label": "1"
+          }
+        ]
+      },
+      "stimuli": []
+    }
+  },
+  {
+    "name": "Current question workshop valid",
+    "contract": "MissionTask",
+    "valid": true,
+    "value": {
+      "kind": "question",
+      "exerciseId": "M09.build_pattern",
+      "interaction": {
+        "kind": "workshop",
+        "scaffold": "Choose objects or draw shapes. Repeat a small unit at least twice.",
+        "rubric": [
+          "Point to the complete repeating unit.",
+          "Explain and continue the same rule."
+        ]
+      },
+      "stimuli": []
+    }
+  },
+  {
+    "name": "Current question multi_choice valid",
+    "contract": "MissionTask",
+    "valid": true,
+    "value": {
+      "kind": "question",
+      "exerciseId": "M10.features",
+      "interaction": {
+        "kind": "multi_choice",
+        "options": [
+          {
+            "id": "option-0",
+            "label": "triangle",
+            "picture": "triangle"
+          },
+          {
+            "id": "option-1",
+            "label": "circle",
+            "picture": "circle"
+          },
+          {
+            "id": "option-2",
+            "label": "square",
+            "picture": "square"
+          },
+          {
+            "id": "option-3",
+            "label": "star",
+            "picture": "star"
+          }
+        ]
+      },
+      "stimuli": [
+        {
+          "kind": "text",
+          "text": "A shape can have straight sides even when turned."
+        }
+      ]
+    }
+  },
+  {
+    "name": "Current question text_entry valid",
+    "contract": "MissionTask",
+    "valid": true,
+    "value": {
+      "kind": "question",
+      "exerciseId": "E07.cvc",
+      "interaction": {
+        "kind": "text_entry",
+        "label": "Your word",
+        "maxLength": 120
+      },
+      "stimuli": [
+        {
+          "kind": "picture",
+          "name": "hat",
+          "description": "Hat"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Current question single_choice invalid",
+    "contract": "MissionTask",
+    "valid": false,
+    "value": {
+      "kind": "question",
+      "exerciseId": "M02.tiny_groups",
+      "interaction": {
+        "kind": "single_choice",
+        "options": []
+      },
+      "stimuli": [
+        {
+          "kind": "collection",
+          "counts": [
+            1
+          ],
+          "labels": [
+            "Dots"
+          ],
+          "layout": "rows"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Current question number_entry invalid",
+    "contract": "MissionTask",
+    "valid": false,
+    "value": {
+      "kind": "question",
+      "exerciseId": "M03.scattered",
+      "interaction": {
+        "kind": "number_entry",
+        "fields": [
+          {
+            "id": "value-0",
+            "label": "Your answer",
+            "format": "integer"
+          }
+        ]
+      },
+      "stimuli": [
+        {
+          "kind": "collection",
+          "counts": [
+            1
+          ],
+          "labels": [
+            "Objects"
+          ],
+          "layout": "scattered"
+        }
+      ],
+      "answerKey": "private"
+    }
+  },
+  {
+    "name": "Current question workshop invalid",
+    "contract": "MissionTask",
+    "valid": false,
+    "value": {
+      "kind": "question",
+      "exerciseId": "M09.build_pattern",
+      "interaction": {
+        "kind": "workshop",
+        "scaffold": "Choose objects or draw shapes. Repeat a small unit at least twice.",
+        "rubric": []
+      },
+      "stimuli": []
+    }
   }
 ]

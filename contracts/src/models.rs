@@ -102,6 +102,11 @@ pub struct MissionLearningCommand {
 pub enum MissionLearningAnswer {
     Variant1(MissionLearningAnswerVariant1),
     Variant2(MissionLearningAnswerVariant2),
+    Variant3(MissionLearningAnswerVariant3),
+    Variant4(MissionLearningAnswerVariant4),
+    Variant5(MissionLearningAnswerVariant5),
+    Variant6(MissionLearningAnswerVariant6),
+    Variant7(MissionLearningAnswerVariant7),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -145,6 +150,7 @@ pub enum MissionTask {
     Variant4(MissionTaskVariant4),
     Variant5(MissionTaskVariant5),
     Variant6(MissionTaskVariant6),
+    Variant7(MissionTaskVariant7),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -179,6 +185,12 @@ pub struct MissionLearningFeedback {
     pub result: MissionLearningFeedbackResult,
     pub message: String,
     pub completed: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exercise_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variant_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub explanation: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -198,6 +210,8 @@ pub struct MissionActivity {
     pub revealed_support: Option<MissionSupportContent>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub story_step: Option<MissionActivityStoryStep>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exercise_id: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -626,6 +640,59 @@ pub struct StorySnapshot {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionOption {
+    pub id: String,
+    pub label: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub picture: Option<QuestionOptionPicture>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionField {
+    pub id: String,
+    pub label: String,
+    pub format: QuestionFieldFormat,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum QuestionInteraction {
+    Variant1(QuestionInteractionVariant1),
+    Variant2(QuestionInteractionVariant2),
+    Variant3(QuestionInteractionVariant3),
+    Variant4(QuestionInteractionVariant4),
+    Variant5(QuestionInteractionVariant5),
+    Variant6(QuestionInteractionVariant6),
+    Variant7(QuestionInteractionVariant7),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum QuestionStimulus {
+    Variant1(QuestionStimulusVariant1),
+    Variant2(QuestionStimulusVariant2),
+    Variant3(QuestionStimulusVariant3),
+    Variant4(QuestionStimulusVariant4),
+    Variant5(QuestionStimulusVariant5),
+    Variant6(QuestionStimulusVariant6),
+    Variant7(QuestionStimulusVariant7),
+    Variant8(QuestionStimulusVariant8),
+    Variant9(QuestionStimulusVariant9),
+    Variant10(QuestionStimulusVariant10),
+    Variant11(QuestionStimulusVariant11),
+    Variant12(QuestionStimulusVariant12),
+    Variant13(QuestionStimulusVariant13),
+    Variant14(QuestionStimulusVariant14),
+    Variant15(QuestionStimulusVariant15),
+    Variant16(QuestionStimulusVariant16),
+    Variant17(QuestionStimulusVariant17),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GeneratedNeighbourhoodSprite {
     #[serde(rename = "pip")]
     Pip,
@@ -900,6 +967,41 @@ pub struct MissionLearningAnswerVariant2 {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningAnswerVariant3 {
+    pub kind: MissionLearningAnswerVariant3Kind,
+    pub choice_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningAnswerVariant4 {
+    pub kind: MissionLearningAnswerVariant4Kind,
+    pub values: Vec<MissionLearningAnswerVariant4ValuesItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningAnswerVariant5 {
+    pub kind: MissionLearningAnswerVariant5Kind,
+    pub value: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningAnswerVariant6 {
+    pub kind: MissionLearningAnswerVariant6Kind,
+    pub item_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningAnswerVariant7 {
+    pub kind: MissionLearningAnswerVariant7Kind,
+    pub assignments: Vec<MissionLearningAnswerVariant7AssignmentsItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionTaskVariant1 {
     pub kind: MissionTaskVariant1Kind,
     pub stimulus: String,
@@ -950,6 +1052,15 @@ pub struct MissionTaskVariant6 {
     pub whole: u64,
     pub shown_part: u64,
     pub choices: Vec<MissionChoice>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionTaskVariant7 {
+    pub kind: MissionTaskVariant7Kind,
+    pub exercise_id: String,
+    pub interaction: QuestionInteraction,
+    pub stimuli: Vec<QuestionStimulus>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1573,6 +1684,270 @@ pub enum StorySnapshotLocationId {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionOptionPicture {
+    #[serde(rename = "triangle")]
+    Triangle,
+    #[serde(rename = "square")]
+    Square,
+    #[serde(rename = "circle")]
+    Circle,
+    #[serde(rename = "star")]
+    Star,
+    #[serde(rename = "leaf")]
+    Leaf,
+    #[serde(rename = "flower")]
+    Flower,
+    #[serde(rename = "berry")]
+    Berry,
+    #[serde(rename = "hat")]
+    Hat,
+    #[serde(rename = "seed")]
+    Seed,
+    #[serde(rename = "sprout")]
+    Sprout,
+    #[serde(rename = "cup")]
+    Cup,
+    #[serde(rename = "cat")]
+    Cat,
+    #[serde(rename = "dog")]
+    Dog,
+    #[serde(rename = "sun")]
+    Sun,
+    #[serde(rename = "map")]
+    Map,
+    #[serde(rename = "cake")]
+    Cake,
+    #[serde(rename = "bike")]
+    Bike,
+    #[serde(rename = "cube")]
+    Cube,
+    #[serde(rename = "home")]
+    Home,
+    #[serde(rename = "plane")]
+    Plane,
+    #[serde(rename = "flag")]
+    Flag,
+    #[serde(rename = "snail")]
+    Snail,
+    #[serde(rename = "cloud")]
+    Cloud,
+    #[serde(rename = "clock")]
+    Clock,
+    #[serde(rename = "grape")]
+    Grape,
+    #[serde(rename = "flame")]
+    Flame,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionFieldFormat {
+    #[serde(rename = "integer")]
+    Integer,
+    #[serde(rename = "decimal")]
+    Decimal,
+    #[serde(rename = "fraction")]
+    Fraction,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionInteractionVariant1 {
+    pub kind: QuestionInteractionVariant1Kind,
+    pub options: Vec<QuestionOption>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionInteractionVariant2 {
+    pub kind: QuestionInteractionVariant2Kind,
+    pub options: Vec<QuestionOption>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionInteractionVariant3 {
+    pub kind: QuestionInteractionVariant3Kind,
+    pub fields: Vec<QuestionField>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionInteractionVariant4 {
+    pub kind: QuestionInteractionVariant4Kind,
+    pub label: String,
+    pub max_length: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionInteractionVariant5 {
+    pub kind: QuestionInteractionVariant5Kind,
+    pub items: Vec<QuestionOption>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionInteractionVariant6 {
+    pub kind: QuestionInteractionVariant6Kind,
+    pub items: Vec<QuestionOption>,
+    pub targets: Vec<MissionObject>,
+    pub capacity: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionInteractionVariant7 {
+    pub kind: QuestionInteractionVariant7Kind,
+    pub scaffold: String,
+    pub rubric: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant1 {
+    pub kind: QuestionStimulusVariant1Kind,
+    pub text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant2 {
+    pub kind: QuestionStimulusVariant2Kind,
+    pub text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant3 {
+    pub kind: QuestionStimulusVariant3Kind,
+    pub counts: Vec<u64>,
+    pub labels: Vec<String>,
+    pub layout: QuestionStimulusVariant3Layout,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant4 {
+    pub kind: QuestionStimulusVariant4Kind,
+    pub hour: u64,
+    pub minute: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant5 {
+    pub kind: QuestionStimulusVariant5Kind,
+    pub numerator: u64,
+    pub denominator: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant6 {
+    pub kind: QuestionStimulusVariant6Kind,
+    pub headings: Vec<String>,
+    pub rows: Vec<Vec<String>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant7 {
+    pub kind: QuestionStimulusVariant7Kind,
+    pub labels: Vec<String>,
+    pub values: Vec<u64>,
+    pub scale: u64,
+    pub style: QuestionStimulusVariant7Style,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub baseline: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant8 {
+    pub kind: QuestionStimulusVariant8Kind,
+    pub labels: Vec<String>,
+    pub lengths: Vec<u64>,
+    pub unit: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant9 {
+    pub kind: QuestionStimulusVariant9Kind,
+    pub min: u64,
+    pub max: u64,
+    pub labels: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant10 {
+    pub kind: QuestionStimulusVariant10Kind,
+    pub value: String,
+    pub places: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub blocks: Option<bool>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant11 {
+    pub kind: QuestionStimulusVariant11Kind,
+    pub name: QuestionStimulusVariant11Name,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant12 {
+    pub kind: QuestionStimulusVariant12Kind,
+    pub size: u64,
+    pub x: u64,
+    pub y: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant13 {
+    pub kind: QuestionStimulusVariant13Kind,
+    pub values: Vec<u64>,
+    pub triangle: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant14 {
+    pub kind: QuestionStimulusVariant14Kind,
+    pub numerator: u64,
+    pub denominator: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant15 {
+    pub kind: QuestionStimulusVariant15Kind,
+    pub width: u64,
+    pub height: u64,
+    pub cut: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant16 {
+    pub kind: QuestionStimulusVariant16Kind,
+    pub length: u64,
+    pub width: u64,
+    pub height: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant17 {
+    pub kind: QuestionStimulusVariant17Kind,
+    pub asset_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GeneratedNeighbourhoodStepsItemShape {
     #[serde(rename = "hollow")]
     Hollow,
@@ -1743,6 +2118,50 @@ pub enum MissionLearningAnswerVariant2Kind {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningAnswerVariant3Kind {
+    #[serde(rename = "choices")]
+    Choices,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningAnswerVariant4Kind {
+    #[serde(rename = "numbers")]
+    Numbers,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningAnswerVariant4ValuesItem {
+    pub field_id: String,
+    pub value: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningAnswerVariant5Kind {
+    #[serde(rename = "text")]
+    Text,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningAnswerVariant6Kind {
+    #[serde(rename = "order")]
+    Order,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningAnswerVariant7Kind {
+    #[serde(rename = "assign")]
+    Assign,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningAnswerVariant7AssignmentsItem {
+    pub object_id: String,
+    pub target_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MissionTaskVariant1Kind {
     #[serde(rename = "practice_cards")]
     PracticeCards,
@@ -1800,6 +2219,12 @@ pub enum MissionTaskVariant5Direction {
 pub enum MissionTaskVariant6Kind {
     #[serde(rename = "part_whole")]
     PartWhole,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionTaskVariant7Kind {
+    #[serde(rename = "question")]
+    Question,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2044,6 +2469,224 @@ pub struct StoryCommandPayloadVariant2 {
     pub r#type: StoryCommandPayloadVariant2Type,
     pub scene_id: String,
     pub entry_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionInteractionVariant1Kind {
+    #[serde(rename = "single_choice")]
+    SingleChoice,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionInteractionVariant2Kind {
+    #[serde(rename = "multi_choice")]
+    MultiChoice,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionInteractionVariant3Kind {
+    #[serde(rename = "number_entry")]
+    NumberEntry,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionInteractionVariant4Kind {
+    #[serde(rename = "text_entry")]
+    TextEntry,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionInteractionVariant5Kind {
+    #[serde(rename = "order")]
+    Order,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionInteractionVariant6Kind {
+    #[serde(rename = "assign")]
+    Assign,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionInteractionVariant7Kind {
+    #[serde(rename = "workshop")]
+    Workshop,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant1Kind {
+    #[serde(rename = "text")]
+    Text,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant2Kind {
+    #[serde(rename = "passage")]
+    Passage,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant3Kind {
+    #[serde(rename = "collection")]
+    Collection,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant3Layout {
+    #[serde(rename = "scattered")]
+    Scattered,
+    #[serde(rename = "ten_frame")]
+    TenFrame,
+    #[serde(rename = "rows")]
+    Rows,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant4Kind {
+    #[serde(rename = "clock")]
+    Clock,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant5Kind {
+    #[serde(rename = "fraction")]
+    Fraction,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant6Kind {
+    #[serde(rename = "table")]
+    Table,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant7Kind {
+    #[serde(rename = "graph")]
+    Graph,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant7Style {
+    #[serde(rename = "bar")]
+    Bar,
+    #[serde(rename = "line")]
+    Line,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant8Kind {
+    #[serde(rename = "measure")]
+    Measure,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant9Kind {
+    #[serde(rename = "number_line")]
+    NumberLine,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant10Kind {
+    #[serde(rename = "place_value")]
+    PlaceValue,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant11Kind {
+    #[serde(rename = "picture")]
+    Picture,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant11Name {
+    #[serde(rename = "triangle")]
+    Triangle,
+    #[serde(rename = "square")]
+    Square,
+    #[serde(rename = "circle")]
+    Circle,
+    #[serde(rename = "star")]
+    Star,
+    #[serde(rename = "leaf")]
+    Leaf,
+    #[serde(rename = "flower")]
+    Flower,
+    #[serde(rename = "berry")]
+    Berry,
+    #[serde(rename = "hat")]
+    Hat,
+    #[serde(rename = "seed")]
+    Seed,
+    #[serde(rename = "sprout")]
+    Sprout,
+    #[serde(rename = "cup")]
+    Cup,
+    #[serde(rename = "cat")]
+    Cat,
+    #[serde(rename = "dog")]
+    Dog,
+    #[serde(rename = "sun")]
+    Sun,
+    #[serde(rename = "map")]
+    Map,
+    #[serde(rename = "cake")]
+    Cake,
+    #[serde(rename = "bike")]
+    Bike,
+    #[serde(rename = "cube")]
+    Cube,
+    #[serde(rename = "home")]
+    Home,
+    #[serde(rename = "plane")]
+    Plane,
+    #[serde(rename = "flag")]
+    Flag,
+    #[serde(rename = "snail")]
+    Snail,
+    #[serde(rename = "cloud")]
+    Cloud,
+    #[serde(rename = "clock")]
+    Clock,
+    #[serde(rename = "grape")]
+    Grape,
+    #[serde(rename = "flame")]
+    Flame,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant12Kind {
+    #[serde(rename = "grid")]
+    Grid,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant13Kind {
+    #[serde(rename = "angle")]
+    Angle,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant14Kind {
+    #[serde(rename = "fraction_line")]
+    FractionLine,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant15Kind {
+    #[serde(rename = "composite")]
+    Composite,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant16Kind {
+    #[serde(rename = "prism")]
+    Prism,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant17Kind {
+    #[serde(rename = "audio")]
+    Audio,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

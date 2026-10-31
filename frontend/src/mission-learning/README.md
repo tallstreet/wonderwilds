@@ -1,5 +1,41 @@
 # Mission activity controls
 
+## Current question controls
+
+New story activities use `task.kind: question`, an exercise ID, a full-seed variant
+and bounded semantic stimuli. `question-control.ts` collects single/multiple
+choices, numeric fields, text, order and assignment answers. Human-reviewed
+workshops provide a local draft/rubric and Ready to share via supported completion.
+`stimulus.ts` renders educational SVG/DOM diagrams; `icons.ts` imports a fixed
+Lucide allowlist. Nothing in these components marks correctness.
+
+The current shell matches the approved activity playground: direct choice cards,
+explicit Check answer, labelled input, optional hints, undo and tap/keyboard
+alternatives to dragging. Wrong answers show the server explanation before a local
+Try another action reveals the replacement already saved by Rust. Reload may
+resume that replacement directly. Successful completion returns to the world.
+
+The prelaunch replacement uses `mission-learning-storage-v2` and the browser
+pending namespace `wonderwilds.mission-learning.pending.v2`. Old synthetic learning
+checkpoints/events/receipts may be cleared together; old question factories are
+not reconstructed by the live repository. Story/inventory remain separate. Never
+silently clear state on startup. Legacy components and pure assessment diagnostics
+remain for their existing checks, rather than alternate live question readers.
+
+Reviewed audio is allowlisted through `content/activities/audio-v1.json`; there
+are currently no approved recordings. Those skills retain human-supported routes.
+Optional numeric dictation accepts explicit bounded number forms, preserves an
+unmatched answer, and still requires Check; spelling/decoding are not dictated.
+
+Run `node frontend/src/mission-learning/questions.browser.mjs` with Vite running
+and `CHROMIUM_PATH` set if needed. This covers all seven current controls and the
+semantic diagrams at desktop, phone and 320px widths. Keep the original component
+suite and `node qa/e2e/activity-review.mjs` passing as well.
+
+## Earlier component fixtures
+
+The following notes describe retained diagnostic/legacy component fixtures, not the current story question bank.
+
 `activity.ts` mounts the server-issued mission task. It never decides correctness,
 readiness, story effects or rewards. Every answer and help request uses the existing
 revisioned command session; uncertain writes retry the exact prepared body.

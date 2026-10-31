@@ -71,6 +71,8 @@ jobs:
           python3 content/curriculum/validate.py
           python3 -m unittest discover -s content/curriculum -p 'test_*.py'
           node content/curriculum/check-schema.mjs
+          python3 content/activities/validate.py
+          python3 -m unittest discover -s content/activities -p 'test_*.py'
           python3 content/story/validate.py
           python3 content/creatures/art/validate.py
           python3 -m unittest discover -s content/story -p 'test_*.py'
@@ -144,6 +146,7 @@ jobs:
           node frontend/src/learning/activity.browser.mjs
           node frontend/src/mission-learning/activity.browser.mjs
           node qa/e2e/activity-review.mjs
+          node frontend/src/mission-learning/questions.browser.mjs
       - name: Check default authored world with real API and disposable PostgreSQL
         if: matrix.suite == 'browser'
         run: node qa/e2e/run-training-qa.mjs

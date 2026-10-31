@@ -20,7 +20,7 @@ use wonderwilds_learning::mission::{
     self, MissionActivity, MissionAnswer, MissionObservation, MissionState, Support, SupportKind,
 };
 
-const STORAGE_FORMAT: &str = "mission-learning-storage-v1";
+const STORAGE_FORMAT: &str = "mission-learning-storage-v2";
 const ZERO_DIGEST: &str = "0000000000000000000000000000000000000000000000000000000000000000";
 const POLICY_EXPLANATION: &str = "Completed activities are not offered again. Incorrect answers receive a different variation of the same skill. Completion unlocks related practice, separately from academic readiness or mastery. Open responses need adult review.";
 
@@ -42,8 +42,7 @@ pub struct PostgresRepository {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct ActiveActivity {
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-    modern_tasks: bool,
+    exercise_id: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     inline_step: Option<InlineStep>,
     id: String,
@@ -292,31 +291,23 @@ impl PostgresRepository {
                 invitation(&active.mission_id, &active.location_id).ok_or(Error::Unavailable)?;
             format!("{} — {}", invite.title, invite.relation)
         };
-        let activity = if active.modern_tasks {
-            let mut task = mission::practice_activity(&active.skill_id, active.seed, &active.id)
-                .map_err(|_| Error::Unavailable)?;
-            task.view.context_id = context_id;
-            task.view.presentation.context =
-                "A little challenge before we carry on with our adventure.".into();
-            task
-        } else {
-            let task = mission::authored_activity_in_context(
-                &active.skill_id,
-                active.seed,
-                &active.id,
-                &context_id,
-                &context_text,
-            )
+        let mut activity = mission::practice_activity(&active.skill_id, active.seed, &active.id)
             .map_err(|_| Error::Unavailable)?;
-            if active.inline_step.is_some() {
-                mission::discovery_activity(task)
-            } else {
-                task
-            }
+        let exercise_id = match &activity.view.task {
+            mission::PublicTask::Question { exercise_id, .. } => exercise_id,
+            _ => return Err(Error::Unavailable),
         };
+        if exercise_id != &active.exercise_id {
+            return Err(Error::Unavailable);
+        }
+        activity.view.context_id = context_id;
+        activity.view.presentation.context = context_text;
+
         let mut view = serde_json::to_value(&activity.view).map_err(|_| Error::Unavailable)?;
+        view["exerciseId"] = json!(active.exercise_id);
         if let Some(step) = &active.inline_step {
-            view["storyStep"] = json!({"label":step.label,"introduction":if active.modern_tasks { "Try this activity, then we’ll carry on with the adventure." } else { step.introduction.as_str() }});
+            view["storyStep"] =
+                json!({"label":step.label,"introduction":"Pip has a little challenge for you."});
         }
         view["support"] = json!({"hintCount":active.hint_count,"workedExample":active.worked_example,"readAloud":active.read_aloud});
         if let (Some(kind), Some(text)) = (&active.revealed_kind, &active.revealed_text) {
@@ -475,6 +466,7 @@ impl PostgresRepository {
     ) -> Result<(), Error> {
         let id = request["commandId"].as_str().ok_or(Error::InvalidInput)?;
         let digest = persistence::digest(&json!([request, response]));
+
         tx.execute("INSERT INTO wonderwilds.mission_learning_command_receipts(profile_id,command_id,revision,request,response,digest) VALUES($1::text::uuid,$2,$3,$4,$5,$6)", &[&profile,&id,&(revision as i64),request,response,&digest]).map_err(|e| if e.code().is_some_and(|c| c.code()=="23505") { Error::RevisionConflict } else { Error::Unavailable })?;
         Ok(())
     }
@@ -510,7 +502,13 @@ impl PostgresRepository {
             .ok_or(Error::RevisionConflict)?;
         let mut frozen = active.clone();
         frozen.seed = seed;
-        frozen.modern_tasks = view["contentVersion"] == "mission-practice-draft-3";
+        if view["contentVersion"] != "mission-exercises-draft-1" {
+            return Err(Error::RevisionConflict);
+        }
+        frozen.exercise_id = view["exerciseId"]
+            .as_str()
+            .ok_or(Error::RevisionConflict)?
+            .to_owned();
         let (question, _) = Self::active_activity(&frozen)?;
         if question.view.variant_id != variant
             || question.view.skill_id != active.skill_id
@@ -636,8 +634,13 @@ impl Repository for PostgresRepository {
                     state.revision.saturating_add(1),
                     seed
                 );
+                let generated = mission::practice_activity(&selected.skill_id, seed, &id)
+                    .map_err(|_| Error::Unavailable)?;
+                let mission::PublicTask::Question { exercise_id, .. } = generated.view.task else {
+                    return Err(Error::Unavailable);
+                };
                 state.active = Some(ActiveActivity {
-                    modern_tasks: true,
+                    exercise_id,
                     inline_step: step,
                     id,
                     skill_id: selected.skill_id,
@@ -706,7 +709,7 @@ impl Repository for PostgresRepository {
                 let event_id = observation.evidence.event_id.clone();
                 event = Some((sequence, event_id, record));
                 state.last_feedback = Some(
-                    json!({"result":if outcome.correct {"correct"} else {"incorrect"},"message":if outcome.correct {"That works!"} else {"Let’s try a different one. You can ask for a hint."},"completed":outcome.correct}),
+                    json!({"result":if outcome.correct {"correct"} else {"incorrect"},"message":if outcome.correct {"Nice work!"} else {"Let’s look at that together."},"completed":outcome.correct,"exerciseId":active.exercise_id,"variantId":activity.view.variant_id,"explanation":activity.explanation()}),
                 );
                 if outcome.correct {
                     if let Some(step) = &active.inline_step {
@@ -725,7 +728,7 @@ impl Repository for PostgresRepository {
                         .entry(active.skill_id.clone())
                         .or_default();
                     let mut replacement = None;
-                    for _ in 0..48 {
+                    for _ in 0..512 {
                         let next_seed = *issued;
                         *issued = issued.saturating_add(1);
                         let next =
@@ -737,7 +740,14 @@ impl Repository for PostgresRepository {
                         }
                     }
                     active.seed = replacement.ok_or(Error::Unavailable)?;
-                    active.modern_tasks = true;
+                    let generated =
+                        mission::practice_activity(&active.skill_id, active.seed, &active.id)
+                            .map_err(|_| Error::Unavailable)?;
+                    let mission::PublicTask::Question { exercise_id, .. } = generated.view.task
+                    else {
+                        return Err(Error::Unavailable);
+                    };
+                    active.exercise_id = exercise_id;
                     active.revealed_kind = None;
                     active.revealed_text = None;
                 }
@@ -754,8 +764,7 @@ impl Repository for PostgresRepository {
                         active.hint_count = active.hint_count.saturating_add(1).min(20);
                         (
                             EventKind::Hint,
-                            mission::support_content(
-                                &active.skill_id,
+                            activity.help(
                                 SupportKind::Hint,
                                 usize::from(active.hint_count.saturating_sub(1)),
                             ),
@@ -765,11 +774,7 @@ impl Repository for PostgresRepository {
                         active.worked_example = true;
                         (
                             EventKind::WorkedExample,
-                            mission::support_content(
-                                &active.skill_id,
-                                SupportKind::WorkedExample,
-                                0,
-                            ),
+                            activity.help(SupportKind::WorkedExample, 0),
                         )
                     }
                     _ => return Err(Error::InvalidInput),
@@ -861,7 +866,7 @@ impl Repository for PostgresRepository {
                 ));
                 state.last_feedback = if together {
                     Some(
-                        json!({"result":"assisted","message":activity.discovery_solution(),"completed":true}),
+                        json!({"result":"assisted","message":"We did it together.","explanation":activity.discovery_solution(),"completed":true}),
                     )
                 } else {
                     None

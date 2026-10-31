@@ -11,6 +11,8 @@ cargo test --workspace --locked
 python3 content/curriculum/validate.py
 python3 -m unittest discover -s content/curriculum -p 'test_*.py'
 node content/curriculum/check-schema.mjs
+python3 content/activities/validate.py
+python3 -m unittest discover -s content/activities -p 'test_*.py'
 python3 content/story/validate.py
 python3 content/creatures/art/validate.py
 python3 -m unittest discover -s content/story -p 'test_*.py'

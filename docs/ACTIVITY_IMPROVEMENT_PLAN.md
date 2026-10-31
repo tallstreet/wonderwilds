@@ -1,12 +1,22 @@
 # Activity improvement implementation plan
 
-Date: 31 October 2026. Status: planned, not implemented.
+Date: 31 October 2026. Status: implemented in development; content and accessibility review pending.
 
 Replace the draft activity experience with short, clear questions that children
 answer by tapping choices, entering a number or word, or occasionally arranging
 objects. Upgrade all 120 skill-map nodes using the exact exercise requirements in
 [the skill checklist](ACTIVITY_SKILL_CHECKLIST.md). Keep learning inside the
 existing story missions, with brief feedback and an easy supported route onward.
+
+## Implemented scope
+
+All 120 nodes now use the seven controls in real mission activities. See
+[actual coverage and review limits](ACTIVITY_COVERAGE.md). Private deterministic
+banks are authored in Python domain modules and loaded/marked by the pure Rust
+learning crate, rather than placing each authoring factory in Rust. No answer
+keys are sent to the browser. Lucide icons and bounded semantic diagrams provide
+visual context. Difficulty rungs are draft bank organisation, not adaptive scoring.
+Reviewed audio remains unavailable; human-supported routes stay explicit.
 
 ## Scope and development assumptions
 
@@ -40,17 +50,17 @@ Read `README.md`, `docs/IMPLEMENTATION_STATUS.md`, `docs/ACTIVITY_COVERAGE.md`,
 `docs/adr/curriculum-starter-practice.md` and both curriculum pack READMEs first.
 Some older feature documentation describes superseded entry points.
 
-| Area | Existing files | Work |
-| --- | --- | --- |
-| Skill definitions | `content/curriculum/seed-v1.json`, `content/curriculum/years/seed-years1to6-v1.json`, their authoring packs | Keep IDs/edges; enforce bounds; reconcile objective conflicts below |
-| Question generation and marking | `backend/crates/learning/src/mission.rs`, `backend/crates/learning/src/mission/catalogue.rs` | Replace starter-only catalogue with focused exercise factories and private assessors |
-| Persistence and feedback | `backend/crates/api/src/mission_learning/repository.rs`, `http.rs` | Persist exercise identity; assess typed answers; issue stable replacement questions and teaching feedback |
-| Wire contract | `contracts/schemas/v1.json`, `contracts/openapi.yaml`, `contracts/fixtures/cases.json` | Define typed questions, stimuli, answers and feedback; regenerate Rust/TypeScript |
-| Activity interface | `frontend/src/mission-learning/activity.ts`, `activity.css` | Build the simple question shell and reusable controls |
-| Answer entry and transport | `frontend/src/mission-learning/answer.ts`, `voice.ts`, `client.ts`, `validation.ts` | Typed input, optional existing dictation, schema validation and pending-command recovery |
-| World integration | Find `mountMissionActivity` callers with `rg` | Keep automatic return, wrong-question replacement and save recovery working |
-| Existing shared pieces | `frontend/src/learning/drag.ts`, `visuals.ts` | Reuse gestures and bundled artwork; do not rewrite the separate assessment UI |
-| Tests | Learning unit tests, `backend/crates/api/src/mission_learning/repository/tests.rs`, mission-learning frontend tests/browser suite, `qa/e2e/mission-learning.mjs` | Extend the existing test structure |
+| Area                            | Existing files                                                                                                                                                   | Work                                                                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Skill definitions               | `content/curriculum/seed-v1.json`, `content/curriculum/years/seed-years1to6-v1.json`, their authoring packs                                                      | Keep IDs/edges; enforce bounds; reconcile objective conflicts below                                       |
+| Question generation and marking | `backend/crates/learning/src/mission.rs`, `backend/crates/learning/src/mission/catalogue.rs`                                                                     | Replace starter-only catalogue with focused exercise factories and private assessors                      |
+| Persistence and feedback        | `backend/crates/api/src/mission_learning/repository.rs`, `http.rs`                                                                                               | Persist exercise identity; assess typed answers; issue stable replacement questions and teaching feedback |
+| Wire contract                   | `contracts/schemas/v1.json`, `contracts/openapi.yaml`, `contracts/fixtures/cases.json`                                                                           | Define typed questions, stimuli, answers and feedback; regenerate Rust/TypeScript                         |
+| Activity interface              | `frontend/src/mission-learning/activity.ts`, `activity.css`                                                                                                      | Build the simple question shell and reusable controls                                                     |
+| Answer entry and transport      | `frontend/src/mission-learning/answer.ts`, `voice.ts`, `client.ts`, `validation.ts`                                                                              | Typed input, optional existing dictation, schema validation and pending-command recovery                  |
+| World integration               | Find `mountMissionActivity` callers with `rg`                                                                                                                    | Keep automatic return, wrong-question replacement and save recovery working                               |
+| Existing shared pieces          | `frontend/src/learning/drag.ts`, `visuals.ts`                                                                                                                    | Reuse gestures and bundled artwork; do not rewrite the separate assessment UI                             |
+| Tests                           | Learning unit tests, `backend/crates/api/src/mission_learning/repository/tests.rs`, mission-learning frontend tests/browser suite, `qa/e2e/mission-learning.mjs` | Extend the existing test structure                                                                        |
 
 ## The question screen
 
@@ -97,6 +107,33 @@ Requirements:
 - A confirmed correct answer closes automatically. Show a brief nonblocking
   world status such as “Nice work!”; do not add a compulsory Continue screen.
 
+## Approved visual and interaction reference
+
+`/activity-review.html` (`frontend/src/activity-review/`, README there) is the
+accepted look and behaviour for each control. Match it in the live mission
+activity; it is a UI sample only, so do not import its hard-coded answers, copy or
+mock data. Reuse `controls.ts` patterns, `style.css` tokens and the `learning/drag.ts`
+and `visuals.ts` helpers where practical.
+
+| Review example         | Interaction kind | Behaviour to reproduce                                                                                                                      |
+| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Choose one (`M05`)     | `single_choice`  | Large native radio cards, bold emphasised words in the question, caption changes from “Choose” to “✓ Selected”, Check disabled until chosen |
+| Choose a few (`M10`)   | `multi_choice`   | Native checkboxes with picture cards; each card has a descriptive label that does not reveal correctness; toggle on/off                     |
+| Type a number (`M07`)  | `number_entry`   | Equation stimulus, labelled field, numeric input mode, pattern and length bounds, Enter checks only a valid value                           |
+| Type a word (`EY106`)  | `text_entry`     | Picture stimulus with useful alternative text, labelled field, no autocomplete or spellcheck, length bound                                  |
+| Put in order (`M13`)   | `order`          | Select a card then a place, or drag; placed state shown by text, replacement of an occupied place, Undo, Check only when complete           |
+| Match and move (`M01`) | `assign`         | Same select/place/drag/undo pattern with named targets; no required drag; keyboard operable                                                 |
+| Make something (`E13`) | `workshop`       | Labelled textarea, scaffold sentence, “Ready to share” instead of Check, human-review note, local draft only and not marked                 |
+
+Shared shell: skill eyebrow, character portrait with empty alt text and a short
+invitation, focusable title, question, control, polite status region, **Check
+answer**, and a toggleable hint (`aria-expanded`/`aria-controls`) revealing text
+beneath. Add **Show me** and **Let's do it together** as plan-specified extras,
+styled like Hint. Choice controls must not use correct-first order, colour-only
+state or an answer tray. Confirm each against the page at 1280px, 390px and
+320px, and keep `node qa/e2e/activity-review.mjs` passing while the sample page
+remains.
+
 ## Shared controls and contract
 
 Use one current question format with a discriminated interaction and a bounded
@@ -109,15 +146,15 @@ support and story binding. Use exercise IDs such as `M05.one_more` and
 `MY110.read_half_hour`. The following are implementation requirements, not
 permission to pass arbitrary HTML or arbitrary drawing code:
 
-| Interaction kind | Public data and answer | Marking |
-| --- | --- | --- |
-| `single_choice` | 2–4 options with IDs and bounded text or asset/diagram data; answer `{kind: 'choice', choiceId}` | Compare against private correct ID |
-| `multi_choice` | 2–6 options; answer `{kind: 'choices', choiceIds}` with unique IDs | Compare sets; no partial automatic success |
-| `number_entry` | 1–3 labelled fields with IDs and format `integer`, `decimal` or `fraction`; answer `{kind: 'numbers', values: [{fieldId, value}]}` where value is a bounded string | Parse exactly in Rust, compare against private values and any explicitly required form |
-| `text_entry` | One labelled field, maximum 120 characters; answer `{kind: 'text', value}` | Authored accepted spellings and item-specific case/punctuation policy |
-| `order` | 2–8 uniquely identified cards; answer `{kind: 'order', itemIds}` | Match private accepted order; explicitly model alternatives where needed |
-| `assign` | Up to 20 objects, up to 6 target IDs; answer `{kind: 'assign', assignments: [{objectId, targetId}]}` | Validate identities/uniqueness, then pairing, category or equal-sharing rule |
-| `workshop` | Prompt, scaffold, rubric and human-review notice; no automatic answer command | Existing supported/not-assessed completion only |
+| Interaction kind | Public data and answer                                                                                                                                             | Marking                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `single_choice`  | 2–4 options with IDs and bounded text or asset/diagram data; answer `{kind: 'choice', choiceId}`                                                                   | Compare against private correct ID                                                     |
+| `multi_choice`   | 2–6 options; answer `{kind: 'choices', choiceIds}` with unique IDs                                                                                                 | Compare sets; no partial automatic success                                             |
+| `number_entry`   | 1–3 labelled fields with IDs and format `integer`, `decimal` or `fraction`; answer `{kind: 'numbers', values: [{fieldId, value}]}` where value is a bounded string | Parse exactly in Rust, compare against private values and any explicitly required form |
+| `text_entry`     | One labelled field, maximum 120 characters; answer `{kind: 'text', value}`                                                                                         | Authored accepted spellings and item-specific case/punctuation policy                  |
+| `order`          | 2–8 uniquely identified cards; answer `{kind: 'order', itemIds}`                                                                                                   | Match private accepted order; explicitly model alternatives where needed               |
+| `assign`         | Up to 20 objects, up to 6 target IDs; answer `{kind: 'assign', assignments: [{objectId, targetId}]}`                                                               | Validate identities/uniqueness, then pairing, category or equal-sharing rule           |
+| `workshop`       | Prompt, scaffold, rubric and human-review notice; no automatic answer command                                                                                      | Existing supported/not-assessed completion only                                        |
 
 Number strings are at most 32 characters. Reject unknown fields/IDs, duplicate
 IDs, nonfinite values and invalid formats. A malformed answer produces a field
@@ -271,15 +308,15 @@ storage or claim a completed adult-review workflow.
 Complete these work packages in order. Each ends with working code and the
 specified checks; do not stop after building only the reusable shell.
 
-| Package | Exact deliverable | Acceptance |
-| --- | --- | --- |
-| 1 Inventory | Add exercise inventory for every checklist row; add coverage validator; reconcile the listed bounds | Exactly 120 unique known skills, no missing/extra IDs, every listed facet has an exercise or named human-review/audio limitation |
-| 2 Controls | Simplify existing choice screen first; add text/number entry, ordering, assignment and multi-select controls, using synthetic questions | Real tap/keyboard/touch tests; no choice tray; no required drag; explicit Check; narrow-screen screenshots inspected |
-| 3 Server and contract | Update schemas, generated models, assessors, feedback, repository and command preparation; replace draft factory dispatch | All new answer kinds assessed in Rust; public payload has no keys; exact retries and wrong-answer replacement tested against disposable PostgreSQL |
-| 4 Pilot | Implement `M01`, `M03`, `M05`, `M07`, `MY110`, `EY106`, `EY103`, `E13` completely | Matching, counting, one-more, calculation, clock, spelling, passage and workshop work through real story integration; no mastery invented |
-| 5 Early content | Finish all remaining Foundation, Year 1 and Year 2 checklist rows | Required item counts, bounds, answer fixtures and UI/assessment coverage pass for every row |
-| 6 Later content | Finish Years 3–6 rows; add remaining diagram types and exact rational/multi-field questions | Fractions, decimals, graphs, maps, longer passages and writing scaffolds meet checklist and length requirements |
-| 7 Final verification | Run aggregate, database and browser checks; update READMEs, coverage, status and ADR | Completion report lists every implemented family and any missing reviewed assets/human checks; no unsupported full-skill claims |
+| Package               | Exact deliverable                                                                                                                                                                                                  | Acceptance                                                                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 Inventory           | Add exercise inventory for every checklist row; add coverage validator; reconcile the listed bounds                                                                                                                | Exactly 120 unique known skills, no missing/extra IDs, every listed facet has an exercise or named human-review/audio limitation                   |
+| 2 Controls            | Port the approved `/activity-review.html` examples into the live activity, simplifying the choice screen first, then text/number entry, ordering, assignment, multi-select and workshop, using synthetic questions | Real tap/keyboard/touch tests; no choice tray; no required drag; explicit Check; narrow-screen screenshots inspected                               |
+| 3 Server and contract | Update schemas, generated models, assessors, feedback, repository and command preparation; replace draft factory dispatch                                                                                          | All new answer kinds assessed in Rust; public payload has no keys; exact retries and wrong-answer replacement tested against disposable PostgreSQL |
+| 4 Pilot               | Implement `M01`, `M03`, `M05`, `M07`, `MY110`, `EY106`, `EY103`, `E13` completely                                                                                                                                  | Matching, counting, one-more, calculation, clock, spelling, passage and workshop work through real story integration; no mastery invented          |
+| 5 Early content       | Finish all remaining Foundation, Year 1 and Year 2 checklist rows                                                                                                                                                  | Required item counts, bounds, answer fixtures and UI/assessment coverage pass for every row                                                        |
+| 6 Later content       | Finish Years 3–6 rows; add remaining diagram types and exact rational/multi-field questions                                                                                                                        | Fractions, decimals, graphs, maps, longer passages and writing scaffolds meet checklist and length requirements                                    |
+| 7 Final verification  | Run aggregate, database and browser checks; update READMEs, coverage, status and ADR                                                                                                                               | Completion report lists every implemented family and any missing reviewed assets/human checks; no unsupported full-skill claims                    |
 
 The pilot validates the architecture, not the entire delivery. Packages 5–7 remain
 required. Keep PRs/commits focused if delivering incrementally; clearly label

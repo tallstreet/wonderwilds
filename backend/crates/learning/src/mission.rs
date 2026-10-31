@@ -1,6 +1,7 @@
 //! Original, bounded curriculum practice and a separate provisional readiness policy.
 //! This does not alter the established independent-transfer mastery policy.
 mod catalogue;
+mod exercises;
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -13,7 +14,7 @@ use wonderwilds_contracts::{
 use crate::curriculum::{CurriculumGraph, SkillNode};
 
 pub const POLICY_VERSION: &str = "provisional-mission-v1";
-pub const CONTENT_VERSION: &str = "mission-maths-draft-1";
+pub const CONTENT_VERSION: &str = "mission-exercises-draft-1";
 const QUALIFYING_CHECKS: usize = 8;
 const REQUIRED_CORRECT: usize = 7;
 
@@ -134,6 +135,11 @@ pub struct NamedItem {
     tag = "kind"
 )]
 pub enum PublicTask {
+    Question {
+        exercise_id: String,
+        interaction: serde_json::Value,
+        stimuli: Vec<serde_json::Value>,
+    },
     PracticeCards {
         stimulus: String,
         choices: Vec<NamedItem>,
@@ -199,6 +205,23 @@ pub struct MissionActivityView {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "kind", deny_unknown_fields)]
 pub enum MissionAnswer {
+    Choices {
+        #[serde(rename = "choiceIds")]
+        choice_ids: Vec<String>,
+    },
+    Numbers {
+        values: Vec<NumberEntry>,
+    },
+    Text {
+        value: String,
+    },
+    Order {
+        #[serde(rename = "itemIds")]
+        item_ids: Vec<String>,
+    },
+    Assign {
+        assignments: Vec<TargetAssignment>,
+    },
     Pairing {
         assignments: Vec<PairAssignment>,
     },
@@ -206,6 +229,19 @@ pub enum MissionAnswer {
         #[serde(rename = "choiceId")]
         choice_id: String,
     },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NumberEntry {
+    pub field_id: String,
+    pub value: String,
+}
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TargetAssignment {
+    pub object_id: String,
+    pub target_id: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -236,6 +272,7 @@ pub struct Support {
 
 #[derive(Debug, Clone)]
 enum AssessmentKey {
+    Question(Box<exercises::Item>),
     Review,
     Pairing {
         object_ids: Vec<String>,
@@ -255,6 +292,28 @@ pub struct MissionActivity {
 }
 
 impl MissionActivity {
+    pub fn explanation(&self) -> String {
+        if let AssessmentKey::Question(item) = &self.key {
+            item.explanation.clone()
+        } else {
+            "Try the strategy in the worked example.".into()
+        }
+    }
+    pub fn help(&self, kind: SupportKind, index: usize) -> Option<String> {
+        if let AssessmentKey::Question(item) = &self.key {
+            Some(match kind {
+                SupportKind::Hint => item.hints[index.min(item.hints.len() - 1)].clone(),
+                SupportKind::WorkedExample => item.explanation.clone(),
+            })
+        } else {
+            support_content(&self.view.skill_id, kind, index)
+        }
+    }
+    pub fn needs_review(&self) -> bool {
+        matches!(&self.key, AssessmentKey::Question(item) if item.answer.is_none())
+            || matches!(self.key, AssessmentKey::Review)
+    }
+
     pub fn canonical_fingerprint(&self) -> &str {
         &self.canonical_fingerprint
     }
@@ -263,6 +322,7 @@ impl MissionActivity {
     /// material, never independent answer-check evidence.
     pub fn discovery_solution(&self) -> String {
         match &self.view.task {
+            PublicTask::Question { .. } => self.explanation(),
             PublicTask::PracticeCards { adult_review, .. } => if *adult_review { "Thank you for sharing! Review your ideas with a grown-up. We explored this together; your work has not been automatically assessed.".to_owned() } else { match &self.key { AssessmentKey::Choice { correct_id, .. } => { if let PublicTask::PracticeCards { choices, .. } = &self.view.task { format!("Together, we found: {}. Ask a grown-up to help explain your thinking.", choices.iter().find(|c| &c.id == correct_id).map_or("our answer", |c|c.label.as_str())) } else { unreachable!() } }, _ => unreachable!() } },
             PublicTask::Pairing { .. } => "We put one marker at each spot and checked that no spot was missed. Now let's discover together!".to_owned(),
             PublicTask::CountCollection { objects, .. } => format!("We counted each marker once: {} altogether. Now let's discover together!", objects.len()),
@@ -281,6 +341,7 @@ impl MissionActivity {
         support: Support,
     ) -> Result<Outcome, MissionError> {
         let correct = match (&self.key, answer) {
+            (AssessmentKey::Question(item), answer) => exercises::assess(item, answer)?,
             (
                 AssessmentKey::Pairing {
                     object_ids,
@@ -342,7 +403,7 @@ pub enum SupportKind {
 const READINESS_SKILLS: [&str; 5] = ["M01", "M03", "M04", "M05", "M06"];
 
 pub fn supported_skill(skill_id: &str) -> bool {
-    READINESS_SKILLS.contains(&skill_id) || catalogue::item(skill_id, 0).is_some()
+    exercises::available(skill_id)
 }
 
 /// New story tasks use meaningful props and a nontrivial matching layout; old saves keep their factory.
@@ -351,19 +412,7 @@ pub fn practice_activity(
     seed: u64,
     id: &str,
 ) -> Result<MissionActivity, MissionError> {
-    let mut activity = if READINESS_SKILLS.contains(&skill) {
-        let source_seed = if skill == "M01" {
-            2 + seed % 4 + if seed % 8 >= 4 { 6 } else { 0 }
-        } else {
-            seed
-        };
-        authored_activity(skill, source_seed, id)?
-    } else {
-        catalogue::practice_activity(skill, seed, id)?
-    };
-    activity.view.content_version = "mission-practice-draft-3".into();
-    activity.view.variant_id = format!("{skill}-practice-v3-{:02}", seed % 24);
-    Ok(activity)
+    exercises::activity(skill, seed, id)
 }
 
 pub fn authored_activity(
@@ -628,7 +677,7 @@ pub fn discovery_activity(mut activity: MissionActivity) -> MissionActivity {
         }
     }
     let prompt = match &mut activity.view.task {
-        PublicTask::PracticeCards { .. } => return activity,
+        PublicTask::Question { .. } | PublicTask::PracticeCards { .. } => return activity,
         PublicTask::Pairing {
             objects,
             recipients,
@@ -674,6 +723,11 @@ pub fn discovery_activity(mut activity: MissionActivity) -> MissionActivity {
 
 fn canonical_fingerprint(skill_id: &str, task: &PublicTask) -> String {
     let shape = match task {
+        PublicTask::Question {
+            exercise_id,
+            stimuli,
+            ..
+        } => format!("{exercise_id}:{stimuli:?}"),
         PublicTask::PracticeCards {
             stimulus,
             choices,
@@ -1399,6 +1453,7 @@ mod tests {
                     read_aloud: false,
                 };
                 match &original.key {
+                    AssessmentKey::Question(_) => unreachable!(),
                     AssessmentKey::Review => {
                         unreachable!("original five skills are objectively assessed")
                     }
@@ -1460,6 +1515,7 @@ mod tests {
                 .clone()
         };
         match &view.task {
+            PublicTask::Question { .. } => panic!("new question uses its private fixture"),
             PublicTask::PracticeCards { .. } => {
                 panic!("use catalogue assessment coverage for practice cards")
             }
@@ -2068,7 +2124,7 @@ mod tests {
             let task = practice_activity(&selected.skill_id, 0, "practice").unwrap();
             let mut event = observation(&selected.skill_id, i as usize, true);
             event.activity_completed = true;
-            if matches!(task.key, AssessmentKey::Review) {
+            if task.needs_review() {
                 event.evidence.event_kind = EventKind::WorkedExample;
                 event.evidence.result = ResultKind::NotAssessed;
                 event.evidence.first_check = false;
@@ -2091,7 +2147,7 @@ mod tests {
         let graph = CurriculumGraph::load().unwrap();
         for node in graph.nodes() {
             let first = practice_activity(&node.id, 0, "variants").unwrap();
-            if matches!(first.key, AssessmentKey::Review) {
+            if first.needs_review() {
                 continue;
             }
             let variants: BTreeSet<_> = (0..24)

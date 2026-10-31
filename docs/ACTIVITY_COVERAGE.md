@@ -1,165 +1,196 @@
-# Activity coverage and public IXL references
+# Activity coverage
 
-Planned replacement work is specified in the
-[activity implementation plan](ACTIVITY_IMPROVEMENT_PLAN.md) and
-[120-skill checklist](ACTIVITY_SKILL_CHECKLIST.md). Those documents describe
-future work; the inventory below records the current implementation.
+Updated 31 October 2026. All **120** draft skill-map nodes use the current
+question controls in story missions: **354 exercise families** and
+**3945 original authored question/prompt records**. The controls are direct
+single/multiple choices, typed numbers/words, ordering, object assignment and
+human-reviewed workshops. Rust owns automatic marking; no answer bank is served
+to the browser. Completing one story question still finishes that skill's practice
+activity, separately from readiness or mastery.
 
-Updated 31 October 2026. All **120** draft graph nodes have original, code-authored
-practice: five existing assessed maths activities, 93 additional card starters and
-22 guided human-review workshops. This is activity availability, not complete
-curriculum assessment, pedagogical approval or IXL equivalence.
+The [implementation plan](ACTIVITY_IMPROVEMENT_PLAN.md) and
+[skill checklist](ACTIVITY_SKILL_CHECKLIST.md) describe the intended breadth.
+The internal inventory is `content/activities/skill-exercises-v1.json`, authored
+by `scripts/activity_content/` and rebuilt with `python3 scripts/build-activities.py`.
+The table reports implemented families, controls and actual bank sizes. Small
+finite contrasts have fewer items than open numeric families. More records do
+not establish calibrated difficulty, transfer, educator approval or full-skill
+assessment.
 
-Maths starters use fixed algorithms with bounded seeded quantities; language
-starters use authored text/word sets. Every automatically marked activity in the
-current story factory has at least two canonical questions; some guided workshops
-still have a single scenario. Wrong answers receive a different same-skill
-question, and completed activities are not offered again. Reordered choices and
-renamed contexts do not count as new learning evidence. Short samples deliberately
-do not establish readiness for
-full objectives involving longer passages, multiple representations, writing,
-fluency or collaboration. New starters have no automatic full-skill readiness.
-The original five retain their experimental varied-evidence diagnostic, separately
-from the completion-driven story journey. Richer manipulatives and item banks
-remain follow-on work.
+## Assessment and review limits
 
-IXL's public Australian Foundation and Years 1–6 maths and English catalogues
-were consulted for task families: picture counting, ten frames, sequences,
-comparison, arithmetic, equal parts, graphs, grammar, spelling, main idea and
-inference. These are references for our interpretation of a suitable starter,
-not an item-by-item exercise audit. Public exercise pages either failed to load
-or exposed the navigation shell without their interactive questions. We have not
-verified exact IXL mechanics, difficulty progression or question-bank parity.
-No IXL questions, artwork, wording or scoring algorithm were copied.
+- Reviewed audio is not yet available: `content/activities/audio-v1.json` has no
+  approved recordings. Listening, phoneme production and oral decoding retain
+  explicit grown-up-supported routes. Written questions do not masquerade as
+  independent listening evidence. The renderer supports allowlisted local audio
+  references with a clear missing-recording fallback.
+- Picture-supported spelling uses the visual target and, for less obvious long
+  vowel/blend targets, word length and an initial-letter clue. Dictation never
+  certifies spelling or decoding. Additional taught word sets and dialect review
+  remain educator work.
+- Productive writing, fluency, presentations, inquiry and collaboration use local
+  drafts/scaffolds and review rubrics. Supported completion is not an actual
+  recorded adult approval or an independent success. Some recognition exercises
+  support these skills without assessing their productive objective.
+- Reading banks use three original narratives, three paired fictional
+  informational/promotional sources, and shorter Year 2 informational examples.
+  Text lengths follow the node bounds, per passage for paired texts. More sources,
+  genre breadth and educator-reviewed interpretation alternatives remain review
+  limits; these sources do not establish full reading coverage.
+- `MY305` still has the draft unit-fraction versus same-denominator wording
+  ambiguity. Recognition/placement of unit fractions and comparison of proper
+  same-denominator fractions are separate exercise families; alignment is pending.
+- Difficulty rungs describe draft bank organisation. There is no new adaptive
+  algorithm, speed scoring, spaced review or validated mastery policy.
+- Icons use bundled Lucide SVGs; clocks, equal parts, number lines, graphs, grids,
+  measurement, place value, composite shapes and prisms use bounded semantic
+  diagrams. Passing browser checks does not replace educator, screen-reader,
+  iPad Safari or child usability review.
 
-The table links the corresponding public year/subject catalogue, rather than
-claiming an exact one-to-one mapping for broad curriculum nodes. Curriculum
-alignment and all educator/accessibility/release review gates remain pending.
+Public IXL catalogues informed the task-family comparison, including
+[Foundation maths](https://au.ixl.com/maths/foundation/skills) and
+[Year 3 English](https://au.ixl.com/english/year-3/skills). Exact interactive
+exercise mechanics and bank parity were not verified. Wonderwilds questions,
+text and assessment rules are original; no IXL endorsement is implied.
+All curriculum and release reviews remain pending and release is disabled.
 
-| Skill | Existing objective | Implemented practice | IXL catalogue reference |
+## Implemented inventory
+
+| Skill | Exercise families | Controls | Records |
 | --- | --- | --- | --- |
-| M01 | Match one object to each recipient | Existing assessed maths | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M02 | Recognise tiny quantities without counting | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M03 | Count collections and connect totals to numerals | Existing assessed maths | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M04 | Compare and order collections | Existing assessed maths | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M05 | Move forward and backward through a counting sequence | Existing assessed maths | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M06 | Compose and partition a small whole | Existing assessed maths | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M07 | Model joining and taking away with objects | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M08 | Share a small collection fairly | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M09 | Identify extend and create repeating patterns | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M10 | Sort and describe familiar shapes | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M11 | Use position and movement language | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M12 | Compare length mass and capacity directly | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M13 | Order familiar events and connect them to daily time | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M14 | Sort collections by a stated attribute | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M15 | Gather and interpret simple category counts | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M16 | Group tens and ones | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M17 | Use equal groups and skip-counting | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| M18 | Partition familiar wholes equally | Focused answer-card starter | [maths foundation](https://au.ixl.com/maths/foundation/skills) |
-| E01 | Follow short spoken directions and take turns | Guided workshop · human review | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E02 | Connect useful vocabulary with objects and actions | Focused answer-card starter | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E03 | Notice rhymes and syllables | Focused answer-card starter | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E04 | Identify and manipulate sounds in spoken words | Guided workshop · human review | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E05 | Connect taught letters with their sounds | Guided workshop · human review | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E06 | Blend taught sounds to decode regular words | Guided workshop · human review | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E07 | Segment and encode regular words with taught letters | Focused answer-card starter | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E08 | Recognise explicitly taught common word forms | Focused answer-card starter | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E09 | Track print and sentence boundaries | Focused answer-card starter | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E10 | Read a controlled short sentence | Focused answer-card starter | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E11 | Recall characters and sequence events in a heard story | Guided workshop · human review | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E12 | Retrieve meaning from a short independently read text | Focused answer-card starter | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E13 | Compose a short meaningful message with scaffolds | Guided workshop · human review | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E14 | Discuss a character's choice and give a reason | Guided workshop · human review | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| E15 | Extend spelling patterns and sentence detail | Guided workshop · human review | [english foundation](https://au.ixl.com/english/foundation/skills) |
-| MY101 | Count forward and backward by 1s, 2s, 5s and 10s from any starting point to at least 120 | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY102 | Read, write and represent two-digit numbers | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY103 | Compare and order two-digit numbers using < = > symbols | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY104 | Represent and solve addition problems within 20 using strategies including counting on and making 10 | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY105 | Represent and solve subtraction problems within 20 using strategies including counting back and think addition | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY106 | Identify and describe the features of familiar 2D shapes and 3D objects | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY107 | Use direct and indirect comparison to measure length, mass and capacity | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY108 | Identify and continue repeating patterns and create number patterns using addition and skip counting | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY109 | Collect and represent data in lists, tables and simple picture graphs and interpret results | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY110 | Read and represent time to the hour and half-hour on analogue and digital clocks | Focused answer-card starter | [maths year-1](https://au.ixl.com/maths/year-1/skills) |
-| MY201 | Read, write and represent three-digit numbers and explain the place value of each digit | Focused answer-card starter | [maths year-2](https://au.ixl.com/maths/year-2/skills) |
-| MY202 | Apply addition and subtraction strategies to solve problems within 100 including regrouping | Focused answer-card starter | [maths year-2](https://au.ixl.com/maths/year-2/skills) |
-| MY203 | Represent and solve multiplication problems using groups, arrays and repeated addition for 2, 3, 5 and 10 times tables | Focused answer-card starter | [maths year-2](https://au.ixl.com/maths/year-2/skills) |
-| MY204 | Recognise, model and describe equal sharing and equal grouping as division | Focused answer-card starter | [maths year-2](https://au.ixl.com/maths/year-2/skills) |
-| MY205 | Recognise and represent half and quarter as equal parts of a whole and a collection | Focused answer-card starter | [maths year-2](https://au.ixl.com/maths/year-2/skills) |
-| MY206 | Measure and compare length, area, mass and capacity using standard and non-standard units | Focused answer-card starter | [maths year-2](https://au.ixl.com/maths/year-2/skills) |
-| MY207 | Read and represent time to the quarter-hour and understand AM and PM | Focused answer-card starter | [maths year-2](https://au.ixl.com/maths/year-2/skills) |
-| MY208 | Identify and describe the properties of 2D shapes and 3D objects including symmetry and transformation | Focused answer-card starter | [maths year-2](https://au.ixl.com/maths/year-2/skills) |
-| MY209 | Collect, organise and display data in tables, picture graphs and bar graphs and draw conclusions | Focused answer-card starter | [maths year-2](https://au.ixl.com/maths/year-2/skills) |
-| MY301 | Read, write and represent four-digit numbers and apply place value understanding including rounding to the nearest 10 and 100 | Focused answer-card starter | [maths year-3](https://au.ixl.com/maths/year-3/skills) |
-| MY302 | Apply written strategies for addition and subtraction of up to four-digit numbers | Focused answer-card starter | [maths year-3](https://au.ixl.com/maths/year-3/skills) |
-| MY303 | Recall multiplication facts up to 10x10 and apply them to solve problems | Focused answer-card starter | [maths year-3](https://au.ixl.com/maths/year-3/skills) |
-| MY304 | Apply division facts related to multiplication tables and solve simple division problems with remainders | Focused answer-card starter | [maths year-3](https://au.ixl.com/maths/year-3/skills) |
-| MY305 | Model, compare and order unit fractions with the same denominator and place them on a number line | Focused answer-card starter | [maths year-3](https://au.ixl.com/maths/year-3/skills) |
-| MY306 | Measure perimeter and area of rectangles using grids and the standard formula | Focused answer-card starter | [maths year-3](https://au.ixl.com/maths/year-3/skills) |
-| MY307 | Read and interpret data in picture graphs, bar graphs and tables including scales greater than one | Focused answer-card starter | [maths year-3](https://au.ixl.com/maths/year-3/skills) |
-| MY308 | Describe the likelihood of events using the language of chance including impossible, unlikely, likely and certain | Focused answer-card starter | [maths year-3](https://au.ixl.com/maths/year-3/skills) |
-| MY309 | Describe location and direction using grid references, compass directions and mapping conventions | Focused answer-card starter | [maths year-3](https://au.ixl.com/maths/year-3/skills) |
-| MY401 | Read, write and compare large numbers up to millions and apply flexible place value understanding | Focused answer-card starter | [maths year-4](https://au.ixl.com/maths/year-4/skills) |
-| MY402 | Apply written strategies for multiplication of two-digit by one-digit numbers using the area model and standard algorithm | Focused answer-card starter | [maths year-4](https://au.ixl.com/maths/year-4/skills) |
-| MY403 | Investigate and solve problems involving equivalent fractions and locate fractions on a number line | Focused answer-card starter | [maths year-4](https://au.ixl.com/maths/year-4/skills) |
-| MY404 | Recognise and represent decimals to hundredths and connect them to fractions and place value | Focused answer-card starter | [maths year-4](https://au.ixl.com/maths/year-4/skills) |
-| MY405 | Calculate perimeter and area of composite shapes and apply the formulas for rectangles and squares | Focused answer-card starter | [maths year-4](https://au.ixl.com/maths/year-4/skills) |
-| MY406 | Create and interpret line graphs for continuous data and compare graphs to make predictions | Focused answer-card starter | [maths year-4](https://au.ixl.com/maths/year-4/skills) |
-| MY407 | Describe and compare the likelihood of events using fractions and conduct chance experiments | Focused answer-card starter | [maths year-4](https://au.ixl.com/maths/year-4/skills) |
-| MY408 | Solve problems involving time duration, timetables and the relationship between units of time | Focused answer-card starter | [maths year-4](https://au.ixl.com/maths/year-4/skills) |
-| MY501 | Apply efficient strategies for multiplication and division of multi-digit numbers including the standard algorithm | Focused answer-card starter | [maths year-5](https://au.ixl.com/maths/year-5/skills) |
-| MY502 | Compare, order and represent fractions with different denominators and convert between improper fractions and mixed numbers | Focused answer-card starter | [maths year-5](https://au.ixl.com/maths/year-5/skills) |
-| MY503 | Add and subtract fractions with related denominators and multiply fractions by whole numbers | Focused answer-card starter | [maths year-5](https://au.ixl.com/maths/year-5/skills) |
-| MY504 | Represent and compare decimals to thousandths and add and subtract decimals | Focused answer-card starter | [maths year-5](https://au.ixl.com/maths/year-5/skills) |
-| MY505 | Understand and apply percentages as rates per hundred and connect to fractions and decimals | Focused answer-card starter | [maths year-5](https://au.ixl.com/maths/year-5/skills) |
-| MY506 | Explore the Cartesian plane and graph and interpret relationships between variables | Focused answer-card starter | [maths year-5](https://au.ixl.com/maths/year-5/skills) |
-| MY507 | Calculate mean, median, mode and range and select appropriate measure of centre for a data set | Focused answer-card starter | [maths year-5](https://au.ixl.com/maths/year-5/skills) |
-| MY508 | Solve problems involving volume and capacity of rectangular prisms using formal units | Focused answer-card starter | [maths year-5](https://au.ixl.com/maths/year-5/skills) |
-| MY601 | Apply order of operations (BODMAS) to evaluate and write numerical expressions with brackets | Focused answer-card starter | [maths year-6](https://au.ixl.com/maths/year-6/skills) |
-| MY602 | Solve problems involving fractions, decimals and percentages in real-world contexts | Focused answer-card starter | [maths year-6](https://au.ixl.com/maths/year-6/skills) |
-| MY603 | Identify and describe properties of prime and composite numbers and apply divisibility rules | Focused answer-card starter | [maths year-6](https://au.ixl.com/maths/year-6/skills) |
-| MY604 | Investigate and solve problems involving ratios and rates in everyday contexts | Focused answer-card starter | [maths year-6](https://au.ixl.com/maths/year-6/skills) |
-| MY605 | Write, evaluate and interpret algebraic expressions and equations using pronumerals | Focused answer-card starter | [maths year-6](https://au.ixl.com/maths/year-6/skills) |
-| MY606 | Calculate angles in triangles and on straight lines and classify triangles by their properties | Focused answer-card starter | [maths year-6](https://au.ixl.com/maths/year-6/skills) |
-| MY607 | Interpret and critically evaluate statistical data and identify misleading representations | Focused answer-card starter | [maths year-6](https://au.ixl.com/maths/year-6/skills) |
-| MY608 | Assign and compare probabilities of complementary and mutually exclusive events | Focused answer-card starter | [maths year-6](https://au.ixl.com/maths/year-6/skills) |
-| EY101 | Apply knowledge of grapheme-phoneme correspondences to decode unfamiliar words in simple texts | Guided workshop · human review | [english year-1](https://au.ixl.com/english/year-1/skills) |
-| EY102 | Read and spell high-frequency words including common irregular words (sight words) | Focused answer-card starter | [english year-1](https://au.ixl.com/english/year-1/skills) |
-| EY103 | Comprehend a short text by identifying the main idea and supporting details | Focused answer-card starter | [english year-1](https://au.ixl.com/english/year-1/skills) |
-| EY104 | Write simple grammatically correct sentences with capital letters, full stops and question marks | Guided workshop · human review | [english year-1](https://au.ixl.com/english/year-1/skills) |
-| EY105 | Identify and use nouns, verbs, adjectives and pronouns in sentences | Focused answer-card starter | [english year-1](https://au.ixl.com/english/year-1/skills) |
-| EY106 | Spell simple words using knowledge of common spelling patterns and CVC, CVCE and consonant blend structures | Focused answer-card starter | [english year-1](https://au.ixl.com/english/year-1/skills) |
-| EY107 | Listen and respond to spoken texts by predicting, retelling and asking questions | Guided workshop · human review | [english year-1](https://au.ixl.com/english/year-1/skills) |
-| EY201 | Read texts with fluency and expression, applying decoding strategies for multisyllabic words | Guided workshop · human review | [english year-2](https://au.ixl.com/english/year-2/skills) |
-| EY202 | Comprehend narrative and informational texts by making inferences and identifying the author's purpose | Focused answer-card starter | [english year-2](https://au.ixl.com/english/year-2/skills) |
-| EY203 | Write a structured recount or narrative with a beginning, middle and end using time connectives | Guided workshop · human review | [english year-2](https://au.ixl.com/english/year-2/skills) |
-| EY204 | Spell words applying common digraphs, blends, long vowel patterns and morphological patterns including plurals and simple suffixes | Focused answer-card starter | [english year-2](https://au.ixl.com/english/year-2/skills) |
-| EY205 | Identify and use simple punctuation including commas in lists, exclamation marks and apostrophes for contractions | Focused answer-card starter | [english year-2](https://au.ixl.com/english/year-2/skills) |
-| EY206 | Understand and use text features of informational texts including headings, subheadings and captions | Focused answer-card starter | [english year-2](https://au.ixl.com/english/year-2/skills) |
-| EY301 | Analyse literary texts for character, setting and plot structure and identify how language creates meaning | Focused answer-card starter | [english year-3](https://au.ixl.com/english/year-3/skills) |
-| EY302 | Write informational texts using topic sentences, supporting details and a concluding statement | Guided workshop · human review | [english year-3](https://au.ixl.com/english/year-3/skills) |
-| EY303 | Spell words using morphological knowledge including prefixes, suffixes and base words | Focused answer-card starter | [english year-3](https://au.ixl.com/english/year-3/skills) |
-| EY304 | Identify and apply knowledge of sentence types including statements, questions, commands and exclamations | Focused answer-card starter | [english year-3](https://au.ixl.com/english/year-3/skills) |
-| EY305 | Discuss vocabulary and use context clues to determine the meaning of unfamiliar words and phrases | Focused answer-card starter | [english year-3](https://au.ixl.com/english/year-3/skills) |
-| EY306 | Speak clearly in structured presentations with awareness of audience and purpose | Guided workshop · human review | [english year-3](https://au.ixl.com/english/year-3/skills) |
-| EY401 | Compare and contrast information from multiple texts and evaluate the reliability of sources | Focused answer-card starter | [english year-4](https://au.ixl.com/english/year-4/skills) |
-| EY402 | Write persuasive texts using a clear position, reasoned arguments and evidence | Guided workshop · human review | [english year-4](https://au.ixl.com/english/year-4/skills) |
-| EY403 | Spell a range of words including homophones, commonly confused words and words with Latin and Greek roots | Focused answer-card starter | [english year-4](https://au.ixl.com/english/year-4/skills) |
-| EY404 | Use complex sentences with subordinate clauses and a variety of conjunctions to improve writing | Guided workshop · human review | [english year-4](https://au.ixl.com/english/year-4/skills) |
-| EY405 | Understand and apply different types of figurative language including simile, metaphor and personification | Focused answer-card starter | [english year-4](https://au.ixl.com/english/year-4/skills) |
-| EY406 | Plan, draft, revise and edit written texts using feedback to improve clarity, vocabulary and organisation | Guided workshop · human review | [english year-4](https://au.ixl.com/english/year-4/skills) |
-| EY501 | Analyse how authors use narrative structure, point of view and language choices to create impact | Focused answer-card starter | [english year-5](https://au.ixl.com/english/year-5/skills) |
-| EY502 | Write and refine informational and persuasive texts using sophisticated vocabulary, varied sentence structures and text organisation | Guided workshop · human review | [english year-5](https://au.ixl.com/english/year-5/skills) |
-| EY503 | Identify and explain the effect of grammatical choices including tense, voice and modal verbs | Focused answer-card starter | [english year-5](https://au.ixl.com/english/year-5/skills) |
-| EY504 | Comprehend complex texts by synthesising information, identifying bias and evaluating author's argument | Focused answer-card starter | [english year-5](https://au.ixl.com/english/year-5/skills) |
-| EY505 | Use a dictionary and thesaurus to expand vocabulary, understand etymology and select words for effect | Focused answer-card starter | [english year-5](https://au.ixl.com/english/year-5/skills) |
-| EY601 | Analyse how texts position readers through language, structure and perspective choices including critical literacy | Focused answer-card starter | [english year-6](https://au.ixl.com/english/year-6/skills) |
-| EY602 | Plan, draft and produce a polished extended written text demonstrating control of structure, language and conventions | Guided workshop · human review | [english year-6](https://au.ixl.com/english/year-6/skills) |
-| EY603 | Investigate how language evolves over time and across contexts including formal and informal registers | Focused answer-card starter | [english year-6](https://au.ixl.com/english/year-6/skills) |
-| EY604 | Conduct and present a structured research inquiry using multiple sources with proper referencing | Guided workshop · human review | [english year-6](https://au.ixl.com/english/year-6/skills) |
-| EY605 | Engage in collaborative discussion using active listening, respectful disagreement and building on others' ideas | Guided workshop · human review | [english year-6](https://au.ixl.com/english/year-6/skills) |
+| M01 | one for each; repair pairing | assign | 11 |
+| M02 | tiny groups; match patterns | single_choice | 8 |
+| M03 | scattered; ten frames; numeral match | number_entry | 60 |
+| M04 | more; fewer; same; order | order, single_choice | 42 |
+| M05 | one more; one less; missing number | number_entry, single_choice | 54 |
+| M06 | missing part; two parts; split collection | assign, number_entry, single_choice | 110 |
+| M07 | join; take away; picture equation | number_entry, single_choice | 135 |
+| M08 | share; per recipient; fair shares | assign, number_entry, single_choice | 23 |
+| M09 | continue; repeating unit; build pattern | single_choice, workshop | 14 |
+| M10 | features; name shape; silhouettes | multi_choice, single_choice | 9 |
+| M11 | position; movement | single_choice | 6 |
+| M12 | length; mass; capacity | single_choice | 36 |
+| M13 | order events; before after; day stages | order, single_choice | 18 |
+| M14 | sort attribute; belongs | assign, single_choice | 10 |
+| M15 | record counts; read graph; compare categories | assign, number_entry, single_choice | 51 |
+| M16 | count tens ones; build number; regroup | number_entry | 63 |
+| M17 | equal groups; skip count; grouped total | number_entry | 36 |
+| M18 | equal parts; halves quarters; partition | single_choice | 12 |
+| E01 | observed; second prompt | workshop | 2 |
+| E02 | recognise word; sentence context; actions | single_choice | 18 |
+| E03 | observed; second prompt | workshop | 2 |
+| E04 | observed; second prompt | workshop | 2 |
+| E05 | observed; second prompt | workshop | 2 |
+| E06 | observed; second prompt | workshop | 2 |
+| E07 | cvc; word building; sound boxes | order, text_entry | 18 |
+| E08 | recognise word; sentence context | single_choice | 12 |
+| E09 | first last; word order; boundaries | order, single_choice | 18 |
+| E10 | sentence picture; written instruction | single_choice | 12 |
+| E11 | observed; second prompt | workshop | 2 |
+| E12 | retrieve | single_choice | 6 |
+| E13 | observed; second prompt | workshop | 2 |
+| E14 | observed; second prompt | workshop | 2 |
+| E15 | observed; second prompt | workshop | 2 |
+| MY101 | forward; backward; missing terms | number_entry | 36 |
+| MY102 | read write; digit value; expand | number_entry | 36 |
+| MY103 | symbols; greatest least; order | order, single_choice | 36 |
+| MY104 | count on; make ten; addition story | number_entry | 36 |
+| MY105 | count back; missing addend; take away | number_entry | 144 |
+| MY106 | name shape; features; sort | assign, number_entry, single_choice | 25 |
+| MY107 | length; mass; capacity; equal units | number_entry, single_choice | 48 |
+| MY108 | repeating core; number pattern; create pattern | number_entry, single_choice, workshop | 17 |
+| MY109 | record; read; compare; combine | assign, number_entry | 52 |
+| MY110 | read clock; match digital; set time | number_entry, single_choice | 72 |
+| MY201 | read write; digit value; expand | number_entry | 36 |
+| MY202 | add; subtract; missing value | number_entry | 36 |
+| MY203 | multiply; missing factor; apply fact | number_entry | 36 |
+| MY204 | share; group; inverse | number_entry, single_choice | 75 |
+| MY205 | shape half; shape quarter; collection | number_entry, single_choice | 22 |
+| MY206 | length; mass; capacity; area | number_entry, single_choice | 48 |
+| MY207 | read clock; match digital; set time; am pm | number_entry, single_choice | 78 |
+| MY208 | classify; symmetry; transform | single_choice | 18 |
+| MY209 | record; read; compare; combine | assign, number_entry | 52 |
+| MY301 | read write; digit value; expand; round 10; round 100 | number_entry | 60 |
+| MY302 | add; subtract; missing value | number_entry | 36 |
+| MY303 | multiply; missing factor; apply fact | number_entry | 243 |
+| MY304 | facts; remainder; inverse | number_entry | 36 |
+| MY305 | unit fraction; place on line; compare; order | number_entry, order, single_choice | 41 |
+| MY306 | area; perimeter | number_entry | 24 |
+| MY307 | record; read; compare; combine | number_entry | 48 |
+| MY308 | language; likelihood scale | order, single_choice | 7 |
+| MY309 | grid reference; compass; map legend | number_entry, single_choice | 46 |
+| MY401 | read write; digit value; expand; compare order | number_entry, order | 48 |
+| MY402 | area model; standard; partial product | number_entry | 36 |
+| MY403 | equivalent; missing part; locate | number_entry | 102 |
+| MY404 | read model; digit value; fraction decimal | number_entry | 36 |
+| MY405 | composite area; composite perimeter; decompose | number_entry, single_choice | 36 |
+| MY406 | read line; complete point; trend prediction | number_entry, single_choice | 36 |
+| MY407 | fraction probability; compare; experiment | number_entry, single_choice | 41 |
+| MY408 | elapsed; timetable; convert | number_entry | 36 |
+| MY501 | multiply; missing factor; apply fact; division; choose method | number_entry, single_choice | 60 |
+| MY502 | compare; order; mixed number; locate | number_entry, order, single_choice | 138 |
+| MY503 | add; subtract; multiply | number_entry | 52 |
+| MY504 | read order; add; subtract | number_entry | 36 |
+| MY505 | hundred model; convert; application | number_entry | 36 |
+| MY506 | read point; plot point; value table; relationship | number_entry, single_choice | 70 |
+| MY507 | mean; median; mode; range; choose measure | number_entry, single_choice | 60 |
+| MY508 | unit cubes; prism volume; capacity | number_entry | 72 |
+| MY601 | evaluate; brackets; equivalent expression | number_entry, single_choice | 36 |
+| MY602 | fraction context; decimal context; percent context; representation | number_entry | 48 |
+| MY603 | prime composite; divisibility; factorisation | multi_choice, single_choice | 54 |
+| MY604 | equivalent ratio; missing part; unit rate | number_entry | 36 |
+| MY605 | substitute; solve equation; match expression | number_entry, single_choice | 36 |
+| MY606 | straight line; triangle angle; classify | number_entry, single_choice | 36 |
+| MY607 | distribution; compare graphs; misleading graph | number_entry, single_choice | 36 |
+| MY608 | complement; exclusive; compare | number_entry, single_choice | 51 |
+| EY101 | observed; second prompt | workshop | 2 |
+| EY102 | recognise word; sentence context; spell word | single_choice, workshop | 13 |
+| EY103 | main idea; detail; evidence | single_choice | 18 |
+| EY104 | observed; second prompt | workshop | 2 |
+| EY105 | noun; verb; adjective; pronoun | single_choice | 24 |
+| EY106 | cvc; word building; sound boxes; cvce; blends | order, text_entry | 30 |
+| EY107 | observed; second prompt | workshop | 2 |
+| EY201 | observed; second prompt | workshop | 2 |
+| EY202 | inference; purpose; evidence | single_choice | 36 |
+| EY203 | observed; second prompt | workshop | 2 |
+| EY204 | pattern; word family; context; digraphs; long vowels; blends | order, single_choice, text_entry | 36 |
+| EY205 | commas; exclamation; contraction | single_choice | 18 |
+| EY206 | heading; caption; locate feature | single_choice | 18 |
+| EY301 | character; setting; plot; language effect | single_choice | 24 |
+| EY302 | observed; second prompt | workshop | 2 |
+| EY303 | pattern; word family; context | order, text_entry | 18 |
+| EY304 | sentence type; punctuation; appropriate sentence | single_choice | 18 |
+| EY305 | word meaning; context clue | single_choice | 12 |
+| EY306 | observed; second prompt | workshop | 2 |
+| EY401 | compare; agreement; reliability | single_choice | 18 |
+| EY402 | observed; second prompt | workshop | 2 |
+| EY403 | pattern; word family; context | single_choice | 18 |
+| EY404 | observed; second prompt | workshop | 2 |
+| EY405 | simile; metaphor; personification | single_choice | 18 |
+| EY406 | observed; second prompt | workshop | 2 |
+| EY501 | structure; point of view; language effect; evidence | single_choice | 24 |
+| EY502 | observed; second prompt | workshop | 2 |
+| EY503 | tense; voice; modality | single_choice | 18 |
+| EY504 | synthesise; bias; argument | single_choice | 18 |
+| EY505 | dictionary; synonym; etymology register | single_choice | 18 |
+| EY601 | positioning; perspective; structure; evidence | single_choice | 24 |
+| EY602 | observed; second prompt | workshop | 2 |
+| EY603 | historical usage; register; context | single_choice | 18 |
+| EY604 | observed; second prompt | workshop | 2 |
+| EY605 | observed; second prompt; scenario | single_choice, workshop | 8 |
 
-The implementations are in `backend/crates/learning/src/mission.rs` and its
-`mission/catalogue.rs` module. The browser uses `frontend/src/mission-learning/`.
-[Design decisions](adr/curriculum-starter-practice.md) explain prerequisite
-exposure, evidence limits, save compatibility and supported completion.
+## Manual review before release
+
+These checks are pending; passing automated checks does not complete them.
+
+- An educator checks every family against the skill checklist, answer keys,
+  plausible distractors, vocabulary, source interpretation and difficulty.
+- Children try each control on a phone/tablet: find the action, answer, correct a
+  mistake, request a hint and continue after feedback without adult UI coaching.
+- Check small-screen text and diagram legibility, keyboard-only use, screen-reader
+  names/focus/feedback, colour-independent selection and iPad Safari touch/drag.
+- Confirm phoneme/dialect recordings, consent and asset allowlisting before
+  enabling listening exercises. Observe workshop review with a grown-up.
+- Confirm supported completion remains distinct from independent evidence and
+  story access remains available. Record issues and actual reviewer decisions
+  before changing pending review or release flags.

@@ -114,3 +114,18 @@ export function spokenCard(
   );
   return ids.size === 1 ? [...ids][0] : undefined;
 }
+
+/** Bounded numeric transcription only; never solve a question or submit an answer. */
+export function spokenNumber(text: string): string | undefined {
+  const value = text.trim();
+  if (value.length <= 32 && /^-?\d+(?:\.\d{1,6})?$|^-?\d+\/[1-9]\d*$/.test(value)) return value;
+  const choices = Array.from({ length: 1001 }, (_, value) => ({
+    id: String(value),
+    label: String(value),
+  }));
+  choices.push({ id: '1000000', label: '1000000' });
+  for (let denominator = 2; denominator <= 12; denominator++)
+    for (let numerator = 1; numerator <= 12; numerator++)
+      choices.push({ id: `${numerator}/${denominator}`, label: `${numerator}/${denominator}` });
+  return spokenCard(text, choices);
+}

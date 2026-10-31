@@ -10,6 +10,7 @@ use wonderwilds_learning::{
 
 fn answer(task: &PublicTask) -> MissionAnswer {
     match task {
+        PublicTask::Question { .. } => unreachable!("this suite tests original diagnostics"),
         PublicTask::PracticeCards { .. } => {
             panic!("this regression covers the established five-skill path")
         }

@@ -5,6 +5,34 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## All-skill mission questions — 31 October 2026
+
+The accepted controls now run in real missions for all **120** skill-map nodes:
+**354 exercise families**, **3945 authored question/prompt records**, seven
+interaction types, Lucide icons and 15 deterministic diagram/stimulus types.
+Rust selects and marks private fixtures; the browser receives the current public
+question without answer keys. Direct typed/selected answers, explicit checking,
+question-specific hints and worked explanations, local workshop drafts and
+Try another feedback replace the live starter task factories. Optional dictation
+fills eligible numeric/choice answers for review without submitting them;
+spelling/decoding never use dictation as independent evidence.
+
+Incorrect-answer replacement, support distinctions, exact retries, owned receipt
+recovery, progress/rewards and export/deletion remain server-authoritative. The
+prelaunch learning storage/pending-command format is v2. Only verified local
+synthetic mission-learning records were reset; story and inventory were kept.
+The standalone review page remains available.
+
+Validation: the aggregate repository check, real temporary-PostgreSQL suite,
+183 shared contract fixtures, full frontend check and live controls at 1280,
+390 and 320px passed. The browser suite covers all controls, 15 stimuli,
+keyboard/Enter, touch placement/undo, feedback, mocked dictation and missing
+audio. The real mission-learning API/browser journey passed with retry/reload
+recovery. Node 26 was available instead of the documented Node 24; the existing
+adventure bundle-size warning remains. See [coverage](ACTIVITY_COVERAGE.md) for
+family counts and pending educator, child usability, assistive-technology and
+recorded-audio review. No release approval or learning-efficacy claim is made.
+
 ## Activity control review examples — 31 October 2026
 
 `/activity-review.html` provides seven standalone UI examples: direct single
@@ -18,7 +46,7 @@ The writing example has an explicit local-draft notice and Ready to share action
 This is a review surface, not the replacement mission assessment implementation.
 It collects and displays sample answers without marking correctness, making API
 or provider calls, recording evidence, awarding rewards or modifying the database.
-The 120-skill implementation plan remains planned. The page has its own Vite
+This historical review-only milestone is superseded by the all-skill integration above. The page has its own Vite
 production entry and requires only the frontend development server.
 
 Validation: full frontend check passed, including 137 unit/API tests and the

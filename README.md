@@ -268,17 +268,18 @@ it without completing the story action. Travel or another tab can invalidate a
 joining point; put that task aside and reopen the current step. Unsupported
 frontiers retain the normal story action. Original direct story commands remain available without an academic gate.
 
-The combined Foundation/Years 1–6 graph contains 120 draft nodes, all with
-code-authored practice. **M01 → M03 → M04/M05/M06** retain their original
-assessed matching, counting, comparison, sequence and part–whole activities.
-The other 115 have focused answer-card starters or guided human-review workshops.
-Matching and counting support drag/tap/keyboard; answer cards support drag/tap and
-optional reviewed speech-to-text. Writing workshops offer a local draft pad and
-optional dictation, with human review and supported completion. There is no TTS.
+The combined Foundation/Years 1–6 graph contains 120 draft nodes with original,
+server-authored exercise families. Story questions use the reviewed direct-choice,
+multiple-choice, typed number/word, ordering, assignment and workshop controls.
+Lucide icons provide consistent visual cues; educational diagrams show clocks,
+fractions, graphs, grids, measurements and place value. Writing workshops have a
+local draft and explicit human-review guidance. Reviewed listening audio is not
+yet available, so affected tasks retain a grown-up-supported route. There is no TTS.
 A correct answer or explicit together-completion closes the activity automatically
 and marks it finished for that profile. Finished activities are not offered again,
-including after reload. A wrong answer issues a different question of the same
-skill, retaining help/check history and the same story binding. Completing an
+including after reload. A wrong answer shows a server-authored explanation, then Try another reveals
+the different same-skill question already saved with the same help/check history
+and story binding. Completing an
 activity unlocks related practice separately from academic readiness or mastery.
 Rust selects unfinished prerequisite-ready activities by year band; the original
 evidence policy remains available for assessment diagnostics.

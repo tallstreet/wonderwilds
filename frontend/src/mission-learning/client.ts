@@ -132,7 +132,7 @@ export class MissionLearningSession {
     private readonly storage: MissionLearningPendingStore,
     private readonly commandId: () => string = () => crypto.randomUUID(),
   ) {
-    this.storageKey = `wonderwilds.mission-learning.pending.v1:${profileId}`;
+    this.storageKey = `wonderwilds.mission-learning.pending.v2:${profileId}`;
     const saved = storage.getItem(this.storageKey);
     if (saved !== null) {
       if (saved.length > maximumCommandBytes)

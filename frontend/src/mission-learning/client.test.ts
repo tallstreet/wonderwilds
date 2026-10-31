@@ -159,7 +159,7 @@ test('blocked storage fails before send and corrupt pending command fails closed
   await assert.rejects(session.choose({ type: 'begin' }));
   assert.equal(sent, 0);
   const corrupted = storage();
-  corrupted.values.set('wonderwilds.mission-learning.pending.v1:profile-1', '{bad');
+  corrupted.values.set('wonderwilds.mission-learning.pending.v2:profile-1', '{bad');
   assert.throws(() => new MissionLearningSession(client, 'profile-1', corrupted));
 });
 

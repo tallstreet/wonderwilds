@@ -9,7 +9,7 @@ export function voiceEntry(
   enabled: () => boolean,
   select: (id: string) => void,
   freeze: (active: boolean) => void,
-  useDraft?: (text: string) => void,
+  useDraft?: (text: string) => boolean | void,
 ) {
   const document = root.ownerDocument;
   const panel = document.createElement('fieldset');
@@ -117,8 +117,11 @@ export function voiceEntry(
     if (!alive || !enabled() || recording) return;
     if (useDraft) {
       if (input.value.trim()) {
-        useDraft(input.value.trim());
-        message.textContent = 'Your draft is ready to share with a grown-up.';
+        const accepted = useDraft(input.value.trim());
+        message.textContent =
+          accepted === false
+            ? 'I could not match that answer. Your previous answer is still here.'
+            : 'Your words are ready. Check them before continuing.';
       } else message.textContent = 'Add some words to your draft first.';
       return;
     }
