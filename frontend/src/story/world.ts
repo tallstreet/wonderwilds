@@ -1,3 +1,4 @@
+import { CharacterCustomizer } from '../character-customizer.ts';
 import { characterPortrait } from '../character-art.ts';
 import { sceneSourceLabel } from './source-status.ts';
 import type Phaser from 'phaser';
@@ -36,6 +37,7 @@ const escape = (value: string) =>
 type Hooks = { open(html: string): void; close(): void; toast(text: string): void };
 export class StoryWorld {
   private state = freshState();
+  private customizer?: CharacterCustomizer;
   private game!: Phaser.Game;
   private commands: StorySession;
   private crossing = false;
@@ -55,6 +57,7 @@ export class StoryWorld {
     private hooks: Hooks,
     learningClient: MissionLearningClient,
     private recorder?: AnswerRecorder,
+    private appearance?: { profile: string; csrf: string; enabled: boolean },
   ) {
     this.commands = new StorySession(client, profile, sessionStorage);
     this.learning = new MissionLearningSession(learningClient, profile, sessionStorage);
@@ -124,6 +127,20 @@ export class StoryWorld {
         },
       },
     );
+    if (this.appearance) {
+      this.customizer = new CharacterCustomizer(
+        this.game,
+        this.appearance.profile,
+        this.appearance.csrf,
+        this.appearance.enabled,
+        this.hooks,
+      );
+      await new Promise<void>((resolve) => {
+        if (this.game.isBooted && this.game.scene.isActive('island')) resolve();
+        else this.game.events.once('world-ready', resolve);
+      });
+      await this.customizer.restore();
+    }
     this.hud();
     return this.game;
   }
@@ -351,6 +368,7 @@ export class StoryWorld {
     );
   }
   handle(button: HTMLButtonElement) {
+    if (button.id === 'character') return this.customizer?.open();
     if (button.id === 'bag') {
       this.bag();
       return;
@@ -654,5 +672,6 @@ export async function connectStoryWorld(hooks: Hooks) {
       typeof navigator.mediaDevices?.getUserMedia === 'function'
       ? createRecorder(value.csrf, value.profileId)
       : undefined,
+    { profile: value.profileId, csrf: value.csrf, enabled: value.characterGeneration === true },
   );
 }

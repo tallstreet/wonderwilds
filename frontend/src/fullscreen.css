@@ -49,6 +49,7 @@ body {
   pointer-events: auto;
 }
 .location-badge {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 11px;
@@ -704,4 +705,27 @@ body {
   font-size: 11px;
   font-weight: 700;
   color: #59456e;
+}
+
+/* Keep the location heading semantic while the whole title tile opens your look. */
+.location-customize {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: auto;
+}
+.location-customize:hover:not(:disabled) {
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.location-customize:focus-visible {
+  outline: 3px solid #7947dc;
+  outline-offset: 4px;
 }

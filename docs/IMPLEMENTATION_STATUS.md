@@ -1360,3 +1360,54 @@ frontend check reached a formatting failure in the pre-existing, unrelated edit
 to `frontend/src/learning/activity.ts`; that edit was preserved. Typechecking,
 linting, 129 frontend tests, the production build and changed-file formatting
 passed separately. `git diff --check` passed.
+
+### Describe a playable character — 31 October 2026
+
+The story HUD's top-left Wonderwilds title tile opens an accessible description/generation
+flow with animated directional preview, explicit apply, and restore-original.
+The HUD and browser title use Wonderwilds. The whole title tile supports pointer
+and keyboard activation; the separate Character shortcut has been removed.
+The local synthetic demo optionally calls Meta Muse Image (`muse-image-1.0`)
+using the server-only `MODEL_API_KEY`. Host/Origin/CSRF/profile/session checks,
+bounded inputs/PNG outputs, timeout, cancellation and concurrency/rate limits
+protect the local bridge. No provider secrets or gameplay/learning records are
+sent to Meta. The bundled hero atlas is sent as a rendering-style reference via
+the image-edit endpoint; instructions request its rounded, softly lit 3D look and
+explicit blank margins in every cell. A generated 3×4 sheet is keyed from magenta, checked for usable cell
+bounds and normalized to consistent scale and ground alignment. Phaser uses
+idle/alternating-foot frames in four directions and respects reduced motion.
+Appearance changes preserve position, route and gameplay progress. Browser-local
+art is scoped to the selected profile and survives reload; it is not cloud saved.
+Missing configuration disables generation; invalid art or unavailable storage
+never prevents the original character from playing.
+
+Validation: frontend type/lint/format, 132 unit/API tests and production build;
+mocked real-HTTP bridge checks for authorization, invalid/oversized input,
+provider request shape and throttling; desktop/phone browser journeys for
+preview/apply/walk/reload/reset, focus, cancellation and provider failure without
+progress writes. Node 26 was used. Live Meta access, sprite/content quality,
+provider child-data terms and child playtesting remain unverified. This is a local
+development feature, not production deployment or content approval.
+
+Character-sheet diagnostics follow-up: failed normalization now retains the latest
+raw image in page memory and exposes original/keyed previews, a grid overlay,
+original PNG download and all twelve cells' dimensions, bounds, occupancy and
+specific rejection reasons. Debug data survives dialog dismissal, clears on
+replacement/reload/page exit and is not logged or saved to backend/browser
+storage. Validation thresholds remain unchanged. A live reproduction of
+“A fluffy cat with red suit” returned a 1344×1792 PNG: background removal worked,
+but the first pose extends past the fixed 448px row boundary; visual inspection
+also found an incorrectly facing walking pose. This confirms a layout/alignment
+failure rather than API unavailability. A rejected sheet is never applied.
+
+The style follow-up replaces the earlier flat/painterly text-only request with
+Meta's image-edit endpoint and the existing hero atlas as a style-only reference.
+A live follow-up produced a dimensional 3D-looking cat that passed the pixel/cell
+checks and remained available for explicit selection. Visual inspection still
+found reversed side-walking poses: geometric validation does not establish correct
+facing, alternating feet or content approval. No generated look was applied during
+this debug session. The reference is bundled artwork, with no profile/learning
+information added to provider input. Final verification: 133 frontend tests,
+strict type/lint/format and production build; mocked bridge authorization/reference
+checks; desktop/phone diagnostics, exact original-PNG download, retained failed
+images, preview/apply/walk/reload/reset and failure/cancellation checks passed.

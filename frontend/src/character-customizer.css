@@ -1,0 +1,104 @@
+.character-customizer {
+  max-width: 560px;
+}
+.character-customizer label {
+  display: block;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.character-customizer textarea {
+  box-sizing: border-box;
+  width: 100%;
+  resize: vertical;
+  min-height: 90px;
+  border: 2px solid #d5c8e5;
+  border-radius: 14px;
+  padding: 12px;
+  font: inherit;
+  color: #49395c;
+  background: #fffdf9;
+}
+.character-customizer textarea:focus-visible {
+  outline: 3px solid #8b68b5;
+  outline-offset: 2px;
+}
+.character-note {
+  font-size: 0.85rem;
+  color: #675674;
+}
+.character-walk-preview {
+  width: 128px;
+  height: 128px;
+  margin: 12px auto;
+  border-radius: 16px;
+  background-color: #eee6f5;
+  background-size: 300% 400%;
+  background-position: 50% var(--character-row, 0%);
+  animation: character-preview-walk 600ms steps(1) infinite;
+}
+.character-directions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.character-directions button[aria-pressed='true'] {
+  outline: 2px solid #8b68b5;
+}
+@keyframes character-preview-walk {
+  0%,
+  100% {
+    background-position-x: 50%;
+  }
+  50% {
+    background-position-x: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .character-walk-preview {
+    animation: none;
+    background-position-x: 0%;
+  }
+}
+#character-reset {
+  margin-top: 16px;
+}
+#character-debug {
+  margin: 18px 0;
+}
+#character-debug summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+.character-debug-sheet {
+  position: relative;
+  margin: 12px 0;
+  background: repeating-conic-gradient(#eee 0% 25%, #fff 0% 50%) 0 / 20px 20px;
+}
+.character-debug-sheet img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.character-debug-sheet > span {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, transparent calc(100% - 1px), #00bfff calc(100% - 1px)) 0 0 /
+      calc(100% / 3) 100%,
+    linear-gradient(to bottom, transparent calc(100% - 1px), #00bfff calc(100% - 1px)) 0 0 / 100%
+      25%;
+  border: 1px solid #00bfff;
+}
+#character-debug pre {
+  max-height: 260px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 12px;
+  background: #eee6f5;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

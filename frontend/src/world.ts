@@ -1,3 +1,4 @@
+import { CUSTOM_TEXTURE, customFacing, customFrame } from './custom-character.ts';
 import { SpeechBubble } from './speech-bubble.ts';
 import type {
   Progress,
@@ -112,6 +113,12 @@ export function createWorld(
         },
       );
       this.game.events.on('refresh', () => this.paint());
+      this.game.events.on('appearance', () => {
+        this.player.heroId = this.textures.exists(CUSTOM_TEXTURE)
+          ? CUSTOM_TEXTURE
+          : getState().hero;
+        this.poseActor(this.player, 0, 0, 0);
+      });
       this.game.events.on('authoritative-position', () => this.paint(true));
       this.game.events.on('scripted-walk', (point: Point, arrived: () => void) => {
         this.walkTo(point, null, true);
@@ -133,6 +140,7 @@ export function createWorld(
         if (waypoint) this.walkTo(waypoint.point, waypoint.arrived ? e : null);
       });
       keyboard.on('keydown-SPACE', () => this.interact());
+      this.game.events.emit('world-ready');
     }
     label(x: number, y: number, text: string, size = 16, color = '#6a4c86') {
       return this.add
@@ -264,7 +272,13 @@ export function createWorld(
             });
         });
       const pos = old && !this.blocked(old.x, old.y) ? old : { x: 160, y: 490 };
-      this.player = this.makeActor(pos.x, pos.y, s.hero, 100, 112);
+      this.player = this.makeActor(
+        pos.x,
+        pos.y,
+        this.textures.exists(CUSTOM_TEXTURE) ? CUSTOM_TEXTURE : s.hero,
+        100,
+        112,
+      );
 
       this.you = this.add
         .text(pos.x, pos.y - 120, 'YOU', {
@@ -538,23 +552,36 @@ export function createWorld(
         species = character?.species ?? heroes[actor.heroId]?.species ?? 'kitten';
       actor.phase = moving ? advanceGaitPhase(actor.phase, distance, species) : 0;
       // These library sheets supply front poses; do not borrow another hero's side/back art.
-      const facing = character
+      const custom = actor.heroId === CUSTOM_TEXTURE && this.textures.exists(CUSTOM_TEXTURE);
+      const direction = customFacing(dx, dy, actor.facing);
+      const facing = custom
         ? {
-            texture: character.texture,
-            frame: character.frame,
+            texture: CUSTOM_TEXTURE,
+            frame: String(customFrame(direction, actor.phase, moving, this.reducedMotion)),
             flipX: false,
-            facing: 'down' as const,
+            facing: direction,
             originX: 0.5,
-            originY: 0.96,
+            originY: 120 / 128,
             scaleX: 1,
             scaleY: 1,
           }
-        : resolveFacing(
-            heroFrames.includes(actor.heroId) ? actor.heroId : 'pip',
-            dx,
-            dy,
-            actor.facing,
-          );
+        : character
+          ? {
+              texture: character.texture,
+              frame: character.frame,
+              flipX: false,
+              facing: 'down' as const,
+              originX: 0.5,
+              originY: 0.96,
+              scaleX: 1,
+              scaleY: 1,
+            }
+          : resolveFacing(
+              heroFrames.includes(actor.heroId) ? actor.heroId : 'pip',
+              dx,
+              dy,
+              actor.facing,
+            );
       actor.facing = facing.facing;
       const texture =
         this.textures.exists(facing.texture) && this.textures.get(facing.texture).has(facing.frame)
@@ -565,6 +592,7 @@ export function createWorld(
         .setFlipX(facing.flipX)
         .setOrigin(facing.originX ?? 0.5, facing.originY ?? 0.96);
       const spriteWalk =
+        !custom &&
         !character &&
         applyWalkCycle(actor.art, actor.heroId, actor.phase, moving, {
           reducedMotion: this.reducedMotion,
@@ -576,16 +604,23 @@ export function createWorld(
       }
       const gait = sampleGait(species, actor.phase, moving, { reducedMotion: this.reducedMotion });
       // The real walking frames already contain the kitten's weight shift.
-      const lift = spriteWalk ? 0 : gait.lift,
-        sx = spriteWalk ? 1 : gait.scaleX,
-        sy = spriteWalk ? 1 : gait.scaleY;
+      const lift = spriteWalk || custom ? 0 : gait.lift,
+        sx = spriteWalk || custom ? 1 : gait.scaleX,
+        sy = spriteWalk || custom ? 1 : gait.scaleY;
       actor.art
         .setDisplaySize(
-          actor.baseWidth * sx * (spriteWalk ? 1 : (facing.scaleX ?? 1)),
+          (custom ? actor.baseHeight : actor.baseWidth) *
+            sx *
+            (spriteWalk ? 1 : (facing.scaleX ?? 1)),
           actor.baseHeight * sy * (spriteWalk ? 1 : (facing.scaleY ?? 1)),
         )
         .setPosition(0, -lift)
-        .setAngle(spriteWalk ? 0 : gait.rotation);
+        .setAngle(spriteWalk || custom ? 0 : gait.rotation);
+      if (actor === this.player) {
+        const surface = document.getElementById(parent)!;
+        surface.dataset.playerTexture = actor.art.texture.key;
+        surface.dataset.playerFrame = String(actor.art.frame.name);
+      }
       actor.setDepth(actor.y);
       const shadowScale = Math.max(0.65, 1 - lift * 0.023);
       actor.shadow

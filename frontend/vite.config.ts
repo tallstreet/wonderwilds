@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { museHandler } from './server/muse.ts';
+import { characterHandler } from './server/character.ts';
 import { readFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { fileURLToPath } from 'node:url';
@@ -13,7 +14,7 @@ export default defineConfig(({ command }) => {
   const host = `127.0.0.1:${port}`;
   const origin = `http://${host}`;
   const museKey = process.env.BASETEN_API_KEY;
-  const transcribe = museHandler(museKey, async () => {
+  const authorize = async () => {
     const response = await fetch(`http://127.0.0.1:${apiPort}/api/v1/game`, {
       headers: {
         Cookie: `wonderwilds_session=${demo.session}`,
@@ -23,7 +24,10 @@ export default defineConfig(({ command }) => {
     });
     await response.body?.cancel();
     return response.ok;
-  });
+  };
+  const transcribe = museHandler(museKey, authorize);
+  const characterKey = process.env.MODEL_API_KEY;
+  const character = characterHandler(characterKey, authorize);
   return {
     build: {
       rollupOptions: {
@@ -62,10 +66,11 @@ export default defineConfig(({ command }) => {
                       profileId: demo.profileId,
                       csrf: demo.browserToken,
                       voiceInput: Boolean(museKey),
+                      characterGeneration: Boolean(characterKey),
                     }),
                   );
                 }
-                if (path === '/__demo/transcribe') {
+                if (path === '/__demo/transcribe' || path === '/__demo/character') {
                   if (req.method !== 'POST') return reject(405);
                   if (
                     req.headers.origin !== origin ||
@@ -73,7 +78,7 @@ export default defineConfig(({ command }) => {
                     req.headers['x-wonderwilds-profile'] !== demo.profileId
                   )
                     return reject(403);
-                  void transcribe(req, res);
+                  void (path === '/__demo/character' ? character : transcribe)(req, res);
                   return;
                 }
                 if (

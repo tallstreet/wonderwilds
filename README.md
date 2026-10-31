@@ -456,3 +456,43 @@ WW_STORY_BRANCHES=alternate WW_QA_BROWSER_TEST=qa/e2e/story-broader.mjs node qa/
 
 Set `CHROMIUM_PATH` to your Chromium executable if required. Persistence checks run
 with `sh scripts/check-postgres.sh` and also create a disposable database.
+
+### Describe a playable character (local demo)
+
+Export `MODEL_API_KEY` for Meta Model API before starting
+`sh scripts/local-demo.sh`, then restart the launcher after changing the key.
+The top-left **Wonderwilds** title tile opens a description box. Generate, preview the
+character walking from each direction, then choose **Use this character**.
+**Use original character** restores Rosie. Descriptions are limited to 400
+characters. The chosen art is saved in local browser storage for the current
+profile; it is not synced to PostgreSQL or other devices. Generation is disabled
+when the key is absent. Keep the key server-side, outside `VITE_*` variables.
+
+The opt-in local bridge uses Meta's `muse-image-1.0` at
+`https://api.meta.ai/v1/images/edits`, with the existing hero atlas as a rendering-style
+reference for rounded, softly lit 3D characters. It requests one PNG containing a
+3-column, 4-row sheet (idle and two walking poses in four directions). Muse's
+opaque output is keyed from magenta, checked for empty/clipped/background-filled
+cells, scaled consistently and aligned at the feet before Phaser registers it.
+Reduced motion uses standing poses. Previewing or changing appearance does not
+write story/learning progress, move the player or interrupt their current route.
+Generation is explicit, cancellable and never automatically retried. The bridge
+checks Host, Origin, CSRF, profile and the real backend session, bounds input and
+output, permits one active request and limits starts to one per ten seconds.
+
+Only the description, fixed art instructions and bundled hero artwork go to Meta. This adds free-form
+text and generated imagery to the existing synthetic/adult local demo; provider
+child-data terms, content review and live sprite consistency remain unverified.
+Do not expose the demo bridge publicly. Mocked checks make no paid requests:
+`node --import ./frontend/node_modules/tsx/dist/loader.mjs frontend/src/character-bridge.browser.mjs`
+and, with Vite on port 5194,
+`node qa/e2e/character-customizer.mjs` (`WONDERWILDS_TEST_URL` and `CHROMIUM_PATH`
+can override the URL/browser).
+
+If a returned character sheet fails validation, **Inspect returned image** shows
+the original PNG, the background-removed image and the expected 3×4 grid. The
+report identifies each cell's bounds, visible coverage and rejection reasons.
+**Download original PNG** preserves the exact returned image for inspection.
+Only the latest response is held in page memory, including across closing and
+reopening the dialog; a new image, reload or leaving the page clears it. Rejected
+art is never applied, and opening diagnostics does not call Meta again.
