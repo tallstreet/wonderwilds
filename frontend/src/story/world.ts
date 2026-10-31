@@ -20,6 +20,10 @@ import '../mission-learning/world.css';
 import { createRecorder, type AnswerRecorder } from '../learning/voice.ts';
 import {
   storyPlaces,
+  missionTracker,
+  currentNeighbourMission,
+  neighbourDestination,
+  missionDiscovery,
   missionSupplyIds,
   storyBounds,
   storyMarkers,
@@ -203,11 +207,7 @@ export class StoryWorld {
     document.querySelector('.location-badge h1')!.textContent =
       storyPlaces[snapshot.locationId].name;
     document.querySelector('#star-count')!.textContent = 'Story';
-    document.querySelector('#mission-status')!.textContent =
-      snapshot.sceneInput?.mission?.current ??
-      (snapshot.sceneInput?.mission?.status === 'completed'
-        ? `Completed: ${snapshot.sceneInput.mission.goal}`
-        : 'Find Pip to begin your story');
+    document.querySelector('#mission-status')!.textContent = missionTracker(snapshot);
     document.querySelector('#save-status')!.textContent = this.commands.hasPending
       ? 'A save needs confirmation · open Missions'
       : this.commands.needsRefresh || this.storyAfterLearningNeedsRefresh
@@ -327,14 +327,18 @@ export class StoryWorld {
           this.learningActivity?.destroy();
           this.learningActivity = undefined;
           const completed = this.learning.snapshot?.lastFeedback?.completed;
+          const encounter = this.learningEncounter;
           this.learningEncounter = undefined;
           this.storyAfterLearningNeedsRefresh = true;
           this.hooks.close();
-          void this.run(async () => {
-            await this.commands.refresh();
-            await this.refreshLearning();
-            if (completed) this.hooks.toast('Nice work! Your adventure is ready to continue.');
-          });
+          void this.run(
+            async () => {
+              await this.commands.refresh();
+              await this.refreshLearning();
+              if (completed) this.hooks.toast('Nice work! Your adventure is ready to continue.');
+            },
+            completed ? encounter : undefined,
+          );
         },
       },
     );
@@ -439,8 +443,51 @@ export class StoryWorld {
     }
     const input = this.snapshot.sceneInput;
     const mission = input?.mission;
+    const currentNeighbour = currentNeighbourMission(this.snapshot);
+    const pipProgress = mission
+      ? `<p data-story-mission-status="${mission.status}">${mission.status === 'completed' ? `Mission complete · ${escape(mission.narrative.payoff)}` : mission.status === 'abandoned' ? 'Mission paused · your progress is saved.' : escape(mission.current ?? '')}</p><ul class="story-checklist">${mission.completed.map((text) => `<li class="is-complete"><span aria-hidden="true">✓</span>${escape(text)}</li>`).join('')}${mission.remaining.map((text) => `<li><span aria-hidden="true">○</span>${escape(text)}</li>`).join('')}</ul>`
+      : '';
+    const heading = currentNeighbour
+      ? `<header class="story-journal-heading"><span class="story-journal-icon" aria-hidden="true">✦</span><span class="pill" data-story-missions-panel>CURRENT MISSION</span><h2 id="dialog-title">${escape(currentNeighbour.title)}</h2></header>${currentNeighbour.generatedStory ? `<p class="story-premise">${escape(currentNeighbour.generatedStory.premise)}</p>` : ''}<p data-story-mission-status="open">${escape(missionTracker(this.snapshot))}</p>${
+          currentNeighbour.generatedStory
+            ? `<ul class="story-checklist">${currentNeighbour.generatedStory.steps
+                .slice(0, currentNeighbour.stepIndex ?? 0)
+                .map(
+                  (step) =>
+                    `<li class="is-complete"><span aria-hidden="true">✓</span>${escape(step.label)}</li>`,
+                )
+                .join(
+                  '',
+                )}<li><span aria-hidden="true">○</span>${escape(currentNeighbour.inspected ? `Return to ${currentNeighbour.generatedStory.name}` : currentNeighbour.task)}</li></ul>`
+            : ''
+        }`
+      : `<header class="story-journal-heading"><span class="story-journal-icon" aria-hidden="true">✦</span><span class="pill" data-story-missions-panel>PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2></header><p class="story-premise">${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${pipProgress}`;
+    const pipSummary =
+      currentNeighbour && mission
+        ? `<details data-story-pip-summary><summary>${escape(mission.goal)} · ${mission.status === 'completed' ? 'completed' : mission.status === 'abandoned' ? 'paused' : 'in progress'}</summary><p>${escape(mission.narrative.premise)}</p>${pipProgress}</details>`
+        : '';
     const neighboursPanel = input?.neighbourMissions?.length
-      ? `<section><h3>Neighbourhood missions · ${input.neighbourMissions.filter((q) => q.status === 'open').length + (mission && mission.status !== 'completed' ? 1 : 0)} / 4 open</h3><p>New missions archive the oldest neighbourhood mission when space is needed. Visit its friend to resume; progress is kept.</p><ul class="story-checklist">${input.neighbourMissions.map((q) => `<li><div><strong>${escape(q.title)}</strong> · ${escape(q.status)}${q.storySource ? ` · ${q.storySource === 'llm' ? 'AI-generated story' : 'Offline story fallback'}` : ''}<br>${escape(q.status === 'completed' ? q.payoff : q.inspected ? `Return to ${q.generatedStory?.name ?? neighbours[q.characterId]?.name ?? q.characterId}` : q.task)} · ${escape(storyPlaces[q.locationId].name)}</div></li>`).join('')}</ul></section>`
+      ? `<section><h3>Neighbourhood missions · ${input.neighbourMissions.filter((q) => q.status === 'open').length + (mission && mission.status !== 'completed' ? 1 : 0)} / 4 open</h3><p>New missions archive the oldest neighbourhood mission when space is needed. Visit its friend to resume; progress is kept.</p><ul class="story-checklist">${[
+          ...input.neighbourMissions,
+        ]
+          .sort(
+            (a, b) =>
+              Number(b === currentNeighbour) - Number(a === currentNeighbour) ||
+              Number(b.status === 'open') - Number(a.status === 'open'),
+          )
+          .map(
+            (q) =>
+              `<li><div><strong>${escape(q.title)}</strong> · ${escape(q.status)}${q.storySource ? ` · ${q.storySource === 'llm' ? 'AI-generated story' : 'Offline story fallback'}` : ''}<br>${escape(q.status === 'completed' ? q.payoff : q.inspected ? `Return to ${q.generatedStory?.name ?? neighbours[q.characterId]?.name ?? q.characterId}` : q.task)} · ${escape(storyPlaces[neighbourDestination(q)].name)}${q.generatedStory && q.status !== 'completed' ? `<p>${escape(q.generatedStory.premise)}</p>` : ''}${
+                q.generatedStory?.steps.slice(0, q.stepIndex ?? 0).some((step) => step.discovery)
+                  ? `<details><summary>Clues we found</summary><ul>${q.generatedStory.steps
+                      .slice(0, q.stepIndex ?? 0)
+                      .filter((step) => step.discovery)
+                      .map((step) => `<li>${escape(step.discovery!)}</li>`)
+                      .join('')}</ul></details>`
+                  : ''
+              }</div></li>`,
+          )
+          .join('')}</ul></section>`
       : '';
     const pipPresent = this.markers.some((marker) => marker.id === 'npc:pip');
     const missionControls = (input?.availableActions ?? []).filter(
@@ -449,8 +496,16 @@ export class StoryWorld {
         (!pipPresent && item.action.type === 'accept_mission'),
     );
     this.hooks.open(
-      `<header class="story-journal-heading"><span class="story-journal-icon" aria-hidden="true">✦</span><span class="pill" data-story-missions-panel>PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2></header><p class="story-premise">${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${mission ? `<p data-story-mission-status="${mission.status}">${mission.status === 'completed' ? `Mission complete · ${escape(mission.narrative.payoff)}` : mission.status === 'abandoned' ? 'Mission paused · your progress is saved.' : escape(mission.current ?? '')}</p><ul class="story-checklist">${mission.completed.map((text) => `<li class="is-complete"><span aria-hidden="true">✓</span>${escape(text)}</li>`).join('')}${mission.remaining.map((text) => `<li><span aria-hidden="true">○</span>${escape(text)}</li>`).join('')}</ul>` : ''}${nextStoryLabel(this.snapshot) ? `<p data-story-next>${escape(nextStoryLabel(this.snapshot)!)}</p>` : ''}${input?.context.memory.recentMissions.length ? `<details data-story-history><summary>Our adventures so far</summary><ul>${input.context.memory.recentMissions.map((text) => `<li>${escape(text)}</li>`).join('')}</ul></details>` : ''}${neighboursPanel}${this.missionItems()}<h3 class="story-section-title">Where shall we go?</h3><div class="modal-quests story-destinations">${this.markers.map((marker) => `<button class="quest" data-story-visit="${escape(marker.id)}" ${this.locked() ? 'disabled' : ''}><span class="story-destination-icon" aria-hidden="true">${marker.sprite ? characterPortrait(marker.sprite, 48) : marker.itemId ? `<span data-item-art="${escape(marker.itemId)}" data-item-size="48">${itemArt(marker.itemId, 48)}</span>` : marker.id.startsWith('route:') ? '↗' : '✦'}</span><span><strong>${escape(marker.character)}</strong><small>${marker.id.startsWith('npc:') ? 'Walk over & chat' : 'Follow the path'}</small></span><span class="quest-arrow" aria-hidden="true">→</span></button>`).join('')}</div>${missionControls.map((item) => `<button class="secondary" data-story-action="${item.action.type}" data-story-mission-handle="${escape(item.id)}" ${this.locked() ? 'disabled' : ''}>${escape(this.snapshot.scene?.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}<footer class="story-journal-footer"><p id="story-world-status" role="status">${this.commands.hasPending ? 'A previous save needs confirmation. Retry the same action.' : this.commands.needsRefresh ? 'Refresh before choosing another action.' : this.snapshot.commandBudgetExhausted ? 'This development story reached its save limit.' : 'Your adventure is saved as you go.'}</p><button class="secondary" data-story-refresh>Refresh progress</button>${this.commands.hasPending ? '<button class="primary" data-story-retry>Retry the same action</button>' : ''}</footer>`,
+      `${heading}${pipSummary}${nextStoryLabel(this.snapshot) ? `<p data-story-next>${escape(nextStoryLabel(this.snapshot)!)}</p>` : ''}${input?.context.memory.recentMissions.length ? `<details data-story-history><summary>Our adventures so far</summary><ul>${input.context.memory.recentMissions.map((text) => `<li>${escape(text)}</li>`).join('')}</ul></details>` : ''}${neighboursPanel}${this.missionItems()}<h3 class="story-section-title">Where shall we go?</h3><div class="modal-quests story-destinations">${this.markers.map((marker) => `<button class="quest" data-story-visit="${escape(marker.id)}" ${this.locked() ? 'disabled' : ''}><span class="story-destination-icon" aria-hidden="true">${marker.sprite ? characterPortrait(marker.sprite, 48) : marker.itemId ? `<span data-item-art="${escape(marker.itemId)}" data-item-size="48">${itemArt(marker.itemId, 48)}</span>` : marker.id.startsWith('route:') ? '↗' : '✦'}</span><span><strong>${escape(marker.character)}</strong><small>${marker.id.startsWith('npc:') ? 'Walk over & chat' : 'Follow the path'}</small></span><span class="quest-arrow" aria-hidden="true">→</span></button>`).join('')}</div>${missionControls.map((item) => `<button class="secondary" data-story-action="${item.action.type}" data-story-mission-handle="${escape(item.id)}" ${this.locked() ? 'disabled' : ''}>${escape(this.snapshot.scene?.choices.find((choice) => choice.actionId === item.id)?.label ?? item.description)}</button>`).join('')}<footer class="story-journal-footer"><p id="story-world-status" role="status">${this.commands.hasPending ? 'A previous save needs confirmation. Retry the same action.' : this.commands.needsRefresh ? 'Refresh before choosing another action.' : this.snapshot.commandBudgetExhausted ? 'This development story reached its save limit.' : 'Your adventure is saved as you go.'}</p><button class="secondary" data-story-refresh>Refresh progress</button>${this.commands.hasPending ? '<button class="primary" data-story-retry>Retry the same action</button>' : ''}</footer>`,
     );
+    // Long journals must open at the objective, even when the first route button is below it.
+    const dialog = document.querySelector<HTMLElement>('#dialog');
+    const title = dialog?.querySelector<HTMLElement>('#dialog-title');
+    if (title) {
+      title.tabIndex = -1;
+      title.focus({ preventScroll: true });
+    }
+    if (dialog) dialog.scrollTop = 0;
     const learningPanel = this.learningPanel();
     if (learningPanel)
       document.querySelector('#dialog')?.insertAdjacentHTML('beforeend', learningPanel);
@@ -544,6 +599,13 @@ export class StoryWorld {
   }
   private outcome(marker: WorldEncounter) {
     if (this.snapshot.commandBudgetExhausted) return this.missions();
+    const discovery = marker.id.startsWith('object:')
+      ? missionDiscovery(this.snapshot, marker.id.slice('object:'.length))
+      : undefined;
+    if (discovery) {
+      this.game.events.emit('speech', marker, [discovery]);
+      return;
+    }
     if (this.markers.some((item) => item.id === marker.id)) return this.encounter(marker);
     const present = new Set(
       this.snapshot.sceneInput!.here.characters.map((character) => character.id),
@@ -597,7 +659,10 @@ export class StoryWorld {
       action?.type === 'inspect' &&
       action.objectId.startsWith('neighbour_') &&
       this.snapshot.sceneInput?.neighbourMissions?.some(
-        (mission) => mission.status === 'open' && mission.locationId === this.snapshot.locationId,
+        (mission) =>
+          mission.status === 'open' &&
+          neighbourDestination(mission) === this.snapshot.locationId &&
+          action.objectId.startsWith(`neighbour_${mission.characterId}`),
       );
     if (
       action &&

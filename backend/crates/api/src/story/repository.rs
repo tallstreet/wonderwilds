@@ -70,8 +70,10 @@ pub(crate) fn inline_step(
     {
         Some(
             state
-                .current_neighbour()
-                .filter(|q| q.status == "open")
+                .neighbour_for_object(match &action {
+                    wonderwilds_domain::story::Action::Inspect { object_id } => object_id,
+                    _ => unreachable!(),
+                })
                 .ok_or(Error::NotFound)?,
         )
     } else {

@@ -307,7 +307,10 @@ export function mountMissionActivity(
     );
     if (task.interaction.kind === 'workshop') {
       check.hidden = true;
-      together.replaceChildren(activityIcon('together'), document.createTextNode('Ready to share'));
+      together.replaceChildren(
+        activityIcon('together'),
+        document.createTextNode('Finish activity'),
+      );
     }
     if (
       callbacks.recorder &&

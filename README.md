@@ -282,8 +282,13 @@ remain available. Restart the local demo after changing credentials.
 
 On entering a neighbourhood without unfinished work, the model invents a name,
 personality, greeting, mission title/premise, one to three sequential investigation
-tasks, and a payoff. It chooses from existing character and object artwork. Accept
-the story, investigate its marked objects, then return to share the discoveries.
+tasks, and a payoff. Rotating briefs vary sound mysteries, nature surprises,
+welcoming trails and evening walks, including journeys into neighbouring areas.
+Each new step reveals a clue that leads towards the story's resolution. It chooses
+from existing character and object artwork. Accept the story, follow the marked
+objects and neighbourhood destinations, then return to the original friend to
+share the discoveries. Missions keeps the clues you found, and the bottom-left
+tracker follows open work and its next destination instead of an old completed story.
 After completion, leave and return to receive another story. There is no fixed
 catalogue limit on these repeat visits; the physical map catalogue remains finite.
 

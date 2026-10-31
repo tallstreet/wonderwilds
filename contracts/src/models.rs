@@ -725,6 +725,10 @@ pub enum GeneratedNeighbourhoodSprite {
 pub struct GeneratedNeighbourhoodStepsItem {
     pub label: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_id: Option<GeneratedNeighbourhoodStepsItemLocationId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discovery: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub learning_bridge: Option<String>,
     pub shape: GeneratedNeighbourhoodStepsItemShape,
 }
@@ -1945,6 +1949,20 @@ pub struct QuestionStimulusVariant16 {
 pub struct QuestionStimulusVariant17 {
     pub kind: QuestionStimulusVariant17Kind,
     pub asset_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum GeneratedNeighbourhoodStepsItemLocationId {
+    #[serde(rename = "cove")]
+    Cove,
+    #[serde(rename = "fern_hollow")]
+    FernHollow,
+    #[serde(rename = "mossy_clearing")]
+    MossyClearing,
+    #[serde(rename = "owl_grove")]
+    OwlGrove,
+    #[serde(rename = "acorn_trail")]
+    AcornTrail,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

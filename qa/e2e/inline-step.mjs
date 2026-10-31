@@ -3,7 +3,7 @@
 export async function finishInlineStep(page, type) {
   if (!['inspect', 'collect', 'exchange', 'assemble'].includes(type)) return;
   await page.locator('.ww-mission-activity').waitFor();
-  await page.getByRole('button', { name: /^(Let’s do it together|Ready to share)$/ }).click();
+  await page.getByRole('button', { name: /^(Let’s do it together|Finish activity)$/ }).click();
   await page.locator('.ww-mission-activity').waitFor({ state: 'hidden' });
   // Completion can return either speech or the next actionable encounter.
   await page.waitForFunction(() => {

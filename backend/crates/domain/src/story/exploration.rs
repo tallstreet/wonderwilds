@@ -91,6 +91,10 @@ pub struct GeneratedContent {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct GeneratedStep {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discovery: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub learning_bridge: Option<String>,
     pub label: String,
     pub shape: String,
@@ -128,7 +132,37 @@ pub struct Quest {
     #[serde(default, skip_serializing_if = "zero")]
     pub step: u32,
 }
+impl Quest {
+    pub fn task_location(&self) -> Location {
+        self.story
+            .as_ref()
+            .and_then(|s| s.content.steps.get(self.step as usize))
+            .and_then(|s| s.location_id.as_deref())
+            .and_then(|id| PLACES.iter().find(|p| p.location.as_str() == id))
+            .unwrap_or_else(|| {
+                PLACES
+                    .iter()
+                    .find(|p| p.character == self.character)
+                    .unwrap()
+            })
+            .location
+    }
+}
 impl State {
+    pub fn neighbour_for_object(&self, object: &str) -> Option<&Quest> {
+        self.exploration.iter().find(|q| {
+            q.status == "open"
+                && !q.inspected
+                && q.task_location() == self.location
+                && object
+                    == if q.story.is_some() {
+                        format!("neighbour_{}_{}", q.character, q.step)
+                    } else {
+                        format!("neighbour_{}", q.character)
+                    }
+        })
+    }
+
     pub(super) fn valid_exploration(&self) -> bool {
         let mut ids = std::collections::BTreeSet::new();
         self.exploration.len() <= PLACES.len()
@@ -221,6 +255,18 @@ impl State {
                 },
             });
         }
+        for q in &self.exploration {
+            if q.status == "open"
+                && !q.inspected
+                && q.story.is_some()
+                && q.task_location() == self.location
+                && place(self.location).is_none_or(|p| p.character != q.character)
+            {
+                actions.push(Action::Inspect {
+                    object_id: format!("neighbour_{}_{}", q.character, q.step),
+                });
+            }
+        }
         actions
     }
     pub(super) fn exploration_transition(
@@ -242,9 +288,13 @@ impl State {
             _ => return None,
         };
         Some((|| {
-            let p = place(self.location)
-                .filter(|p| p.character == character)
+            let p = PLACES
+                .iter()
+                .find(|p| p.character == character)
                 .ok_or(Rejection::NotAvailable)?;
+            if !inspect && self.location != p.location {
+                return Err(Rejection::NotAvailable);
+            }
             let index = self
                 .exploration
                 .iter()
@@ -256,18 +306,24 @@ impl State {
                 if q.status != "open" || (finish && !q.inspected) || (inspect && q.inspected) {
                     return Err(Rejection::NotAvailable);
                 }
+                if inspect && q.task_location() != self.location {
+                    return Err(Rejection::NotAvailable);
+                }
                 if inspect && let Some(story) = &q.story {
                     if !matches!(action, Action::Inspect { object_id } if *object_id == format!("neighbour_{}_{}", p.character,q.step))
                     {
                         return Err(Rejection::NotAvailable);
                     }
+                    let discovery = story.content.steps[q.step as usize].discovery.clone();
                     q.step += 1;
                     q.inspected = q.step as usize == story.content.steps.len();
-                    return Ok(format!(
-                        "Completed step {} of {}.",
-                        q.step,
-                        story.content.steps.len()
-                    ));
+                    return Ok(discovery.unwrap_or_else(|| {
+                        format!(
+                            "Completed step {} of {}.",
+                            q.step,
+                            story.content.steps.len()
+                        )
+                    }));
                 }
                 if finish {
                     q.status = "completed".into();

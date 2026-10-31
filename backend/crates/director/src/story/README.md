@@ -210,3 +210,14 @@ current step and generation source. The scene builder resolves names and canonic
 text from that saved content; model IDs never determine new commands or rewards.
 Completed slots can be replaced on a later arrival, while unfinished work remains
 stable. Existing pure authored projections and receipts stay compatible.
+
+New neighbourhood steps may optionally save a `locationId` (one of the five
+connected neighbourhoods) and a `discovery` clue. Missing destinations still mean
+the mission's home area. Rust advertises and accepts an inspection only at its
+saved destination, in order, while the final conversation stays with the original
+friend. The learning binding resolves the mission from the inspected object,
+including when another neighbourhood's character is present. Generated requests
+rotate story briefs, opening artwork, lengths and routes and include the previous
+story's steps to discourage repetition. Offline generated-story fallbacks use
+four coherent discovery arcs through the same boundary. Original authored
+neighbourhood missions remain available without generation credentials.

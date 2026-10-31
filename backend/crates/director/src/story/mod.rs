@@ -315,6 +315,15 @@ fn capabilities(state: &State, mission: Mission) -> Vec<Value> {
 }
 
 fn action_description(state: &State, action: &Action) -> String {
+    if let Action::Inspect { object_id } = action
+        && let Some(q) = state.neighbour_for_object(object_id)
+        && let Some(step) = q
+            .story
+            .as_ref()
+            .and_then(|s| s.content.steps.get(q.step as usize))
+    {
+        return step.label.clone();
+    }
     if let Some(p) = exploration::place(state.location()) {
         match action {
             Action::Talk { topic_id, .. } if topic_id == "start_neighbour_story" => {

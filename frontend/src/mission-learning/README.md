@@ -5,7 +5,7 @@
 New story activities use `task.kind: question`, an exercise ID, a full-seed variant
 and bounded semantic stimuli. `question-control.ts` collects single/multiple
 choices, numeric fields, text, order and assignment answers. Human-reviewed
-workshops provide a local draft/rubric and Ready to share via supported completion.
+workshops provide a local draft/rubric and Finish activity via supported completion.
 `stimulus.ts` renders educational SVG/DOM diagrams; `icons.ts` imports a fixed
 Lucide allowlist. Nothing in these components marks correctness.
 

@@ -33,6 +33,7 @@ python3 scripts/seed-local-demo.py
 export WONDERWILDS_DATABASE_URL="$WONDERWILDS_DATABASE_URL user=ww_demo_runtime"
 export WONDERWILDS_ORIGIN=https://wonderwilds.local
 export WW_LOCAL_DEMO_CONFIG="$task_dir/session.json"
+export WONDERWILDS_MISSION_LOG=${WONDERWILDS_MISSION_LOG:-$task_dir/missions.jsonl}
 cargo build -p wonderwilds-api --locked
 ./target/debug/wonderwilds-api > "$task_dir/api.log" 2>&1 &
 task_api=$!

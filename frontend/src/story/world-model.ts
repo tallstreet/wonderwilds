@@ -485,3 +485,49 @@ export function storySceneryFlags(snapshot: StorySnapshot): string[] {
     flags.push('meadow-picnic');
   return flags;
 }
+
+/** Old saves without step destinations keep their original neighbourhood. */
+export function neighbourDestination(
+  q: NonNullable<NonNullable<StorySnapshot['sceneInput']>['neighbourMissions']>[number],
+) {
+  return (!q.inspected && q.generatedStory?.steps[q.stepIndex ?? 0]?.locationId) || q.locationId;
+}
+/** Share the current open mission between the HUD tracker and Missions dialog. */
+export function currentNeighbourMission(snapshot: StorySnapshot) {
+  const input = snapshot.sceneInput;
+  const open = input?.neighbourMissions?.filter((q) => q.status === 'open') ?? [];
+  const local = [...open].reverse().find((q) => neighbourDestination(q) === snapshot.locationId);
+  const pip = input?.mission;
+  const pipHere =
+    pip?.status === 'active' &&
+    ['bridge_bank', 'far_bank', 'workshop'].includes(snapshot.locationId);
+  return local ?? (pipHere ? undefined : open.at(-1));
+}
+export function missionTracker(snapshot: StorySnapshot): string {
+  const input = snapshot.sceneInput;
+  const pip = input?.mission;
+  const neighbour = currentNeighbourMission(snapshot);
+  if (neighbour) {
+    const task = neighbour.inspected
+      ? `Return to ${neighbour.generatedStory?.name ?? neighbours[neighbour.characterId]?.name ?? neighbour.characterId}`
+      : neighbour.task;
+    return `${task} · ${storyPlaces[neighbourDestination(neighbour)].name}`;
+  }
+  if (pip?.status === 'active') return pip.current ?? pip.goal;
+  const offered = input?.neighbourMissions
+    ?.slice()
+    .reverse()
+    .find((q) => q.status === 'offered');
+  if (offered)
+    return `Meet ${offered.generatedStory?.name ?? neighbours[offered.characterId]?.name ?? offered.characterId} · ${storyPlaces[offered.locationId].name}`;
+  return nextStoryLabel(snapshot) ?? 'Explore and talk to a friend for a new adventure';
+}
+export function missionDiscovery(snapshot: StorySnapshot, objectId: string): string | undefined {
+  const q = snapshot.sceneInput?.neighbourMissions?.find((q) =>
+    objectId.startsWith(`neighbour_${q.characterId}_`),
+  );
+  if (!q) return;
+  const index = Number(objectId.slice(`neighbour_${q.characterId}_`.length));
+  if (!Number.isInteger(index) || index < 0 || index >= (q.stepIndex ?? 0)) return;
+  return q.generatedStory?.steps[index]?.discovery;
+}

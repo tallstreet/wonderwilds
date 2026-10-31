@@ -165,7 +165,7 @@ try {
       if (interaction.kind === 'workshop') {
         assert.equal(await check.count(), 0);
         await root.getByRole('textbox').fill('Dear Pip, meet me for a picnic.');
-        await root.getByRole('button', { name: 'Ready to share', exact: false }).click();
+        await root.getByRole('button', { name: 'Finish activity', exact: false }).click();
         assert.equal(await page.evaluate(() => window.finished), 1);
         assert.deepEqual(await page.evaluate(() => window.answers), []);
       } else {

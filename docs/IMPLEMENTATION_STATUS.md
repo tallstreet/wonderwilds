@@ -5,6 +5,44 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Live neighbourhood generation compatibility — 31 October 2026
+
+After Modal recovered, the original neighbourhood request returned HTTP 400:
+XGrammar could not combine `pattern` with string length bounds. Serving schemas
+now omit the conflicting pattern only where length bounds are present; full
+original contract validation remains mandatory for responses. The neighbourhood
+prompt also includes its output schema, matching the scene/planner approach.
+Without that prompt context, a live response used incorrect field names and
+unsupported artwork IDs despite the serving response format.
+
+A corrected live request generated “Owl Grove Owl Watch” with three steps in
+2.33 seconds and passed the original shared schema in Ajv. Nine Modal regression
+tests passed, including nested serving-schema projection and rejection of text
+that violates the original pattern. The running demo still needs a backend
+restart to load this fix. No progress reset or in-game live journey was performed
+for this follow-up; existing unfinished fallbacks remain stable by design.
+
+## Neighbourhood generation diagnostics — 31 October 2026
+
+Non-success Modal responses now log their HTTP status without provider bodies,
+credentials or endpoint details. Arrival generation logs whether it accepted a
+validated story or saved an offline fallback; scene provenance alone does not
+establish neighbourhood-story generation.
+
+A user-approved live neighbourhood request returned HTTP 503 with “no upstreams
+available”. The existing demo's five saved neighbourhood stories were all offline
+fallbacks, despite earlier successful scene/planner logs. This confirms current
+provider unavailability, not the cause of every historical fallback. The synthetic
+demo database was backed up under ignored `.local-demo/`, then its profile was
+replaced for a fresh playtest. The bridge loaded the new profile, authenticated
+game reads succeeded, and story/mission/learning records were empty. Resetting
+progress does not restore the external provider. The logging change requires a
+backend restart.
+
+Validation: eight Modal provider regression tests passed with local mock HTTP
+servers, workspace formatting and `git diff --check` passed. No gameplay,
+assessment, receipt or schema behavior changed.
+
 ## All-skill mission questions — 31 October 2026
 
 The accepted controls now run in real missions for all **120** skill-map nodes:
@@ -1518,3 +1556,57 @@ The existing disposable bridge browser journey also passed, including gathering,
 workshop crafting, exact-save recovery, visible repair and shared crossing on a
 phone viewport. An earlier run was interrupted by development-server reloads
 while this patch was still being edited; the final unchanged-source rerun passed.
+
+### Mission journeys and current-objective tracker — 31 October 2026
+
+The bottom-left tracker now prefers open neighbourhood work at its next destination,
+then Pip's active work in his areas, then the newest open neighbourhood mission.
+Completed and archived missions cannot mask an in-progress objective. Return trips
+name the original friend and area; offered stories and Pip's next story provide
+next steps when no work is active. The journal shows the actual next destination,
+story premise and discoveries already found.
+
+New generated neighbourhood requests rotate sound mysteries, nature surprises,
+welcoming routes and evening-walk stories with different lengths, opening shapes
+and suggested routes. Steps can save an optional neighbourhood destination and a
+short discovery that develops the next clue. Rust enforces the saved area and step
+order and keeps the final conversation at the original friend's home. Inline
+learning binds the inspected mission even away from its home neighbourhood.
+Unavailable generation uses four coherent fallback arcs with the same travel and
+clue support. Existing saved missions retain their content/progress; missing new
+fields retain local-step behavior. No migration or demo reset is required. A
+rollback must retain a reader for saves containing these optional fields.
+
+These remain investigation-and-conversation mechanics in the existing finite
+world; generation cannot create new actions, rewards or artwork. Original authored
+neighbourhood missions without generation credentials are unchanged. Live model
+story quality and educator/child playtesting remain unverified; release gates
+remain pending.
+
+Validation: 140 frontend tests, strict type/lint/format and production build;
+186 shared contract fixtures, TypeScript and generated-code checks; domain,
+director and API Rust suites plus fresh-output compatibility regressions;
+Rust formatting/Clippy; the full disposable PostgreSQL suite; standard desktop/
+phone browser smoke; and a real disposable API/browser journey covering cross-area
+supported learning, discovery replies, saved clues/destinations, reload, return
+and a different repeat story. The phone screenshot was inspected. Browser story
+content used offline fallbacks and provider tests used local mocks; no live model
+call or persistent demo progress was used. Node 26 was available; the existing
+bundle-size warning remains. Unrelated concurrent edits were preserved.
+
+
+### Open mission at the top of Missions — 31 October 2026
+
+The Missions dialog shares the HUD's current-open-mission selection. It presents
+that mission's title, premise, current objective/destination and completed steps
+first, with Pip's older story collapsed below it. Open neighbourhood entries sort
+before inactive entries without changing saved order. Active Pip work keeps its
+existing priority in his areas. The dialog focuses its heading and resets its
+scroll position so the objective is visible immediately on small screens.
+
+Validation: frontend check passed (141 tests, strict type/lint/format and build),
+synthetic desktop/phone journal checks passed for completed Pip history, open
+work, return destinations, reload, focus/scroll and no writes. Standard browser
+smoke checks passed and the phone screenshot was inspected. `git diff --check`
+passed. Node 26 was used; the existing bundle-size warning remains. No backend,
+database or provider behavior changed; persistent demo progress was not modified.

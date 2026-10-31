@@ -222,6 +222,14 @@ fn exploration_requests_closed_schema_and_validates_model_created_characters_and
         "GeneratedNeighbourhood"
     );
     assert_eq!(body["response_format"]["json_schema"]["strict"], true);
+    let properties = &body["response_format"]["json_schema"]["schema"]["properties"];
+    assert_eq!(properties["name"]["maxLength"], 32);
+    assert!(properties["name"].get("pattern").is_none());
+    assert!(
+        properties["steps"]["items"]["properties"]["learningBridge"]
+            .get("pattern")
+            .is_none()
+    );
     assert!(body["response_format"]["json_schema"]["schema"]["properties"]["steps"]["items"]["required"].as_array().unwrap().contains(&json!("learningBridge")));
     assert!(
         body["messages"][0]["content"]
@@ -230,12 +238,46 @@ fn exploration_requests_closed_schema_and_validates_model_created_characters_and
             .contains("learningBridge")
     );
     let prompt = body["messages"][1]["content"].as_str().unwrap();
+    let supplied: Value = serde_json::from_str(prompt).unwrap();
+    assert_eq!(supplied["area"], input["area"]);
+    assert!(supplied["outputSchema"]["properties"]["name"]["pattern"].is_string());
+    assert!(
+        supplied["outputSchema"]["properties"]["steps"]["items"]["required"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("learningBridge"))
+    );
     assert!(!prompt.contains("profile"));
     assert!(!prompt.contains("session"));
     assert!(crate::story::planning::ValidatedPlan::generated(&state, output, true).is_ok());
     let mut bad = content;
     bad["steps"] = json!([]);
     assert!(crate::story::planning::ValidatedPlan::generated(&state, bad, true).is_err());
+}
+
+#[test]
+fn exploration_rejects_text_outside_original_contract_after_grammar_projection() {
+    let mut content = crate::story::generation::fallback(&{
+        let mut state = State::new();
+        for destination in ["workshop", "cove"] {
+            state
+                .apply(&wonderwilds_domain::story::Command {
+                    command_id: destination.into(),
+                    expected_revision: state.revision(),
+                    action: wonderwilds_domain::story::Action::Travel {
+                        destination_id: destination.into(),
+                    },
+                })
+                .unwrap();
+        }
+        state
+    })
+    .unwrap();
+    content["name"] = json!("<unsafe>");
+    let (url, server) = server("200 OK", envelope(&content).to_string());
+    let provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+    assert!(crate::story::generation::ExplorationProvider::propose(&provider, &json!({})).is_err());
+    server.join().unwrap();
 }
 
 #[test]
@@ -294,4 +336,86 @@ fn shared_endpoint_override_is_restricted_to_https_or_loopback() {
             .is_err()
         );
     }
+}
+
+#[test]
+fn fresh_neighbourhood_output_requires_journey_fields_while_old_saves_still_validate() {
+    let mut state = State::new();
+    for destination in ["workshop", "cove"] {
+        state
+            .apply(&wonderwilds_domain::story::Command {
+                command_id: destination.into(),
+                expected_revision: state.revision(),
+                action: wonderwilds_domain::story::Action::Travel {
+                    destination_id: destination.into(),
+                },
+            })
+            .unwrap();
+    }
+    for field in ["locationId", "discovery", "learningBridge"] {
+        let mut content = crate::story::generation::fallback(&state).unwrap();
+        content["steps"][0].as_object_mut().unwrap().remove(field);
+        wonderwilds_contracts::validate("GeneratedNeighbourhood", &content).unwrap();
+        let (url, server) = server("200 OK", envelope(&content).to_string());
+        let provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+        assert!(
+            crate::story::generation::ExplorationProvider::propose(
+                &provider,
+                &crate::story::generation::input(&state).unwrap()
+            )
+            .is_err()
+        );
+        server.join().unwrap();
+    }
+}
+
+#[test]
+fn mission_capture_retains_rejected_output_without_credentials() {
+    use super::super::planning::PlanProvider;
+    let output = json!({"unexpected":"mission text"});
+    let (url, handle) = server("200 OK", envelope(&output).to_string());
+    let mut provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+    let path = std::env::temp_dir().join(format!(
+        "modal-mission-{}.jsonl",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    provider.mission_log = Some(path.clone());
+    let mut state = State::new();
+    state
+        .apply(&wonderwilds_domain::story::Command {
+            command_id: "capture-accept".into(),
+            expected_revision: 0,
+            action: wonderwilds_domain::story::Action::AcceptMission,
+        })
+        .unwrap();
+    let input = wonderwilds_director::story::build_plan_input(&state).unwrap();
+    assert!(PlanProvider::propose(&provider, &input, &[]).is_err());
+    handle.join().unwrap();
+    let raw = std::fs::read_to_string(&path).unwrap();
+    let captured: Value = serde_json::from_str(raw.trim()).unwrap();
+    assert_eq!(captured["output"], output);
+    assert_eq!(captured["kind"], "mission_plan");
+    assert_eq!(captured["providerValidation"], "failed");
+    assert!(!raw.contains("synthetic.id"));
+    assert!(!raw.contains("127.0.0.1"));
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn mission_capture_failure_never_replaces_a_successful_proposal() {
+    let output = json!({"title":"A captured adventure"});
+    let (url, handle) = server("200 OK", envelope(&output).to_string());
+    let mut provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+    // Opening a directory as an append-only file must fail.
+    provider.mission_log = Some(std::env::temp_dir());
+    assert_eq!(
+        provider
+            .mission_request("neighbourhood", &json!({}), |_| Ok(()))
+            .unwrap(),
+        output
+    );
+    handle.join().unwrap();
 }

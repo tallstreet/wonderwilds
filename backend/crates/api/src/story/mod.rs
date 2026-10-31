@@ -8,6 +8,7 @@ use wonderwilds_domain::story::{Action, Command, Location, Rejection, State};
 
 pub mod generation;
 pub mod http;
+mod mission_log;
 pub mod modal;
 pub mod planning;
 pub mod repository;

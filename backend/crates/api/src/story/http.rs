@@ -77,6 +77,14 @@ async fn run(
                     plan = provider.propose(&input).ok().and_then(|content| {
                         super::planning::ValidatedPlan::generated(&candidate, content, true).ok()
                     });
+                    eprintln!(
+                        "Modal neighbourhood: {}",
+                        if plan.is_some() {
+                            "validated story accepted"
+                        } else {
+                            "provider unavailable or invalid; saving offline fallback"
+                        }
+                    );
                     if plan.is_none() {
                         plan = Some(super::planning::ValidatedPlan::generated(
                             &candidate,

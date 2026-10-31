@@ -1069,11 +1069,15 @@ fn generated_stories_repeat_without_replacing_unfinished_work_and_replay_every_s
                 payoff: "You shared a discovery.".into(),
                 steps: vec![
                     GeneratedStep {
+                        location_id: None,
+                        discovery: None,
                         learning_bridge: None,
                         label: "Listen to the hollow branch.".into(),
                         shape: "hollow".into(),
                     },
                     GeneratedStep {
+                        location_id: None,
+                        discovery: None,
                         learning_bridge: None,
                         label: "Look at the rustling leaf.".into(),
                         shape: "leaf".into(),
@@ -1258,4 +1262,70 @@ fn legacy_versions_cannot_claim_new_keepsake_commands() {
         State::from_checkpoint(&state.v2_checkpoint()),
         Err(Rejection::InvalidCheckpoint)
     );
+}
+
+#[test]
+fn generated_journey_requires_the_right_area_and_returns_to_its_original_friend() {
+    use exploration::{GeneratedContent, GeneratedStep, GeneratedStory};
+    let mut state = State::new();
+    perform(&mut state, travel("workshop"));
+    let story = GeneratedStory {
+        model_generated: true,
+        content: GeneratedContent {
+            name: "Wren".into(),
+            personality: "A curious listener.".into(),
+            sprite: "patter".into(),
+            greeting: "Can you hear it?".into(),
+            title: "The travelling tune".into(),
+            premise: "Follow the tune into Fern Hollow, then return.".into(),
+            payoff: "The breeze makes music!".into(),
+            steps: vec![GeneratedStep {
+                location_id: Some("fern_hollow".into()),
+                discovery: Some("The wind hums through a stem.".into()),
+                learning_bridge: None,
+                label: "Listen to the stem in Fern Hollow".into(),
+                shape: "instrument".into(),
+            }],
+        },
+    };
+    perform(
+        &mut state,
+        Action::GeneratedTravel {
+            destination_id: "cove".into(),
+            story,
+        },
+    );
+    perform(
+        &mut state,
+        Action::Talk {
+            character_id: "marina".into(),
+            topic_id: "start_neighbour_story".into(),
+        },
+    );
+    let inspect = Action::Inspect {
+        object_id: "neighbour_marina_0".into(),
+    };
+    assert!(!state.available_actions().contains(&inspect));
+    assert!(state.apply(&command(&state, inspect.clone())).is_err());
+    perform(&mut state, travel("fern_hollow"));
+    assert!(state.available_actions().contains(&inspect));
+    assert_eq!(
+        state
+            .neighbour_for_object("neighbour_marina_0")
+            .unwrap()
+            .character,
+        "marina"
+    );
+    let restored = State::from_checkpoint(&state.checkpoint()).unwrap();
+    assert_eq!(restored.available_actions(), state.available_actions());
+    perform(&mut state, inspect.clone());
+    assert!(!state.available_actions().contains(&inspect));
+    let finish = Action::Talk {
+        character_id: "marina".into(),
+        topic_id: "finish_neighbour_story".into(),
+    };
+    assert!(!state.available_actions().contains(&finish));
+    perform(&mut state, travel("cove"));
+    perform(&mut state, finish);
+    assert_eq!(state.current_neighbour().unwrap().status, "completed");
 }

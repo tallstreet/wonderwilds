@@ -13507,5 +13507,71 @@
       },
       "stimuli": []
     }
+  },
+  {
+    "name": "GeneratedNeighbourhood accepts cross-area discovery",
+    "contract": "GeneratedNeighbourhood",
+    "valid": true,
+    "value": {
+      "name": "Wren",
+      "personality": "Curious",
+      "sprite": "patter",
+      "greeting": "Hello!",
+      "title": "The travelling tune",
+      "premise": "Follow the breeze.",
+      "payoff": "The breeze makes music.",
+      "steps": [
+        {
+          "label": "Listen to the tune",
+          "shape": "instrument",
+          "locationId": "fern_hollow",
+          "discovery": "The breeze hums through a stem."
+        }
+      ]
+    }
+  },
+  {
+    "name": "GeneratedNeighbourhood rejects invalid locationId",
+    "contract": "GeneratedNeighbourhood",
+    "valid": false,
+    "value": {
+      "name": "Wren",
+      "personality": "Curious",
+      "sprite": "patter",
+      "greeting": "Hello!",
+      "title": "The travelling tune",
+      "premise": "Follow the breeze.",
+      "payoff": "The breeze makes music.",
+      "steps": [
+        {
+          "label": "Listen to the tune",
+          "shape": "instrument",
+          "locationId": "moon",
+          "discovery": "The breeze hums through a stem."
+        }
+      ]
+    }
+  },
+  {
+    "name": "GeneratedNeighbourhood rejects invalid discovery",
+    "contract": "GeneratedNeighbourhood",
+    "valid": false,
+    "value": {
+      "name": "Wren",
+      "personality": "Curious",
+      "sprite": "patter",
+      "greeting": "Hello!",
+      "title": "The travelling tune",
+      "premise": "Follow the breeze.",
+      "payoff": "The breeze makes music.",
+      "steps": [
+        {
+          "label": "Listen to the tune",
+          "shape": "instrument",
+          "locationId": "fern_hollow",
+          "discovery": "<script>"
+        }
+      ]
+    }
   }
 ]

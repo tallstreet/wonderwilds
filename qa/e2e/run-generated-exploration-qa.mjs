@@ -16,11 +16,12 @@ const server = createServer(async (req, res) => {
   assert.equal(Object.hasOwn(input, 'profileId'), false);
   assert.equal(Object.hasOwn(input, 'sessionId'), false);
   requests++;
+  const locationId = input.allowedLocations.find(place => place.name === input.area).id;
   const content = requests === 5 ? { invalid: true } : {
     name: `Visitor ${requests}`, personality: 'A curious neighbour who enjoys quiet discoveries.',
     sprite: 'glimmer', greeting: `Hello! Let us listen for little sounds in ${input.area}.`,
     title: `The little sounds of ${input.area}`, premise: 'Investigate two places and return to share your discoveries.',
-    steps: [{ label: 'Listen beside the hollow branch.', shape: 'hollow', learningBridge: 'Help organise our discovery markers so we can keep track of the sounds.' }, { label: 'Look closely at the rustling leaves.', shape: 'leaf' }],
+    steps: [{ label: 'Listen beside the hollow branch.', shape: 'hollow', locationId, discovery: 'A soft breeze whistles through the branch.', learningBridge: 'Help organise our discovery markers so we can keep track of the sounds.' }, { label: 'Look closely at the rustling leaves.', shape: 'leaf', locationId, discovery: 'The leaves rustle in answer to the breeze.', learningBridge: 'Organise our discovery markers to compare these sounds.' }],
     payoff: 'You shared the sounds of the woodland with your new friend.'
   };
   res.writeHead(200, { 'Content-Type': 'application/json' });

@@ -95,9 +95,20 @@ try {
       await ready();
     } else await choose('talk');
     const taskCount = generated ? (await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === friends[i]).generatedStory.steps.length : 1;
+    const travelTo = async destination => {
+      let current = places.indexOf((await snapshot()).locationId);
+      const target = places.indexOf(destination);
+      while (current !== target) {
+        current += current < target ? 1 : -1;
+        await travel(places[current]);
+      }
+    };
     for (let task = 0; task < taskCount; task++) {
+      const mission = (await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === friends[i]);
+      await travelTo(mission.generatedStory?.steps[task]?.locationId ?? places[i]);
       await visit(`object:neighbour_${friends[i]}${generated ? `_${task}` : ''}`); await choose('inspect');
     }
+    await travelTo(places[i]);
     const state = await snapshot();
     assert.ok(state.sceneInput.neighbourMissions.filter(q => q.status === 'open').length <= 3);
     assert.equal(state.sceneInput.mission.status, 'active');

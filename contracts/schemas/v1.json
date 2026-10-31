@@ -73,6 +73,14 @@
                 "maxLength": 60,
                 "pattern": "^[^<>\\u0000-\\u001f]+$"
               },
+              "locationId": {
+                "type": "string",
+                "enum": ["cove", "fern_hollow", "mossy_clearing", "owl_grove", "acorn_trail"]
+              },
+              "discovery": {
+                "type": "string", "minLength": 1, "maxLength": 180,
+                "pattern": "^[^<>\\u0000-\\u001f]+$"
+              },
               "learningBridge": {
                 "type": "string", "minLength": 1, "maxLength": 160,
                 "pattern": "^[^<>\\u0000-\\u001f]+$"

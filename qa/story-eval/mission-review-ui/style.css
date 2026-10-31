@@ -1,0 +1,13 @@
+:root { font: 17px/1.5 system-ui,sans-serif; color: #223c32; background: #f5f4ed; }
+body { margin: auto; max-width: 1400px; padding: 24px; }
+h1,h2 { line-height: 1.2; } header { max-width: 900px; }
+.layout { display: grid; grid-template-columns: 290px minmax(0,1fr); gap: 28px; }
+main,nav { min-width: 0; } article { background: white; border: 1px solid #b6c3b7; border-radius: 12px; padding: 24px; }
+button,input,select,textarea { font: inherit; padding: 9px; border: 1px solid #728679; border-radius: 5px; }
+button { cursor: pointer; background: #e2edde; color: #223c32; } button[aria-current=true] { background: #254f40; color: white; }
+#queue button { display: block; width: 100%; margin: 8px 0; text-align: left; overflow-wrap: anywhere; }
+label { display: block; margin: 12px 0; } textarea { display: block; box-sizing: border-box; width: 100%; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 15px/1.5 ui-monospace,monospace; background: #f2f5ef; padding: 16px; }
+#scores { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 16px; } #scores select { display: block; width: 100%; }
+:focus-visible { outline: 3px solid #a85f13; outline-offset: 3px; } #status { font-weight: 600; }
+@media(max-width:760px) { body { padding: 12px; } .layout { grid-template-columns: 1fr; } #queue { max-height: 230px; overflow: auto; } article { padding: 14px; } #scores { grid-template-columns: 1fr; } }

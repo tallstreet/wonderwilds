@@ -4,6 +4,10 @@ import type { StorySceneInput, StorySnapshot } from '../../../contracts/generate
 import workshop from '../../../backend/crates/director/src/story/fixtures/scene-workshop.json';
 import {
   actionTarget,
+  missionTracker,
+  currentNeighbourMission,
+  neighbourDestination,
+  missionDiscovery,
   missionSupplyIds,
   bridgeRepaired,
   storyBounds,
@@ -542,4 +546,116 @@ test('mission item previews include ingredients and crafted results while away f
   assert.deepEqual(missionSupplyIds(value), ['wood', 'planks']);
   value.sceneInput!.mission!.status = 'completed';
   assert.deepEqual(missionSupplyIds(value), []);
+});
+
+test('mission tracker prefers local open work and never presents old completed work as current', () => {
+  const value = snapshot('cove');
+  value.sceneInput!.mission = {
+    missionId: 'pips_bridge',
+    goal: 'An old bridge mission',
+    status: 'completed',
+    current: 'An old objective',
+    completed: [],
+    remaining: [],
+    narrative: { premise: 'Old premise', payoff: 'Old payoff', participantIds: ['pip'] },
+  };
+  const quest: NonNullable<StorySceneInput['neighbourMissions']>[number] = {
+    characterId: 'marina',
+    locationId: 'cove',
+    title: 'The travelling tune',
+    status: 'open',
+    inspected: false,
+    task: 'Listen to the tune',
+    payoff: 'The breeze makes music.',
+  };
+  value.sceneInput!.neighbourMissions = [quest];
+  assert.match(missionTracker(value), /Listen to the tune/);
+  value.locationId = 'owl_grove';
+  assert.match(missionTracker(value), /Listen to the tune/);
+  quest.inspected = true;
+  assert.match(missionTracker(value), /Return to Marina/);
+  quest.status = 'archived';
+  assert.doesNotMatch(missionTracker(value), /old objective|old bridge|Listen to the tune/i);
+  quest.status = 'completed';
+  assert.doesNotMatch(missionTracker(value), /old objective|old bridge|Listen to the tune/i);
+});
+
+test('cross-area missions track their next destination and reveal only completed discoveries', () => {
+  const value = snapshot('fern_hollow');
+  const quest: NonNullable<StorySceneInput['neighbourMissions']>[number] = {
+    characterId: 'marina',
+    locationId: 'cove',
+    title: 'The travelling tune',
+    status: 'open',
+    inspected: false,
+    task: 'Listen in Fern Hollow',
+    payoff: 'A shared tune',
+    stepIndex: 0,
+    generatedStory: {
+      name: 'Wren',
+      personality: 'Curious',
+      sprite: 'patter',
+      greeting: 'Hello',
+      title: 'The travelling tune',
+      premise: 'Follow a tune',
+      payoff: 'A shared tune',
+      steps: [
+        {
+          label: 'Listen in Fern Hollow',
+          shape: 'instrument',
+          locationId: 'fern_hollow',
+          discovery: 'The breeze hums through a stem.',
+        },
+      ],
+    },
+  };
+  value.sceneInput!.neighbourMissions = [quest];
+  assert.equal(neighbourDestination(quest), 'fern_hollow');
+  assert.match(missionTracker(value), /Fern Hollow/);
+  assert.equal(missionDiscovery(value, 'neighbour_marina_0'), undefined);
+  quest.stepIndex = 1;
+  quest.inspected = true;
+  assert.equal(missionDiscovery(value, 'neighbour_marina_0'), 'The breeze hums through a stem.');
+  assert.equal(neighbourDestination(quest), 'cove');
+  assert.match(missionTracker(value), /Return to Wren.*Starlight Cove/);
+});
+
+test('dialog and tracker share local, Pip and newest-open mission priority without reordering saves', () => {
+  const value = snapshot('cove');
+  const local: NonNullable<StorySceneInput['neighbourMissions']>[number] = {
+    characterId: 'marina',
+    locationId: 'cove',
+    title: 'Local story',
+    status: 'open',
+    inspected: false,
+    task: 'Listen nearby',
+    payoff: 'A tune',
+  };
+  const newest = {
+    ...local,
+    characterId: 'hazel' as const,
+    locationId: 'acorn_trail' as const,
+    title: 'Newest story',
+    task: 'Find an acorn',
+  };
+  const closed = { ...local, characterId: 'orla' as const, status: 'completed' as const };
+  const saved = [local, newest, closed];
+  value.sceneInput!.neighbourMissions = saved;
+  assert.equal(currentNeighbourMission(value), local);
+  assert.match(missionTracker(value), /Listen nearby/);
+  value.locationId = 'workshop';
+  assert.equal(currentNeighbourMission(value), undefined, 'Pip is active in the workshop');
+  value.sceneInput!.mission!.status = 'completed';
+  assert.equal(currentNeighbourMission(value), newest);
+  assert.match(missionTracker(value), /Find an acorn/);
+  value.sceneInput!.mission!.status = 'abandoned';
+  assert.equal(currentNeighbourMission(value), newest);
+  newest.status = 'archived';
+  assert.equal(currentNeighbourMission(value), local);
+  local.status = 'completed';
+  assert.equal(currentNeighbourMission(value), undefined);
+  assert.deepEqual(
+    saved.map((q) => q.characterId),
+    ['marina', 'hazel', 'orla'],
+  );
 });

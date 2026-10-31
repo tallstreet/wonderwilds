@@ -62,7 +62,7 @@ wrong one-to-one assignment, records help, retries an uncertain save after reloa
 and completes a workshop step together. It checks atomic story advancement,
 independent versus assisted evidence, desktop/phone controls and separate
 guest/assessed-adventure saves. Full story journeys use `inline-step.mjs` to
-complete these interactions through the supported route, including **Ready to share**
+complete these interactions through the supported route, including **Finish activity**
 for human-reviewed workshops. The mission practice client tests
 cover exact retry and stale-revision recovery; learning-engine tests cover the
 five supported skills, evidence diversity and graph progression. This is not
@@ -197,6 +197,13 @@ story responses. Start Vite on that port and set `CHROMIUM_PATH` if needed. It
 uses no database or provider and checks that only explicit acknowledgement
 submits a command; reading and dismissing speech do not write progress.
 
+`WONDERWILDS_TEST_URL=http://127.0.0.1:5189 node qa/e2e/mission-journal.mjs`
+checks that the open mission heads the dialog and opens in view on desktop/phone,
+completed Pip progress stays collapsed, return destinations survive reload, and
+active Pip work retains priority in his areas. It uses synthetic responses and
+asserts that reading the journal writes no progress. Use the same Vite and
+`CHROMIUM_PATH` setup above.
+
 ### Story neighbourhood exploration
 
 `WW_QA_BROWSER_TEST=qa/e2e/story-exploration.mjs node qa/e2e/run-training-qa.mjs`
@@ -219,3 +226,11 @@ Story bag presentation: with Vite running on port 5189, run
 when needed. Synthetic responses cover empty and populated bags, updated quantities
 after reload, desktop/phone fit, keyboard opening/dismissal and focus restoration,
 Missions access and no progress writes. No demo database or provider is used.
+
+Mission journey regression (no paid calls): set synthetic `MODAL_PROXY_TOKEN_ID`
+and `MODAL_PROXY_TOKEN_SECRET`, `WONDERWILDS_MODAL_ENDPOINT=http://127.0.0.1:1/v1/chat/completions`,
+and `WW_QA_BROWSER_TEST=qa/e2e/story-mission-variety.mjs`, then run
+`node qa/e2e/run-training-qa.mjs`. This uses a fresh disposable database and saved
+offline story fallbacks. It checks cross-area inline learning, clue replies,
+current-objective tracking, phone journal destinations, reload, return/payoff and
+a different story length/artwork on the next visit. Set `CHROMIUM_PATH` as needed.
