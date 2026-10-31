@@ -1,3 +1,4 @@
+import { itemTexture } from './items.ts';
 import { CUSTOM_TEXTURE, customFacing, customFrame } from './custom-character.ts';
 import { SpeechBubble } from './speech-bubble.ts';
 import type {
@@ -113,6 +114,21 @@ export function createWorld(
         },
       );
       this.game.events.on('refresh', () => this.paint());
+      const updateItemArt = (id: string) => {
+        if (!this.textures.exists(itemTexture(id))) return;
+        for (const marker of this.markers) {
+          if (marker.e.itemId !== id) continue;
+          this.tweens.killTweensOf(marker.cat);
+          marker.cat.destroy();
+          marker.cat = this.add
+            .image(marker.x, marker.y, itemTexture(id))
+            .setOrigin(0.5, 0.9)
+            .setDisplaySize(76, 76)
+            .setDepth(marker.y);
+        }
+      };
+      this.game.events.on('item-art', updateItemArt);
+      this.events.once('shutdown', () => this.game.events.off('item-art', updateItemArt));
       this.game.events.on('appearance', () => {
         this.player.heroId = this.textures.exists(CUSTOM_TEXTURE)
           ? CUSTOM_TEXTURE
@@ -202,21 +218,27 @@ export function createWorld(
           const npcFacing = character
             ? { originX: 0.5, originY: 0.96, scaleX: 1, scaleY: 1 }
             : resolveFacing(heroFrames.includes(sprite) ? sprite : 'pip', 0, 0, 'down');
-          const cat = e.shape
-            ? this.storyShape(x, y, e.shape, false)
-            : this.add
-                .image(
-                  x,
-                  y,
-                  e.prop ? 'prop-atlas' : (character?.texture ?? 'hero-atlas'),
-                  e.prop ?? character?.frame ?? (heroFrames.includes(sprite) ? sprite : 'pip'),
-                )
-                .setOrigin(npcFacing.originX, npcFacing.originY)
-                .setDisplaySize(
-                  e.prop === 'berry' ? 32 : 86 * npcFacing.scaleX,
-                  e.prop === 'berry' ? 32 : 96 * npcFacing.scaleY,
-                )
-                .setDepth(y);
+          const item =
+            e.itemId && this.textures.exists(itemTexture(e.itemId))
+              ? itemTexture(e.itemId)
+              : undefined;
+          const cat = item
+            ? this.add.image(x, y, item).setOrigin(0.5, 0.9).setDisplaySize(76, 76).setDepth(y)
+            : e.shape
+              ? this.storyShape(x, y, e.shape, false)
+              : this.add
+                  .image(
+                    x,
+                    y,
+                    e.prop ? 'prop-atlas' : (character?.texture ?? 'hero-atlas'),
+                    e.prop ?? character?.frame ?? (heroFrames.includes(sprite) ? sprite : 'pip'),
+                  )
+                  .setOrigin(npcFacing.originX, npcFacing.originY)
+                  .setDisplaySize(
+                    e.prop === 'berry' ? 32 : 86 * npcFacing.scaleX,
+                    e.prop === 'berry' ? 32 : 96 * npcFacing.scaleY,
+                  )
+                  .setDepth(y);
           // Keep every layer in one container so the symbol never drifts from its badge.
           const badge = this.add.container(x, y - 112).setDepth(y + 100);
           const medallion = this.add.graphics();

@@ -28,6 +28,7 @@ export interface WorldEncounter extends Point {
   character: string;
   sprite?: string;
   prop?: string;
+  itemId?: string;
   shape?: StoryShape;
 }
 export type Blocked = (x: number, y: number) => boolean;

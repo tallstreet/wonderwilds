@@ -4,6 +4,7 @@ import type { StorySceneInput, StorySnapshot } from '../../../contracts/generate
 import workshop from '../../../backend/crates/director/src/story/fixtures/scene-workshop.json';
 import {
   actionTarget,
+  missionSupplyIds,
   bridgeRepaired,
   storyBounds,
   storyMarkers,
@@ -501,4 +502,44 @@ test('generated people and sequential tasks use saved names, art and distinct re
   assert.equal(task.shape, 'leaf');
   assert.deepEqual({ x: task.x, y: task.y }, { x: 420, y: 540 });
   assert.ok(findRoute(storyPlaces.cove.spawn, task, true, 'cove').length);
+});
+
+test('keepsakes have reachable pickups and use the same item IDs as the bag', () => {
+  for (const [sourceId, itemId, location] of [
+    ['find_clover', 'lucky_clover', 'bridge_bank'],
+    ['find_ribbon', 'ribbon', 'workshop'],
+    ['find_crystal', 'river_crystal', 'far_bank'],
+    ['find_shell', 'seashell', 'cove'],
+    ['find_fern', 'fern_leaf', 'fern_hollow'],
+    ['find_mushroom', 'moon_mushroom', 'mossy_clearing'],
+    ['find_feather', 'feather', 'owl_grove'],
+    ['find_acorn', 'acorn', 'acorn_trail'],
+  ] as const) {
+    const value = snapshot(location);
+    value.sceneInput!.here.characters = [];
+    value.sceneInput!.availableActions = [
+      { id: 'pickup', description: '', action: { type: 'collect', sourceId, itemId, quantity: 1 } },
+    ];
+    const marker = storyMarkers(value)[0];
+    assert.equal(marker.itemId, itemId);
+    const route = findRoute(
+      storyPlaces[location].spawn,
+      { x: marker.x - 30, y: marker.y + 25 },
+      true,
+      storyPlaces[location].region,
+      storyBounds(location),
+    );
+    assert.ok(route.length, sourceId);
+    assert.ok(Math.hypot(route.at(-1)!.x - marker.x, route.at(-1)!.y - marker.y) < 110, sourceId);
+    value.sceneInput!.availableActions = [];
+    assert.deepEqual(storyMarkers(value), []);
+  }
+});
+
+test('mission item previews include ingredients and crafted results while away from their source', () => {
+  const value = snapshot('workshop');
+  value.sceneInput!.availableActions = [];
+  assert.deepEqual(missionSupplyIds(value), ['wood', 'planks']);
+  value.sceneInput!.mission!.status = 'completed';
+  assert.deepEqual(missionSupplyIds(value), []);
 });

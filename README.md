@@ -167,7 +167,17 @@ running local demo after updating the backend; existing bridge saves continue
 without a reset.
 Missions offers paths to the current characters/resources and shows objectives and
 milestones. The HUD’s **Bag** button opens your carried supplies and quantities;
-it replaces the duplicate Explore, Journal and Grown-ups controls. Click a nearby character or press Space to read the returned dialogue.
+it replaces the duplicate Explore, Journal and Grown-ups controls.
+Supplies have shared illustrations in the bag,
+mission cards and pickup encounters. Eight optional keepsakes are scattered across
+the eight story areas; pick each up once and it stays in your saved bag, even
+outside a mission. Workshop crafting continues to consume the real ingredients.
+With the server-only `MODEL_API_KEY` configured, the local demo automatically
+creates item icons using the bundled prop artwork as a reference. Art is cached
+in this browser for the profile; bundled art remains available while generation
+loads or if it fails. Restart the launcher after changing provider configuration.
+This supports the finite item catalogue, not arbitrary generated game mechanics.
+Click a nearby character or press Space to read the returned dialogue.
 Reload restores the server's location/progress. If saving is uncertain, open
 Missions and use **Retry the same action**; the exact command survives reloads.
 

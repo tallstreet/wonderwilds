@@ -375,6 +375,12 @@ fn action_description(state: &State, action: &Action) -> String {
             quantity,
             ..
         } => {
+            if let Some(find) = wonderwilds_domain::story::items::FINDS
+                .iter()
+                .find(|find| find.source == source_id)
+            {
+                return format!("Pick up {} for your bag.", find.name);
+            }
             if source_id == "berry_bush" {
                 return format!("Pick {quantity} berries for the picnic.");
             }
@@ -476,6 +482,12 @@ pub fn build_scene_input(state: &State) -> Result<Value, Error> {
         }
         _ => {}
     }
+    objects.extend(state.available_actions().iter().filter_map(|action| {
+        if let Action::Collect { source_id, .. } = action {
+            wonderwilds_domain::story::items::FINDS.iter().find(|find| find.source == source_id)
+                .map(|find| json!({"id":find.source,"state":format!("{} can be picked up for the bag",find.name)}))
+        } else { None }
+    }));
     objects.extend(broader::objects(state));
     if let Some(p) = exploration::place(state.location()) {
         objects.push(json!({"id":format!("neighbour_{}",p.character),"state":p.task}));

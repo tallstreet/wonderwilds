@@ -28,6 +28,7 @@ export default defineConfig(({ command }) => {
   const transcribe = museHandler(museKey, authorize);
   const characterKey = process.env.MODEL_API_KEY;
   const character = characterHandler(characterKey, authorize);
+  const item = characterHandler(characterKey, authorize, fetch, 'item');
   return {
     build: {
       rollupOptions: {
@@ -70,7 +71,11 @@ export default defineConfig(({ command }) => {
                     }),
                   );
                 }
-                if (path === '/__demo/transcribe' || path === '/__demo/character') {
+                if (
+                  path === '/__demo/transcribe' ||
+                  path === '/__demo/character' ||
+                  path === '/__demo/item'
+                ) {
                   if (req.method !== 'POST') return reject(405);
                   if (
                     req.headers.origin !== origin ||
@@ -78,7 +83,13 @@ export default defineConfig(({ command }) => {
                     req.headers['x-wonderwilds-profile'] !== demo.profileId
                   )
                     return reject(403);
-                  void (path === '/__demo/character' ? character : transcribe)(req, res);
+                  void (
+                    path === '/__demo/item'
+                      ? item
+                      : path === '/__demo/character'
+                        ? character
+                        : transcribe
+                  )(req, res);
                   return;
                 }
                 if (

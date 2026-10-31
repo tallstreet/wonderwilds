@@ -41,6 +41,16 @@
       },
       "description": "Walk to Starlight Cove.",
       "id": "story-v3-3-4"
+    },
+    {
+      "id": "story-v3-3-5",
+      "description": "Pick up a golden ribbon for your bag.",
+      "action": {
+        "type": "collect",
+        "sourceId": "find_ribbon",
+        "itemId": "ribbon",
+        "quantity": 1
+      }
     }
   ],
   "context": {
@@ -87,6 +97,10 @@
       {
         "id": "spare_wood",
         "state": "3 wood available"
+      },
+      {
+        "id": "find_ribbon",
+        "state": "a golden ribbon can be picked up for the bag"
       }
     ]
   },

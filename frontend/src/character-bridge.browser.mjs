@@ -41,6 +41,7 @@ globalThis.fetch = async (url, options) => {
     assert.equal(payload.model, 'muse-image-1.0');
     assert.match(payload.images[0].image_url, /^data:image\/png;base64,iVBOR/);
     assert.match(payload.prompt, /rendering-style reference/);
+    if (payload.size === '1024x1024') assert.match(payload.prompt, /ONE isolated inventory item/);
     assert.equal(JSON.stringify(payload).includes('synthetic-profile'), false);
     return Response.json({ data: [{ b64_json: png.toString('base64') }] });
   }
@@ -107,8 +108,23 @@ try {
   assert.equal(providerCalls, 1);
   assert.equal((await post()).status, 429);
   assert.equal(providerCalls, 1);
+  const itemPost = (body = { itemId: 'seashell' }, overrides = {}) =>
+    originalFetch(`${origin}/__demo/item`, {
+      method: 'POST',
+      headers: { ...headers, ...overrides },
+      body: JSON.stringify(body),
+    });
+  assert.equal((await itemPost({}, { 'X-CSRF-Token': 'wrong' })).status, 403);
+  assert.equal((await itemPost({ itemId: '__proto__' })).status, 400);
+  assert.equal((await itemPost({ description: 'invent rewards' })).status, 400);
+  authenticated = false;
+  assert.equal((await itemPost()).status, 401);
+  authenticated = true;
+  assert.equal((await itemPost()).status, 200);
+  assert.equal(providerCalls, 2);
+  assert.equal((await itemPost()).status, 429);
   console.log(
-    'PASS: character bridge Host/Origin/CSRF/profile/session, bounded input, fixed Meta model, no secret exposure and request throttling',
+    'PASS: item and character bridge Host/Origin/CSRF/profile/session, bounded input, fixed Meta model, no secret exposure and request throttling',
   );
 } finally {
   globalThis.fetch = originalFetch;

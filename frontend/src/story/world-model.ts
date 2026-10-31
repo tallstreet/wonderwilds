@@ -1,3 +1,4 @@
+import { items } from '../items.ts';
 import type { StoryAction, StorySnapshot } from '../../../contracts/generated/contracts.ts';
 import { exitPoint } from '../maps.ts';
 import type { Point, WorldEncounter, StoryShape, WorldDecoration } from '../types.ts';
@@ -12,6 +13,31 @@ export const storyPlaces = {
   owl_grove: { region: 'explore-0-2', name: 'Owl Grove', spawn: { x: 160, y: 345 } },
   acorn_trail: { region: 'explore-0-3', name: 'Acorn Trail', spawn: { x: 160, y: 345 } },
 } as const;
+/** Mission illustrations stay visible even when the supplies are in another area. */
+export function missionSupplyIds(snapshot: StorySnapshot): string[] {
+  const authored: Record<string, string[]> = {
+    pips_bridge: ['wood', 'planks'],
+    pips_picnic: ['berries', 'picnic_basket'],
+    welcome_lights: ['glow_pebbles', 'lanterns'],
+    humming_hollow: ['wind_instrument'],
+  };
+  const mission = snapshot.sceneInput?.mission;
+  const ids = new Set<string>(
+    mission && mission.status !== 'completed' ? (authored[mission.missionId ?? ''] ?? []) : [],
+  );
+  for (const { action } of snapshot.sceneInput?.availableActions ?? []) {
+    if (action.type === 'collect' && !action.sourceId.startsWith('find_')) ids.add(action.itemId);
+    if (action.type === 'exchange') {
+      const outputs: Record<string, string> = {
+        wood_to_planks: 'planks',
+        berries_to_picnic: 'picnic_basket',
+        glow_to_lanterns: 'lanterns',
+      };
+      if (outputs[action.recipeId]) ids.add(outputs[action.recipeId]);
+    }
+  }
+  return [...ids];
+}
 export const neighbours: Record<string, { name: string; sprite: string }> = {
   marina: { name: 'Marina', sprite: 'sail' },
   fern: { name: 'Fern', sprite: 'flutter' },
@@ -90,6 +116,16 @@ export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
       sprite: art.sprite,
       prop: art.prop,
       shape: art.shape,
+      itemId:
+        (
+          {
+            stones: 'glow_pebbles',
+            lantern: 'lanterns',
+            instrument: 'wind_instrument',
+            leaf: 'fern_leaf',
+          } as Record<string, string>
+        )[art.shape ?? ''] ??
+        (art.prop === 'plank' ? 'planks' : art.prop === 'berry' ? 'berries' : undefined),
     });
   for (const character of snapshot.sceneInput?.here.characters ?? []) {
     const generated = snapshot.sceneInput?.neighbourMissions?.find(
@@ -127,7 +163,10 @@ export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
     if (markers.some((marker) => marker.id === id)) continue;
     if (action.type === 'collect') {
       const source = resourcePlaces[action.sourceId];
-      if (source && source.location === snapshot.locationId) add(id, source.name, source, source);
+      if (source && source.location === snapshot.locationId) {
+        add(id, source.name, source, source);
+        markers[markers.length - 1].itemId = action.itemId;
+      }
     }
     if (action.type === 'assemble' || action.type === 'inspect' || action.type === 'choose') {
       if (action.type === 'inspect' && action.objectId.startsWith('neighbour_')) {
@@ -197,6 +236,27 @@ type Placement = Point & {
   shape?: StoryShape;
 };
 const resourcePlaces: Record<string, Placement> = {
+  ...Object.fromEntries(
+    [
+      ['find_clover', 'lucky_clover', 'bridge_bank'],
+      ['find_ribbon', 'ribbon', 'workshop'],
+      ['find_crystal', 'river_crystal', 'far_bank'],
+      ['find_shell', 'seashell', 'cove'],
+      ['find_fern', 'fern_leaf', 'fern_hollow'],
+      ['find_mushroom', 'moon_mushroom', 'mossy_clearing'],
+      ['find_feather', 'feather', 'owl_grove'],
+      ['find_acorn', 'acorn', 'acorn_trail'],
+    ].map(([source, item, location]) => [
+      source,
+      {
+        location,
+        name: `Pick up ${items[item].name}`,
+        x: location === 'far_bank' ? 880 : 310,
+        y: 490,
+        prop: items[item].prop,
+      },
+    ]),
+  ),
   fallen_wood: { location: 'bridge_bank', name: 'Gather wood', x: 350, y: 490, prop: 'plank' },
   spare_wood: { location: 'workshop', name: 'Gather spare wood', x: 700, y: 480, prop: 'plank' },
   berry_bush: { location: 'far_bank', name: 'Gather berries', x: 930, y: 540, prop: 'berry' },

@@ -566,10 +566,13 @@ pub(super) fn scene(input: &Value, canonical: &Value) -> Result<Value, Error> {
     let mission = input["mission"]["missionId"].as_str().unwrap();
     let actions = input["availableActions"].as_array().unwrap();
     let progress = |a: &&Value| {
-        !matches!(
-            a["action"]["type"].as_str(),
-            Some("travel" | "cancel_mission" | "accept_mission")
-        )
+        !a["action"]["sourceId"]
+            .as_str()
+            .is_some_and(|id| id.starts_with("find_"))
+            && !matches!(
+                a["action"]["type"].as_str(),
+                Some("travel" | "cancel_mission" | "accept_mission")
+            )
     };
     let primary = actions
         .iter()

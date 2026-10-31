@@ -8,6 +8,7 @@ use std::collections::BTreeMap;
 
 mod broader;
 pub mod exploration;
+pub mod items;
 mod missions;
 use broader::BroaderProgress;
 pub use missions::Mission;
@@ -235,6 +236,8 @@ pub struct State {
     broader: BroaderProgress,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     exploration: Vec<exploration::Quest>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    finds: BTreeMap<String, u32>,
     events: Vec<Event>,
     history: Vec<Command>,
     receipts: BTreeMap<String, Receipt>,
@@ -285,6 +288,7 @@ impl State {
             far_lit: false,
             broader: BroaderProgress::default(),
             exploration: Vec::new(),
+            finds: BTreeMap::new(),
             events: Vec::new(),
             history: Vec::new(),
             receipts: BTreeMap::new(),
@@ -379,7 +383,7 @@ impl State {
                 self.instrument_home() == Some(Location::BridgeBank)
                     && !self.has_story_flag("instrument_placed"),
             ),
-            _ => 0,
+            _ => self.finds.get(item).copied().unwrap_or(0),
         }
     }
     pub fn inventory(&self) -> BTreeMap<String, u32> {
@@ -393,6 +397,7 @@ impl State {
             "wind_instrument",
         ]
         .into_iter()
+        .chain(items::FINDS.iter().map(|item| item.id))
         .filter_map(|id| {
             let quantity = self.quantity(id);
             (quantity > 0).then(|| (id.to_owned(), quantity))
@@ -533,6 +538,16 @@ impl State {
                 item_id,
                 quantity,
             } => {
+                if let Some(find) = items::FINDS.iter().find(|find| find.source == source_id) {
+                    if item_id != find.id || *quantity != 1 {
+                        return Err(Rejection::InvalidAction);
+                    }
+                    if self.location != find.location || self.quantity(find.id) > 0 {
+                        return Err(Rejection::NotAvailable);
+                    }
+                    self.finds.insert(find.id.into(), 1);
+                    return Ok(format!("Picked up {} and added it to the bag.", find.name));
+                }
                 self.require_active()?;
                 let (source_location, item, mission) = match source_id.as_str() {
                     "fallen_wood" => (Location::BridgeBank, "wood", Mission::Bridge),
@@ -1094,6 +1109,11 @@ impl State {
         ]);
         candidates.extend(self.broader_actions());
         candidates.extend(self.exploration_actions());
+        candidates.extend(items::FINDS.iter().map(|find| Action::Collect {
+            source_id: find.source.into(),
+            item_id: find.id.into(),
+            quantity: 1,
+        }));
         candidates
             .into_iter()
             .filter(|action| self.clone().transition(action).is_ok())
@@ -1127,7 +1147,11 @@ impl State {
         }
         let state: Self = serde_json::from_value(value["state"].clone())
             .map_err(|_| Rejection::InvalidCheckpoint)?;
-        if !state.valid_exploration()
+        if state
+            .finds
+            .iter()
+            .any(|(id, quantity)| *quantity != 1 || !items::FINDS.iter().any(|find| find.id == id))
+            || !state.valid_exploration()
             || state.durable_checkpoint() != *value
             || state.events.len() > 8
             || state.revision > 1_000_000_000
@@ -1178,7 +1202,9 @@ impl State {
             // v1 had no transition from a completed bridge into another mission.
             // Do not reinterpret a forged legacy log using expanded v2 semantics.
             if ((legacy || legacy_v2)
-                && matches!(&command.action, Action::Travel { destination_id }
+                && matches!(&command.action, Action::Collect { source_id, .. } if source_id.starts_with("find_")))
+                || ((legacy || legacy_v2)
+                    && matches!(&command.action, Action::Travel { destination_id }
                     if !["bridge_bank", "workshop", "far_bank"].contains(&destination_id.as_str())))
                 || ((legacy || legacy_v2)
                     && matches!(
@@ -1220,6 +1246,9 @@ impl State {
     fn projection(&self) -> Value {
         let mut value = json!({"revision":self.revision,"location":self.location,"wood":self.wood,"planks":self.planks,"sources":self.sources,"bridgeRepaired":self.bridge_repaired,"crossedWithPip":self.crossed_with_pip,"pipLocation":self.pip_location,"missionStatus":self.mission_status,"milestones":self.milestones,"metWoodcutter":self.met_woodcutter,"events":self.events,
         "mission":self.mission,"completedMissions":self.completed_missions,"berries":self.berries,"picnicBasket":self.picnic_basket,"glowPebbles":self.glow_pebbles,"lanterns":self.lanterns,"picnicReady":self.picnic_ready,"picnicShared":self.picnic_shared,"nearLit":self.near_lit,"farLit":self.far_lit,"broader":self.broader});
+        if !self.finds.is_empty() {
+            value["finds"] = json!(self.finds);
+        }
         if !self.exploration.is_empty() {
             value["exploration"] = json!(self.exploration);
         }

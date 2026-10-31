@@ -1411,3 +1411,46 @@ information added to provider input. Final verification: 133 frontend tests,
 strict type/lint/format and production build; mocked bridge authorization/reference
 checks; desktop/phone diagnostics, exact original-PNG download, retained failed
 images, preview/apply/walk/reload/reset and failure/cancellation checks passed.
+
+### Illustrated supplies and world keepsakes — 31 October 2026
+
+Story supplies now share an item-art catalogue across the bag, mission supply
+cards, encounter headers, destination cards and Phaser pickup markers. The local
+demo automatically requests isolated item icons from Meta Muse Image using the
+repository prop atlas as its style reference and the existing server-only
+`MODEL_API_KEY`. Only fixed cosmetic item descriptions and bundled reference art
+are sent. Background removal and bounded 256px browser caching keep icons reusable
+per profile through reload. Missing configuration, provider errors, invalid art or
+storage failures retain bundled prop art and never block collecting or crafting.
+Art arrivals update markers without interrupting walking.
+
+Eight finite keepsakes can be picked up once per profile: clover at the near bank,
+ribbon at the workshop, crystal at the far bank, shell at the cove, fern leaf in
+Fern Hollow, moon mushroom in Mossy Clearing, feather in Owl Grove and acorn on
+Acorn Trail. Existing collect commands enforce location, item, quantity and source
+depletion in Rust. Keepsakes work outside missions, add no learning evidence and
+remain separate from mission ingredients. Existing workshop recipes still create
+planks, picnic baskets and lanterns authoritatively. Optional empty checkpoint
+fields preserve old saves; no migration or demo reset is required. A rollback
+must keep a reader compatible with saves containing keepsakes.
+
+This is a finite gameplay catalogue with generated cosmetic images, not arbitrary
+model-invented inventory, recipes or rewards. Generated neighbourhood stories
+retain their supported investigation mechanics. Art is browser-local, while item
+ownership is saved in PostgreSQL. Live provider image quality and content approval
+remain unverified; release gates are unchanged.
+
+Validation: 137 frontend unit/API tests, strict type/lint/format and production
+build passed; 43 domain tests, the director unit/integration suites and workspace
+Clippy/format passed. The complete disposable PostgreSQL suite passed. Real
+API/browser checks covered keepsake pickups outside missions, depleted sources,
+quantities and cached icons after reload at desktop/phone sizes; the standard
+browser suite, illustrated bag controls and mocked image-bridge authorization,
+reference request shape, invalid item IDs and throttling passed. Screenshots were
+inspected. Browser image-provider responses were synthetic; no paid image call or
+persistent demo progress was used. Node 26 was available; the existing bundle-size
+warning remains.
+The existing disposable bridge browser journey also passed, including gathering,
+workshop crafting, exact-save recovery, visible repair and shared crossing on a
+phone viewport. An earlier run was interrupted by development-server reloads
+while this patch was still being edited; the final unchanged-source rerun passed.

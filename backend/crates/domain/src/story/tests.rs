@@ -1158,3 +1158,104 @@ fn generated_stories_repeat_without_replacing_unfinished_work_and_replay_every_s
         perform(&mut state, travel("workshop"));
     }
 }
+
+#[test]
+fn keepsakes_are_location_bound_once_only_and_replayable_without_a_mission() {
+    let mut state = State::new();
+    let pickup = Action::Collect {
+        source_id: "find_clover".into(),
+        item_id: "lucky_clover".into(),
+        quantity: 1,
+    };
+    assert!(state.available_actions().contains(&pickup));
+    for action in [
+        Action::Collect {
+            source_id: "find_shell".into(),
+            item_id: "seashell".into(),
+            quantity: 1,
+        },
+        Action::Collect {
+            source_id: "find_clover".into(),
+            item_id: "wood".into(),
+            quantity: 1,
+        },
+        Action::Collect {
+            source_id: "find_clover".into(),
+            item_id: "lucky_clover".into(),
+            quantity: 2,
+        },
+    ] {
+        let before = state.clone();
+        assert!(state.apply(&command(&state, action)).is_err());
+        assert_eq!(state, before);
+    }
+    let cmd = command(&state, pickup.clone());
+    let receipt = state.apply(&cmd).unwrap();
+    assert_eq!(state.apply(&cmd), Ok(receipt));
+    assert_eq!(state.inventory().get("lucky_clover"), Some(&1));
+    assert!(!state.available_actions().contains(&pickup));
+    assert!(state.apply(&command(&state, pickup)).is_err());
+    assert_eq!(state, State::from_checkpoint(&state.checkpoint()).unwrap());
+    assert_eq!(
+        state.compact(),
+        State::from_durable_checkpoint(&state.durable_checkpoint()).unwrap()
+    );
+    perform(&mut state, travel("workshop"));
+    perform(
+        &mut state,
+        Action::Collect {
+            source_id: "find_ribbon".into(),
+            item_id: "ribbon".into(),
+            quantity: 1,
+        },
+    );
+    assert_eq!(state.quantity("ribbon"), 1);
+    assert_eq!(state.quantity("wood"), 0);
+    assert_eq!(state.mission_status(), MissionStatus::Offered);
+    let mut corrupt = state.durable_checkpoint();
+    corrupt["state"]["finds"]["ribbon"] = json!(999);
+    assert_eq!(
+        State::from_durable_checkpoint(&corrupt),
+        Err(Rejection::InvalidCheckpoint)
+    );
+}
+
+#[test]
+fn every_area_has_a_finite_pickup_and_old_saves_omit_empty_finds() {
+    let state = State::new();
+    assert!(state.durable_checkpoint()["state"].get("finds").is_none());
+    for find in items::FINDS {
+        let mut state = State::new();
+        state.location = find.location;
+        let action = Action::Collect {
+            source_id: find.source.into(),
+            item_id: find.id.into(),
+            quantity: 1,
+        };
+        assert!(state.available_actions().contains(&action));
+        perform(&mut state, action);
+        assert_eq!(state.quantity(find.id), 1);
+        assert_eq!(state.inventory().len(), 1);
+    }
+}
+
+#[test]
+fn legacy_versions_cannot_claim_new_keepsake_commands() {
+    let mut state = State::new();
+    perform(
+        &mut state,
+        Action::Collect {
+            source_id: "find_clover".into(),
+            item_id: "lucky_clover".into(),
+            quantity: 1,
+        },
+    );
+    assert_eq!(
+        State::from_checkpoint(&state.legacy_checkpoint()),
+        Err(Rejection::InvalidCheckpoint)
+    );
+    assert_eq!(
+        State::from_checkpoint(&state.v2_checkpoint()),
+        Err(Rejection::InvalidCheckpoint)
+    );
+}
