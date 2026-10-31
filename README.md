@@ -178,6 +178,23 @@ For real browser checks, `node qa/e2e/run-training-qa.mjs` creates and removes a
 fresh synthetic database/session on ports 3002/5180. It never uses demo progress.
 Set `CHROMIUM_PATH` to your installed Chromium executable if needed.
 
+### Grade generated missions
+
+Restart `sh scripts/local-demo.sh` to enable local capture of new LLM mission
+plans and neighbourhood stories in ignored `.local-demo/missions.jsonl`.
+In another terminal, from the repository root, run:
+
+```sh
+python3 qa/story-eval/mission_review.py
+```
+
+Open [mission feedback](http://127.0.0.1:5184/), enter your reviewer name,
+and score story, clarity, variety, learning fit and age suitability from 1–5.
+Choose accept, revise or reject and add notes. **Refresh captures** loads new
+missions; **Download captures + feedback** exports JSONL for later analysis.
+Grades persist in `.local-demo/mission-feedback.json`. Existing saved missions
+are not regenerated or backfilled. See [capture details](qa/story-eval/README.md#live-mission-capture-and-feedback).
+
 ### Optional spoken answers (Baseten hackathon)
 
 Export `BASETEN_API_KEY` in the terminal environment before starting
@@ -280,17 +297,38 @@ When both Modal proxy credentials are supplied, arrivals generate neighbourhood
 stories automatically. Without them, the five authored neighbourhood missions
 remain available. Restart the local demo after changing credentials.
 
-On entering a neighbourhood without unfinished work, the model invents a name,
-personality, greeting, mission title/premise, one to three sequential investigation
-tasks, and a payoff. Rotating briefs vary sound mysteries, nature surprises,
-welcoming trails and evening walks, including journeys into neighbouring areas.
-Each new step reveals a clue that leads towards the story's resolution. It chooses
-from existing character and object artwork. Accept the story, follow the marked
-objects and neighbourhood destinations, then return to the original friend to
-share the discoveries. Missions keeps the clues you found, and the bottom-left
-tracker follows open work and its next destination instead of an old completed story.
-After completion, leave and return to receive another story. There is no fixed
-catalogue limit on these repeat visits; the physical map catalogue remains finite.
+On entering a neighbourhood without unfinished work, the model writes a character,
+greeting and mission around a server-selected, playable plan. Most new offers are
+hands-on projects, with discovery stories mixed in:
+
+- Gather fallen wood, make planks and build a resting seat.
+- Pick berries, pack a basket and deliver a picnic next door.
+- Gather glow pebbles, make a lantern and place it along a path.
+- Prepare and deliver a useful stack of planks.
+- Choose a leafy or starry design, then build a resting corner or decorated lantern.
+- Explore a sound, trace, natural pattern or mistaken first impression.
+
+Project supplies appear in the bag and stay reserved for the mission that gathered
+them. Crafting consumes those ingredients; delivery and construction consume the
+finished supplies. These repeatable sources do not deplete Pip's one-time story
+resources. Projects complete at their destination without a return conversation.
+Seats, picnic places, lanterns and supply stacks remain visible after reload and
+later missions. Each area keeps one project of each kind; a later project of that
+kind updates it. Both creative design choices are valid and change the result.
+
+The server selects mechanics and recipes; AI supplies their purpose and prose.
+Six project plans and twelve discovery briefs vary actions, lengths, routes and
+character wishes. Selection considers the latest saved story in each area;
+the model receives compact avoidance hints instead of complete previous stories.
+New responses must follow the selected mechanics, route, opening and completion
+mode. Copied recent titles, premises, payoffs or full step lists use a labelled
+playable offline fallback. These checks do not establish semantic novelty or
+editorial quality. Memory covers the latest story per area, not lifetime history.
+
+Missions keeps completed steps and the next destination. Discovery stories may
+still finish by returning to the original friend. After completing a mission,
+leave its home area and return to receive another. Unfinished stories are never
+rewritten. The physical map, supported recipes and artwork remain finite.
 
 Unfinished and archived stories keep their generated content and progress. At most
 three neighbourhood missions are open, reserving Pip's fourth slot; old open
@@ -300,8 +338,9 @@ command history, not an ever-growing browser list.
 
 Generation happens outside database locks and is validated before committing with
 travel. Exact retries return the original saved story; reloads do not regenerate
-it. Rust owns adjacency, task order, completion and the mission cap. AI generates
-content for supported investigation actions, not arbitrary mechanics or rewards.
+it. Rust owns adjacency, task order, recipes, reserved supplies, project effects,
+completion and the mission cap. AI writes for supported actions, not arbitrary
+mechanics or rewards.
 Malformed, busy or unavailable model responses use a saved, labelled offline
 fallback; an unfinished fallback also remains stable until completed.
 

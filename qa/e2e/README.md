@@ -6,6 +6,12 @@ It checks blind grades, all three decisions, reload/server-restart persistence,
 failed-save recovery, revision gating, JSONL export, request protections and mobile
 layout. Set `CHROMIUM_PATH` as below. No actual human decisions or demo data are used.
 
+Live mission feedback: `node qa/e2e/mission-feedback.mjs` starts an isolated
+loopback review server with synthetic capture and feedback files. It checks safe
+text rendering, 1–5 scores, durable feedback across server restarts, newly appended
+captures, failed-attempt filtering, JSONL export and phone layout. It does not
+call a model or modify demo data. Set `CHROMIUM_PATH` for your installed browser.
+
 Use the existing isolated checkout; no worktree is needed. From `frontend/`,
 start `npm run dev -- --host 127.0.0.1`. From this directory run `npm ci` then
 `npm test`. Chromium is available at `/usr/bin/chromium` in the prepared cloud

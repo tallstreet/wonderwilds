@@ -211,13 +211,23 @@ text from that saved content; model IDs never determine new commands or rewards.
 Completed slots can be replaced on a later arrival, while unfinished work remains
 stable. Existing pure authored projections and receipts stay compatible.
 
-New neighbourhood steps may optionally save a `locationId` (one of the five
-connected neighbourhoods) and a `discovery` clue. Missing destinations still mean
-the mission's home area. Rust advertises and accepts an inspection only at its
-saved destination, in order, while the final conversation stays with the original
-friend. The learning binding resolves the mission from the inspected object,
-including when another neighbourhood's character is present. Generated requests
-rotate story briefs, opening artwork, lengths and routes and include the previous
-story's steps to discourage repetition. Offline generated-story fallbacks use
-four coherent discovery arcs through the same boundary. Original authored
-neighbourhood missions remain available without generation credentials.
+New neighbourhood steps may optionally save a `locationId`, a `discovery`,
+`learningBridge` and a fixed `mechanic`. Missing mechanics mean inspection and
+missing destinations mean the mission's home area, preserving older saves.
+Supported project mechanics gather reserved wood/berries/glow pebbles, craft
+planks/baskets/lanterns, deliver supplies, build a seat, place a lantern or choose
+a leafy/starry design. Generated specs must conserve their mission supplies and
+use connected destinations. Quantities and effects are authored domain rules.
+Project steps use existing collect/assemble/choose wire actions with generation-
+and step-bound targets. The director projects their actual saved labels and
+permanent project objects. Both design options are creative choices, not assessed
+answers. Bag quantities include supplies reserved to active/archived projects.
+
+Optional `completeOnLastStep` allows projects to finish at their destination.
+Old missing/false values retain the final return conversation. Up to six steps are
+supported; current projects use three or four. The server selects supported plans
+and the model writes their narrative. Fresh responses are checked against that
+plan and recent-copy fingerprints; twelve discovery and six project fallbacks
+remain available. Generation receives compact avoidance hints from the latest
+story per area, not complete prior stories or lifetime history. Original authored
+neighbourhood missions remain unchanged without generation credentials.

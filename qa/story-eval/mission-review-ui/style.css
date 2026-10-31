@@ -11,3 +11,5 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 15px/1.5 ui-monospac
 #scores { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 16px; } #scores select { display: block; width: 100%; }
 :focus-visible { outline: 3px solid #a85f13; outline-offset: 3px; } #status { font-weight: 600; }
 @media(max-width:760px) { body { padding: 12px; } .layout { grid-template-columns: 1fr; } #queue { max-height: 230px; overflow: auto; } article { padding: 14px; } #scores { grid-template-columns: 1fr; } }
+
+#metadata { overflow-wrap: anywhere; }

@@ -66,22 +66,12 @@ pub(crate) fn inline_step(
     ) {
         return Err(Error::InvalidInput);
     }
-    let neighbour = if matches!(&action, wonderwilds_domain::story::Action::Inspect { object_id } if object_id.starts_with("neighbour_"))
+    let neighbour = state.neighbour_for_action(&action);
+    if neighbour.is_none()
+        && state.mission_status() != wonderwilds_domain::story::MissionStatus::Active
     {
-        Some(
-            state
-                .neighbour_for_object(match &action {
-                    wonderwilds_domain::story::Action::Inspect { object_id } => object_id,
-                    _ => unreachable!(),
-                })
-                .ok_or(Error::NotFound)?,
-        )
-    } else {
-        if state.mission_status() != wonderwilds_domain::story::MissionStatus::Active {
-            return Err(Error::NotFound);
-        }
-        None
-    };
+        return Err(Error::NotFound);
+    }
     let snapshot = saved_snapshot(tx, identity, &state)?;
     let label = snapshot["sceneInput"]["availableActions"]
         .as_array()

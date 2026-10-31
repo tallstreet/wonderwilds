@@ -3,6 +3,9 @@
 use super::{Action, Location, Rejection, State};
 use serde::{Deserialize, Serialize};
 
+pub mod mechanics;
+pub use mechanics::{Mechanic, Project};
+
 pub struct Place {
     pub location: Location,
     pub name: &'static str,
@@ -85,11 +88,15 @@ pub struct GeneratedContent {
     pub title: String,
     pub premise: String,
     pub steps: Vec<GeneratedStep>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub complete_on_last_step: bool,
     pub payoff: String,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct GeneratedStep {
+    #[serde(default, skip_serializing_if = "Mechanic::is_inspect")]
+    pub mechanic: Mechanic,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub location_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -109,6 +116,7 @@ impl GeneratedStory {
     pub fn valid(&self) -> bool {
         wonderwilds_contracts::validate("GeneratedNeighbourhood", &serde_json::json!(self.content))
             .is_ok()
+            && self.valid_mechanics()
             && self.content.steps.iter().enumerate().all(|(i, s)| {
                 !self.content.steps[..i]
                     .iter()
@@ -131,6 +139,10 @@ pub struct Quest {
     pub generation: u32,
     #[serde(default, skip_serializing_if = "zero")]
     pub step: u32,
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub supplies: std::collections::BTreeMap<String, u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style: Option<String>,
 }
 impl Quest {
     pub fn task_location(&self) -> Location {
@@ -156,7 +168,7 @@ impl State {
                 && q.task_location() == self.location
                 && object
                     == if q.story.is_some() {
-                        format!("neighbour_{}_{}", q.character, q.step)
+                        q.step_object_id()
                     } else {
                         format!("neighbour_{}", q.character)
                     }
@@ -165,7 +177,17 @@ impl State {
 
     pub(super) fn valid_exploration(&self) -> bool {
         let mut ids = std::collections::BTreeSet::new();
-        self.exploration.len() <= PLACES.len()
+        self.neighbourhood_projects.len() <= PLACES.len() * 4
+            && self.neighbourhood_projects.iter().all(|(key, project)| {
+                place(project.location).is_some()
+                    && matches!(
+                        project.kind.as_str(),
+                        "seat" | "picnic" | "lantern" | "supplies"
+                    )
+                    && matches!(project.style.as_str(), "leafy" | "starry")
+                    && *key == format!("{}_{}", project.location.as_str(), project.kind)
+            })
+            && self.exploration.len() <= PLACES.len()
             && self
                 .exploration
                 .iter()
@@ -179,6 +201,7 @@ impl State {
                         q.status.as_str(),
                         "offered" | "open" | "archived" | "completed"
                     )
+                    && q.valid_supplies()
                     && (q.status != "completed" || q.inspected)
                     && (q.status != "offered" || q.story.is_some() && q.step == 0)
                     && q.story.as_ref().is_none_or(|s| {
@@ -226,6 +249,8 @@ impl State {
             story: Some(story.clone()),
             generation,
             step: 0,
+            supplies: Default::default(),
+            style: None,
         });
         Ok(())
     }
@@ -247,24 +272,19 @@ impl State {
                     topic_id: topic.into(),
                 });
             }
-            actions.push(Action::Inspect {
-                object_id: if let Some(q) = self.current_neighbour().filter(|q| q.story.is_some()) {
-                    format!("neighbour_{}_{}", p.character, q.step)
-                } else {
-                    format!("neighbour_{}", p.character)
-                },
-            });
+            if self.current_neighbour().is_none_or(|q| q.story.is_none()) {
+                actions.push(Action::Inspect {
+                    object_id: format!("neighbour_{}", p.character),
+                });
+            }
         }
         for q in &self.exploration {
             if q.status == "open"
                 && !q.inspected
                 && q.story.is_some()
                 && q.task_location() == self.location
-                && place(self.location).is_none_or(|p| p.character != q.character)
             {
-                actions.push(Action::Inspect {
-                    object_id: format!("neighbour_{}_{}", q.character, q.step),
-                });
+                actions.extend(q.step_actions());
             }
         }
         actions
@@ -273,6 +293,9 @@ impl State {
         &mut self,
         action: &Action,
     ) -> Option<Result<String, Rejection>> {
+        if let Some(result) = self.project_transition(action) {
+            return Some(result);
+        }
         let (character, finish, inspect) = match action {
             Action::Talk {
                 character_id,
@@ -310,13 +333,16 @@ impl State {
                     return Err(Rejection::NotAvailable);
                 }
                 if inspect && let Some(story) = &q.story {
-                    if !matches!(action, Action::Inspect { object_id } if *object_id == format!("neighbour_{}_{}", p.character,q.step))
-                    {
+                    if !q.step_actions().contains(action) {
                         return Err(Rejection::NotAvailable);
                     }
                     let discovery = story.content.steps[q.step as usize].discovery.clone();
                     q.step += 1;
                     q.inspected = q.step as usize == story.content.steps.len();
+                    if q.inspected && story.content.complete_on_last_step {
+                        q.status = "completed".into();
+                        return Ok(story.content.payoff.clone());
+                    }
                     return Ok(discovery.unwrap_or_else(|| {
                         format!(
                             "Completed step {} of {}.",
@@ -370,6 +396,8 @@ impl State {
                     story: None,
                     generation: 0,
                     step: 0,
+                    supplies: Default::default(),
+                    style: None,
                 });
                 quest.status = "open".into();
                 let generated_title = quest.story.as_ref().map(|s| s.content.title.clone());

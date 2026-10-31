@@ -256,6 +256,55 @@ fn exploration_requests_closed_schema_and_validates_model_created_characters_and
 }
 
 #[test]
+fn exploration_rejects_copies_and_brief_mismatches_and_hides_server_checks() {
+    let mut state = State::new();
+    for destination in ["workshop", "cove"] {
+        state
+            .apply(&wonderwilds_domain::story::Command {
+                command_id: destination.into(),
+                expected_revision: state.revision(),
+                action: wonderwilds_domain::story::Action::Travel {
+                    destination_id: destination.into(),
+                },
+            })
+            .unwrap();
+    }
+    let content = crate::story::generation::fallback(&state).unwrap();
+    let mut input = crate::story::generation::input(&state).unwrap();
+    // Private comparison data must never be copied into model prompts/captures.
+    input["noveltyChecks"] = json!([{"title":"server-only-synthetic-digest"}]);
+    let mut wrong_opening = content.clone();
+    wrong_opening["steps"][0]["shape"] = json!("trail");
+    let mut wrong_route = content.clone();
+    wrong_route["steps"][0]["locationId"] = json!("acorn_trail");
+    for proposal in [wrong_opening, wrong_route] {
+        wonderwilds_contracts::validate("GeneratedNeighbourhood", &proposal).unwrap();
+        let (url, handle) = server("200 OK", envelope(&proposal).to_string());
+        let provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+        assert!(crate::story::generation::ExplorationProvider::propose(&provider, &input).is_err());
+        let body = handle.join().unwrap();
+        let prompt = body["messages"][1]["content"].as_str().unwrap();
+        assert!(!prompt.contains("noveltyChecks"));
+        assert!(!prompt.contains("server-only-synthetic-digest"));
+        let supplied: Value = serde_json::from_str(prompt).unwrap();
+        assert!(supplied["recentStories"].is_array());
+    }
+    // Regression for the captured response which returned the previous story
+    // unchanged, despite being given a different brief.
+    let mut copying_input = input;
+    let title = content["title"].as_str().unwrap().to_lowercase();
+    use sha2::{Digest, Sha256};
+    copying_input["noveltyChecks"] =
+        json!([{"title":format!("{:x}", Sha256::digest(title.as_bytes()))}]);
+    let (url, handle) = server("200 OK", envelope(&content).to_string());
+    let provider = ModalSceneProvider::new(url, "synthetic".into(), "id".into()).unwrap();
+    assert!(
+        crate::story::generation::ExplorationProvider::propose(&provider, &copying_input).is_err()
+    );
+    handle.join().unwrap();
+}
+
+#[test]
 fn exploration_rejects_text_outside_original_contract_after_grammar_projection() {
     let mut content = crate::story::generation::fallback(&{
         let mut state = State::new();

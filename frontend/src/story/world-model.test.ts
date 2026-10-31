@@ -7,6 +7,8 @@ import {
   missionTracker,
   currentNeighbourMission,
   neighbourDestination,
+  neighbourForAction,
+  storyDecorations,
   missionDiscovery,
   missionSupplyIds,
   bridgeRepaired,
@@ -658,4 +660,163 @@ test('dialog and tracker share local, Pip and newest-open mission priority witho
     saved.map((q) => q.characterId),
     ['marina', 'hazel', 'orla'],
   );
+});
+
+test('project markers use real item artwork, generation-bound targets and saved design outcomes', () => {
+  const value = snapshot('cove');
+  value.sceneInput!.mission = null;
+  value.sceneInput!.here.characters = [];
+  value.sceneInput!.here.objects = [];
+  const quest: NonNullable<StorySceneInput['neighbourMissions']>[number] = {
+    characterId: 'marina',
+    locationId: 'cove',
+    title: 'A resting corner',
+    status: 'open',
+    inspected: false,
+    task: 'Gather wood',
+    payoff: 'The corner is ready.',
+    generation: 4,
+    stepIndex: 0,
+    generatedStory: {
+      name: 'Wren',
+      personality: 'A maker',
+      sprite: 'flutter',
+      greeting: 'Hello',
+      title: 'A resting corner',
+      premise: 'Make a corner next door.',
+      payoff: 'The corner is ready.',
+      completeOnLastStep: true,
+      steps: [
+        {
+          mechanic: 'gather_wood',
+          label: 'Gather wood',
+          shape: 'hollow',
+          locationId: 'cove',
+          discovery: 'Wood is in your bag.',
+        },
+        {
+          mechanic: 'craft_planks',
+          label: 'Make planks',
+          shape: 'stones',
+          locationId: 'cove',
+          discovery: 'Planks are ready.',
+        },
+        {
+          mechanic: 'build_seat',
+          label: 'Build the corner',
+          shape: 'trail',
+          locationId: 'fern_hollow',
+          discovery: 'The corner is built.',
+        },
+      ],
+    },
+  };
+  value.sceneInput!.neighbourMissions = [quest];
+  const gather = {
+    type: 'collect' as const,
+    sourceId: 'neighbour_marina_g4_0',
+    itemId: 'wood',
+    quantity: 3,
+  };
+  value.sceneInput!.availableActions = [
+    { id: 'gather', description: 'Gather wood', action: gather },
+  ];
+  assert.equal(neighbourForAction(value, gather), quest);
+  assert.deepEqual(missionSupplyIds(value), ['wood', 'planks']);
+  assert.equal(storyMarkers(value)[0].id, 'resource:neighbour_marina_g4_0');
+  assert.equal(storyMarkers(value)[0].itemId, 'wood');
+  assert.equal(
+    neighbourForAction(value, { ...gather, sourceId: 'neighbour_marina_g3_0' }),
+    undefined,
+  );
+  quest.stepIndex = 1;
+  assert.equal(missionDiscovery(value, 'neighbour_marina_g4_0'), 'Wood is in your bag.');
+  assert.equal(missionDiscovery(value, 'neighbour_marina_g3_0'), undefined);
+  value.sceneInput!.availableActions = [
+    {
+      id: 'craft',
+      description: 'Make planks',
+      action: { type: 'assemble', objectId: 'neighbour_marina_g4_1', recipeId: 'craft_planks' },
+    },
+  ];
+  assert.equal(storyMarkers(value)[0].itemId, 'planks');
+  quest.stepIndex = 3;
+  quest.inspected = true;
+  quest.status = 'completed';
+  value.locationId = 'fern_hollow';
+  value.sceneInput!.here.objects = [
+    { id: 'project_fern_hollow_seat', state: 'starry' },
+    { id: 'project_fern_hollow_supplies', state: 'leafy' },
+  ];
+  assert.equal(missionDiscovery(value, 'neighbour_marina_g4_2'), quest.payoff);
+  assert.ok(storyDecorations(value).some((d) => d.kind === 'corner-stars'));
+  assert.ok(storyDecorations(value).some((d) => d.kind === 'supplies'));
+  assert.doesNotMatch(missionTracker(value), /Return to Wren/);
+});
+
+test('all project step markers have reachable approaches in every neighbourhood', () => {
+  for (const location of [
+    'cove',
+    'fern_hollow',
+    'mossy_clearing',
+    'owl_grove',
+    'acorn_trail',
+  ] as const) {
+    for (let index = 0; index < 6; index++) {
+      const value = snapshot(location);
+      value.sceneInput!.here.characters = [];
+      value.sceneInput!.neighbourMissions = [
+        {
+          characterId: 'marina',
+          locationId: 'cove',
+          title: 'Project',
+          status: 'open',
+          inspected: false,
+          task: 'Build here',
+          payoff: 'Done',
+          generation: 1,
+          stepIndex: index,
+          generatedStory: {
+            name: 'Wren',
+            personality: 'Curious',
+            sprite: 'flutter',
+            title: 'Project',
+            greeting: 'Hello',
+            premise: 'Build a seat',
+            payoff: 'Done',
+            completeOnLastStep: true,
+            steps: Array.from({ length: 6 }, () => ({
+              mechanic: 'build_seat' as const,
+              locationId: location,
+              label: 'Build here',
+              shape: 'trail' as const,
+            })),
+          },
+        },
+      ];
+      value.sceneInput!.availableActions = [
+        {
+          id: 'build',
+          description: 'Build here',
+          action: {
+            type: 'assemble',
+            objectId: `neighbour_marina_g1_${index}`,
+            recipeId: 'build_seat',
+          },
+        },
+      ];
+      const marker = storyMarkers(value)[0];
+      assert.ok(marker, `${location} step ${index}`);
+      const approach = { x: marker.x - 30, y: marker.y + 25 };
+      const route = findRoute(
+        storyPlaces[location].spawn,
+        approach,
+        true,
+        storyPlaces[location].region,
+        storyBounds(location),
+      );
+      assert.ok(route.length, `${location} step ${index} approach`);
+      assert.ok(Math.hypot(route.at(-1)!.x - marker.x, route.at(-1)!.y - marker.y) < 110);
+    }
+  }
 });

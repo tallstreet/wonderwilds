@@ -90,7 +90,14 @@ fn context(state: &State) -> Value {
     let inventory: Vec<_> = state
         .inventory()
         .into_iter()
-        .map(|(item, quantity)| json!({"itemId":item,"quantity":quantity}))
+        .map(|(item, quantity)| {
+            let reserved = state.reserved_quantity(&item);
+            let mut value = json!({"itemId":item,"quantity":quantity});
+            if reserved > 0 {
+                value["reservedQuantity"] = json!(reserved);
+            }
+            value
+        })
         .collect();
     let mut facts = vec![
         if state.bridge_repaired() {
@@ -315,14 +322,24 @@ fn capabilities(state: &State, mission: Mission) -> Vec<Value> {
 }
 
 fn action_description(state: &State, action: &Action) -> String {
-    if let Action::Inspect { object_id } = action
-        && let Some(q) = state.neighbour_for_object(object_id)
+    if let Some(q) = state.neighbour_for_action(action)
         && let Some(step) = q
             .story
             .as_ref()
             .and_then(|s| s.content.steps.get(q.step as usize))
     {
-        return step.label.clone();
+        return match action {
+            Action::Choose { option_id, .. } => format!(
+                "{}: {}",
+                step.label,
+                if option_id == "starry" {
+                    "starry"
+                } else {
+                    "leafy"
+                }
+            ),
+            _ => step.label.clone(),
+        };
     }
     if let Some(p) = exploration::place(state.location()) {
         match action {
@@ -498,6 +515,13 @@ pub fn build_scene_input(state: &State) -> Result<Value, Error> {
         } else { None }
     }));
     objects.extend(broader::objects(state));
+    objects.extend(
+        state
+            .neighbourhood_projects()
+            .iter()
+            .filter(|(_, p)| p.location == state.location())
+            .map(|(id, project)| json!({"id":format!("project_{id}"),"state":project.style})),
+    );
     if let Some(p) = exploration::place(state.location()) {
         objects.push(json!({"id":format!("neighbour_{}",p.character),"state":p.task}));
     }

@@ -1060,6 +1060,7 @@ fn generated_stories_repeat_without_replacing_unfinished_work_and_replay_every_s
         let story = GeneratedStory {
             model_generated: true,
             content: GeneratedContent {
+                complete_on_last_step: false,
                 name: format!("Visitor {generation}"),
                 personality: "A curious neighbour.".into(),
                 sprite: "flutter".into(),
@@ -1069,6 +1070,7 @@ fn generated_stories_repeat_without_replacing_unfinished_work_and_replay_every_s
                 payoff: "You shared a discovery.".into(),
                 steps: vec![
                     GeneratedStep {
+                        mechanic: super::exploration::Mechanic::Inspect,
                         location_id: None,
                         discovery: None,
                         learning_bridge: None,
@@ -1076,6 +1078,7 @@ fn generated_stories_repeat_without_replacing_unfinished_work_and_replay_every_s
                         shape: "hollow".into(),
                     },
                     GeneratedStep {
+                        mechanic: super::exploration::Mechanic::Inspect,
                         location_id: None,
                         discovery: None,
                         learning_bridge: None,
@@ -1272,6 +1275,7 @@ fn generated_journey_requires_the_right_area_and_returns_to_its_original_friend(
     let story = GeneratedStory {
         model_generated: true,
         content: GeneratedContent {
+            complete_on_last_step: false,
             name: "Wren".into(),
             personality: "A curious listener.".into(),
             sprite: "patter".into(),
@@ -1280,6 +1284,7 @@ fn generated_journey_requires_the_right_area_and_returns_to_its_original_friend(
             premise: "Follow the tune into Fern Hollow, then return.".into(),
             payoff: "The breeze makes music!".into(),
             steps: vec![GeneratedStep {
+                mechanic: super::exploration::Mechanic::Inspect,
                 location_id: Some("fern_hollow".into()),
                 discovery: Some("The wind hums through a stem.".into()),
                 learning_bridge: None,

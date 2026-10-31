@@ -5,6 +5,78 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Neighbourhood mission variety — 31 October 2026
+
+The former four-brief cycle is replaced by twelve narrative ingredients and
+matching playable offline arcs: mistaken impressions, traces, echoes, viewpoint
+changes, natural patterns, weather observations and specific character wishes.
+Deterministic selection penalizes matching openings and overlapping words against
+the latest saved story in each of the five areas, with extra weight on the newest
+opening. One-, two- and three-step routes retain adjacency and alternate between
+both neighbours where available. The generator receives a character wish and
+causal story structure, plus compact recent-title/motif/route avoidance hints;
+complete previous stories are no longer supplied as implicit examples.
+
+Fresh provider responses must match the requested route, length and opening
+artwork, and cannot copy a recent title, premise, payoff or full step list after
+case/punctuation normalization. Server-only comparison fingerprints are excluded
+from provider requests and mission captures. Rejected output uses the existing
+labelled offline-fallback path, now with twelve arcs and varied preparation
+invitations. No extra provider retries or increased generation timeout are added.
+The prompt asks for evidence that develops and resolves a question, distinctive
+voices and preparation wording that does not invent academic controls.
+
+This remains investigation-and-conversation gameplay; collecting, crafting,
+repairing and escorting are not newly available generated-mission mechanics.
+Word-overlap heuristics and equality checks do not establish semantic novelty.
+Only the latest saved story per area is available as avoidance memory; long-term
+history is not newly queried or persisted. Existing unfinished stories, receipts,
+saves and release gates are unchanged. No migration or demo reset is needed.
+Restart the backend to use this policy for subsequent new stories.
+
+Validation: API suite passed (48 tests; four database tests deliberately ignored),
+API all-target Clippy, workspace Rust formatting and `git diff --check` passed.
+Regression coverage checks all twelve offline arcs against the wire contract in
+all five areas, sixteen playable repeat/cross-area visits with saved-state reload,
+one/two/three steps and all five opening shapes, normalized copy rejection,
+route/opening mismatch rejection and removal of private checks from mock HTTP
+provider bodies. The local socket tests required sandbox escalation. No database
+persistence code or browser code changed; database/browser suites and live model
+quality were not evaluated for this change. No paid provider calls, fine-tuning
+or persistent demo progress changes were made. Human content review remains pending.
+
+## Live mission capture and human feedback — 31 October 2026
+
+The local demo now captures new Modal mission-plan and neighbourhood-generation
+attempts to ignored `.local-demo/missions.jsonl`. Standalone API capture is opt-in
+through `WONDERWILDS_MISSION_LOG`. Records contain exact request bodies, final
+output (including malformed text), timing, attempt IDs and provider-validation
+results without credentials, session/profile identifiers or learning records.
+Capture is best effort and cannot change gameplay results. These are provider
+attempts: further domain/state validation or commit can reject a passing proposal.
+Existing saved missions are not regenerated or backfilled; restarting the local
+demo enables capture for subsequent generation.
+
+`python3 qa/story-eval/mission_review.py` serves a separate loopback review UI at
+port 5184. Reviewers score story coherence/payoff, clarity, variety, learning fit
+and age suitability from 1–5, choose accept/revise/reject and save notes. Grades
+are bound to the full capture fingerprint and reviewer, persisted atomically in
+ignored `.local-demo/mission-feedback.json`, and downloadable with captures as
+JSONL. Refresh loads new attempts; pending and failed-provider filters support
+review. Feedback is separate from gameplay, scene-training export and release
+approval. This is a single-machine synthetic-development tool, with no automatic
+rotation, training, quality judge or hosted multi-user deployment.
+
+Validation: API suite (44 passed, four database tests deliberately ignored), API
+Clippy, workspace Rust formatting, all 58 story-evaluation Python tests, shell/JS
+syntax and `git diff --check` passed. Synthetic browser checks passed for safe
+text rendering, scoring, disk persistence across server restart, live appends,
+failed-attempt filtering, export and phone layout; the phone screenshot was
+inspected. Tests used local mock providers and disposable feedback files. No
+paid model calls, persistent demo writes or database/schema changes were needed.
+Node 26 was available instead of the documented Node 24. Concurrent existing
+checkout changes were preserved.
+
 ## Live neighbourhood generation compatibility — 31 October 2026
 
 After Modal recovered, the original neighbourhood request returned HTTP 400:

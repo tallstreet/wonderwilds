@@ -18,7 +18,7 @@ export type StoryShape =
   | 'trail';
 export interface WorldDecoration extends Point {
   id: string;
-  kind: 'picnic' | StoryShape;
+  kind: 'picnic' | 'supplies' | StoryShape;
 }
 /** A world interaction location; assessment parameters belong to the API. */
 export interface WorldEncounter extends Point {

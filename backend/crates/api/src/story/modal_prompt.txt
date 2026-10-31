@@ -29,3 +29,7 @@ contribute distinct information; omit redundant entries instead of padding the
 presentation array. These rules do not permit editing or omitting requiredEntries.
 Before returning JSON, check that all entryIds are distinct and that no optional
 entry repeats another entry's text. Return only the scene, without this checklist.
+
+Inventory quantities include reservedQuantity when project supplies are carried.
+That reserved portion belongs only to its neighbourhood mission and is unavailable
+for Pip's recipes or other missions. Describe only the currently legal actions.

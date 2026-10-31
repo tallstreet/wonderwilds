@@ -244,3 +244,66 @@ local. It performs no response repair, authored substitution, retries, training 
 release approval. The server is asked for strict `StoryScene` JSON Schema output;
 local validation remains authoritative. See
 [measured results and the observed length violation](RESULTS_JSON_SCHEMA_2026-10-31.md).
+
+## Live mission capture and feedback
+
+`sh scripts/local-demo.sh` now sets `WONDERWILDS_MISSION_LOG` to
+`.local-demo/missions.jsonl` unless a different nonempty path is supplied.
+A separately launched API captures only when this variable is set. Use synthetic
+local play only. Parent directories must already exist. New files use owner-only
+permissions. Captures and feedback stay under ignored `.local-demo/` by default;
+keep alternate paths outside tracked source and back them up as needed.
+
+Each `mission-capture-1` JSONL record contains a unique attempt ID, timestamp,
+kind (`mission_plan` or `neighbourhood`), exact request body (model, prompts,
+schema and sampling settings), final output, elapsed time and provider-validation
+result. Malformed final text is retained as a string. Busy, transport, HTTP,
+oversized and malformed-envelope failures may have no final output. Credentials,
+authorization headers, endpoints, provider error bodies, session/profile IDs and
+learning records are not included. Ordinary scene dialogue is not captured.
+The model alias is recorded, not an assertion about its deployed weight version.
+
+`providerValidation: passed` means the provider's structural checks passed.
+The subsequent state-bound/domain completion checks, authentication and commit
+can still reject it or save an authored fallback. This is an attempt log, not
+proof that a mission was played or committed. Exact retries and reloads do not
+regenerate saved missions; existing saved content is not backfilled. Logging is
+best effort: append failures emit a fixed diagnostic and never change gameplay.
+One API process should write each capture file; there is no automatic rotation.
+
+Start the separate loopback review tool from the repository root:
+
+```sh
+python3 qa/story-eval/mission_review.py
+# Optional independent capture/feedback files or another loopback port:
+python3 qa/story-eval/mission_review.py --log /tmp/missions.jsonl \
+  --feedback /tmp/mission-feedback.json --port 5185
+```
+
+The default address is [http://127.0.0.1:5184/](http://127.0.0.1:5184/).
+Enter a reviewer name, select a capture and grade all five criteria from 1–5:
+story coherence/payoff, clear next steps, variety/originality, learning invitation
+fit, and suitability for ages 6–8. Choose **Accept as written**, **Needs revision**
+or **Reject**; revision and rejection require notes. All attempts, including
+invalid output and failures, can receive feedback. A high score or acceptance
+is a human opinion, not mechanical validation or release/training approval.
+
+Reviews are keyed by attempt ID, the full capture fingerprint and reviewer name.
+Different reviewers retain independent decisions; saving again replaces that
+reviewer's current decision for that attempt. This is not an immutable review
+history. The default `.local-demo/mission-feedback.json` is replaced atomically,
+with an exclusive writer lock. Failed saves preserve prior decisions. Changed
+captures cannot inherit grades. The pending filter applies to the entered reviewer.
+New captures appear on **Refresh captures**; an incomplete trailing append is
+withheld until complete. Invalid complete records produce a visible read error.
+**Download captures + feedback** exports one JSONL row per captured attempt with
+matching current reviews. This format is separate from the scene-training export;
+it does not automatically approve or train on any data.
+
+Verification (synthetic data, no paid model requests or persistent demo writes):
+
+```sh
+cargo test -p wonderwilds-api --locked
+python3 -m unittest discover -s qa/story-eval -p 'test_mission_review.py'
+CHROMIUM_PATH=/path/to/chromium node qa/e2e/mission-feedback.mjs
+```

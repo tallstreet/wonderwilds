@@ -760,6 +760,10 @@ fn generated_neighbourhood_replay(repo: &PostgresRepository, identity: &Identity
         );
         let candidate = repo.generation_state(identity, &travel).unwrap().unwrap();
         let mut content = super::super::generation::fallback(&candidate).unwrap();
+        content
+            .as_object_mut()
+            .unwrap()
+            .remove("completeOnLastStep");
         content["name"] = json!(format!("Visitor {cycle}"));
         content["steps"] = json!([{"label":"Listen to the shell.","shape":"stones"},{"label":"Look at the winding trail.","shape":"trail"}]);
         let plan = ValidatedPlan::generated(&candidate, content.clone(), true).unwrap();

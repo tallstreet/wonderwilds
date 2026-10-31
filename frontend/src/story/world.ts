@@ -23,6 +23,7 @@ import {
   missionTracker,
   currentNeighbourMission,
   neighbourDestination,
+  neighbourForAction,
   missionDiscovery,
   missionSupplyIds,
   storyBounds,
@@ -422,7 +423,7 @@ export class StoryWorld {
     const carried =
       this.snapshot.sceneInput?.context.inventory.filter((item) => item.quantity > 0) ?? [];
     this.hooks.open(
-      `<section class="story-bag" aria-labelledby="dialog-title"><span class="pill">YOUR ADVENTURE</span><h2 id="dialog-title">My bag</h2><p>The things you’re carrying for your adventures.</p>${carried.length ? `<ul class="story-bag-items" aria-label="Things in your bag">${carried.map((item) => `<li><span class="story-item-picture" data-item-art="${escape(item.itemId)}">${itemArt(item.itemId)}</span><strong>${escape(Object.hasOwn(items, item.itemId) ? items[item.itemId].name : item.itemId.replace(/[_-]+/g, ' '))}</strong><span class="story-bag-quantity" aria-label="Quantity: ${item.quantity}">× ${item.quantity}</span></li>`).join('')}</ul>` : '<div class="story-bag-empty"><p><strong>Your bag is empty.</strong></p><p>Supplies you collect on your adventures will appear here.</p></div>'}${this.commands.hasPending || this.commands.needsRefresh || this.storyAfterLearningNeedsRefresh ? '<p role="status">Showing your last confirmed supplies. Open Missions to confirm your latest progress.</p>' : ''}</section>`,
+      `<section class="story-bag" aria-labelledby="dialog-title"><span class="pill">YOUR ADVENTURE</span><h2 id="dialog-title">My bag</h2><p>The things you’re carrying for your adventures. Project supplies stay reserved for the mission you gathered them for.</p>${carried.length ? `<ul class="story-bag-items" aria-label="Things in your bag">${carried.map((item) => `<li><span class="story-item-picture" data-item-art="${escape(item.itemId)}">${itemArt(item.itemId)}</span><strong>${escape(Object.hasOwn(items, item.itemId) ? items[item.itemId].name : item.itemId.replace(/[_-]+/g, ' '))}</strong><span class="story-bag-quantity" aria-label="Quantity: ${item.quantity}${item.reservedQuantity ? `, ${item.reservedQuantity} reserved for projects` : ''}">× ${item.quantity}${item.reservedQuantity ? `<small>${item.reservedQuantity} for projects</small>` : ''}</span></li>`).join('')}</ul>` : '<div class="story-bag-empty"><p><strong>Your bag is empty.</strong></p><p>Supplies you collect on your adventures will appear here.</p></div>'}${this.commands.hasPending || this.commands.needsRefresh || this.storyAfterLearningNeedsRefresh ? '<p role="status">Showing your last confirmed supplies. Open Missions to confirm your latest progress.</p>' : ''}</section>`,
     );
   }
   private missionItems() {
@@ -599,9 +600,7 @@ export class StoryWorld {
   }
   private outcome(marker: WorldEncounter) {
     if (this.snapshot.commandBudgetExhausted) return this.missions();
-    const discovery = marker.id.startsWith('object:')
-      ? missionDiscovery(this.snapshot, marker.id.slice('object:'.length))
-      : undefined;
+    const discovery = missionDiscovery(this.snapshot, marker.id.split(':').slice(1).join(':'));
     if (discovery) {
       this.game.events.emit('speech', marker, [discovery]);
       return;
@@ -655,15 +654,7 @@ export class StoryWorld {
             ?.action
         : undefined;
     const activeMission = this.snapshot.sceneInput?.mission?.status === 'active';
-    const activeNeighbour =
-      action?.type === 'inspect' &&
-      action.objectId.startsWith('neighbour_') &&
-      this.snapshot.sceneInput?.neighbourMissions?.some(
-        (mission) =>
-          mission.status === 'open' &&
-          neighbourDestination(mission) === this.snapshot.locationId &&
-          action.objectId.startsWith(`neighbour_${mission.characterId}`),
-      );
+    const activeNeighbour = action && neighbourForAction(this.snapshot, action);
     if (
       action &&
       (activeMission || activeNeighbour) &&

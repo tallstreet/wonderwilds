@@ -675,6 +675,7 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     assert_eq!(repo.execute(&identity_a, &begin_request).unwrap(), begun);
 
     exercise_inline_steps(&mut admin, &restricted, parent);
+    exercise_project_steps(&mut admin, &restricted, parent);
 
     // Export includes the mission checkpoint, immutable events, and command receipts; delete cascades them.
     let verified = VerifiedContext {
@@ -942,4 +943,137 @@ fn exercise_inline_steps(admin: &mut Client, restricted: &str, parent: &str) {
     let loaded = PostgresRepository::load(&mut tx, profile).unwrap();
     PostgresRepository::verify_history(&mut tx, profile, &loaded).unwrap();
     tx.commit().unwrap();
+}
+
+fn exercise_project_steps(admin: &mut Client, restricted: &str, parent: &str) {
+    let profile = "72000000-0000-0000-0000-000000000004";
+    admin.execute("INSERT INTO wonderwilds.profiles(id,parent_id,ability_band) VALUES($1::text::uuid,$2::text::uuid,'beginning')", &[&profile,&parent]).unwrap();
+    let identity = Identity {
+        parent_id: parent.into(),
+        profile_id: profile.into(),
+        session_id: "project-synthetic-session".into(),
+    };
+    let repo = PostgresRepository::new(restricted.into());
+    let story = StoryRepository::new(restricted.into());
+    travel(&story, &identity, "workshop");
+    let at = story.read(&identity).unwrap();
+    let arrival = story_action(&at, "travel", Some("cove"));
+    let candidate = story
+        .generation_state(&identity, &arrival)
+        .unwrap()
+        .unwrap();
+    let content = json!({"name":"Wren","personality":"A thoughtful maker.","sprite":"flutter","greeting":"Let's make a seat.",
+        "title":"Your resting corner","premise":"Choose a look and build a corner next door.","payoff":"Your starry corner is ready.","completeOnLastStep":true,
+        "steps":[{"mechanic":"choose_style","label":"Choose a design","shape":"leaf","locationId":"cove"},
+            {"mechanic":"gather_wood","label":"Gather project wood","shape":"hollow","locationId":"cove"},
+            {"mechanic":"craft_planks","label":"Make project planks","shape":"stones","locationId":"cove"},
+            {"mechanic":"build_seat","label":"Build the resting corner","shape":"trail","locationId":"fern_hollow"}]});
+    let plan = crate::story::planning::ValidatedPlan::generated(&candidate, content, true).unwrap();
+    let offered = story
+        .execute_planned(&identity, &arrival, Some(&plan))
+        .unwrap();
+    assert_eq!(story.execute(&identity, &arrival).unwrap(), offered);
+    let accepted = story
+        .execute(&identity, &story_action(&offered, "talk", None))
+        .unwrap();
+    let design = accepted["sceneInput"]["availableActions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|a| a["action"]["optionId"] == "starry")
+        .unwrap();
+    let request = command(
+        "project-design",
+        accepted["revision"].as_u64().unwrap(),
+        json!({"type":"choose","actionId":design["id"]}),
+    );
+    story.execute(&identity, &request).unwrap();
+    for index in 0..3 {
+        if index == 2 {
+            travel(&story, &identity, "fern_hollow");
+        }
+        let before = story.read(&identity).unwrap();
+        let learning = repo.read(&identity).unwrap();
+        let action = before["sceneInput"]["availableActions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| {
+                ["sourceId", "objectId"].iter().any(|field| {
+                    a["action"][*field]
+                        .as_str()
+                        .is_some_and(|id| id.starts_with("neighbour_marina_"))
+                })
+            })
+            .unwrap();
+        let begun = repo.execute(&identity, &command(&format!("project-begin-{index}"), learning["revision"].as_u64().unwrap(), json!({"type":"begin_step","actionId":action["id"],"storyRevision":before["revision"]}))).unwrap();
+        assert!(
+            begun["activeActivity"].is_object(),
+            "project step binds without an active Pip mission"
+        );
+        let finish = command(
+            &format!("project-finish-{index}"),
+            begun["revision"].as_u64().unwrap(),
+            json!({"type":"finish_together","encounterId":begun["activeActivity"]["id"]}),
+        );
+        if index == 0 {
+            let mut faulty = repo.clone();
+            faulty.fail_before_commit = true;
+            assert_eq!(faulty.execute(&identity, &finish), Err(Error::Unavailable));
+            assert_eq!(
+                story.read(&identity).unwrap(),
+                before,
+                "rolled-back learning cannot gather supplies"
+            );
+            assert_eq!(
+                repo.read(&identity).unwrap()["activeActivity"],
+                begun["activeActivity"]
+            );
+        }
+        let completed = repo.execute(&identity, &finish).unwrap();
+        let after = story.read(&identity).unwrap();
+        assert_eq!(repo.execute(&identity, &finish).unwrap(), completed);
+        assert_eq!(
+            story.read(&identity).unwrap(),
+            after,
+            "retry cannot repeat a resource or project effect"
+        );
+        let inventory = after["sceneInput"]["context"]["inventory"]
+            .as_array()
+            .unwrap();
+        if index < 2 {
+            assert!(inventory.iter().any(|item| item["itemId"]
+                == if index == 0 { "wood" } else { "planks" }
+                && item["quantity"] == 3));
+        }
+        if index == 2 {
+            let quest = after["sceneInput"]["neighbourMissions"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|q| q["characterId"] == "marina")
+                .unwrap();
+            assert_eq!(quest["status"], "completed");
+            assert_eq!(after["locationId"], "fern_hollow");
+            assert!(
+                after["sceneInput"]["here"]["objects"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|o| o["id"] == "project_fern_hollow_seat" && o["state"] == "starry")
+            );
+            assert!(
+                !inventory
+                    .iter()
+                    .any(|item| item["itemId"] == "wood" || item["itemId"] == "planks")
+            );
+        }
+        assert_eq!(
+            StoryRepository::new(restricted.into())
+                .read(&identity)
+                .unwrap(),
+            after
+        );
+        assert_eq!(story.verify_history(&identity).unwrap(), after);
+    }
 }

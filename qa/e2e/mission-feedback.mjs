@@ -34,6 +34,7 @@ try {
   await page.getByRole('heading',{name:capture.output.title,exact:true}).waitFor();
   assert.equal(await page.locator('img').count(),0);
   await page.getByLabel('Reviewer name').fill('Browser reviewer');
+  await page.getByLabel('Reviewer name').press('Tab');
   for(const name of ['Story coherence and payoff','Clear next steps','Variety / originality','Learning invitation fits the story','Age suitability (6–8)']) {
     await page.getByLabel(name,{exact:true}).selectOption('4');
   }
@@ -45,6 +46,7 @@ try {
   assert.equal(saved[0].scores.story,4);
   await stop(); url = await start(); await page.goto(url);
   await page.getByLabel('Reviewer name').fill('Browser reviewer');
+  await page.getByLabel('Reviewer name').press('Tab');
   await page.getByRole('button',{name:'Refresh captures'}).click();
   await page.locator('#saved').filter({hasText:/^Saved /}).waitFor();
   assert.equal(await page.getByLabel('Notes / suggested improvements').inputValue(),'Make the clue more concrete.');

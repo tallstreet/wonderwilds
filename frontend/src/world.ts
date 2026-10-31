@@ -194,6 +194,12 @@ export function createWorld(
             .setDisplaySize(160, 100)
             .setOrigin(0.5, 0.9)
             .setDepth(decoration.y);
+        else if (decoration.kind === 'supplies')
+          this.add
+            .image(decoration.x, decoration.y, 'prop-atlas', 'plank')
+            .setDisplaySize(96, 72)
+            .setOrigin(0.5, 0.9)
+            .setDepth(decoration.y);
         else if (decoration.kind !== 'picnic')
           this.storyShape(decoration.x, decoration.y, decoration.kind, true);
       }

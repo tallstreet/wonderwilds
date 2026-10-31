@@ -15,7 +15,12 @@ fn count(input: &Value, item: &str) -> u64 {
         .unwrap()
         .iter()
         .find(|i| i["itemId"] == item)
-        .and_then(|i| i["quantity"].as_u64())
+        .map(|i| {
+            i["quantity"]
+                .as_u64()
+                .unwrap_or(0)
+                .saturating_sub(i["reservedQuantity"].as_u64().unwrap_or(0))
+        })
         .unwrap_or(0)
 }
 
@@ -447,5 +452,12 @@ mod tests {
         assert!(!needs_introduction(
             &build_scene_input(&State::new()).unwrap()
         ));
+    }
+    #[test]
+    fn project_supplies_cannot_make_pips_story_claim_available_materials() {
+        let input = json!({"context":{"inventory":[{"itemId":"wood","quantity":5,"reservedQuantity":3}, {"itemId":"planks","quantity":3,"reservedQuantity":3}]}});
+        assert_eq!(count(&input, "wood"), 2);
+        assert_eq!(count(&input, "planks"), 0);
+        assert_eq!(count(&input, "berries"), 0);
     }
 }

@@ -3,7 +3,7 @@ const labels = {story: 'Story coherence and payoff', clarity: 'Clear next steps'
 let workspace, selected, dirty = false, saving = false;
 for (const [key, label] of Object.entries(labels)) {
   const wrapper = document.createElement('label'); wrapper.textContent = label;
-  const select = document.createElement('select'); select.id = key; select.required = true;
+  const select = document.createElement('select'); select.id = key; select.required = true; select.setAttribute('aria-label', label);
   for (const [value, text] of [['', 'Choose score…'], ...[1,2,3,4,5].map(n => [String(n), String(n)])]) {
     const option = document.createElement('option'); option.value = value; option.textContent = text; select.append(option);
   }
@@ -39,8 +39,9 @@ function show(item) {
 async function refresh() {
   if (!mayLeave()) return;
   try {
-    const response = await fetch('/api/review'); workspace = await response.json();
-    if (!response.ok) throw new Error(workspace.error);
+    const response = await fetch('/api/review'); const next = await response.json();
+    if (!response.ok) throw new Error(next.error);
+    workspace = next;
     $('status').textContent = workspace.partial ? 'Capture append in progress; refresh to see the last record.' : 'Captures loaded. Refresh to include newly generated missions.';
     const item = workspace.items.find(i => i.capture.id === selected?.capture.id) ?? workspace.items[0];
     if (item) show(item); else { queue(); $('detail').hidden = true; $('empty').hidden = false; }
@@ -49,7 +50,7 @@ async function refresh() {
 $('review').addEventListener('input', () => { dirty = true; });
 $('reviewer').addEventListener('change', () => {
   try { localStorage.setItem('mission-reviewer', $('reviewer').value); } catch {}
-  queue();
+  if (selected && !dirty) show(selected); else queue();
 });
 $('review').onsubmit = async (event) => {
   event.preventDefault();
@@ -57,7 +58,7 @@ $('review').onsubmit = async (event) => {
   const body = {id: item.capture.id, fingerprint: item.fingerprint, reviewer: $('reviewer').value,
     decision: $('decision').value, notes: $('notes').value, scores: Object.fromEntries(Object.keys(labels).map(key => [key, Number($(key).value)]))};
   saving = true;
-  const controls = [...$('review').querySelectorAll('input, select, textarea, button')];
+  const controls = [$('reviewer'), ...$('review').querySelectorAll('input, select, textarea, button')];
   controls.forEach(control => { control.disabled = true; });
   try {
     const response = await fetch('/api/review', {method: 'POST', headers: {'Content-Type':'application/json', 'X-Review-Token':workspace.token}, body: JSON.stringify(body)});

@@ -11,8 +11,11 @@ presentation text only. The generator is told not to invent task quantities,
 answers, difficulty, successful assessment or world inventory. Missing bridges
 use authored copy selected from the legal action's mechanic.
 
-The story world routes inspect, collect, exchange and assemble choices through
-begin_step. The server resolves the action handle and exact story revision under
+The story world routes inspect, collect, exchange and assemble actions through
+begin_step. Generated project collect/assemble actions resolve their owning
+neighbourhood mission through the exact saved generation/step binding, including
+at a neighbouring destination. Creative leafy/starry choices use ordinary story
+commands, with no assessment or right answer. The server resolves the action handle and exact story revision under
 the shared profile lock. A frozen binding contains mission identity (including
 neighbourhood generation), location, action, revision and joining text. Supported
 prerequisite-ready skills reuse existing task parameters, representation,

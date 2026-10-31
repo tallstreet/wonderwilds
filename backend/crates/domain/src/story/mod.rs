@@ -238,6 +238,8 @@ pub struct State {
     exploration: Vec<exploration::Quest>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     finds: BTreeMap<String, u32>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    neighbourhood_projects: BTreeMap<String, exploration::Project>,
     events: Vec<Event>,
     history: Vec<Command>,
     receipts: BTreeMap<String, Receipt>,
@@ -289,6 +291,7 @@ impl State {
             broader: BroaderProgress::default(),
             exploration: Vec::new(),
             finds: BTreeMap::new(),
+            neighbourhood_projects: BTreeMap::new(),
             events: Vec::new(),
             history: Vec::new(),
             receipts: BTreeMap::new(),
@@ -371,20 +374,27 @@ impl State {
     pub fn far_lit(&self) -> bool {
         self.far_lit
     }
+    pub fn reserved_quantity(&self, item: &str) -> u32 {
+        self.exploration
+            .iter()
+            .map(|q| q.supplies.get(item).copied().unwrap_or(0))
+            .sum()
+    }
     pub fn quantity(&self, item: &str) -> u32 {
-        match item {
-            "wood" => self.wood,
-            "planks" => self.planks,
-            "berries" => self.berries,
-            "picnic_basket" => self.picnic_basket,
-            "glow_pebbles" => self.glow_pebbles,
-            "lanterns" => self.lanterns,
-            "wind_instrument" => u32::from(
-                self.instrument_home() == Some(Location::BridgeBank)
-                    && !self.has_story_flag("instrument_placed"),
-            ),
-            _ => self.finds.get(item).copied().unwrap_or(0),
-        }
+        self.reserved_quantity(item)
+            + match item {
+                "wood" => self.wood,
+                "planks" => self.planks,
+                "berries" => self.berries,
+                "picnic_basket" => self.picnic_basket,
+                "glow_pebbles" => self.glow_pebbles,
+                "lanterns" => self.lanterns,
+                "wind_instrument" => u32::from(
+                    self.instrument_home() == Some(Location::BridgeBank)
+                        && !self.has_story_flag("instrument_placed"),
+                ),
+                _ => self.finds.get(item).copied().unwrap_or(0),
+            }
     }
     pub fn inventory(&self) -> BTreeMap<String, u32> {
         [
@@ -1248,6 +1258,9 @@ impl State {
         "mission":self.mission,"completedMissions":self.completed_missions,"berries":self.berries,"picnicBasket":self.picnic_basket,"glowPebbles":self.glow_pebbles,"lanterns":self.lanterns,"picnicReady":self.picnic_ready,"picnicShared":self.picnic_shared,"nearLit":self.near_lit,"farLit":self.far_lit,"broader":self.broader});
         if !self.finds.is_empty() {
             value["finds"] = json!(self.finds);
+        }
+        if !self.neighbourhood_projects.is_empty() {
+            value["neighbourhoodProjects"] = json!(self.neighbourhood_projects);
         }
         if !self.exploration.is_empty() {
             value["exploration"] = json!(self.exploration);

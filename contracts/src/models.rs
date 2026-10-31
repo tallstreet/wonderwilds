@@ -10,6 +10,8 @@ pub struct GeneratedNeighbourhood {
     pub premise: String,
     pub payoff: String,
     pub sprite: GeneratedNeighbourhoodSprite,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub complete_on_last_step: Option<bool>,
     pub steps: Vec<GeneratedNeighbourhoodStepsItem>,
 }
 
@@ -723,6 +725,8 @@ pub enum GeneratedNeighbourhoodSprite {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct GeneratedNeighbourhoodStepsItem {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mechanic: Option<GeneratedNeighbourhoodStepsItemMechanic>,
     pub label: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub location_id: Option<GeneratedNeighbourhoodStepsItemLocationId>,
@@ -1485,6 +1489,8 @@ pub enum StoryPreferencesAvoidItem {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct StoryContextInventoryItem {
     pub item_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reserved_quantity: Option<u64>,
     pub quantity: u64,
 }
 
@@ -1949,6 +1955,34 @@ pub struct QuestionStimulusVariant16 {
 pub struct QuestionStimulusVariant17 {
     pub kind: QuestionStimulusVariant17Kind,
     pub asset_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum GeneratedNeighbourhoodStepsItemMechanic {
+    #[serde(rename = "inspect")]
+    Inspect,
+    #[serde(rename = "gather_wood")]
+    GatherWood,
+    #[serde(rename = "gather_berries")]
+    GatherBerries,
+    #[serde(rename = "gather_glow_pebbles")]
+    GatherGlowPebbles,
+    #[serde(rename = "craft_planks")]
+    CraftPlanks,
+    #[serde(rename = "pack_basket")]
+    PackBasket,
+    #[serde(rename = "craft_lantern")]
+    CraftLantern,
+    #[serde(rename = "deliver_basket")]
+    DeliverBasket,
+    #[serde(rename = "deliver_planks")]
+    DeliverPlanks,
+    #[serde(rename = "build_seat")]
+    BuildSeat,
+    #[serde(rename = "place_lantern")]
+    PlaceLantern,
+    #[serde(rename = "choose_style")]
+    ChooseStyle,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -36,6 +36,23 @@ export function missionSupplyIds(snapshot: StorySnapshot): string[] {
       if (outputs[action.recipeId]) ids.add(outputs[action.recipeId]);
     }
   }
+  const projectItems: Record<string, string[]> = {
+    gather_wood: ['wood'],
+    craft_planks: ['wood', 'planks'],
+    build_seat: ['planks'],
+    deliver_planks: ['planks'],
+    gather_berries: ['berries'],
+    pack_basket: ['berries', 'picnic_basket'],
+    deliver_basket: ['picnic_basket'],
+    gather_glow_pebbles: ['glow_pebbles'],
+    craft_lantern: ['glow_pebbles', 'lanterns'],
+    place_lantern: ['lanterns'],
+  };
+  for (const q of snapshot.sceneInput?.neighbourMissions ?? []) {
+    if (q.status !== 'open') continue;
+    for (const step of q.generatedStory?.steps ?? [])
+      for (const item of projectItems[step.mechanic ?? 'inspect'] ?? []) ids.add(item);
+  }
   return [...ids];
 }
 export const neighbours: Record<string, { name: string; sprite: string }> = {
@@ -95,6 +112,23 @@ export function actionTarget(action: StoryAction): string {
     case 'travel':
       return `route:${action.destinationId}`;
   }
+}
+/** Resolve only the saved mission's current action target, including its generation. */
+export function neighbourForAction(snapshot: StorySnapshot, action: StoryAction) {
+  const target = actionTarget(action).split(':').slice(1).join(':');
+  return snapshot.sceneInput?.neighbourMissions?.find((q) => {
+    if (q.status !== 'open' || q.inspected || neighbourDestination(q) !== snapshot.locationId)
+      return false;
+    if (!q.generatedStory)
+      return action.type === 'inspect' && target === `neighbour_${q.characterId}`;
+    const project = q.generatedStory.steps.some(
+      (step) => step.mechanic && step.mechanic !== 'inspect',
+    );
+    const id = project
+      ? `neighbour_${q.characterId}_g${q.generation}_${q.stepIndex ?? 0}`
+      : `neighbour_${q.characterId}_${q.stepIndex ?? 0}`;
+    return target === id;
+  });
 }
 /** Authored display placement, never an alternative source of legal actions or progress. */
 export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
@@ -161,6 +195,38 @@ export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
   for (const { action } of actions) {
     const id = actionTarget(action);
     if (markers.some((marker) => marker.id === id)) continue;
+    const neighbour = neighbourForAction(snapshot, action);
+    if (neighbour?.generatedStory) {
+      const index = neighbour.stepIndex ?? 0;
+      const step = neighbour.generatedStory.steps[index];
+      const points = [
+        { x: 780, y: 460 },
+        { x: 420, y: 540 },
+        { x: 900, y: 300 },
+        { x: 730, y: 530 },
+        { x: 350, y: 330 },
+        { x: 880, y: 550 },
+      ];
+      const output: Record<string, string> = {
+        gather_wood: 'wood',
+        gather_berries: 'berries',
+        gather_glow_pebbles: 'glow_pebbles',
+        craft_planks: 'planks',
+        pack_basket: 'picnic_basket',
+        craft_lantern: 'lanterns',
+        deliver_basket: 'picnic_basket',
+        deliver_planks: 'planks',
+        build_seat: 'planks',
+        place_lantern: 'lanterns',
+      };
+      const item = output[step.mechanic ?? 'inspect'];
+      const art = item
+        ? { prop: items[item].prop }
+        : { shape: step.mechanic === 'choose_style' ? ('corner-leaves' as const) : step.shape };
+      add(id, step.label, points[index % points.length], art);
+      if (item) markers[markers.length - 1].itemId = item;
+      continue;
+    }
     if (action.type === 'collect') {
       const source = resourcePlaces[action.sourceId];
       if (source && source.location === snapshot.locationId) {
@@ -169,22 +235,6 @@ export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
       }
     }
     if (action.type === 'assemble' || action.type === 'inspect' || action.type === 'choose') {
-      if (action.type === 'inspect' && action.objectId.startsWith('neighbour_')) {
-        const task =
-          snapshot.sceneInput?.availableActions.find((item) => item.action === action)
-            ?.description ?? 'Explore this place';
-        const mission = snapshot.sceneInput?.neighbourMissions?.find((q) =>
-          action.objectId.startsWith(`neighbour_${q.characterId}_`),
-        );
-        const index = mission?.stepIndex ?? 0;
-        const shape = mission?.generatedStory?.steps[index]?.shape ?? 'hollow';
-        const points = [
-          { x: 780, y: 460 },
-          { x: 420, y: 540 },
-          { x: 900, y: 300 },
-        ];
-        add(id, task, points[index] ?? points[0], { shape });
-      }
       const object = assemblyPlaces[action.type === 'choose' ? action.choiceId : action.objectId];
       const selectedPlace = gatheringLocation(snapshot);
       const point = gatheringPoint(snapshot);
@@ -391,11 +441,31 @@ const assemblyPlaces: Record<string, Placement> = {
   },
 };
 export function storyDecorations(snapshot: StorySnapshot): WorldDecoration[] {
-  if (
-    !snapshot.sceneInput ||
-    !['bridge_bank', 'far_bank', 'workshop'].includes(snapshot.locationId)
-  )
-    return [];
+  if (!snapshot.sceneInput) return [];
+  const projects: WorldDecoration[] = [];
+  for (const object of snapshot.sceneInput.here.objects) {
+    if (!object.id.startsWith(`project_${snapshot.locationId}_`)) continue;
+    const kind = object.id.slice(`project_${snapshot.locationId}_`.length);
+    if (kind === 'seat')
+      projects.push({
+        id: object.id,
+        kind: object.state === 'starry' ? 'corner-stars' : 'corner-leaves',
+        x: 340,
+        y: 580,
+      });
+    if (kind === 'picnic') projects.push({ id: object.id, kind: 'picnic', x: 350, y: 280 });
+    if (kind === 'supplies') projects.push({ id: object.id, kind: 'supplies', x: 880, y: 530 });
+    if (kind === 'lantern') {
+      projects.push({ id: object.id, kind: 'lantern', x: 660, y: 310 });
+      projects.push({
+        id: `${object.id}-design`,
+        kind: object.state === 'starry' ? 'bunting' : 'leaf',
+        x: 660,
+        y: 365,
+      });
+    }
+  }
+  if (!['bridge_bank', 'far_bank', 'workshop'].includes(snapshot.locationId)) return projects;
   const facts = snapshot.sceneInput.context.memory.facts;
   if (snapshot.locationId === 'workshop')
     return facts.includes('The workshop path is clear.')
@@ -438,7 +508,7 @@ export function storyDecorations(snapshot: StorySnapshot): WorldDecoration[] {
       x: gathering.x,
       y: gathering.y - 30,
     });
-  return decorations;
+  return [...decorations, ...projects];
 }
 export function gatheringLocation(snapshot: StorySnapshot): StorySnapshot['locationId'] {
   return snapshot.sceneInput?.context.memory.facts.includes('The gathering is at far_bank.')
@@ -527,7 +597,11 @@ export function missionDiscovery(snapshot: StorySnapshot, objectId: string): str
     objectId.startsWith(`neighbour_${q.characterId}_`),
   );
   if (!q) return;
-  const index = Number(objectId.slice(`neighbour_${q.characterId}_`.length));
+  const suffix = objectId.slice(`neighbour_${q.characterId}_`.length);
+  if (suffix.startsWith('g') && !suffix.startsWith(`g${q.generation}_`)) return;
+  const index = Number(suffix.split('_').at(-1));
   if (!Number.isInteger(index) || index < 0 || index >= (q.stepIndex ?? 0)) return;
-  return q.generatedStory?.steps[index]?.discovery;
+  return q.status === 'completed' && q.generatedStory?.completeOnLastStep
+    ? q.payoff
+    : q.generatedStory?.steps[index]?.discovery;
 }

@@ -286,6 +286,10 @@ impl super::generation::ExplorationProvider for ModalSceneProvider {
         // Also give the model the field names and supported artwork IDs in its
         // prompt; serving-side grammar enforcement alone is not sufficient.
         let mut supplied = input.clone();
+        supplied
+            .as_object_mut()
+            .ok_or_else(unavailable)?
+            .remove("noveltyChecks");
         supplied["outputSchema"] = output_schema.clone();
         let body = json!({"model":"wonderwilds","messages":[
             {"role":"system","content":include_str!("exploration_prompt.txt")},
@@ -307,7 +311,7 @@ impl super::generation::ExplorationProvider for ModalSceneProvider {
             }) {
                 return Err(unavailable());
             }
-            Ok(())
+            super::generation::validate_proposal(input, proposal).map_err(|_| unavailable())
         })
     }
 }

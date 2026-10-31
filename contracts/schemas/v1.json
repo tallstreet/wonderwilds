@@ -59,14 +59,19 @@
             "sail"
           ]
         },
+        "completeOnLastStep": { "type": "boolean" },
         "steps": {
           "type": "array",
           "minItems": 1,
-          "maxItems": 3,
+          "maxItems": 6,
           "items": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
+              "mechanic": {
+                "type": "string",
+                "enum": ["inspect", "gather_wood", "gather_berries", "gather_glow_pebbles", "craft_planks", "pack_basket", "craft_lantern", "deliver_basket", "deliver_planks", "build_seat", "place_lantern", "choose_style"]
+              },
               "label": {
                 "type": "string",
                 "minLength": 1,
@@ -3024,6 +3029,7 @@
                 "minLength": 1,
                 "maxLength": 80
               },
+              "reservedQuantity": { "type": "integer", "minimum": 1, "maximum": 999 },
               "quantity": {
                 "type": "integer",
                 "minimum": 1,
@@ -3037,7 +3043,7 @@
             "additionalProperties": false
           },
           "minItems": 0,
-          "maxItems": 12
+          "maxItems": 20
         },
         "memory": {
           "type": "object",
@@ -3662,7 +3668,7 @@
               "stepIndex": {
                 "type": "integer",
                 "minimum": 0,
-                "maximum": 3
+                "maximum": 6
               }
             },
             "required": [

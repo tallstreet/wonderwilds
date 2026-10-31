@@ -3,7 +3,7 @@
   "info": {
     "title": "Wonderwilds gameplay API",
     "version": "1.0.0",
-    "description": "Saved generated neighbourhood steps may optionally include a supported locationId and discovery; omitted locations use the mission home area. Authored development gameplay surface. Commands support explicit encounter abandonment with revision and idempotency checks. Parent lifecycle endpoints remain integration work. Persisted story supports long play through revision 1,000,000,000; legacy exhausted-at-256 snapshots remain valid exact retry responses."
+    "description": "Saved generated neighbourhood steps may optionally include a supported mechanic, locationId and discovery; omitted mechanics mean inspect and omitted locations use the mission home area. Project missions support up to six steps and optional completeOnLastStep, with fixed server recipes and mission-reserved supplies. Authored development gameplay surface. Commands support explicit encounter abandonment with revision and idempotency checks. Parent lifecycle endpoints remain integration work. Persisted story supports long play through revision 1,000,000,000; legacy exhausted-at-256 snapshots remain valid exact retry responses."
   },
   "servers": [
     {
