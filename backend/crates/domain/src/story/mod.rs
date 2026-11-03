@@ -240,6 +240,8 @@ pub struct State {
     finds: BTreeMap<String, u32>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     neighbourhood_projects: BTreeMap<String, exploration::Project>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    recent_neighbourhood_plans: Vec<Vec<exploration::Mechanic>>,
     events: Vec<Event>,
     history: Vec<Command>,
     receipts: BTreeMap<String, Receipt>,
@@ -292,6 +294,7 @@ impl State {
             exploration: Vec::new(),
             finds: BTreeMap::new(),
             neighbourhood_projects: BTreeMap::new(),
+            recent_neighbourhood_plans: Vec::new(),
             events: Vec::new(),
             history: Vec::new(),
             receipts: BTreeMap::new(),
@@ -1258,6 +1261,9 @@ impl State {
         "mission":self.mission,"completedMissions":self.completed_missions,"berries":self.berries,"picnicBasket":self.picnic_basket,"glowPebbles":self.glow_pebbles,"lanterns":self.lanterns,"picnicReady":self.picnic_ready,"picnicShared":self.picnic_shared,"nearLit":self.near_lit,"farLit":self.far_lit,"broader":self.broader});
         if !self.finds.is_empty() {
             value["finds"] = json!(self.finds);
+        }
+        if !self.recent_neighbourhood_plans.is_empty() {
+            value["recentNeighbourhoodPlans"] = json!(self.recent_neighbourhood_plans);
         }
         if !self.neighbourhood_projects.is_empty() {
             value["neighbourhoodProjects"] = json!(self.neighbourhood_projects);

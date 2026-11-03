@@ -39,6 +39,8 @@ try {
     return sync();
   };
   const travel = async destination => {
+    const current = await snapshot();
+    if (current.locationId === destination) return current;
     await visit(`route:${destination}`);
     await Promise.any([
       page.locator('[data-story-action="travel"]').waitFor({ timeout: 20000 }),
@@ -78,6 +80,7 @@ try {
         : `object:${action.action.objectId ?? action.action.choiceId}`;
       await visit(target);
       if (mechanic === 'choose_style') {
+        await page.locator('[data-story-action="choose"]').first().waitFor();
         assert.equal(await page.locator('[data-story-action="choose"]').count(), 2);
         await page.locator('[data-story-action="choose"]').filter({ hasText: 'starry' }).click();
         await page.waitForFunction(revision => Number(document.querySelector('#game')?.dataset.storyRevision) > revision, current.revision);
@@ -90,6 +93,8 @@ try {
         assert.ok(state.sceneInput.context.inventory.some(i => i.itemId === item && i.quantity > 0));
         await close(); await page.locator('#bag').click();
         await page.locator('.story-bag-items').waitFor();
+        assert.ok(await page.locator('.story-bag-quantity small').count());
+        if (cycle <= 1 && index === 0) await page.screenshot({ path: `/tmp/wonderwilds-project-bag-${cycle === 0 ? 'desktop' : 'phone'}.png` });
         await close();
       }
       if (cycle === 0 && index === 1) {
@@ -109,6 +114,7 @@ try {
       const before = objects;
       await close(); await page.reload(); await page.locator('#game canvas').waitFor(); await sync();
       assert.deepEqual((await snapshot()).sceneInput.here.objects.filter(o => o.id.startsWith('project_')), before);
+      if (cycle === 0) await page.screenshot({ path: '/tmp/wonderwilds-project-first-phone.png' });
     } else {
       await travel('cove'); await visit('npc:marina'); await choose('talk');
       assert.equal(quest(await snapshot()).status, 'completed');

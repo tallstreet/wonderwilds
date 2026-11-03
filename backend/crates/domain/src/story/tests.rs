@@ -1058,6 +1058,7 @@ fn generated_stories_repeat_without_replacing_unfinished_work_and_replay_every_s
     perform(&mut state, travel("workshop"));
     for generation in 1..=8 {
         let story = GeneratedStory {
+            remember_plan: false,
             model_generated: true,
             content: GeneratedContent {
                 complete_on_last_step: false,
@@ -1273,6 +1274,7 @@ fn generated_journey_requires_the_right_area_and_returns_to_its_original_friend(
     let mut state = State::new();
     perform(&mut state, travel("workshop"));
     let story = GeneratedStory {
+        remember_plan: false,
         model_generated: true,
         content: GeneratedContent {
             complete_on_last_step: false,

@@ -240,3 +240,34 @@ and `WW_QA_BROWSER_TEST=qa/e2e/story-mission-variety.mjs`, then run
 offline story fallbacks. It checks cross-area inline learning, clue replies,
 current-objective tracking, phone journal destinations, reload, return/payoff and
 a different story length/artwork on the next visit. Set `CHROMIUM_PATH` as needed.
+
+
+### Generated project mission variety
+
+`qa/e2e/story-mission-variety.mjs` runs through the portable disposable-database
+runner. It exercises real project gathering/crafting/delivery/construction,
+creative choices, inline supported learning, bag reservations, saved projects,
+destination completion, reload and discovery stories at desktop/phone sizes.
+Use synthetic provider credentials with an unavailable loopback endpoint so no
+paid generation or persistent demo progress is involved:
+
+```sh
+MODEL_API_KEY= BASETEN_API_KEY= WONDERWILDS_MISSION_LOG= \
+CHROMIUM_PATH="/path/to/Chromium" \
+WW_QA_BROWSER_TEST=qa/e2e/story-mission-variety.mjs \
+MODAL_PROXY_TOKEN_ID=synthetic MODAL_PROXY_TOKEN_SECRET=synthetic \
+WONDERWILDS_MODAL_ENDPOINT=http://127.0.0.1:9/v1/chat/completions \
+node qa/e2e/run-training-qa.mjs
+```
+
+Run disposable PostgreSQL/browser suites sequentially on macOS if concurrent
+clusters exhaust the system shared-memory limit. The helper shuts down and
+removes its own temporary cluster; do not stop the persistent demo database.
+
+
+`qa/e2e/story-lantern-hint.mjs` separately prepares the reported Welcome lights
+state in a fresh synthetic profile, verifies the woodcutter-only hint (without
+route/placement instructions or guide buttons), and completes real crafting and
+both lantern placements with supported learning and reload. Select it with
+`WW_QA_BROWSER_TEST` in the same runner, with both Modal credential variables
+empty to use authored content. It never advances the persistent demo profile.

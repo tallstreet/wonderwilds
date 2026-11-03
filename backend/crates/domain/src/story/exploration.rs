@@ -109,6 +109,8 @@ pub struct GeneratedStep {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct GeneratedStory {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub remember_plan: bool,
     pub content: GeneratedContent,
     pub model_generated: bool,
 }
@@ -177,7 +179,12 @@ impl State {
 
     pub(super) fn valid_exploration(&self) -> bool {
         let mut ids = std::collections::BTreeSet::new();
-        self.neighbourhood_projects.len() <= PLACES.len() * 4
+        self.recent_neighbourhood_plans.len() <= 8
+            && self
+                .recent_neighbourhood_plans
+                .iter()
+                .all(|p| !p.is_empty() && p.len() <= 6)
+            && self.neighbourhood_projects.len() <= PLACES.len() * 4
             && self.neighbourhood_projects.iter().all(|(key, project)| {
                 place(project.location).is_some()
                     && matches!(
@@ -272,7 +279,10 @@ impl State {
                     topic_id: topic.into(),
                 });
             }
-            if self.current_neighbour().is_none_or(|q| q.story.is_none()) {
+            if let Some(q) = self.current_neighbour().filter(|q| q.story.is_some()) {
+                // Preserve the historical local-before-remote candidate ordering.
+                actions.extend(q.step_actions());
+            } else {
                 actions.push(Action::Inspect {
                     object_id: format!("neighbour_{}", p.character),
                 });
@@ -283,6 +293,7 @@ impl State {
                 && !q.inspected
                 && q.story.is_some()
                 && q.task_location() == self.location
+                && place(self.location).is_none_or(|p| p.character != q.character)
             {
                 actions.extend(q.step_actions());
             }
@@ -341,7 +352,12 @@ impl State {
                     q.inspected = q.step as usize == story.content.steps.len();
                     if q.inspected && story.content.complete_on_last_step {
                         q.status = "completed".into();
-                        return Ok(story.content.payoff.clone());
+                        let payoff = story.content.payoff.clone();
+                        let plan = story.content.steps.iter().map(|s| s.mechanic).collect();
+                        if story.remember_plan {
+                            self.record_neighbourhood_plan(plan);
+                        }
+                        return Ok(payoff);
                     }
                     return Ok(discovery.unwrap_or_else(|| {
                         format!(

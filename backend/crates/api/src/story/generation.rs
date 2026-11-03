@@ -64,8 +64,9 @@ fn selected(state: &State) -> Result<(&'static Seed, Vec<&'static str>), Error> 
     let stories: Vec<_> = state
         .exploration_quests()
         .iter()
-        .filter_map(|q| q.story.as_ref())
+        .filter_map(|q| q.story.as_ref().map(|s| (s, q.status != "offered")))
         .collect();
+    let newest_played = stories.iter().rposition(|(_, played)| *played);
     let total: u64 = state
         .exploration_quests()
         .iter()
@@ -78,35 +79,59 @@ fn selected(state: &State) -> Result<(&'static Seed, Vec<&'static str>), Error> 
         .map(|offset| &candidates[(start + offset) % candidates.len()])
         .min_by_key(|seed| {
             let terms = motifs(&format!("{} {} {}", seed.kind, seed.wish, seed.title));
-            stories
+            let completed_uses = state
+                .recent_neighbourhood_plans()
                 .iter()
-                .enumerate()
-                .map(|(i, story)| {
-                    let content = &story.content;
-                    let overlap = terms
-                        .intersection(&motifs(&format!(
-                            "{} {} {}",
-                            content.title, content.premise, content.payoff
-                        )))
-                        .count();
-                    let same_opening = content
-                        .steps
-                        .first()
-                        .is_some_and(|s| s.shape == seed.steps[0].0);
-                    usize::from(
-                        fingerprint(&json!(content.title)) == fingerprint(&json!(seed.title)),
-                    ) * 1000
-                        + usize::from(content.steps.last().is_some_and(|s| {
-                            serde_json::to_value(s.mechanic)
-                                .ok()
-                                .and_then(|v| v.as_str().map(str::to_owned))
-                                .as_deref()
-                                == seed.mechanics.last().copied()
-                        })) * 15
-                        + overlap * 3
-                        + usize::from(same_opening) * if i + 1 == stories.len() { 30 } else { 2 }
+                .filter(|plan| {
+                    let ids: Vec<_> = plan
+                        .iter()
+                        .map(|m| {
+                            serde_json::to_value(m)
+                                .unwrap()
+                                .as_str()
+                                .unwrap()
+                                .to_owned()
+                        })
+                        .collect();
+                    ids.iter()
+                        .map(String::as_str)
+                        .eq(seed.mechanics.iter().copied())
                 })
-                .sum::<usize>()
+                .count();
+            completed_uses * 200
+                + stories
+                    .iter()
+                    .enumerate()
+                    .map(|(i, (story, played))| {
+                        let content = &story.content;
+                        let overlap = terms
+                            .intersection(&motifs(&format!(
+                                "{} {} {}",
+                                content.title, content.premise, content.payoff
+                            )))
+                            .count();
+                        let same_opening = content
+                            .steps
+                            .first()
+                            .is_some_and(|s| s.shape == seed.steps[0].0);
+                        usize::from(
+                            fingerprint(&json!(content.title)) == fingerprint(&json!(seed.title)),
+                        ) * 1000
+                            + usize::from(
+                                *played
+                                    && content.steps.last().is_some_and(|s| {
+                                        serde_json::to_value(s.mechanic)
+                                            .ok()
+                                            .and_then(|v| v.as_str().map(str::to_owned))
+                                            .as_deref()
+                                            == seed.mechanics.last().copied()
+                                    }),
+                            ) * 15
+                            + usize::from(*played) * overlap * 3
+                            + usize::from(*played && same_opening)
+                                * if Some(i) == newest_played { 30 } else { 2 }
+                    })
+                    .sum::<usize>()
         })
         .unwrap();
     // Alternate both sides of interior areas. Never route outside the map.
@@ -342,6 +367,7 @@ mod tests {
                 wire::validate("GeneratedNeighbourhood", &story)
                     .unwrap_or_else(|error| panic!("{} in {}: {error:?}", seed.title, p.name));
                 let generated = wonderwilds_domain::story::exploration::GeneratedStory {
+                    remember_plan: false,
                     content: serde_json::from_value(story).unwrap(),
                     model_generated: false,
                 };
@@ -357,6 +383,7 @@ mod tests {
         let mut titles = BTreeSet::new();
         let mut lengths = BTreeSet::new();
         let mut openings = BTreeSet::new();
+        let mut mechanics = BTreeSet::new();
         for cycle in 0..16 {
             let home = if cycle < 8 {
                 "cove"
@@ -386,6 +413,9 @@ mod tests {
             let request = input(&arrived).unwrap();
             assert!(request.get("previousStory").is_none());
             let content = fallback(&arrived).unwrap();
+            for step in content["steps"].as_array().unwrap() {
+                mechanics.insert(step["mechanic"].as_str().unwrap_or("inspect").to_owned());
+            }
             assert_eq!(content, fallback(&arrived).unwrap());
             let restored = State::from_durable_checkpoint(&arrived.durable_checkpoint()).unwrap();
             assert_eq!(request, input(&restored).unwrap());
@@ -396,6 +426,7 @@ mod tests {
             lengths.insert(content["steps"].as_array().unwrap().len());
             openings.insert(content["steps"][0]["shape"].as_str().unwrap().to_owned());
             let story = wonderwilds_domain::story::exploration::GeneratedStory {
+                remember_plan: content["completeOnLastStep"] == true,
                 content: serde_json::from_value(content.clone()).unwrap(),
                 model_generated: false,
             };
@@ -482,6 +513,25 @@ mod tests {
         assert!(lengths.contains(&3) && lengths.contains(&4));
         assert!(lengths.contains(&1) || lengths.contains(&2));
         assert!(openings.len() >= 4);
+        for mechanic in [
+            "choose_style",
+            "gather_wood",
+            "craft_planks",
+            "build_seat",
+            "gather_berries",
+            "pack_basket",
+            "deliver_basket",
+            "gather_glow_pebbles",
+            "craft_lantern",
+            "place_lantern",
+            "deliver_planks",
+        ] {
+            assert!(
+                mechanics.contains(mechanic),
+                "missing {mechanic}: {mechanics:?}"
+            );
+        }
+        assert_eq!(state.recent_neighbourhood_plans().len(), 8);
     }
 
     #[test]
@@ -512,6 +562,14 @@ mod tests {
             wire::validate("GeneratedNeighbourhood", &wrong).unwrap();
             assert!(validate_proposal(&request, &wrong).is_err());
         }
+        let mut changed_mechanic = content.clone();
+        changed_mechanic["steps"][0]["mechanic"] = json!("craft_planks");
+        wire::validate("GeneratedNeighbourhood", &changed_mechanic).unwrap();
+        assert!(validate_proposal(&request, &changed_mechanic).is_err());
+        let mut changed_finish = content.clone();
+        changed_finish["completeOnLastStep"] = json!(false);
+        wire::validate("GeneratedNeighbourhood", &changed_finish).unwrap();
+        assert!(validate_proposal(&request, &changed_finish).is_err());
         let mut wrong = content.clone();
         wrong["steps"].as_array_mut().unwrap().pop();
         assert!(validate_proposal(&request, &wrong).is_err());

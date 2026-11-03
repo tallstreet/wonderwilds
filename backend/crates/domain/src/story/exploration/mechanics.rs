@@ -217,6 +217,15 @@ impl State {
                 && (q.step_actions().contains(action) || (q.story.is_none() && matches!(action, Action::Inspect { object_id } if *object_id == format!("neighbour_{}", q.character))))
         })
     }
+    pub fn recent_neighbourhood_plans(&self) -> &[Vec<Mechanic>] {
+        &self.recent_neighbourhood_plans
+    }
+    pub(super) fn record_neighbourhood_plan(&mut self, plan: Vec<Mechanic>) {
+        self.recent_neighbourhood_plans.push(plan);
+        if self.recent_neighbourhood_plans.len() > 8 {
+            self.recent_neighbourhood_plans.remove(0);
+        }
+    }
     pub fn neighbourhood_projects(&self) -> &BTreeMap<String, Project> {
         &self.neighbourhood_projects
     }
@@ -262,7 +271,12 @@ impl State {
             q.inspected = q.step as usize == content.steps.len();
             if q.inspected && content.complete_on_last_step {
                 q.status = "completed".into();
-                return Ok(content.payoff.clone());
+                let payoff = content.payoff.clone();
+                let plan = content.steps.iter().map(|s| s.mechanic).collect();
+                if q.story.as_ref().unwrap().remember_plan {
+                    self.record_neighbourhood_plan(plan);
+                }
+                return Ok(payoff);
             }
             Ok(content.steps[q.step as usize - 1]
                 .discovery
@@ -301,13 +315,16 @@ mod tests {
                 json!({"mechanic":mechanic,"locationId":location,"label":label,"shape":"hollow"}),
             );
         }
-        GeneratedStory { model_generated: false, content: serde_json::from_value(json!({
+        GeneratedStory { remember_plan: true, model_generated: false, content: serde_json::from_value(json!({
             "name":"Wren", "personality":"A hopeful maker.","greeting":"Let's build a seat.",
             "sprite":"flutter","title":"A resting seat","premise":"Build a seat beside the path.",
             "payoff":"The new seat is ready.","completeOnLastStep":true,"steps":steps
         })).unwrap() }
     }
     fn start(style: bool) -> State {
+        start_story(content(style))
+    }
+    fn start_story(story: GeneratedStory) -> State {
         let mut state = State::with_initial(InitialConditions {
             wood: 2,
             planks: 1,
@@ -324,7 +341,7 @@ mod tests {
             &mut state,
             Action::GeneratedTravel {
                 destination_id: "cove".into(),
-                story: content(style),
+                story,
             },
         );
         apply(
@@ -526,5 +543,76 @@ mod tests {
                 },
             );
         }
+    }
+    #[test]
+    fn completion_memory_is_bounded_and_old_project_receipts_keep_their_replay() {
+        for remember in [false, true] {
+            let mut story = content(false);
+            story.remember_plan = remember;
+            let mut state = start_story(story);
+            let action = step(&state);
+            apply(&mut state, action);
+            let action = step(&state);
+            apply(&mut state, action);
+            apply(
+                &mut state,
+                Action::Travel {
+                    destination_id: "fern_hollow".into(),
+                },
+            );
+            let action = step(&state);
+            apply(&mut state, action);
+            assert_eq!(
+                state.recent_neighbourhood_plans().len(),
+                usize::from(remember)
+            );
+            let checkpoint = state.checkpoint();
+            assert_eq!(
+                State::from_checkpoint(&checkpoint).unwrap().checkpoint(),
+                checkpoint
+            );
+            let mut corrupt = state.durable_checkpoint();
+            corrupt["state"]["recentNeighbourhoodPlans"] = json!(vec![vec!["gather_wood"]; 9]);
+            assert_eq!(
+                State::from_durable_checkpoint(&corrupt),
+                Err(Rejection::InvalidCheckpoint)
+            );
+        }
+    }
+    #[test]
+    fn legacy_inspections_keep_local_before_remote_action_handle_order() {
+        let mut story = content(false);
+        story.remember_plan = false;
+        story.content.complete_on_last_step = false;
+        story.content.steps.truncate(1);
+        story.content.steps[0].mechanic = Mechanic::Inspect;
+        story.content.steps[0].location_id = Some("fern_hollow".into());
+        let mut state = start_story(story.clone());
+        apply(
+            &mut state,
+            Action::GeneratedTravel {
+                destination_id: "fern_hollow".into(),
+                story,
+            },
+        );
+        apply(
+            &mut state,
+            Action::Talk {
+                character_id: "fern".into(),
+                topic_id: "start_neighbour_story".into(),
+            },
+        );
+        let ids: Vec<_> = state
+            .available_actions()
+            .into_iter()
+            .filter_map(|a| {
+                if let Action::Inspect { object_id } = a {
+                    Some(object_id)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(ids, ["neighbour_fern_0", "neighbour_marina_0"]);
     }
 }

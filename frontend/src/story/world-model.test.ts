@@ -5,6 +5,7 @@ import workshop from '../../../backend/crates/director/src/story/fixtures/scene-
 import {
   actionTarget,
   missionTracker,
+  missionHint,
   currentNeighbourMission,
   neighbourDestination,
   neighbourForAction,
@@ -740,6 +741,16 @@ test('project markers use real item artwork, generation-bound targets and saved 
     },
   ];
   assert.equal(storyMarkers(value)[0].itemId, 'planks');
+  quest.stepIndex = 2;
+  value.locationId = 'fern_hollow';
+  value.sceneInput!.availableActions = [
+    {
+      id: 'build',
+      description: 'Build the corner',
+      action: { type: 'assemble', objectId: 'neighbour_marina_g4_2', recipeId: 'build_seat' },
+    },
+  ];
+  const site = storyMarkers(value)[0];
   quest.stepIndex = 3;
   quest.inspected = true;
   quest.status = 'completed';
@@ -749,7 +760,11 @@ test('project markers use real item artwork, generation-bound targets and saved 
     { id: 'project_fern_hollow_supplies', state: 'leafy' },
   ];
   assert.equal(missionDiscovery(value, 'neighbour_marina_g4_2'), quest.payoff);
-  assert.ok(storyDecorations(value).some((d) => d.kind === 'corner-stars'));
+  assert.ok(
+    storyDecorations(value).some(
+      (d) => d.kind === 'corner-stars' && d.x === site.x && d.y === site.y,
+    ),
+  );
   assert.ok(storyDecorations(value).some((d) => d.kind === 'supplies'));
   assert.doesNotMatch(missionTracker(value), /Return to Wren/);
 });
@@ -819,4 +834,39 @@ test('all project step markers have reachable approaches in every neighbourhood'
       assert.ok(Math.hypot(route.at(-1)!.x - marker.x, route.at(-1)!.y - marker.y) < 110);
     }
   }
+});
+
+test('Welcome lights gives a woodcutter hint without revealing the route or placement walkthrough', () => {
+  const value = snapshot('far_bank');
+  value.sceneInput!.neighbourMissions = [];
+  value.sceneInput!.mission = {
+    missionId: 'welcome_lights',
+    goal: 'Light both banks',
+    status: 'active',
+    narrative: {
+      premise: 'Make lanterns',
+      payoff: 'Both banks glow',
+      participantIds: ['pip', 'woodcutter'],
+    },
+    completed: [],
+    current: 'Have three lanterns ready.',
+    remaining: [],
+  };
+  value.sceneInput!.context.inventory = [{ itemId: 'glow_pebbles', quantity: 3 }];
+  assert.equal(
+    missionHint(value),
+    'Find the woodcutter to help turn these glow pebbles into lanterns.',
+  );
+  assert.match(missionTracker(value), /Find the woodcutter/);
+  assert.doesNotMatch(missionHint(value)!, /workshop|cross|near bank|far bank|placement/i);
+  value.sceneInput!.context.inventory = [{ itemId: 'lanterns', quantity: 3 }];
+  assert.equal(missionHint(value), undefined);
+  assert.equal(missionTracker(value), 'Have three lanterns ready.');
+  value.sceneInput!.context.inventory = [
+    { itemId: 'glow_pebbles', quantity: 3 },
+    { itemId: 'lanterns', quantity: 3, reservedQuantity: 3 },
+  ];
+  assert.match(missionHint(value)!, /woodcutter/);
+  value.sceneInput!.mission.status = 'completed';
+  assert.equal(missionHint(value), undefined);
 });

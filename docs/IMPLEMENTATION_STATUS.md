@@ -5,6 +5,78 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Hands-on generated neighbourhood projects — 31 October 2026
+
+Generated neighbourhoods now mix six supported project plans with twelve discovery
+briefs. Three out of four generation positions select projects: gathering wood,
+berries or glow pebbles; making planks, a picnic basket or lantern; delivering a
+basket or plank stack; building a resting corner; placing a lantern; and choosing
+a leafy/starry design. The model writes narrative for a server-selected sequence
+and route. Selection also tracks the last eight completed project action plans;
+unaccepted offers do not count as played stories in motif/opening penalties.
+The completion-memory flag is saved in new internal story receipts, while older
+receipts without it retain their original replay behavior. The model cannot
+change the fixed recipes, quantities, completion mode or
+state effects. Fresh output is checked against the selected mechanics as well as
+route/opening/copy checks. Unavailable output gets a complete playable fallback.
+
+Projects have real per-mission reserved supplies, shown in the bag with their
+reserved quantities. Crafting and delivery consume the appropriate inputs.
+Reserved supplies never deplete Pip's finite sources or satisfy his recipes;
+authored scene counts exclude them. Collect/assemble actions reuse existing
+inline-learning assessment and atomic story completion. Creative style choices
+are ordinary unassessed choices with two valid outcomes. Targets bind character,
+generation and step, so stale actions cannot act on a replacement mission.
+
+Project missions finish at their destination without a return conversation.
+Seats/corners, picnics, lanterns and supply stacks remain visible after reload and
+later mission replacement. Each area retains one project of each kind, updating
+that existing kind when rebuilt. Saved design choices change the displayed result.
+The world, item art and recipes remain a finite catalogue; new maps, escorts and
+arbitrary construction are not added. Both generation and fallback use the same
+server-authoritative domain mechanics. Without generation credentials, original
+authored neighbourhood missions remain unchanged.
+
+Optional step mechanic and completeOnLastStep fields retain inspection/return
+semantics when absent. Optional checkpoint supplies, styles and project maps are
+omitted when empty. The shared schema, OpenAPI, generated models and fixtures are
+updated together, allowing up to six steps and a bounded inventory including
+reserved-quantity metadata. No SQL migration or demo reset is required. Existing
+unfinished stories stay saved. Restart the backend for subsequent new missions;
+rollback after project saves requires a reader supporting these fields.
+
+The reported Welcome lights save was read without writes: the player was on the
+far bank with three glow pebbles and no lanterns. The crafting and placement
+mechanics already existed, but the milestone did not name the missing helper.
+A short state-derived hint now says to find the woodcutter. It deliberately omits
+route directions, automatic guide buttons and placement walkthroughs, preserving
+the discovery challenge. Reserved project supplies cannot trigger this hint.
+
+Validation: frontend check passed (144 tests, strict type/lint/format and build),
+192 shared contract fixtures passed in TypeScript/Ajv and Rust with generated-code
+checks, and domain/director/API regression suites passed. Workspace Clippy and
+Rust formatting passed. The full disposable PostgreSQL suite passed; the final
+story and mission-learning database regressions were rerun after completion-memory
+changes and passed, including rollback, exact retry, saved projects and replay.
+Legacy inspection handle ordering and pre-memory project receipt replay have
+explicit regressions.
+
+Eight real disposable API/browser missions passed at desktop/phone sizes, covering
+all project mechanics, both delivery types, design choices, inline supported
+activities, reserved bag quantities, reloads and persistent destination outcomes.
+A separate phone journey reproduced the three-pebbles/no-lanterns stage, verified
+the short woodcutter hint without route/placement walkthroughs, then completed
+crafting and both placements with reload. Standard browser smoke passed. Phone
+bag, project and hint screenshots were inspected. Project sites now coincide
+with their finished decorations, and starry lanterns display stars.
+
+Browser verification used offline generation fallbacks or authored content and
+disabled image/voice providers; live model adherence, human content review and
+child playtesting remain pending. The running demo was read for diagnosis without
+progress writes. No fine-tuning or demo reset was performed. Node 26 was available
+instead of Node 24; the existing production bundle-size warning remains.
+`git diff --check` passed.
+
 ## Neighbourhood mission variety — 31 October 2026
 
 The former four-brief cycle is replaced by twelve narrative ingredients and

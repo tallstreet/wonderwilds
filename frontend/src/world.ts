@@ -425,6 +425,8 @@ export function createWorld(
           shape.fillStyle(0x765339).fillRoundedRect(dx - 15, -23, 30, 23, 5);
           shape.fillStyle(0xcfb178).fillEllipse(dx, -23, 32, 14);
         }
+      } else if (kind === 'stars') {
+        for (const dx of [-20, 0, 20]) this.add.star(x + dx, y - 30, 5, 3, 7, 0xffedac).setDepth(y);
       } else if (kind === 'bunting') {
         shape.lineStyle(4, 0x88633f).lineBetween(-50, 0, -50, -80).lineBetween(50, 0, 50, -80);
         shape.lineStyle(2, 0xffedb6).lineBetween(-50, -72, 50, -72);

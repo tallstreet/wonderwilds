@@ -21,6 +21,7 @@ import { createRecorder, type AnswerRecorder } from '../learning/voice.ts';
 import {
   storyPlaces,
   missionTracker,
+  missionHint,
   currentNeighbourMission,
   neighbourDestination,
   neighbourForAction,
@@ -445,6 +446,8 @@ export class StoryWorld {
     const input = this.snapshot.sceneInput;
     const mission = input?.mission;
     const currentNeighbour = currentNeighbourMission(this.snapshot);
+    const hint = currentNeighbour ? undefined : missionHint(this.snapshot);
+    const hintMarkup = hint ? `<p class="story-premise" data-story-hint>${escape(hint)}</p>` : '';
     const pipProgress = mission
       ? `<p data-story-mission-status="${mission.status}">${mission.status === 'completed' ? `Mission complete · ${escape(mission.narrative.payoff)}` : mission.status === 'abandoned' ? 'Mission paused · your progress is saved.' : escape(mission.current ?? '')}</p><ul class="story-checklist">${mission.completed.map((text) => `<li class="is-complete"><span aria-hidden="true">✓</span>${escape(text)}</li>`).join('')}${mission.remaining.map((text) => `<li><span aria-hidden="true">○</span>${escape(text)}</li>`).join('')}</ul>`
       : '';
@@ -462,7 +465,7 @@ export class StoryWorld {
                 )}<li><span aria-hidden="true">○</span>${escape(currentNeighbour.inspected ? `Return to ${currentNeighbour.generatedStory.name}` : currentNeighbour.task)}</li></ul>`
             : ''
         }`
-      : `<header class="story-journal-heading"><span class="story-journal-icon" aria-hidden="true">✦</span><span class="pill" data-story-missions-panel>PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2></header><p class="story-premise">${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${pipProgress}`;
+      : `<header class="story-journal-heading"><span class="story-journal-icon" aria-hidden="true">✦</span><span class="pill" data-story-missions-panel>PIP’S STORY ADVENTURE</span><h2 id="dialog-title">${escape(mission?.goal ?? 'A way across, together')}</h2></header><p class="story-premise">${escape(mission?.narrative.premise ?? 'Find Pip by the bridge to begin.')}</p>${hintMarkup}${pipProgress}`;
     const pipSummary =
       currentNeighbour && mission
         ? `<details data-story-pip-summary><summary>${escape(mission.goal)} · ${mission.status === 'completed' ? 'completed' : mission.status === 'abandoned' ? 'paused' : 'in progress'}</summary><p>${escape(mission.narrative.premise)}</p>${pipProgress}</details>`

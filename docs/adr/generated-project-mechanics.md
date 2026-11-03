@@ -45,4 +45,7 @@ fields and mechanic IDs; deleting progress is not a rollback strategy.
 The existing map and artwork are reused. This does not add escorts, arbitrary
 items/recipes, new maps, free-form construction or content approval. Novelty
 checks compare bounded recent content, not complete lifetime history or semantic
-quality. Live model adherence and child playtesting remain separate evaluation.
+quality. Selection also retains the last eight completed project action sequences;
+unaccepted offers do not count as played stories in motif/opening penalties.
+New internal saved stories opt into this completion memory. Older stories omit
+the flag and retain their original replay projections. Live model adherence and child playtesting remain separate evaluation.

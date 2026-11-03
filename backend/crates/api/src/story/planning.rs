@@ -33,8 +33,10 @@ impl ValidatedPlan {
     }
     pub fn generated(state: &State, content: Value, model_generated: bool) -> Result<Self, Error> {
         wire::validate("GeneratedNeighbourhood", &content).map_err(|_| Error::InvalidInput)?;
-        let content = serde_json::from_value(content).map_err(|_| Error::InvalidInput)?;
+        let content: wonderwilds_domain::story::exploration::GeneratedContent =
+            serde_json::from_value(content).map_err(|_| Error::InvalidInput)?;
         let story = wonderwilds_domain::story::exploration::GeneratedStory {
+            remember_plan: content.steps.iter().any(|s| !s.mechanic.is_inspect()),
             content,
             model_generated,
         };

@@ -15,6 +15,7 @@ export type StoryShape =
   | 'corner-stars'
   | 'seating'
   | 'bunting'
+  | 'stars'
   | 'trail';
 export interface WorldDecoration extends Point {
   id: string;

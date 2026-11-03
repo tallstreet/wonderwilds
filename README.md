@@ -318,7 +318,8 @@ kind updates it. Both creative design choices are valid and change the result.
 
 The server selects mechanics and recipes; AI supplies their purpose and prose.
 Six project plans and twelve discovery briefs vary actions, lengths, routes and
-character wishes. Selection considers the latest saved story in each area;
+character wishes. Selection considers the latest saved story in each area and the last eight
+completed project action plans;
 the model receives compact avoidance hints instead of complete previous stories.
 New responses must follow the selected mechanics, route, opening and completion
 mode. Copied recent titles, premises, payoffs or full step lists use a labelled

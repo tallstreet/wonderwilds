@@ -130,6 +130,12 @@ export function neighbourForAction(snapshot: StorySnapshot, action: StoryAction)
     return target === id;
   });
 }
+const projectSites: Record<string, Point> = {
+  build_seat: { x: 340, y: 580 },
+  deliver_basket: { x: 350, y: 280 },
+  deliver_planks: { x: 880, y: 530 },
+  place_lantern: { x: 660, y: 310 },
+};
 /** Authored display placement, never an alternative source of legal actions or progress. */
 export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
   const place = storyPlaces[snapshot.locationId];
@@ -223,7 +229,12 @@ export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
       const art = item
         ? { prop: items[item].prop }
         : { shape: step.mechanic === 'choose_style' ? ('corner-leaves' as const) : step.shape };
-      add(id, step.label, points[index % points.length], art);
+      add(
+        id,
+        step.label,
+        projectSites[step.mechanic ?? 'inspect'] ?? points[index % points.length],
+        art,
+      );
       if (item) markers[markers.length - 1].itemId = item;
       continue;
     }
@@ -459,7 +470,7 @@ export function storyDecorations(snapshot: StorySnapshot): WorldDecoration[] {
       projects.push({ id: object.id, kind: 'lantern', x: 660, y: 310 });
       projects.push({
         id: `${object.id}-design`,
-        kind: object.state === 'starry' ? 'bunting' : 'leaf',
+        kind: object.state === 'starry' ? 'stars' : 'leaf',
         x: 660,
         y: 365,
       });
@@ -573,6 +584,18 @@ export function currentNeighbourMission(snapshot: StorySnapshot) {
     ['bridge_bank', 'far_bank', 'workshop'].includes(snapshot.locationId);
   return local ?? (pipHere ? undefined : open.at(-1));
 }
+/** A nudge toward the missing helper, leaving route and placement discovery to play. */
+export function missionHint(snapshot: StorySnapshot): string | undefined {
+  const mission = snapshot.sceneInput?.mission;
+  if (mission?.missionId !== 'welcome_lights' || mission.status !== 'active') return;
+  const available = (id: string) => {
+    const item = snapshot.sceneInput?.context.inventory.find((i) => i.itemId === id);
+    return Math.max(0, (item?.quantity ?? 0) - (item?.reservedQuantity ?? 0));
+  };
+  if (available('glow_pebbles') >= 3 && available('lanterns') === 0)
+    return 'Find the woodcutter to help turn these glow pebbles into lanterns.';
+}
+
 export function missionTracker(snapshot: StorySnapshot): string {
   const input = snapshot.sceneInput;
   const pip = input?.mission;
@@ -583,7 +606,7 @@ export function missionTracker(snapshot: StorySnapshot): string {
       : neighbour.task;
     return `${task} · ${storyPlaces[neighbourDestination(neighbour)].name}`;
   }
-  if (pip?.status === 'active') return pip.current ?? pip.goal;
+  if (pip?.status === 'active') return missionHint(snapshot) ?? pip.current ?? pip.goal;
   const offered = input?.neighbourMissions
     ?.slice()
     .reverse()
