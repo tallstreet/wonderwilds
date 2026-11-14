@@ -1,0 +1,571 @@
+{
+  "schemaVersion": "1.0",
+  "contentVersion": "moonlight-trail-1.0.0",
+  "status": "specification",
+  "releaseEnabled": false,
+  "reviewStatus": "pending",
+  "title": "The Moonlight Trail",
+  "premise": "The trail\u2019s gathering places have fallen quiet. Choose a companion, reconnect the paths and bring your new friends together.",
+  "sourcePolicy": {
+    "core": "authored_json",
+    "generatedScenes": "future_extension",
+    "generationRequired": false
+  },
+  "starterChoice": {
+    "guideId": "hazel",
+    "creatureIds": [
+      "pip",
+      "tansy",
+      "nib"
+    ],
+    "count": 1,
+    "changesPlayerAvatar": false,
+    "unchosenRemainRecruitable": true
+  },
+  "collectionIds": [
+    "pip",
+    "tansy",
+    "nib",
+    "flutter"
+  ],
+  "locations": [
+    "bridge_bank",
+    "workshop",
+    "far_bank",
+    "cove",
+    "fern_hollow",
+    "mossy_clearing",
+    "owl_grove",
+    "acorn_trail",
+    "chosen_bank"
+  ],
+  "progression": {
+    "characterLevelThresholds": [
+      0,
+      10,
+      20,
+      30,
+      40
+    ],
+    "supportedRewardMultiplier": 1,
+    "wrongAnswerXpLoss": 0,
+    "inactivityXpLoss": 0,
+    "storyRequiresAcademicMastery": false,
+    "storyRequiresCharacterLevel": false,
+    "teamSlots": [
+      {
+        "after": "first-friend",
+        "capacity": 1
+      },
+      {
+        "after": "visit",
+        "capacity": 2
+      }
+    ],
+    "levelRewards": [
+      {
+        "level": 2,
+        "reward": "A companion celebration"
+      },
+      {
+        "level": 3,
+        "reward": "An optional habitat clue interaction with a free equivalent for every starter"
+      },
+      {
+        "level": 4,
+        "reward": "A personalised keepsake from the friend\u2019s own project"
+      },
+      {
+        "level": 5,
+        "reward": "An optional reversible trailkeeper accessory; existing glow appearances retain their old rules"
+      }
+    ]
+  },
+  "care": {
+    "actions": [
+      "snack",
+      "rest",
+      "play"
+    ],
+    "kitSource": "first-friend",
+    "consumableCost": 0,
+    "repeatable": true,
+    "repeatXp": 0,
+    "neglectPenalty": false,
+    "blocksAdventures": false,
+    "memoryPolicy": "One memory per companion per distinct completed campaign mission; repeat care creates no reward or academic evidence."
+  },
+  "learningPolicy": {
+    "selector": "server_current_curriculum_frontier",
+    "difficulty": "learner_needs_not_companion_level",
+    "supportedCompletion": "same_game_rewards_separate_evidence",
+    "assessment": "existing_server_controls",
+    "creativeChoicesAssessed": false
+  },
+  "missions": [
+    {
+      "id": "first-friend",
+      "title": "A friend for the road",
+      "requires": [],
+      "steps": [
+        {
+          "id": "meet",
+          "kind": "talk",
+          "locationId": "bridge_bank",
+          "targetId": "hazel",
+          "instruction": "Meet Hazel, who is helping friends reconnect the moonlight trail.",
+          "learning": false
+        },
+        {
+          "id": "choose",
+          "kind": "choose_companion",
+          "locationId": "bridge_bank",
+          "targetId": "starter",
+          "instruction": "Meet Pip, Tansy and Nib. Choose one friend to travel with you.",
+          "learning": false
+        },
+        {
+          "id": "settle",
+          "kind": "care",
+          "locationId": "bridge_bank",
+          "targetId": "selected_companion",
+          "instruction": "Ask what your friend likes and share a quiet welcome.",
+          "learning": false
+        }
+      ],
+      "payoff": "Your first friend joins you. Hazel gives you a field guide and a reusable care kit.",
+      "badgeId": null
+    },
+    {
+      "id": "bridge",
+      "title": "A way across",
+      "requires": [
+        "first-friend"
+      ],
+      "steps": [
+        {
+          "id": "wood",
+          "kind": "collect",
+          "locationId": "bridge_bank",
+          "targetId": "wood",
+          "instruction": "Gather fallen wood for a safe crossing.",
+          "learning": true
+        },
+        {
+          "id": "planks",
+          "kind": "craft",
+          "locationId": "workshop",
+          "targetId": "planks",
+          "instruction": "Ask the woodcutter to help prepare the planks.",
+          "learning": true
+        },
+        {
+          "id": "repair",
+          "kind": "build",
+          "locationId": "bridge_bank",
+          "targetId": "bridge",
+          "instruction": "Repair the bridge together.",
+          "learning": true
+        },
+        {
+          "id": "cross",
+          "kind": "travel",
+          "locationId": "far_bank",
+          "targetId": "bridge",
+          "instruction": "Cross with your companion and Pip, who is still your story friend if you chose someone else.",
+          "learning": false
+        }
+      ],
+      "payoff": "The repaired crossing reconnects both banks.",
+      "badgeId": "pathfinder"
+    },
+    {
+      "id": "picnic",
+      "title": "Room for another friend",
+      "requires": [
+        "bridge"
+      ],
+      "steps": [
+        {
+          "id": "berries",
+          "kind": "collect",
+          "locationId": "far_bank",
+          "targetId": "berries",
+          "instruction": "Gather berries for a welcome picnic.",
+          "learning": true
+        },
+        {
+          "id": "basket",
+          "kind": "craft",
+          "locationId": "workshop",
+          "targetId": "picnic_basket",
+          "instruction": "Pack a basket with the woodcutter.",
+          "learning": true
+        },
+        {
+          "id": "share",
+          "kind": "care",
+          "locationId": "far_bank",
+          "targetId": "selected_companion",
+          "instruction": "Lay out the picnic and offer your companion a snack.",
+          "learning": false
+        },
+        {
+          "id": "invite",
+          "kind": "recruit",
+          "locationId": "far_bank",
+          "targetId": "unchosen_starter",
+          "instruction": "Choose one of the other two starters to invite. They join after sharing the picnic.",
+          "learning": false
+        }
+      ],
+      "payoff": "A second friend joins. The guide now lets you choose which friend accompanies you.",
+      "badgeId": null
+    },
+    {
+      "id": "lights",
+      "title": "The first lights",
+      "requires": [
+        "picnic"
+      ],
+      "steps": [
+        {
+          "id": "pebbles",
+          "kind": "collect",
+          "locationId": "far_bank",
+          "targetId": "glow_pebbles",
+          "instruction": "Gather glow pebbles for the dark path.",
+          "learning": true
+        },
+        {
+          "id": "lanterns",
+          "kind": "craft",
+          "locationId": "workshop",
+          "targetId": "lanterns",
+          "instruction": "Make lanterns with the woodcutter.",
+          "learning": true
+        },
+        {
+          "id": "place",
+          "kind": "build",
+          "locationId": "bridge_bank",
+          "targetId": "trail_lights",
+          "instruction": "Light both banks so visitors can find their way.",
+          "learning": true
+        }
+      ],
+      "payoff": "The lights reveal a trail of paper petals leading west.",
+      "badgeId": "lightkeeper"
+    },
+    {
+      "id": "hollow",
+      "title": "Who is humming?",
+      "requires": [
+        "lights"
+      ],
+      "steps": [
+        {
+          "id": "ask",
+          "kind": "talk",
+          "locationId": "cove",
+          "targetId": "marina",
+          "instruction": "Ask Marina about the humming sound.",
+          "learning": false
+        },
+        {
+          "id": "clue",
+          "kind": "inspect",
+          "locationId": "fern_hollow",
+          "targetId": "paper_petals",
+          "instruction": "Follow the petal pattern and compare the clues.",
+          "learning": true
+        },
+        {
+          "id": "listen",
+          "kind": "inspect",
+          "locationId": "mossy_clearing",
+          "targetId": "humming_hollow",
+          "instruction": "Discover that the sound comes from wind through a hollow branch.",
+          "learning": true
+        },
+        {
+          "id": "friend",
+          "kind": "recruit",
+          "locationId": "mossy_clearing",
+          "targetId": "flutter",
+          "instruction": "Help Flutter arrange the paper petals, then invite them to join.",
+          "learning": true
+        }
+      ],
+      "payoff": "Flutter joins and shows how the humming branch can welcome visitors.",
+      "badgeId": null
+    },
+    {
+      "id": "home",
+      "title": "A place to belong",
+      "requires": [
+        "hollow"
+      ],
+      "steps": [
+        {
+          "id": "wish",
+          "kind": "talk",
+          "locationId": "far_bank",
+          "targetId": "selected_companion",
+          "instruction": "Listen to your companion\u2019s favourite place and comfort preferences.",
+          "learning": false
+        },
+        {
+          "id": "design",
+          "kind": "choose_design",
+          "locationId": "far_bank",
+          "targetId": "resting_corner",
+          "instruction": "Choose a leafy nook or a star canopy.",
+          "learning": false
+        },
+        {
+          "id": "build",
+          "kind": "build",
+          "locationId": "far_bank",
+          "targetId": "resting_corner",
+          "instruction": "Prepare and build your chosen resting corner.",
+          "learning": true
+        },
+        {
+          "id": "rest",
+          "kind": "care",
+          "locationId": "far_bank",
+          "targetId": "selected_companion",
+          "instruction": "Rest together in the finished corner.",
+          "learning": false
+        }
+      ],
+      "payoff": "Your design stays in the world. Every collected friend can rest here.",
+      "badgeId": "homekeeper"
+    },
+    {
+      "id": "visit",
+      "title": "Bramble\u2019s first visit",
+      "requires": [
+        "home"
+      ],
+      "steps": [
+        {
+          "id": "wish",
+          "kind": "talk",
+          "locationId": "workshop",
+          "targetId": "bramble",
+          "instruction": "Hear why Bramble wants to visit but is unsure of the path.",
+          "learning": false
+        },
+        {
+          "id": "clear",
+          "kind": "inspect",
+          "locationId": "workshop",
+          "targetId": "visitor_path",
+          "instruction": "Check the route and clear its obstacles.",
+          "learning": true
+        },
+        {
+          "id": "walk",
+          "kind": "escort",
+          "locationId": "bridge_bank",
+          "targetId": "bramble",
+          "instruction": "Walk with Bramble to the bridge bank.",
+          "learning": false
+        },
+        {
+          "id": "welcome",
+          "kind": "talk",
+          "locationId": "bridge_bank",
+          "targetId": "bramble",
+          "instruction": "Welcome Bramble and explain the trail lights.",
+          "learning": false
+        }
+      ],
+      "payoff": "Bramble promises to bring supplies for a gathering. Two travelling companion slots become available.",
+      "badgeId": null
+    },
+    {
+      "id": "last-starter",
+      "title": "Everyone has a part",
+      "requires": [
+        "visit"
+      ],
+      "steps": [
+        {
+          "id": "meet",
+          "kind": "talk",
+          "locationId": "owl_grove",
+          "targetId": "orla",
+          "instruction": "Orla has found a friend preparing invitations alone.",
+          "learning": false
+        },
+        {
+          "id": "prepare",
+          "kind": "inspect",
+          "locationId": "owl_grove",
+          "targetId": "invitations",
+          "instruction": "Help organise the picture invitations.",
+          "learning": true
+        },
+        {
+          "id": "deliver",
+          "kind": "travel",
+          "locationId": "acorn_trail",
+          "targetId": "hazel",
+          "instruction": "Bring the invitations to Hazel.",
+          "learning": false
+        },
+        {
+          "id": "invite",
+          "kind": "recruit",
+          "locationId": "acorn_trail",
+          "targetId": "remaining_starter",
+          "instruction": "Invite the last unchosen starter to join your collection.",
+          "learning": false
+        }
+      ],
+      "payoff": "All three starters and Flutter can now join your adventures.",
+      "badgeId": null
+    },
+    {
+      "id": "gathering",
+      "title": "The moonlight gathering",
+      "requires": [
+        "last-starter"
+      ],
+      "steps": [
+        {
+          "id": "choose",
+          "kind": "choose_design",
+          "locationId": "bridge_bank",
+          "targetId": "gathering_bank",
+          "instruction": "Choose which bank will host the gathering.",
+          "learning": false
+        },
+        {
+          "id": "seats",
+          "kind": "build",
+          "locationId": "chosen_bank",
+          "targetId": "gathering_seats",
+          "instruction": "Prepare comfortable seats at the chosen bank.",
+          "learning": true
+        },
+        {
+          "id": "music",
+          "kind": "build",
+          "locationId": "chosen_bank",
+          "targetId": "humming_circle",
+          "instruction": "Set up the humming branch and a circle of lanterns.",
+          "learning": true
+        },
+        {
+          "id": "invite",
+          "kind": "talk",
+          "locationId": "chosen_bank",
+          "targetId": "friends",
+          "instruction": "Invite Hazel, Pip, Bramble and your collected companions.",
+          "learning": false
+        },
+        {
+          "id": "celebrate",
+          "kind": "celebrate",
+          "locationId": "chosen_bank",
+          "targetId": "gathering",
+          "instruction": "Welcome everyone and see how your work has connected the trail.",
+          "learning": false
+        }
+      ],
+      "payoff": "The first adventure ends with your friends together. Your collection, training and optional discoveries remain available.",
+      "badgeId": "trailkeeper"
+    }
+  ],
+  "training": [
+    {
+      "id": "training-1",
+      "title": "Learning to help",
+      "unlockedBy": "first-friend",
+      "requiresLevel": 1,
+      "xp": 10,
+      "locationId": "bridge_bank",
+      "instruction": "Prepare supplies together",
+      "recipient": "chosen_owned_companion",
+      "learning": true,
+      "grantScope": "profile_companion_milestone",
+      "replayXp": 0
+    },
+    {
+      "id": "training-2",
+      "title": "Sharing the load",
+      "unlockedBy": "picnic",
+      "requiresLevel": 2,
+      "xp": 10,
+      "locationId": "workshop",
+      "instruction": "Organise a delivery together",
+      "recipient": "chosen_owned_companion",
+      "learning": true,
+      "grantScope": "profile_companion_milestone",
+      "replayXp": 0
+    },
+    {
+      "id": "training-3",
+      "title": "A friend\u2019s own project",
+      "unlockedBy": "home",
+      "requiresLevel": 3,
+      "xp": 10,
+      "locationId": "far_bank",
+      "instruction": "Make a comfort item for this friend",
+      "recipient": "chosen_owned_companion",
+      "learning": true,
+      "grantScope": "profile_companion_milestone",
+      "replayXp": 0
+    },
+    {
+      "id": "training-4",
+      "title": "A confident explorer",
+      "unlockedBy": "gathering",
+      "requiresLevel": 4,
+      "xp": 10,
+      "locationId": "acorn_trail",
+      "instruction": "Prepare a new trail welcome together",
+      "recipient": "chosen_owned_companion",
+      "learning": true,
+      "grantScope": "profile_companion_milestone",
+      "replayXp": 0
+    }
+  ],
+  "postCampaign": {
+    "objectives": [
+      "Raise each of the four companions to level five using their four distinct training milestones.",
+      "Discover the existing optional keepsakes across the eight areas.",
+      "Try each friend\u2019s optional habitat interaction and choose your travelling pair."
+    ],
+    "repeatTrainingXp": 0,
+    "nextExpansion": "An authored Orchard chapter with new friends and distinct training milestones; not enabled by this pack."
+  },
+  "persistence": {
+    "pin": [
+      "contentVersion",
+      "missionId",
+      "stepId",
+      "companionId",
+      "activityVariant",
+      "rewardGrantKey"
+    ],
+    "authority": "rust_transactions",
+    "retry": "same_command_id_and_body",
+    "existingSaves": "Opt-in adoption; preserve current missions, inventory, ownership, XP and evidence. Do not retroactively grant campaign rewards. Resolve already-owned recruitment without duplicate grants."
+  },
+  "futureGeneration": {
+    "input": "Versioned campaign schema plus approved catalogues of locations, creatures, actions and rewards.",
+    "output": "A proposed content pack for validation and review, never executable code.",
+    "activation": "Validate schema, references, reachability, supply balance, support routes and reward bounds; require content review before activation.",
+    "protected": [
+      "assessment",
+      "reward_policy",
+      "save_state",
+      "existing_active_missions"
+    ]
+  }
+}

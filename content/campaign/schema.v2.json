@@ -1,0 +1,1604 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contentVersion",
+    "status",
+    "releaseEnabled",
+    "reviewStatus",
+    "title",
+    "supersedes",
+    "premise",
+    "objectives",
+    "scope",
+    "mechanics",
+    "companions",
+    "starterChoice",
+    "characters",
+    "locations",
+    "routes",
+    "abilities",
+    "missions",
+    "trials",
+    "tactics",
+    "progression",
+    "recruitment",
+    "resources",
+    "sideQuests",
+    "exchanges",
+    "social",
+    "ending",
+    "contentPolicy",
+    "rivalEncounters",
+    "puzzles"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "2.0"
+    },
+    "contentVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1500
+    },
+    "status": {
+      "const": "specification"
+    },
+    "releaseEnabled": {
+      "const": false
+    },
+    "reviewStatus": {
+      "const": "pending"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1500
+    },
+    "supersedes": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1500
+    },
+    "premise": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1500
+    },
+    "objectives": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "immediate",
+        "medium",
+        "long"
+      ],
+      "properties": {
+        "immediate": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "medium": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "long": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "core",
+        "humanSocial",
+        "generation"
+      ],
+      "properties": {
+        "core": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "humanSocial": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        }
+      }
+    },
+    "mechanics": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "feedsInto",
+          "id",
+          "rule"
+        ],
+        "properties": {
+          "feedsInto": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "rule": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "companions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "affinity",
+          "discoveryReward",
+          "fieldAbility",
+          "fieldUnlock",
+          "form",
+          "habitatId",
+          "id",
+          "personalQuest",
+          "personality",
+          "regionId",
+          "signatureMove",
+          "starter"
+        ],
+        "properties": {
+          "affinity": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "discoveryReward": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "fieldAbility": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "fieldUnlock": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "form": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "habitatId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "personalQuest": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "personality": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "regionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "signatureMove": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "starter": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "starterChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "guideId",
+        "ids",
+        "count",
+        "avatarSeparate",
+        "rivalChoice"
+      ],
+      "properties": {
+        "guideId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "ids": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "avatarSeparate": {
+          "type": "boolean"
+        },
+        "rivalChoice": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        }
+      }
+    },
+    "characters": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "arc",
+          "id",
+          "role"
+        ],
+        "properties": {
+          "appearances": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            }
+          },
+          "arc": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "locations": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "camp",
+          "id",
+          "regionId"
+        ],
+        "properties": {
+          "camp": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "regionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "abilityId",
+          "bidirectional",
+          "fromId",
+          "id",
+          "preview",
+          "requiredSeal",
+          "toId",
+          "toolAlternative",
+          "travelCost"
+        ],
+        "properties": {
+          "abilityId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bidirectional": {
+            "type": "boolean"
+          },
+          "fromId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "preview": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "requiredSeal": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "toId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "toolAlternative": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "travelCost": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "abilities": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "companionBenefit",
+          "id",
+          "sealId",
+          "toolId",
+          "worldEffect"
+        ],
+        "properties": {
+          "companionBenefit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "sealId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "toolId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "worldEffect": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "missions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "choices",
+          "id",
+          "kind",
+          "learningContext",
+          "locationId",
+          "objectives",
+          "requires",
+          "rewardIds",
+          "story",
+          "title"
+        ],
+        "properties": {
+          "choices": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            }
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "learningContext": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "locationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "objectives": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            }
+          },
+          "requires": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string"
+            }
+          },
+          "rewardIds": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            }
+          },
+          "story": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "trials": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "affinity",
+          "affinityPhases",
+          "guidedPlan",
+          "hazardCycle",
+          "id",
+          "keeper",
+          "locationId",
+          "missionId",
+          "persistentEffect",
+          "pressureLimit",
+          "roundLimit",
+          "rule",
+          "sealId",
+          "targetProgress"
+        ],
+        "properties": {
+          "affinity": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "affinityPhases": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "affinity",
+                "atProgress"
+              ],
+              "properties": {
+                "affinity": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1500
+                },
+                "atProgress": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "guidedPlan": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "hazardCycle": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "keeper": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "locationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "missionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "persistentEffect": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "pressureLimit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "roundLimit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "rule": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "sealId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "targetProgress": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "tactics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "teamCapacity",
+        "equippedTechniques",
+        "universalMoves",
+        "moves",
+        "affinityRule",
+        "levelEnergy",
+        "pressureStartsAt",
+        "energyStarts",
+        "rallyRule",
+        "failure",
+        "learning",
+        "switching",
+        "retry",
+        "preview",
+        "keeperTool",
+        "resolution",
+        "loadouts",
+        "phases"
+      ],
+      "properties": {
+        "teamCapacity": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "equippedTechniques": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "universalMoves": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        },
+        "moves": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "affinity",
+              "effect",
+              "energy",
+              "id",
+              "progress"
+            ],
+            "properties": {
+              "affinity": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "effect": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "energy": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "progress": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "affinityRule": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "levelEnergy": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "pressureStartsAt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "energyStarts": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "rallyRule": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "failure": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "learning": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "switching": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "retry": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "preview": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "keeperTool": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "charges",
+            "progress",
+            "energy",
+            "pressureReduction",
+            "availability",
+            "pouchSlots"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            },
+            "charges": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "progress": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "energy": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pressureReduction": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "availability": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            },
+            "pouchSlots": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "resolution": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "loadouts": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "phases": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        }
+      }
+    },
+    "progression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "levelThresholds",
+        "xpPerMilestone",
+        "milestones",
+        "rewards",
+        "grantKey",
+        "repeatXp",
+        "supportedMultiplier",
+        "friendship",
+        "legacy",
+        "storyRequiresLevel",
+        "storyRequiresAcademicMastery",
+        "trainingDelivery",
+        "rewardTiming",
+        "teamSlots"
+      ],
+      "properties": {
+        "levelThresholds": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "xpPerMilestone": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "milestones": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "requiredLevel",
+              "task",
+              "unlockedBy"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "requiredLevel": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "task": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "unlockedBy": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              }
+            }
+          }
+        },
+        "rewards": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "level",
+              "unlock"
+            ],
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "unlock": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              }
+            }
+          }
+        },
+        "grantKey": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        },
+        "repeatXp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "supportedMultiplier": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "friendship": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "legacy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "storyRequiresLevel": {
+          "type": "boolean"
+        },
+        "storyRequiresAcademicMastery": {
+          "type": "boolean"
+        },
+        "trainingDelivery": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "rewardTiming": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "teamSlots": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "capacity",
+              "unlockedBy"
+            ],
+            "properties": {
+              "capacity": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "unlockedBy": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              }
+            }
+          }
+        }
+      }
+    },
+    "recruitment": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "alreadyOwned",
+          "appearance",
+          "approach",
+          "clue",
+          "creatureId",
+          "habitatId",
+          "helpTask",
+          "unlockedBy"
+        ],
+        "properties": {
+          "alreadyOwned": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "appearance": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "approach": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            }
+          },
+          "clue": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "creatureId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "habitatId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "helpTask": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "unlockedBy": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pouchSlots",
+        "stackPerSlot",
+        "keyItemsUseSlots",
+        "campRestCost",
+        "inactivityDecay",
+        "items",
+        "sources",
+        "missionSupplies",
+        "care"
+      ],
+      "properties": {
+        "pouchSlots": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stackPerSlot": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "keyItemsUseSlots": {
+          "type": "boolean"
+        },
+        "campRestCost": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inactivityDecay": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "costInEncounter",
+              "effect",
+              "id",
+              "recipe"
+            ],
+            "properties": {
+              "costInEncounter": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "effect": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "recipe": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "berry": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3
+                  },
+                  "leaf": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3
+                  },
+                  "wood": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3
+                  },
+                  "glow_pebble": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3
+                  }
+                },
+                "minProperties": 1
+              }
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "purpose",
+              "reset",
+              "yieldPerExpedition"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "reset": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "yieldPerExpedition": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "berry",
+                  "leaf",
+                  "wood",
+                  "glow_pebble"
+                ],
+                "properties": {
+                  "berry": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "leaf": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "wood": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "glow_pebble": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "missionSupplies": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "care": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "sideQuests": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "locationId",
+          "objective",
+          "payoff",
+          "systems",
+          "unlockedBy"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "locationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "objective": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "payoff": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "systems": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            }
+          },
+          "unlockedBy": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "exchanges": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "give",
+          "id",
+          "limit",
+          "npc",
+          "receive",
+          "source",
+          "unlockedBy"
+        ],
+        "properties": {
+          "give": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "npc": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "receive": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "unlockedBy": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "social": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "roles",
+        "turns",
+        "exchange",
+        "progress",
+        "availability",
+        "completion"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "roles": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        },
+        "turns": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "exchange": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "progress": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "availability": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "completion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        }
+      }
+    },
+    "ending": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiredMission",
+        "celebrationMission",
+        "worldChanges",
+        "postgame"
+      ],
+      "properties": {
+        "requiredMission": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "celebrationMission": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "worldChanges": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        },
+        "postgame": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "contentPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority",
+        "learning",
+        "generation",
+        "saves",
+        "runtimeStatus"
+      ],
+      "properties": {
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "learning": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "saves": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "runtimeStatus": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        }
+      }
+    },
+    "rivalEncounters": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "affinity",
+          "id",
+          "locationId",
+          "pressureLimit",
+          "reward",
+          "roundLimit",
+          "story",
+          "targetProgress",
+          "unlockedBy"
+        ],
+        "properties": {
+          "affinity": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "locationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "pressureLimit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reward": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "roundLimit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "story": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "targetProgress": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unlockedBy": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    },
+    "puzzles": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "actions",
+          "goal",
+          "id",
+          "initial",
+          "missionId",
+          "reset",
+          "supported",
+          "type"
+        ],
+        "properties": {
+          "actions": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            }
+          },
+          "goal": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            }
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "initial": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            }
+          },
+          "missionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "reset": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "supported": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wonderwilds.local/content/campaign/v2"
+}

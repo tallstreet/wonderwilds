@@ -1,0 +1,2031 @@
+{
+  "schemaVersion": "2.0",
+  "contentVersion": "missing-moonlight-2.0.0",
+  "status": "specification",
+  "releaseEnabled": false,
+  "reviewStatus": "pending",
+  "title": "The Missing Moonlight",
+  "supersedes": "moonlight-trail-1.0.0",
+  "premise": "Moonlight is disappearing from the habitats. Eight local beacons once shared it; Warden Vell’s Stillworks collectors now divert it into one Observatory reserve. Restore the routes, discover why, and build a team capable of bringing the light home.",
+  "objectives": {
+    "immediate": "Solve the current route, encounter or companion request.",
+    "medium": "Develop a complementary team, earn the next seal and revisit a known mystery with its ability.",
+    "long": "Restore eight beacons, resolve the Observatory crisis and befriend all twelve companions."
+  },
+  "scope": {
+    "core": "Authored single-player campaign with NPC exchanges and all twelve mechanic roles.",
+    "humanSocial": "Designed paired-play extension; requires separate account/session implementation and review, not a prerequisite for the campaign.",
+    "generation": "Future proposed JSON expansions, never required for the core."
+  },
+  "mechanics": [
+    {
+      "id": "collection",
+      "rule": "Track habitat clues, observe preferences and complete a help encounter to invite a companion.",
+      "feedsInto": "A missing guide entry suggests a habitat; recruitment adds a new affinity and field option."
+    },
+    {
+      "id": "growth",
+      "rule": "Four first-time milestone grants per friend lead to levels 2–5, technique choices and a visible Wayfinder form.",
+      "feedsInto": "A new technique improves a trial solution; the trial opens new training contexts."
+    },
+    {
+      "id": "team",
+      "rule": "Collect twelve; travel with two; equip two techniques per friend plus universal actions.",
+      "feedsInto": "Choose a matching specialist and a support partner, or spend a supply to cover a missing affinity."
+    },
+    {
+      "id": "exploration",
+      "rule": "Connected hubs, routes, habitats, shortcuts and landmarks visible before access.",
+      "feedsInto": "A far-off island creates a future goal that ferry ability later resolves."
+    },
+    {
+      "id": "field_abilities",
+      "rule": "Seals license five world abilities; matching friends reveal bonuses; equivalent tools keep the route available.",
+      "feedsInto": "A new seal changes old locations and reveals recruitment clues and useful items."
+    },
+    {
+      "id": "tactics",
+      "rule": "Turn-based friendly contests and environmental encounters use energy, pressure, affinities and preparation.",
+      "feedsInto": "Team composition, level techniques, supplies and learned patterns alter the winning plan."
+    },
+    {
+      "id": "trials",
+      "rule": "Eight keeper trials combine an investigation, a world project and a tactical finale.",
+      "feedsInto": "Every seal changes the map and supplies evidence for the central mystery."
+    },
+    {
+      "id": "care_resources",
+      "rule": "Expedition energy and a three-item pouch create push-on-or-rest decisions; camps restore for free.",
+      "feedsInto": "Saving a snack can extend an expedition; resting changes the route taken, not ownership or XP."
+    },
+    {
+      "id": "rivalry",
+      "rule": "Rowan and Vell recur with changed beliefs and strategies, reacting to your earlier choices.",
+      "feedsInto": "Rowan’s overworked partner makes team rotation and care matter to the plot."
+    },
+    {
+      "id": "sidequests",
+      "rule": "Environmental deductions, deliveries, rescues, optional designs and two-solution obstacles.",
+      "feedsInto": "A fossil choice becomes an exchange opportunity and another habitat clue."
+    },
+    {
+      "id": "secrets",
+      "rule": "Early silhouettes and inaccessible landmarks resolve through return visits and a post-finale sanctuary.",
+      "feedsInto": "The final rare friend completes the mystery and offers a distinct late collection goal."
+    },
+    {
+      "id": "exchange_social",
+      "rule": "Authored NPC barter in the core; a specified paired expedition and keepsake exchange mode for human players.",
+      "feedsInto": "Players share discovery clues and complementary roles; no friend or ending requires multiplayer."
+    }
+  ],
+  "companions": [
+    {
+      "id": "pip",
+      "regionId": "meadow",
+      "affinity": "gleam",
+      "fieldAbility": "illuminate",
+      "personality": "Patient curiosity",
+      "personalQuest": "Pip hides uncertainty behind questions. Help him admit he cannot see the whole path.",
+      "habitatId": "bridge_bank",
+      "discoveryReward": "light_cache",
+      "signatureMove": "reveal",
+      "starter": true,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Pip Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "tansy",
+      "regionId": "meadow",
+      "affinity": "growth",
+      "fieldAbility": "bloom",
+      "personality": "Careful protection",
+      "personalQuest": "Tansy wants every seed to survive. Help her leave room for wild growth.",
+      "habitatId": "flower_garden",
+      "discoveryReward": "seed_cache",
+      "signatureMove": "weave",
+      "starter": true,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Tansy Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "nib",
+      "regionId": "meadow",
+      "affinity": "craft",
+      "fieldAbility": "brace",
+      "personality": "Playful planning",
+      "personalQuest": "Nib keeps supplies for every possibility. Help him trust a partner with the plan.",
+      "habitatId": "picnic_clearing",
+      "discoveryReward": "supply_cache",
+      "signatureMove": "brace",
+      "starter": true,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Nib Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "flutter",
+      "regionId": "meadow",
+      "affinity": "rhythm",
+      "fieldAbility": "resonate",
+      "personality": "Quiet observation",
+      "personalQuest": "Flutter hears a rhythm nobody believes. Give them a chance to lead.",
+      "habitatId": "echo_hollow",
+      "discoveryReward": "echo_cache",
+      "signatureMove": "chime",
+      "starter": false,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Flutter Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "cleo",
+      "regionId": "orchard",
+      "affinity": "growth",
+      "fieldAbility": "bloom",
+      "personality": "Inventive generosity",
+      "personalQuest": "Cleo builds things alone so nobody is disappointed. Build something imperfect together.",
+      "habitatId": "orchard_hub",
+      "discoveryReward": "seed_cache",
+      "signatureMove": "weave",
+      "starter": false,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Cleo Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "bramble",
+      "regionId": "orchard",
+      "affinity": "craft",
+      "fieldAbility": "brace",
+      "personality": "Steady kindness",
+      "personalQuest": "Bramble always carries the heaviest load. Help him ask the team for support.",
+      "habitatId": "old_mill",
+      "discoveryReward": "supply_cache",
+      "signatureMove": "brace",
+      "starter": false,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Bramble Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "patter",
+      "regionId": "orchard",
+      "affinity": "tide",
+      "fieldAbility": "ferry",
+      "personality": "Cheerful persistence",
+      "personalQuest": "Patter rushes deliveries to prove dependable. Plan a route that leaves time to rest.",
+      "habitatId": "courier_pond",
+      "discoveryReward": "water_cache",
+      "signatureMove": "surge",
+      "starter": false,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Patter Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "twizzle",
+      "regionId": "orchard",
+      "affinity": "rhythm",
+      "fieldAbility": "resonate",
+      "personality": "Restless imagination",
+      "personalQuest": "Twizzle abandons inventions when a new idea arrives. Finish a useful tune together.",
+      "habitatId": "garland_ridge",
+      "discoveryReward": "echo_cache",
+      "signatureMove": "chime",
+      "starter": false,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Twizzle Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "luna",
+      "regionId": "cove",
+      "affinity": "gleam",
+      "fieldAbility": "illuminate",
+      "personality": "Gentle courage",
+      "personalQuest": "Luna thinks fear means she cannot guide anyone. Lead a short night walk together.",
+      "habitatId": "cove_hub",
+      "discoveryReward": "light_cache",
+      "signatureMove": "reveal",
+      "starter": false,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Luna Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "pebble",
+      "regionId": "cove",
+      "affinity": "tide",
+      "fieldAbility": "ferry",
+      "personality": "Patient practicality",
+      "personalQuest": "Pebble follows the old tide markers even when they change. Test and redraw the route.",
+      "habitatId": "shell_beach",
+      "discoveryReward": "water_cache",
+      "signatureMove": "surge",
+      "starter": false,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Pebble Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "glimmer",
+      "regionId": "cove",
+      "affinity": "gleam",
+      "fieldAbility": "illuminate",
+      "personality": "Reflective friendship",
+      "personalQuest": "Glimmer was mistaken for the thief of the lights. Restore the truth and the habitat.",
+      "habitatId": "hidden_tide_garden",
+      "discoveryReward": "light_cache",
+      "signatureMove": "reveal",
+      "starter": false,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Glimmer Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    },
+    {
+      "id": "sail",
+      "regionId": "cove",
+      "affinity": "rhythm",
+      "fieldAbility": "resonate",
+      "personality": "Calm encouragement",
+      "personalQuest": "Sail encourages everyone but never joins the expedition. Make a plan with a role for Sail.",
+      "habitatId": "harbour_lookout",
+      "discoveryReward": "echo_cache",
+      "signatureMove": "chime",
+      "starter": false,
+      "fieldUnlock": "Requires the matching seal and ownership; level-three optional interaction adds the habitat cache. The free keeper tool always covers essential traversal.",
+      "form": "Sail Wayfinder: retain recognisable face and species; add a regional light motif, more confident silhouette and a distinct travel animation. Final art design pending."
+    }
+  ],
+  "starterChoice": {
+    "guideId": "hazel",
+    "ids": [
+      "pip",
+      "tansy",
+      "nib"
+    ],
+    "count": 1,
+    "avatarSeparate": true,
+    "rivalChoice": "Next starter in the listed cycle; this is Rowan’s distinct companion, not removed from the player’s catalogue."
+  },
+  "characters": [
+    {
+      "id": "hazel",
+      "role": "Mentor",
+      "arc": "Teaches the shared-beacon tradition but does not know why it failed; asks the player to investigate rather than supplying every answer."
+    },
+    {
+      "id": "rowan",
+      "role": "Friendly rival",
+      "arc": "Starts believing one powerful friend and speed solve everything. Loses the river race through exhaustion, accepts rescue, learns complementary teams, and helps in the final crisis.",
+      "appearances": [
+        "welcome",
+        "echo-trial",
+        "current-clue",
+        "current-project",
+        "beacon-trial",
+        "accord-project",
+        "constellation"
+      ]
+    },
+    {
+      "id": "vell",
+      "role": "Antagonist and inventor",
+      "arc": "Fears a repeat of the Great Storm. His reserve protects the Observatory while draining everyone else. He dismisses local evidence, locks the intake, then helps when the player demonstrates a resilient alternative.",
+      "appearances": [
+        "bloom-clue",
+        "harvest-trial",
+        "current-trial",
+        "accord-clue",
+        "accord-trial",
+        "constellation"
+      ]
+    }
+  ],
+  "locations": [
+    {
+      "id": "bridge_bank",
+      "regionId": "meadow",
+      "camp": true
+    },
+    {
+      "id": "flower_garden",
+      "regionId": "meadow",
+      "camp": false
+    },
+    {
+      "id": "picnic_clearing",
+      "regionId": "meadow",
+      "camp": true
+    },
+    {
+      "id": "echo_hollow",
+      "regionId": "meadow",
+      "camp": false
+    },
+    {
+      "id": "old_watchtower",
+      "regionId": "meadow",
+      "camp": false
+    },
+    {
+      "id": "orchard_hub",
+      "regionId": "orchard",
+      "camp": true
+    },
+    {
+      "id": "old_mill",
+      "regionId": "orchard",
+      "camp": false
+    },
+    {
+      "id": "courier_pond",
+      "regionId": "orchard",
+      "camp": true
+    },
+    {
+      "id": "garland_ridge",
+      "regionId": "orchard",
+      "camp": false
+    },
+    {
+      "id": "cove_hub",
+      "regionId": "cove",
+      "camp": true
+    },
+    {
+      "id": "shell_beach",
+      "regionId": "cove",
+      "camp": false
+    },
+    {
+      "id": "harbour_lookout",
+      "regionId": "cove",
+      "camp": true
+    },
+    {
+      "id": "observatory",
+      "regionId": "cove",
+      "camp": false
+    },
+    {
+      "id": "hidden_tide_garden",
+      "regionId": "cove",
+      "camp": false
+    },
+    {
+      "id": "star_island",
+      "regionId": "cove",
+      "camp": false
+    }
+  ],
+  "routes": [
+    {
+      "id": "bridge_bank--picnic_clearing",
+      "fromId": "bridge_bank",
+      "toId": "picnic_clearing",
+      "bidirectional": true,
+      "requiredSeal": "seal-bridge",
+      "abilityId": null,
+      "toolAlternative": null,
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "bridge_bank--flower_garden",
+      "fromId": "bridge_bank",
+      "toId": "flower_garden",
+      "bidirectional": true,
+      "requiredSeal": "seal-bridge",
+      "abilityId": null,
+      "toolAlternative": null,
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "flower_garden--echo_hollow",
+      "fromId": "flower_garden",
+      "toId": "echo_hollow",
+      "bidirectional": true,
+      "requiredSeal": "seal-bloom",
+      "abilityId": "bloom",
+      "toolAlternative": "seed_kit",
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "picnic_clearing--echo_hollow",
+      "fromId": "picnic_clearing",
+      "toId": "echo_hollow",
+      "bidirectional": true,
+      "requiredSeal": "seal-bloom",
+      "abilityId": null,
+      "toolAlternative": null,
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "echo_hollow--old_watchtower",
+      "fromId": "echo_hollow",
+      "toId": "old_watchtower",
+      "bidirectional": true,
+      "requiredSeal": "seal-echo",
+      "abilityId": "resonate",
+      "toolAlternative": "tuning_fork",
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "old_watchtower--orchard_hub",
+      "fromId": "old_watchtower",
+      "toId": "orchard_hub",
+      "bidirectional": true,
+      "requiredSeal": "seal-echo",
+      "abilityId": null,
+      "toolAlternative": null,
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "orchard_hub--old_mill",
+      "fromId": "orchard_hub",
+      "toId": "old_mill",
+      "bidirectional": true,
+      "requiredSeal": "seal-echo",
+      "abilityId": null,
+      "toolAlternative": null,
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "orchard_hub--courier_pond",
+      "fromId": "orchard_hub",
+      "toId": "courier_pond",
+      "bidirectional": true,
+      "requiredSeal": "seal-echo",
+      "abilityId": null,
+      "toolAlternative": null,
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "old_mill--garland_ridge",
+      "fromId": "old_mill",
+      "toId": "garland_ridge",
+      "bidirectional": true,
+      "requiredSeal": "seal-harvest",
+      "abilityId": "brace",
+      "toolAlternative": "brace_kit",
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "courier_pond--cove_hub",
+      "fromId": "courier_pond",
+      "toId": "cove_hub",
+      "bidirectional": true,
+      "requiredSeal": "seal-current",
+      "abilityId": "ferry",
+      "toolAlternative": "folding_raft",
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "cove_hub--shell_beach",
+      "fromId": "cove_hub",
+      "toId": "shell_beach",
+      "bidirectional": true,
+      "requiredSeal": "seal-current",
+      "abilityId": null,
+      "toolAlternative": null,
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "shell_beach--harbour_lookout",
+      "fromId": "shell_beach",
+      "toId": "harbour_lookout",
+      "bidirectional": true,
+      "requiredSeal": "seal-tide",
+      "abilityId": null,
+      "toolAlternative": null,
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "harbour_lookout--observatory",
+      "fromId": "harbour_lookout",
+      "toId": "observatory",
+      "bidirectional": true,
+      "requiredSeal": "seal-beacon",
+      "abilityId": "illuminate",
+      "toolAlternative": "prism_lantern",
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "shell_beach--hidden_tide_garden",
+      "fromId": "shell_beach",
+      "toId": "hidden_tide_garden",
+      "bidirectional": true,
+      "requiredSeal": "seal-tide",
+      "abilityId": "illuminate",
+      "toolAlternative": "prism_lantern",
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "cove_hub--star_island",
+      "fromId": "cove_hub",
+      "toId": "star_island",
+      "bidirectional": true,
+      "requiredSeal": "seal-accord",
+      "abilityId": "ferry",
+      "toolAlternative": "folding_raft",
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    },
+    {
+      "id": "old_watchtower--harbour_lookout",
+      "fromId": "old_watchtower",
+      "toId": "harbour_lookout",
+      "bidirectional": true,
+      "requiredSeal": "seal-beacon",
+      "abilityId": "illuminate",
+      "toolAlternative": "prism_lantern",
+      "preview": "Visible as a landmark before it opens.",
+      "travelCost": 0
+    }
+  ],
+  "abilities": [
+    {
+      "id": "brace",
+      "sealId": "seal-bridge",
+      "toolId": "brace_kit",
+      "worldEffect": "Stabilise cracked supports and move light obstacles.",
+      "companionBenefit": "Reveal a hidden supply alcove while bracing."
+    },
+    {
+      "id": "bloom",
+      "sealId": "seal-bloom",
+      "toolId": "seed_kit",
+      "worldEffect": "Grow a temporary vine crossing or wake a dormant flower.",
+      "companionBenefit": "Reveal habitat signs and a seed-cache keepsake."
+    },
+    {
+      "id": "resonate",
+      "sealId": "seal-echo",
+      "toolId": "tuning_fork",
+      "worldEffect": "Open chime locks and reveal a hidden echo route.",
+      "companionBenefit": "Hear an extra clue and locate an echo-cache keepsake."
+    },
+    {
+      "id": "ferry",
+      "sealId": "seal-current",
+      "toolId": "folding_raft",
+      "worldEffect": "Cross marked calm water routes.",
+      "companionBenefit": "Find a shoreline clue and water-cache keepsake."
+    },
+    {
+      "id": "illuminate",
+      "sealId": "seal-beacon",
+      "toolId": "prism_lantern",
+      "worldEffect": "Reveal faded markings and navigate marked dark tunnels.",
+      "companionBenefit": "Find a light-cache keepsake and a shorter safe passage."
+    }
+  ],
+  "missions": [
+    {
+      "id": "welcome",
+      "title": "The first expedition",
+      "requires": [],
+      "locationId": "bridge_bank",
+      "kind": "introduction",
+      "story": "Hazel invites you to map the trail for the Moonlight Gathering. The first beacon goes dark during the welcome; your chosen friend notices a fleeing brass cart.",
+      "objectives": [
+        "Meet all three starters and try a free practice encounter with each.",
+        "Choose Pip, Tansy or Nib; choose a nickname optionally.",
+        "Learn care and team controls. Rowan chooses a different starter and proposes a friendly trail challenge."
+      ],
+      "choices": [
+        "Starter choice changes early efficient solutions, reactions and Rowan’s opening team; all starters have a supported path."
+      ],
+      "learningContext": "A short supported supplies activity introduces the existing answer controls.",
+      "rewardIds": [
+        "field_guide",
+        "care_kit"
+      ]
+    },
+    {
+      "id": "bridge-clue",
+      "title": "The broken crossing",
+      "requires": [
+        "welcome"
+      ],
+      "locationId": "bridge_bank",
+      "kind": "investigation",
+      "story": "A storm has broken the bridge, but the moonstones beneath it were removed cleanly.",
+      "objectives": [
+        "Inspect the cut mounts and follow a trail of brass filings.",
+        "Record the clue in the field guide; talk to the keeper about what it changes."
+      ],
+      "choices": [
+        "Inspect optional habitat signs or follow the main lead."
+      ],
+      "learningContext": "One relevant investigation activity selected by the current learner frontier; clue text never supplies an answer key.",
+      "rewardIds": [
+        "evidence-bridge"
+      ]
+    },
+    {
+      "id": "bridge-project",
+      "title": "Prepare: The broken crossing",
+      "requires": [
+        "bridge-clue"
+      ],
+      "locationId": "bridge_bank",
+      "kind": "project",
+      "story": "Use the discovery to make a concrete change before taking on the local challenge.",
+      "objectives": [
+        "Gather three fallen branches; the woodcutter turns them into three planks. Repair the crossing.",
+        "Prepare a two-companion team and up to three expedition items at the nearest camp."
+      ],
+      "choices": [
+        "Use a companion field ability where available, or the keeper’s free tool/helper route.",
+        "Choose who participates; the training recipient is bound before starting."
+      ],
+      "learningContext": "One contextual planning or crafting activity; supported completion performs the same world action.",
+      "rewardIds": [
+        "project-bridge"
+      ]
+    },
+    {
+      "id": "bridge-trial",
+      "title": "The Bridge Trial",
+      "requires": [
+        "bridge-project"
+      ],
+      "locationId": "bridge_bank",
+      "kind": "trial",
+      "story": "Keep three bridge braces steady while the last traveller crosses.",
+      "objectives": [
+        "Complete trial-bridge independently or with the keeper’s guided plan.",
+        "A brass Stillworks cart crossed before the storm. Rowan insists the new machines can explain it."
+      ],
+      "choices": [
+        "Choose equipped techniques, lead companion and supplies.",
+        "Retry, return to camp or follow a supported plan without losing progress."
+      ],
+      "learningContext": "The tactical encounter uses game rules; it is not a quiz. A single preparation activity can support it, never one question per move.",
+      "rewardIds": [
+        "seal-bridge",
+        "brace_kit",
+        "world-bridge"
+      ]
+    },
+    {
+      "id": "bloom-clue",
+      "title": "The garden that forgot morning",
+      "requires": [
+        "bridge-trial"
+      ],
+      "locationId": "flower_garden",
+      "kind": "investigation",
+      "story": "Flowers near the new collector are closing even in daylight.",
+      "objectives": [
+        "Compare a shaded bed with a bed beside the collector; their water is identical.",
+        "Record the clue in the field guide; talk to the keeper about what it changes."
+      ],
+      "choices": [
+        "Inspect optional habitat signs or follow the main lead."
+      ],
+      "learningContext": "One relevant investigation activity selected by the current learner frontier; clue text never supplies an answer key.",
+      "rewardIds": [
+        "evidence-bloom"
+      ]
+    },
+    {
+      "id": "bloom-project",
+      "title": "Prepare: The garden that forgot morning",
+      "requires": [
+        "bloom-clue"
+      ],
+      "locationId": "flower_garden",
+      "kind": "project",
+      "story": "Use the discovery to make a concrete change before taking on the local challenge.",
+      "objectives": [
+        "Redirect two irrigation channels and shelter seedlings. Choose a wild border or an ordered garden.",
+        "Prepare a two-companion team and up to three expedition items at the nearest camp."
+      ],
+      "choices": [
+        "Use a companion field ability where available, or the keeper’s free tool/helper route.",
+        "Choose who participates; the training recipient is bound before starting."
+      ],
+      "learningContext": "One contextual planning or crafting activity; supported completion performs the same world action.",
+      "rewardIds": [
+        "project-bloom"
+      ]
+    },
+    {
+      "id": "bloom-trial",
+      "title": "The Bloom Trial",
+      "requires": [
+        "bloom-project"
+      ],
+      "locationId": "flower_garden",
+      "kind": "trial",
+      "story": "Hold back the collector’s draught while the seed beds take root.",
+      "objectives": [
+        "Complete trial-bloom independently or with the keeper’s guided plan.",
+        "The machine is drawing moonlight from roots. Its label says: temporary emergency reserve."
+      ],
+      "choices": [
+        "Choose equipped techniques, lead companion and supplies.",
+        "Retry, return to camp or follow a supported plan without losing progress."
+      ],
+      "learningContext": "The tactical encounter uses game rules; it is not a quiz. A single preparation activity can support it, never one question per move.",
+      "rewardIds": [
+        "seal-bloom",
+        "seed_kit",
+        "world-bloom"
+      ]
+    },
+    {
+      "id": "echo-clue",
+      "title": "A message in the hollow",
+      "requires": [
+        "bloom-trial"
+      ],
+      "locationId": "echo_hollow",
+      "kind": "investigation",
+      "story": "A warning is repeating in the old watchtower, but everyone hears a different part.",
+      "objectives": [
+        "Follow Flutter’s sound clues; distinguish the warning from its echoes.",
+        "Record the clue in the field guide; talk to the keeper about what it changes."
+      ],
+      "choices": [
+        "Inspect optional habitat signs or follow the main lead."
+      ],
+      "learningContext": "One relevant investigation activity selected by the current learner frontier; clue text never supplies an answer key.",
+      "rewardIds": [
+        "evidence-echo"
+      ]
+    },
+    {
+      "id": "echo-project",
+      "title": "Prepare: A message in the hollow",
+      "requires": [
+        "echo-clue"
+      ],
+      "locationId": "echo_hollow",
+      "kind": "project",
+      "story": "Use the discovery to make a concrete change before taking on the local challenge.",
+      "objectives": [
+        "Repair three wind chimes in the indicated order and help Flutter conduct the message.",
+        "Prepare a two-companion team and up to three expedition items at the nearest camp."
+      ],
+      "choices": [
+        "Use a companion field ability where available, or the keeper’s free tool/helper route.",
+        "Choose who participates; the training recipient is bound before starting."
+      ],
+      "learningContext": "One contextual planning or crafting activity; supported completion performs the same world action.",
+      "rewardIds": [
+        "project-echo"
+      ]
+    },
+    {
+      "id": "echo-trial",
+      "title": "The Echo Trial",
+      "requires": [
+        "echo-project"
+      ],
+      "locationId": "echo_hollow",
+      "kind": "trial",
+      "story": "Match the tower’s changing rhythm while keeping its shutters from closing.",
+      "objectives": [
+        "Complete trial-echo independently or with the keeper’s guided plan.",
+        "The warning came from the Observatory: the collectors were supposed to stop after the storm."
+      ],
+      "choices": [
+        "Choose equipped techniques, lead companion and supplies.",
+        "Retry, return to camp or follow a supported plan without losing progress."
+      ],
+      "learningContext": "The tactical encounter uses game rules; it is not a quiz. A single preparation activity can support it, never one question per move.",
+      "rewardIds": [
+        "seal-echo",
+        "tuning_fork",
+        "world-echo"
+      ]
+    },
+    {
+      "id": "harvest-clue",
+      "title": "The locked harvest",
+      "requires": [
+        "echo-trial"
+      ],
+      "locationId": "old_mill",
+      "kind": "investigation",
+      "story": "Stillworks has taken the mill to pack reserves. Food deliveries are piling up.",
+      "objectives": [
+        "Meet courier Patter; compare the delivery ledger with empty village stores.",
+        "Record the clue in the field guide; talk to the keeper about what it changes."
+      ],
+      "choices": [
+        "Inspect optional habitat signs or follow the main lead."
+      ],
+      "learningContext": "One relevant investigation activity selected by the current learner frontier; clue text never supplies an answer key.",
+      "rewardIds": [
+        "evidence-harvest"
+      ]
+    },
+    {
+      "id": "harvest-project",
+      "title": "Prepare: The locked harvest",
+      "requires": [
+        "harvest-clue"
+      ],
+      "locationId": "old_mill",
+      "kind": "project",
+      "story": "Use the discovery to make a concrete change before taking on the local challenge.",
+      "objectives": [
+        "Choose the canal delivery or ridge delivery, recover a missing gear and reopen the mill.",
+        "Prepare a two-companion team and up to three expedition items at the nearest camp."
+      ],
+      "choices": [
+        "Use a companion field ability where available, or the keeper’s free tool/helper route.",
+        "Choose who participates; the training recipient is bound before starting."
+      ],
+      "learningContext": "One contextual planning or crafting activity; supported completion performs the same world action.",
+      "rewardIds": [
+        "project-harvest"
+      ]
+    },
+    {
+      "id": "harvest-trial",
+      "title": "The Harvest Trial",
+      "requires": [
+        "harvest-project"
+      ],
+      "locationId": "old_mill",
+      "kind": "trial",
+      "story": "Outmanoeuvre the mill’s sorting automaton and redirect its crates safely.",
+      "objectives": [
+        "Complete trial-harvest independently or with the keeper’s guided plan.",
+        "Warden Vell ordered all light and supplies sent to the Observatory for a coming storm."
+      ],
+      "choices": [
+        "Choose equipped techniques, lead companion and supplies.",
+        "Retry, return to camp or follow a supported plan without losing progress."
+      ],
+      "learningContext": "The tactical encounter uses game rules; it is not a quiz. A single preparation activity can support it, never one question per move.",
+      "rewardIds": [
+        "seal-harvest",
+        "brace_kit",
+        "world-harvest"
+      ]
+    },
+    {
+      "id": "current-clue",
+      "title": "The river running backwards",
+      "requires": [
+        "echo-trial"
+      ],
+      "locationId": "courier_pond",
+      "kind": "investigation",
+      "story": "A pump sends river water uphill into the reserve, stranding companions.",
+      "objectives": [
+        "Follow reversed floating leaves to the pumping station; Rowan has already gone inside.",
+        "Record the clue in the field guide; talk to the keeper about what it changes."
+      ],
+      "choices": [
+        "Inspect optional habitat signs or follow the main lead."
+      ],
+      "learningContext": "One relevant investigation activity selected by the current learner frontier; clue text never supplies an answer key.",
+      "rewardIds": [
+        "evidence-current"
+      ]
+    },
+    {
+      "id": "current-project",
+      "title": "Prepare: The river running backwards",
+      "requires": [
+        "current-clue"
+      ],
+      "locationId": "courier_pond",
+      "kind": "project",
+      "story": "Use the discovery to make a concrete change before taking on the local challenge.",
+      "objectives": [
+        "Rescue Rowan’s tired partner, turn two valves and rebuild the ferry landing.",
+        "Prepare a two-companion team and up to three expedition items at the nearest camp."
+      ],
+      "choices": [
+        "Use a companion field ability where available, or the keeper’s free tool/helper route.",
+        "Choose who participates; the training recipient is bound before starting."
+      ],
+      "learningContext": "One contextual planning or crafting activity; supported completion performs the same world action.",
+      "rewardIds": [
+        "project-current"
+      ]
+    },
+    {
+      "id": "current-trial",
+      "title": "The Current Trial",
+      "requires": [
+        "current-project"
+      ],
+      "locationId": "courier_pond",
+      "kind": "trial",
+      "story": "Coordinate crossings between pump surges and protect the overloaded raft.",
+      "objectives": [
+        "Complete trial-current independently or with the keeper’s guided plan.",
+        "Rowan admits rushing and overworking one strong partner failed. Vell refuses to stop the reserve."
+      ],
+      "choices": [
+        "Choose equipped techniques, lead companion and supplies.",
+        "Retry, return to camp or follow a supported plan without losing progress."
+      ],
+      "learningContext": "The tactical encounter uses game rules; it is not a quiz. A single preparation activity can support it, never one question per move.",
+      "rewardIds": [
+        "seal-current",
+        "folding_raft",
+        "world-current"
+      ]
+    },
+    {
+      "id": "tide-clue",
+      "title": "The creature blamed for darkness",
+      "requires": [
+        "harvest-trial",
+        "current-trial"
+      ],
+      "locationId": "shell_beach",
+      "kind": "investigation",
+      "story": "Villagers blame a rare glow moving through the empty tide gardens.",
+      "objectives": [
+        "Compare Glimmer’s tracks with the collector pipes. The tracks lead away from damaged beds.",
+        "Record the clue in the field guide; talk to the keeper about what it changes."
+      ],
+      "choices": [
+        "Inspect optional habitat signs or follow the main lead."
+      ],
+      "learningContext": "One relevant investigation activity selected by the current learner frontier; clue text never supplies an answer key.",
+      "rewardIds": [
+        "evidence-tide"
+      ]
+    },
+    {
+      "id": "tide-project",
+      "title": "Prepare: The creature blamed for darkness",
+      "requires": [
+        "tide-clue"
+      ],
+      "locationId": "shell_beach",
+      "kind": "project",
+      "story": "Use the discovery to make a concrete change before taking on the local challenge.",
+      "objectives": [
+        "Help Pebble mark the safe tide route, patch a pipe and open a refuge pool.",
+        "Prepare a two-companion team and up to three expedition items at the nearest camp."
+      ],
+      "choices": [
+        "Use a companion field ability where available, or the keeper’s free tool/helper route.",
+        "Choose who participates; the training recipient is bound before starting."
+      ],
+      "learningContext": "One contextual planning or crafting activity; supported completion performs the same world action.",
+      "rewardIds": [
+        "project-tide"
+      ]
+    },
+    {
+      "id": "tide-trial",
+      "title": "The Tide Trial",
+      "requires": [
+        "tide-project"
+      ],
+      "locationId": "shell_beach",
+      "kind": "trial",
+      "story": "Keep the refuge pool stable against the collector’s alternating suction.",
+      "objectives": [
+        "Complete trial-tide independently or with the keeper’s guided plan.",
+        "Glimmer is guiding displaced creatures to safety. The collectors, not the creature, drained the habitat."
+      ],
+      "choices": [
+        "Choose equipped techniques, lead companion and supplies.",
+        "Retry, return to camp or follow a supported plan without losing progress."
+      ],
+      "learningContext": "The tactical encounter uses game rules; it is not a quiz. A single preparation activity can support it, never one question per move.",
+      "rewardIds": [
+        "seal-tide",
+        "folding_raft",
+        "world-tide"
+      ]
+    },
+    {
+      "id": "beacon-clue",
+      "title": "A light that cannot reach home",
+      "requires": [
+        "tide-trial"
+      ],
+      "locationId": "harbour_lookout",
+      "kind": "investigation",
+      "story": "The lighthouse lens is missing; ships cannot bring repair supplies.",
+      "objectives": [
+        "Read an old keeper’s map and revisit the Meadow watchtower for the stored lens.",
+        "Record the clue in the field guide; talk to the keeper about what it changes."
+      ],
+      "choices": [
+        "Inspect optional habitat signs or follow the main lead."
+      ],
+      "learningContext": "One relevant investigation activity selected by the current learner frontier; clue text never supplies an answer key.",
+      "rewardIds": [
+        "evidence-beacon"
+      ]
+    },
+    {
+      "id": "beacon-project",
+      "title": "Prepare: A light that cannot reach home",
+      "requires": [
+        "beacon-clue"
+      ],
+      "locationId": "harbour_lookout",
+      "kind": "project",
+      "story": "Use the discovery to make a concrete change before taking on the local challenge.",
+      "objectives": [
+        "Choose a direct illuminated tunnel or the longer escorted ridge; bring the lens to Sail.",
+        "Prepare a two-companion team and up to three expedition items at the nearest camp."
+      ],
+      "choices": [
+        "Use a companion field ability where available, or the keeper’s free tool/helper route.",
+        "Choose who participates; the training recipient is bound before starting."
+      ],
+      "learningContext": "One contextual planning or crafting activity; supported completion performs the same world action.",
+      "rewardIds": [
+        "project-beacon"
+      ]
+    },
+    {
+      "id": "beacon-trial",
+      "title": "The Beacon Trial",
+      "requires": [
+        "beacon-project"
+      ],
+      "locationId": "harbour_lookout",
+      "kind": "trial",
+      "story": "Align the lighthouse beams while shielding the lens from gusts.",
+      "objectives": [
+        "Complete trial-beacon independently or with the keeper’s guided plan.",
+        "The oldest map shows eight local beacons shared the load. Vell replaced them with one fragile reserve."
+      ],
+      "choices": [
+        "Choose equipped techniques, lead companion and supplies.",
+        "Retry, return to camp or follow a supported plan without losing progress."
+      ],
+      "learningContext": "The tactical encounter uses game rules; it is not a quiz. A single preparation activity can support it, never one question per move.",
+      "rewardIds": [
+        "seal-beacon",
+        "prism_lantern",
+        "world-beacon"
+      ]
+    },
+    {
+      "id": "accord-clue",
+      "title": "The last closed gate",
+      "requires": [
+        "beacon-trial"
+      ],
+      "locationId": "observatory",
+      "kind": "investigation",
+      "story": "Vell locks the reserve: releasing it, he believes, will leave everyone helpless in the storm.",
+      "objectives": [
+        "Present the root, ledger and tide evidence. Let Rowan explain the rescue and what he changed.",
+        "Record the clue in the field guide; talk to the keeper about what it changes."
+      ],
+      "choices": [
+        "Inspect optional habitat signs or follow the main lead."
+      ],
+      "learningContext": "One relevant investigation activity selected by the current learner frontier; clue text never supplies an answer key.",
+      "rewardIds": [
+        "evidence-accord"
+      ]
+    },
+    {
+      "id": "accord-project",
+      "title": "Prepare: The last closed gate",
+      "requires": [
+        "accord-clue"
+      ],
+      "locationId": "observatory",
+      "kind": "project",
+      "story": "Use the discovery to make a concrete change before taking on the local challenge.",
+      "objectives": [
+        "Reconnect the eight beacon lines; assign two teams of local friends to keep the return routes open.",
+        "Prepare a two-companion team and up to three expedition items at the nearest camp."
+      ],
+      "choices": [
+        "Use a companion field ability where available, or the keeper’s free tool/helper route.",
+        "Choose who participates; the training recipient is bound before starting."
+      ],
+      "learningContext": "One contextual planning or crafting activity; supported completion performs the same world action.",
+      "rewardIds": [
+        "project-accord"
+      ]
+    },
+    {
+      "id": "accord-trial",
+      "title": "The Accord Trial",
+      "requires": [
+        "accord-project"
+      ],
+      "locationId": "observatory",
+      "kind": "trial",
+      "story": "Complete three stages: stabilise the intake, counter the shutters, then redirect the stored light.",
+      "objectives": [
+        "Complete trial-accord independently or with the keeper’s guided plan.",
+        "Vell helps release the reserve when he sees the local beacons hold. Communities choose their own keepers."
+      ],
+      "choices": [
+        "Choose equipped techniques, lead companion and supplies.",
+        "Retry, return to camp or follow a supported plan without losing progress."
+      ],
+      "learningContext": "The tactical encounter uses game rules; it is not a quiz. A single preparation activity can support it, never one question per move.",
+      "rewardIds": [
+        "seal-accord",
+        "tuning_fork",
+        "world-accord"
+      ]
+    },
+    {
+      "id": "constellation",
+      "title": "A sky full of small lights",
+      "requires": [
+        "accord-trial"
+      ],
+      "locationId": "bridge_bank",
+      "kind": "finale",
+      "story": "Return to the first bridge. Every restored place sends a lantern and a friend. Rowan asks for a rematch as a partner; Vell brings a machine built to share light.",
+      "objectives": [
+        "Visit the three regional celebrations in any order.",
+        "Choose a keeper and a decoration for each restored beacon.",
+        "Follow the new constellation to the sanctuary expedition."
+      ],
+      "choices": [
+        "Keepers and decorations alter dialogue and appearance, not access or assessment."
+      ],
+      "learningContext": "Celebration is not assessed.",
+      "rewardIds": [
+        "trailkeeper_title",
+        "sanctuary_pass"
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "id": "trial-bridge",
+      "missionId": "bridge-trial",
+      "sealId": "seal-bridge",
+      "locationId": "bridge_bank",
+      "keeper": "Hazel",
+      "affinity": "craft",
+      "targetProgress": 6,
+      "roundLimit": 8,
+      "pressureLimit": 6,
+      "hazardCycle": [
+        1,
+        0,
+        2,
+        0
+      ],
+      "rule": "One companion move or item per turn; reaching target wins before the current hazard. Otherwise apply hazard, then check pressure and turn limits.",
+      "guidedPlan": "Keeper supplies an explicit winning sequence with free loan equipment; records supported completion, awards the same seal.",
+      "persistentEffect": "Bridge repaired; picnic clearing opens; a second travelling slot and the brace kit are available.",
+      "affinityPhases": [
+        {
+          "atProgress": 0,
+          "affinity": "craft"
+        }
+      ]
+    },
+    {
+      "id": "trial-bloom",
+      "missionId": "bloom-trial",
+      "sealId": "seal-bloom",
+      "locationId": "flower_garden",
+      "keeper": "Fern",
+      "affinity": "growth",
+      "targetProgress": 7,
+      "roundLimit": 9,
+      "pressureLimit": 6,
+      "hazardCycle": [
+        0,
+        2,
+        0,
+        1
+      ],
+      "rule": "One companion move or item per turn; reaching target wins before the current hazard. Otherwise apply hazard, then check pressure and turn limits.",
+      "guidedPlan": "Keeper supplies an explicit winning sequence with free loan equipment; records supported completion, awards the same seal.",
+      "persistentEffect": "Garden restored; bloom paths open; the first unchosen starter offers a friendship quest.",
+      "affinityPhases": [
+        {
+          "atProgress": 0,
+          "affinity": "growth"
+        }
+      ]
+    },
+    {
+      "id": "trial-echo",
+      "missionId": "echo-trial",
+      "sealId": "seal-echo",
+      "locationId": "echo_hollow",
+      "keeper": "Orla",
+      "affinity": "rhythm",
+      "targetProgress": 8,
+      "roundLimit": 10,
+      "pressureLimit": 6,
+      "hazardCycle": [
+        0,
+        1,
+        0,
+        2
+      ],
+      "rule": "One companion move or item per turn; reaching target wins before the current hazard. Otherwise apply hazard, then check pressure and turn limits.",
+      "guidedPlan": "Keeper supplies an explicit winning sequence with free loan equipment; records supported completion, awards the same seal.",
+      "persistentEffect": "Orchard road opens; Flutter can join; the first three seals activate the regional waypost.",
+      "affinityPhases": [
+        {
+          "atProgress": 0,
+          "affinity": "rhythm"
+        }
+      ]
+    },
+    {
+      "id": "trial-harvest",
+      "missionId": "harvest-trial",
+      "sealId": "seal-harvest",
+      "locationId": "old_mill",
+      "keeper": "Cleo",
+      "affinity": "craft",
+      "targetProgress": 9,
+      "roundLimit": 11,
+      "pressureLimit": 7,
+      "hazardCycle": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "rule": "One companion move or item per turn; reaching target wins before the current hazard. Otherwise apply hazard, then check pressure and turn limits.",
+      "guidedPlan": "Keeper supplies an explicit winning sequence with free loan equipment; records supported completion, awards the same seal.",
+      "persistentEffect": "Mill becomes a crafting hub; Bramble’s rescue and Cleo’s building quests become available.",
+      "affinityPhases": [
+        {
+          "atProgress": 0,
+          "affinity": "craft"
+        },
+        {
+          "atProgress": 5,
+          "affinity": "growth"
+        }
+      ]
+    },
+    {
+      "id": "trial-current",
+      "missionId": "current-trial",
+      "sealId": "seal-current",
+      "locationId": "courier_pond",
+      "keeper": "Patter",
+      "affinity": "tide",
+      "targetProgress": 9,
+      "roundLimit": 11,
+      "pressureLimit": 7,
+      "hazardCycle": [
+        0,
+        2,
+        1,
+        0
+      ],
+      "rule": "One companion move or item per turn; reaching target wins before the current hazard. Otherwise apply hazard, then check pressure and turn limits.",
+      "guidedPlan": "Keeper supplies an explicit winning sequence with free loan equipment; records supported completion, awards the same seal.",
+      "persistentEffect": "Ferry routes and Cove travel open; Rowan starts using complementary partners and offers exchanges.",
+      "affinityPhases": [
+        {
+          "atProgress": 0,
+          "affinity": "tide"
+        }
+      ]
+    },
+    {
+      "id": "trial-tide",
+      "missionId": "tide-trial",
+      "sealId": "seal-tide",
+      "locationId": "shell_beach",
+      "keeper": "Marina",
+      "affinity": "tide",
+      "targetProgress": 10,
+      "roundLimit": 12,
+      "pressureLimit": 7,
+      "hazardCycle": [
+        1,
+        0,
+        2,
+        0
+      ],
+      "rule": "One companion move or item per turn; reaching target wins before the current hazard. Otherwise apply hazard, then check pressure and turn limits.",
+      "guidedPlan": "Keeper supplies an explicit winning sequence with free loan equipment; records supported completion, awards the same seal.",
+      "persistentEffect": "Tide garden refuge restored; evidence clears Glimmer; a hidden sanctuary is teased behind star-marked gates.",
+      "affinityPhases": [
+        {
+          "atProgress": 0,
+          "affinity": "tide"
+        },
+        {
+          "atProgress": 5,
+          "affinity": "craft"
+        }
+      ]
+    },
+    {
+      "id": "trial-beacon",
+      "missionId": "beacon-trial",
+      "sealId": "seal-beacon",
+      "locationId": "harbour_lookout",
+      "keeper": "Sail",
+      "affinity": "gleam",
+      "targetProgress": 11,
+      "roundLimit": 13,
+      "pressureLimit": 8,
+      "hazardCycle": [
+        2,
+        0,
+        0,
+        2
+      ],
+      "rule": "One companion move or item per turn; reaching target wins before the current hazard. Otherwise apply hazard, then check pressure and turn limits.",
+      "guidedPlan": "Keeper supplies an explicit winning sequence with free loan equipment; records supported completion, awards the same seal.",
+      "persistentEffect": "Illumination routes and the Observatory approach open; Luna volunteers to guide the final ascent.",
+      "affinityPhases": [
+        {
+          "atProgress": 0,
+          "affinity": "gleam"
+        }
+      ]
+    },
+    {
+      "id": "trial-accord",
+      "missionId": "accord-trial",
+      "sealId": "seal-accord",
+      "locationId": "observatory",
+      "keeper": "Warden Vell",
+      "affinity": "rhythm",
+      "targetProgress": 12,
+      "roundLimit": 14,
+      "pressureLimit": 8,
+      "hazardCycle": [
+        1,
+        0,
+        2,
+        0
+      ],
+      "rule": "One companion move or item per turn; reaching target wins before the current hazard. Otherwise apply hazard, then check pressure and turn limits.",
+      "guidedPlan": "Keeper supplies an explicit winning sequence with free loan equipment; records supported completion, awards the same seal.",
+      "persistentEffect": "Moonlight returns to all three regions; the constellation celebration and sanctuary expedition unlock.",
+      "affinityPhases": [
+        {
+          "atProgress": 0,
+          "affinity": "craft"
+        },
+        {
+          "atProgress": 4,
+          "affinity": "rhythm"
+        },
+        {
+          "atProgress": 8,
+          "affinity": "gleam"
+        }
+      ]
+    }
+  ],
+  "tactics": {
+    "teamCapacity": 2,
+    "equippedTechniques": 2,
+    "universalMoves": [
+      "focus",
+      "guard",
+      "rest"
+    ],
+    "moves": [
+      {
+        "id": "focus",
+        "affinity": "neutral",
+        "energy": 0,
+        "progress": 1,
+        "effect": "none"
+      },
+      {
+        "id": "reveal",
+        "affinity": "gleam",
+        "energy": 1,
+        "progress": 2,
+        "effect": "preview_next_two_hazards"
+      },
+      {
+        "id": "weave",
+        "affinity": "growth",
+        "energy": 2,
+        "progress": 2,
+        "effect": "reduce_pressure_1"
+      },
+      {
+        "id": "brace",
+        "affinity": "craft",
+        "energy": 1,
+        "progress": 1,
+        "effect": "reduce_pressure_1"
+      },
+      {
+        "id": "chime",
+        "affinity": "rhythm",
+        "energy": 1,
+        "progress": 1,
+        "effect": "partner_next_move_bonus_1"
+      },
+      {
+        "id": "surge",
+        "affinity": "tide",
+        "energy": 2,
+        "progress": 3,
+        "effect": "none"
+      },
+      {
+        "id": "guard",
+        "affinity": "neutral",
+        "energy": 1,
+        "progress": 0,
+        "effect": "reduce_pressure_2"
+      },
+      {
+        "id": "rest",
+        "affinity": "neutral",
+        "energy": 0,
+        "progress": 0,
+        "effect": "recover_energy_2"
+      },
+      {
+        "id": "rally",
+        "affinity": "neutral",
+        "energy": 1,
+        "progress": 0,
+        "effect": "partner_next_move_bonus_2"
+      }
+    ],
+    "affinityRule": "Matching the encounter affinity adds 2 progress. Other affinities retain base progress; there is no immunity.",
+    "levelEnergy": [
+      3,
+      4,
+      4,
+      5,
+      5
+    ],
+    "pressureStartsAt": 0,
+    "energyStarts": "Current expedition energy; a camp restores each friend to their level maximum.",
+    "rallyRule": "Rally and chime set a single pending partner bonus; later use replaces rather than stacks it. Only a progress move by the other companion consumes it; expires at encounter end. Trail marker is separate and consumed by the next progress move.",
+    "failure": "Return to the last camp with party, clues, XP and mission inventory intact; fully restore energy. Consumed optional supplies remain consumed; keeper tool charges reset each attempt.",
+    "learning": "No academic question per turn. Incorrect academic answers never damage companions, raise pressure or consume items.",
+    "switching": "Choose either travelling companion each turn without spending a separate turn; changing the travelling pair is available at camp.",
+    "retry": "Encounter seed, committed turns and supplies persist across reload; restart begins at camp, never duplicates rewards.",
+    "preview": "The next hazard is always visible with words and icons; reveal also shows the following hazard. No reflex timing.",
+    "keeperTool": {
+      "id": "keeper_tool",
+      "charges": 3,
+      "progress": 2,
+      "energy": 0,
+      "pressureReduction": 1,
+      "availability": "Free loan during every trial preparation, available to every starter and kept for that attempt. Does not require the seal being earned; permanent field use unlocks after the trial.",
+      "pouchSlots": 0
+    },
+    "resolution": "Apply actor energy cost and progress, including matching +2 and a pending partner/marker bonus. Clear only bonuses consumed by a progress move. Win if target reached. Otherwise reduce this turn’s hazard by the move/item shield, add remaining hazard to pressure, then lose at pressure >= limit or completed turns >= roundLimit. Rest caps at level maximum. No residual shield.",
+    "loadouts": "At level one the signature technique is equipped. Level two adds rally as a second technique. Universal focus/guard/rest remain available. The level-three choice modifies signature or rally; one free signature is consumed only on a successful signature action and resets at camp.",
+    "phases": "Use the affinity of the highest phase threshold reached BEFORE the move. Progress carries between phases without resetting energy, pressure, turn count or tool charges. The next threshold and affinity are visible; crossing a threshold changes the following turn."
+  },
+  "progression": {
+    "levelThresholds": [
+      0,
+      10,
+      20,
+      30,
+      40
+    ],
+    "xpPerMilestone": 10,
+    "milestones": [
+      {
+        "id": "first-help",
+        "requiredLevel": 1,
+        "unlockedBy": "welcome",
+        "task": "Complete this companion’s first field-help activity."
+      },
+      {
+        "id": "field-partner",
+        "requiredLevel": 2,
+        "unlockedBy": "echo-trial",
+        "task": "Complete this companion’s distinct route-preparation activity."
+      },
+      {
+        "id": "personal-project",
+        "requiredLevel": 3,
+        "unlockedBy": "current-trial",
+        "task": "Complete the authored personal quest in the companion record."
+      },
+      {
+        "id": "wayfinder",
+        "requiredLevel": 4,
+        "unlockedBy": "beacon-trial",
+        "task": "Complete this companion’s distinct expedition-planning activity."
+      }
+    ],
+    "rewards": [
+      {
+        "level": 2,
+        "unlock": "Learn rally as an optional equipped technique; celebration pose."
+      },
+      {
+        "level": 3,
+        "unlock": "Choose signature efficiency (one free signature use per expedition) or partnership (rally grants +3 instead of +2); change at camp for free."
+      },
+      {
+        "level": 4,
+        "unlock": "Personal keepsake and a visible bond detail on the companion."
+      },
+      {
+        "level": 5,
+        "unlock": "Wayfinder form with distinct silhouette, animation and optional appearance toggle; mechanics remain available in either appearance."
+      }
+    ],
+    "grantKey": [
+      "profileId",
+      "contentVersion",
+      "companionId",
+      "milestoneId"
+    ],
+    "repeatXp": 0,
+    "supportedMultiplier": 1,
+    "friendship": "Distinct verified shared quests and preferences; no academic score or repeated petting reward.",
+    "legacy": "No historical XP inferred; existing earned XP, appearances and grants retained under their original policy.",
+    "storyRequiresLevel": false,
+    "storyRequiresAcademicMastery": false,
+    "trainingDelivery": "Four unique activity instances per companion, themed by their affinity and personal quest. A recruited friend can begin every story-unlocked milestone in level order, including after the ending. Tactical replays and repeated care never create extra XP.",
+    "rewardTiming": "Level-three technique choice is offered upon reaching 20 XP; level-four keepsake on completing personal-project; level-five Wayfinder form on completing wayfinder. Distinct art is required before presentation is claimed implemented.",
+    "teamSlots": [
+      {
+        "unlockedBy": "welcome",
+        "capacity": 1
+      },
+      {
+        "unlockedBy": "bridge-trial",
+        "capacity": 2
+      }
+    ]
+  },
+  "recruitment": [
+    {
+      "creatureId": "pip",
+      "unlockedBy": "bloom-trial",
+      "habitatId": "bridge_bank",
+      "clue": "Ask the local keeper about Pip; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Pip hides uncertainty behind questions. Help him admit he cannot see the whole path.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "tansy",
+      "unlockedBy": "bloom-trial",
+      "habitatId": "flower_garden",
+      "clue": "Ask the local keeper about Tansy; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Tansy wants every seed to survive. Help her leave room for wild growth.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "nib",
+      "unlockedBy": "echo-trial",
+      "habitatId": "picnic_clearing",
+      "clue": "Ask the local keeper about Nib; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Nib keeps supplies for every possibility. Help him trust a partner with the plan.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "flutter",
+      "unlockedBy": "echo-trial",
+      "habitatId": "echo_hollow",
+      "clue": "Ask the local keeper about Flutter; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Flutter hears a rhythm nobody believes. Give them a chance to lead.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "cleo",
+      "unlockedBy": "harvest-trial",
+      "habitatId": "orchard_hub",
+      "clue": "Ask the local keeper about Cleo; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Cleo builds things alone so nobody is disappointed. Build something imperfect together.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "bramble",
+      "unlockedBy": "harvest-trial",
+      "habitatId": "old_mill",
+      "clue": "Ask the local keeper about Bramble; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Bramble always carries the heaviest load. Help him ask the team for support.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "patter",
+      "unlockedBy": "current-trial",
+      "habitatId": "courier_pond",
+      "clue": "Ask the local keeper about Patter; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Patter rushes deliveries to prove dependable. Plan a route that leaves time to rest.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "twizzle",
+      "unlockedBy": "current-trial",
+      "habitatId": "garland_ridge",
+      "clue": "Ask the local keeper about Twizzle; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Twizzle abandons inventions when a new idea arrives. Finish a useful tune together.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "luna",
+      "unlockedBy": "beacon-trial",
+      "habitatId": "cove_hub",
+      "clue": "Ask the local keeper about Luna; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Luna thinks fear means she cannot guide anyone. Lead a short night walk together.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "pebble",
+      "unlockedBy": "tide-trial",
+      "habitatId": "shell_beach",
+      "clue": "Ask the local keeper about Pebble; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Pebble follows the old tide markers even when they change. Test and redraw the route.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "glimmer",
+      "unlockedBy": "constellation",
+      "habitatId": "hidden_tide_garden",
+      "clue": "Ask the local keeper about Glimmer; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Glimmer was mistaken for the thief of the lights. Restore the truth and the habitat.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    },
+    {
+      "creatureId": "sail",
+      "unlockedBy": "beacon-trial",
+      "habitatId": "harbour_lookout",
+      "clue": "Ask the local keeper about Sail; their field-guide silhouette names this habitat.",
+      "approach": [
+        "Observe one authored preference clue.",
+        "Choose a respectful approach: wait, offer help or invite play. A mismatch adds a clue; it never removes trust.",
+        "Complete the companion’s authored help task with support available.",
+        "Invite them to join or leave the invitation saved for later."
+      ],
+      "helpTask": "Sail encourages everyone but never joins the expedition. Make a plan with a role for Sail.",
+      "alreadyOwned": "Offer the personal memory scene without granting a duplicate creature.",
+      "appearance": "Persistent authored offer; within three eligible habitat visits. Reload never rerolls the saved order."
+    }
+  ],
+  "resources": {
+    "pouchSlots": 3,
+    "stackPerSlot": 1,
+    "keyItemsUseSlots": false,
+    "campRestCost": 0,
+    "inactivityDecay": false,
+    "items": [
+      {
+        "id": "snack",
+        "effect": "Restore 2 energy to one companion, capped at level maximum.",
+        "costInEncounter": "one_turn",
+        "recipe": {
+          "berry": 2
+        }
+      },
+      {
+        "id": "shelter_patch",
+        "effect": "Reduce current-turn pressure by 2, minimum zero.",
+        "costInEncounter": "one_turn",
+        "recipe": {
+          "leaf": 2
+        }
+      },
+      {
+        "id": "trail_marker",
+        "effect": "Next progress move receives +2 once; does not stack with another marker.",
+        "costInEncounter": "one_turn",
+        "recipe": {
+          "wood": 1,
+          "glow_pebble": 1
+        }
+      }
+    ],
+    "sources": [
+      {
+        "id": "camp-forage",
+        "yieldPerExpedition": {
+          "berry": 2,
+          "leaf": 2,
+          "wood": 1,
+          "glow_pebble": 1
+        },
+        "reset": "After resolving a previously uncompleted project, trial or personal quest; never on reload.",
+        "purpose": "Enough material for one of each optional supply; none is required for a story solution."
+      }
+    ],
+    "missionSupplies": "Reserved per quest, separate from pouch; cannot be sold, traded or spent on optional recipes.",
+    "care": [
+      "Free rest restores energy at a camp.",
+      "Ask about a favourite activity; choose play, grooming or a snack animation without consuming expedition supplies.",
+      "Distinct personal moments change memories and dialogue. No neglect, death or loss while away."
+    ]
+  },
+  "sideQuests": [
+    {
+      "id": "lens-before-light",
+      "unlockedBy": "echo-trial",
+      "locationId": "old_watchtower",
+      "objective": "Notice the sealed lens room. Copy its star mark; revisit after seal-beacon preparation grants keeper access.",
+      "payoff": "Recover the lighthouse lens during beacon-project; the early clue changes Sail’s greeting.",
+      "systems": [
+        "exploration",
+        "mystery",
+        "backtracking"
+      ]
+    },
+    {
+      "id": "first-fossil",
+      "unlockedBy": "harvest-trial",
+      "locationId": "old_mill",
+      "objective": "Choose a leaf fossil or a shell fossil from the mill foundations; restore it at Cleo’s workbench.",
+      "payoff": "A keepsake and clue to a garden or shore side route. NPC exchange later supplies the other fossil without losing a companion.",
+      "systems": [
+        "choice",
+        "exchange",
+        "collection"
+      ]
+    },
+    {
+      "id": "bridge-under-bridge",
+      "unlockedBy": "current-trial",
+      "locationId": "bridge_bank",
+      "objective": "Return with ferry ability or folding raft to the island visible from the opening scene.",
+      "payoff": "An old beacon blueprint and a unique charm; the blueprint explains the distributed system before Vell admits it.",
+      "systems": [
+        "ability",
+        "exploration",
+        "mystery"
+      ]
+    },
+    {
+      "id": "rowan-rematch",
+      "unlockedBy": "beacon-trial",
+      "locationId": "harbour_lookout",
+      "objective": "Try Rowan’s changed two-partner team in a friendly three-round relay.",
+      "payoff": "A partner ribbon for using two affinities. Supported play can earn the same ribbon; no exclusive best-time reward.",
+      "systems": [
+        "tactics",
+        "rivalry",
+        "team"
+      ]
+    },
+    {
+      "id": "last-light",
+      "unlockedBy": "constellation",
+      "locationId": "hidden_tide_garden",
+      "objective": "Use the eight seals to open the sanctuary and help Glimmer guide the last displaced creatures home.",
+      "payoff": "Recruit Glimmer, complete the twelve-friend guide and unlock the sanctuary rest camp.",
+      "systems": [
+        "secret",
+        "collection",
+        "care"
+      ]
+    }
+  ],
+  "exchanges": [
+    {
+      "id": "fossil-exchange",
+      "unlockedBy": "harvest-trial",
+      "npc": "cleo",
+      "give": "duplicate_rubbing",
+      "receive": "unchosen_fossil_rubbing",
+      "limit": 1,
+      "source": "After restoring either fossil, Cleo provides two copies of its rubbing; one is for exchange."
+    },
+    {
+      "id": "rowan-map",
+      "unlockedBy": "current-trial",
+      "npc": "rowan",
+      "give": "copy_of_watchtower_clue",
+      "receive": "garland_ridge_clue",
+      "limit": 1,
+      "source": "Copy an already recorded clue at a camp for free; the original is retained."
+    }
+  ],
+  "social": {
+    "mode": "Paired expedition with a known invited partner; local shared-device play first, network play later.",
+    "roles": [
+      "navigator chooses the route",
+      "keeper chooses the support action"
+    ],
+    "turns": "Alternate roles after every encounter; each player controls their own companion. Both must confirm the expedition start.",
+    "exchange": "Exchange duplicate keepsake rubbings or authored clue cards; show both offers and confirm both sides atomically. Never transfer companion ownership or learning evidence.",
+    "progress": "Each profile receives only its own verified participating quest grants. A partner answer is supported participation, never independent evidence for the other learner.",
+    "availability": "Every reward has an authored NPC or solo equivalent. No version-exclusive friends, random public matchmaking or free-text chat.",
+    "completion": "Disconnection preserves the last confirmed turn and offers solo continuation; no unconfirmed exchange commits."
+  },
+  "ending": {
+    "requiredMission": "accord-trial",
+    "celebrationMission": "constellation",
+    "worldChanges": [
+      "All three regions regain visible light and habitat activity.",
+      "Vell’s collectors become shared wayposts.",
+      "Rowan becomes a cooperative expedition partner."
+    ],
+    "postgame": [
+      "Recruit Glimmer through last-light.",
+      "Complete all twelve field-guide entries and personal quests.",
+      "Revisit the opening island, fossil routes and habitat caches.",
+      "Attempt optional remixed trial boards with fixed authored patterns, no additional milestone XP."
+    ]
+  },
+  "contentPolicy": {
+    "authority": "Rust validates actions and commits progress, supplies, rewards and evidence atomically.",
+    "learning": "Use the current curriculum frontier; supported completion earns identical adventure rewards with separate evidence.",
+    "generation": "LLM may propose packs using this schema and approved IDs; validate graph, recipes, exact trial solutions and content review before activation.",
+    "saves": "Pin campaign/version/mission/turn/recipient/grant IDs; exact retries retain command body. Explicit opt-in adoption of existing saves, no reset.",
+    "runtimeStatus": "New routes, characters, challenges, forms and quests require implementation and assets; this JSON is an authored design, not an executable runtime pack."
+  },
+  "rivalEncounters": [
+    {
+      "id": "rowan-opening",
+      "unlockedBy": "welcome",
+      "locationId": "bridge_bank",
+      "affinity": "craft",
+      "targetProgress": 5,
+      "roundLimit": 7,
+      "pressureLimit": 6,
+      "story": "Rowan uses one specialist and ignores the other partner.",
+      "reward": "First meeting memory; the story continues regardless of outcome."
+    },
+    {
+      "id": "rowan-middle",
+      "unlockedBy": "echo-trial",
+      "locationId": "orchard_hub",
+      "affinity": "growth",
+      "targetProgress": 8,
+      "roundLimit": 9,
+      "pressureLimit": 6,
+      "story": "Rowan has a strong move but repeats it even as the terrain changes.",
+      "reward": "A field-guide strategy note, obtainable through discussion if you skip the contest."
+    },
+    {
+      "id": "rowan-final",
+      "unlockedBy": "beacon-trial",
+      "locationId": "harbour_lookout",
+      "affinity": "tide",
+      "targetProgress": 10,
+      "roundLimit": 11,
+      "pressureLimit": 8,
+      "story": "Rowan alternates a specialist and support partner; the visible round limit represents their relay pace.",
+      "reward": "Partner ribbon for completing with both companions, including a guided plan."
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "garden-channels",
+      "missionId": "bloom-project",
+      "type": "route_flow",
+      "initial": [
+        "source-to-collector",
+        "bed-a-closed",
+        "bed-b-closed"
+      ],
+      "goal": [
+        "source-to-bed-a",
+        "source-to-bed-b"
+      ],
+      "actions": [
+        "rotate-junction-a",
+        "rotate-junction-b",
+        "test-water"
+      ],
+      "reset": "Free reset to the displayed initial state; trial and error never consumes mission supplies.",
+      "supported": "Fern demonstrates the first branch and then offers a complete guided route."
+    },
+    {
+      "id": "hollow-chimes",
+      "missionId": "echo-project",
+      "type": "order_signals",
+      "initial": [
+        "leaf",
+        "star",
+        "wave"
+      ],
+      "goal": [
+        "star",
+        "wave",
+        "leaf"
+      ],
+      "actions": [
+        "swap-adjacent",
+        "listen",
+        "read-symbol-clue"
+      ],
+      "reset": "Free replay; no memory timer. Sound clues always have visible symbol equivalents.",
+      "supported": "Orla places the first chime; the full arrangement is available with support recorded."
+    },
+    {
+      "id": "pump-valves",
+      "missionId": "current-project",
+      "type": "state_sequence",
+      "initial": [
+        "inlet-open",
+        "bypass-closed",
+        "outlet-closed"
+      ],
+      "goal": [
+        "inlet-closed",
+        "bypass-open",
+        "outlet-open"
+      ],
+      "actions": [
+        "open-bypass",
+        "close-inlet",
+        "open-outlet"
+      ],
+      "reset": "Unsafe order gives a visible explanation and returns to the last safe step without losing items.",
+      "supported": "Patter walks through opening bypass, closing inlet, then opening outlet."
+    }
+  ]
+}

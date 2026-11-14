@@ -1,5 +1,24 @@
 # Wonderwilds implementation plan
 
+## Current priority — 14 November 2026
+
+Follow the [Missing Moonlight build plan](CAMPAIGN_BUILD_PLAN.md) for all new
+campaign work. It specifies the implementation sequence, canonical state ownership,
+asset batches, save compatibility and acceptance checks. The first playable delivery
+covers welcome, Bridge and Bloom so team choices, training, care, two trials,
+recruitment and world changes can be tested together.
+
+The [campaign specification](../content/campaign/README.md) defines the complete
+three-region story and twelve interacting mechanics. Runtime implementation and
+asset production remain planned. Existing model integrations are preserved;
+the new core campaign will explicitly use authored content.
+
+## Historical plan — 31 October 2026
+
+The sections below retain earlier decisions and evidence. Their immediate queues
+and priority order are superseded by the build plan above. The active curriculum
+is now the 736-skill NSW pack; older five-skill/120-node references are historical.
+
 Updated: 31 October 2026 · Revision: first curriculum-in-missions slice implemented
 
 ## 1. Updated baseline and purpose

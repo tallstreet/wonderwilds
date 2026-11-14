@@ -5,6 +5,44 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Campaign build planning — 14 November 2026
+
+Added the [active build plan](CAMPAIGN_BUILD_PLAN.md), grounded in the current story
+entry point, separate companion/learning state, existing artwork and API transaction
+boundaries. It sequences executable content, compatible persistence, a seven-mission
+Bridge/Bloom slice, Meadow, branching Orchard, Cove/finale, playtesting and paired
+play. Asset work is batched with playable milestones and starts with an audit of
+existing frames. Historical implementation queues are explicitly superseded.
+
+Documentation only: no campaign runtime, new assets or save writes were produced.
+Plan links and `git diff --check` were checked; application tests were not rerun.
+
+## Authored companion campaign specification — 14 November 2026
+
+The initial Moonlight Trail proposal is superseded by the disabled
+[Missing Moonlight v2 specification](../content/campaign/README.md). It defines a
+three-region mystery involving Rowan, Warden Vell and the diverted moonlight;
+26 main missions, eight keeper trials, twelve companions, five field abilities,
+team tactics, expedition resources, care, puzzles, secrets and NPC exchanges.
+Human paired play has explicit proposed rules but is a separate extension.
+The first playable slice must connect these mechanics, not just show starter
+selection and XP. AI generation remains a future core extension; existing
+provider behavior is unchanged.
+
+This is design content and offline validation only. No new runtime campaign,
+combat, regions, evolution artwork, multiplayer or save migration is claimed.
+The README identifies remaining dialogue, exact action bindings, personal-quest
+steps, art and runtime verification. Legacy story pack hashes, review gates and
+persistent demo data remain unchanged.
+
+V2 validation checks schema/references, mission cycles, route/ability/seal
+reachability, recruitment references, XP and optional recipe supply. An offline
+search finds 24 level-one, single-starter trial solutions with free keeper
+gear; eleven negative cases are rejected. It covers a subset of encounter rules,
+not team synergy, balance, persistence or UI. V1 checks remain regression evidence
+for the superseded design. Existing story validation, 13 story tests and
+`git diff --check` also passed. No educator or runtime playability approval follows.
+
 ## NSW replacement curriculum — 14 November 2026
 
 Active mission selection now uses the supplied 736-node NSW K–6 graph and its

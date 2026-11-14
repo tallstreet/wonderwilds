@@ -15,6 +15,18 @@ the activities become repetitive. Wonderwilds is built around a simple idea:
 give children an adventure they want to return to, and make learning a meaningful
 part of the journey.
 
+## Core-game direction
+
+The next delivery is an authored companion campaign: meet a guide, choose one of
+three companions, investigate the disappearing moonlight and restore eight regional
+beacons. Team tactics, field abilities, care, resource choices, twelve recruitable
+friends and return visits connect progression to the story. The
+[Missing Moonlight specification](content/campaign/README.md) contains the static
+JSON campaign and validation checks. The [build plan](docs/CAMPAIGN_BUILD_PLAN.md)
+sets out playable milestones and asset production. The campaign is not yet wired
+into the playable game. AI-generated scenes remain a future extension of this core;
+the existing prototype integrations described below are preserved.
+
 ## An adventure shaped by imagination
 
 Meta AI helps make the world personal and keeps it full of new stories:

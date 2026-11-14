@@ -1,0 +1,588 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contentVersion",
+    "status",
+    "releaseEnabled",
+    "reviewStatus",
+    "title",
+    "premise",
+    "sourcePolicy",
+    "starterChoice",
+    "collectionIds",
+    "locations",
+    "progression",
+    "care",
+    "learningPolicy",
+    "missions",
+    "training",
+    "postCampaign",
+    "persistence",
+    "futureGeneration"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "contentVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "status": {
+      "const": "specification"
+    },
+    "releaseEnabled": {
+      "const": false
+    },
+    "reviewStatus": {
+      "const": "pending"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "premise": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "sourcePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "core",
+        "generatedScenes",
+        "generationRequired"
+      ],
+      "properties": {
+        "core": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "generatedScenes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "generationRequired": {
+          "type": "boolean"
+        }
+      }
+    },
+    "starterChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "guideId",
+        "creatureIds",
+        "count",
+        "changesPlayerAvatar",
+        "unchosenRemainRecruitable"
+      ],
+      "properties": {
+        "guideId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "creatureIds": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "changesPlayerAvatar": {
+          "type": "boolean"
+        },
+        "unchosenRemainRecruitable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "collectionIds": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      }
+    },
+    "locations": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      }
+    },
+    "progression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "characterLevelThresholds",
+        "supportedRewardMultiplier",
+        "wrongAnswerXpLoss",
+        "inactivityXpLoss",
+        "storyRequiresAcademicMastery",
+        "storyRequiresCharacterLevel",
+        "teamSlots",
+        "levelRewards"
+      ],
+      "properties": {
+        "characterLevelThresholds": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "supportedRewardMultiplier": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wrongAnswerXpLoss": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inactivityXpLoss": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "storyRequiresAcademicMastery": {
+          "type": "boolean"
+        },
+        "storyRequiresCharacterLevel": {
+          "type": "boolean"
+        },
+        "teamSlots": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "after",
+              "capacity"
+            ],
+            "properties": {
+              "after": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "capacity": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "levelRewards": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "level",
+              "reward"
+            ],
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "reward": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            }
+          }
+        }
+      }
+    },
+    "care": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actions",
+        "kitSource",
+        "consumableCost",
+        "repeatable",
+        "repeatXp",
+        "neglectPenalty",
+        "blocksAdventures",
+        "memoryPolicy"
+      ],
+      "properties": {
+        "actions": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "kitSource": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "consumableCost": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repeatable": {
+          "type": "boolean"
+        },
+        "repeatXp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "neglectPenalty": {
+          "type": "boolean"
+        },
+        "blocksAdventures": {
+          "type": "boolean"
+        },
+        "memoryPolicy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    },
+    "learningPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selector",
+        "difficulty",
+        "supportedCompletion",
+        "assessment",
+        "creativeChoicesAssessed"
+      ],
+      "properties": {
+        "selector": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "difficulty": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "supportedCompletion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "assessment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "creativeChoicesAssessed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "missions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "requires",
+          "steps",
+          "payoff",
+          "badgeId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "requires": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string"
+            }
+          },
+          "steps": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "kind",
+                "locationId",
+                "targetId",
+                "instruction",
+                "learning"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "kind": {
+                  "enum": [
+                    "build",
+                    "care",
+                    "celebrate",
+                    "choose_companion",
+                    "choose_design",
+                    "collect",
+                    "craft",
+                    "escort",
+                    "inspect",
+                    "recruit",
+                    "talk",
+                    "travel"
+                  ]
+                },
+                "locationId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "targetId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "instruction": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "learning": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "payoff": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "badgeId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "training": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "unlockedBy",
+          "requiresLevel",
+          "xp",
+          "locationId",
+          "instruction",
+          "recipient",
+          "learning",
+          "grantScope",
+          "replayXp"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "unlockedBy": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "requiresLevel": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "xp": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "locationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "instruction": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "recipient": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "learning": {
+            "type": "boolean"
+          },
+          "grantScope": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "replayXp": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "postCampaign": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objectives",
+        "repeatTrainingXp",
+        "nextExpansion"
+      ],
+      "properties": {
+        "objectives": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "repeatTrainingXp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nextExpansion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pin",
+        "authority",
+        "retry",
+        "existingSaves"
+      ],
+      "properties": {
+        "pin": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "retry": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "existingSaves": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    },
+    "futureGeneration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "output",
+        "activation",
+        "protected"
+      ],
+      "properties": {
+        "input": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "output": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "activation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "protected": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wonderwilds.local/content/campaign/v1"
+}

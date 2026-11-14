@@ -1,5 +1,12 @@
 # Wonderwilds companion progression implementation plan
 
+Current direction (14 November 2026): the [Missing Moonlight campaign](../content/campaign/README.md)
+specifies a three-region story joining collection, tactical team choices, training,
+field abilities, care, resources, rivalry, secrets and exchange. Its new world
+bindings and campaign systems remain implementation work. It takes priority over
+the delivery order below. Earlier training, two-slot and appearance implementations remain foundations to preserve;
+the new campaign is not yet a playable integration.
+
 Updated: 31 October 2026. Status: first Meadow training delivery and long-play persistence implemented and verified; richer milestones and regional integration remain planned. Test evidence is recorded in IMPLEMENTATION_STATUS.md.
 
 ## Purpose and scope
