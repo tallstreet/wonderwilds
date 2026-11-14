@@ -1,4 +1,5 @@
 use super::*;
+use unicode_normalization::UnicodeNormalization;
 fn invalid<T>() -> Result<T, MissionError> {
     Err(MissionError::InvalidAnswer)
 }
@@ -130,6 +131,15 @@ pub(super) fn assess(item: &Item, answer: &MissionAnswer) -> Result<bool, Missio
                     Some("decimal") if text.contains('/') => return invalid(),
                     _ => {}
                 }
+                let constraints =
+                    &item.answer.as_ref().unwrap()["sourceScoring"]["format_constraints"];
+                if let Some(places) = constraints["decimal_places_required"].as_u64()
+                    && text
+                        .split_once('.')
+                        .is_none_or(|(_, tail)| tail.len() != places as usize)
+                {
+                    return Ok(false);
+                }
                 let (a, b) = rational(text).ok_or(MissionError::InvalidAnswer)?;
                 let expected = expected["values"]
                     .as_array()
@@ -147,6 +157,33 @@ pub(super) fn assess(item: &Item, answer: &MissionAnswer) -> Result<bool, Missio
             let text = value.trim();
             if text.is_empty() || text.chars().count() > 120 {
                 return invalid();
+            }
+            if let Some(score) = expected.get("sourceScoring") {
+                let n = &score["normalisation"];
+                let normalise = |input: &str| {
+                    let mut text = input.to_owned();
+                    if n["trim"] == true {
+                        text = text.trim().to_owned();
+                    }
+                    if n["normalise_unicode"] == "NFC" {
+                        text = text.nfc().collect();
+                    }
+                    if n["normalise_apostrophes"] == true {
+                        text = text.replace(['’', '‘'], "'");
+                    }
+                    if n["collapse_internal_whitespace"] == true {
+                        text = text.split_whitespace().collect::<Vec<_>>().join(" ");
+                    }
+                    if n["case_sensitive"] == false {
+                        text = text.to_lowercase();
+                    }
+                    text
+                };
+                return Ok(score["accepted"]
+                    .as_array()
+                    .ok_or(MissionError::InvalidState)?
+                    .iter()
+                    .any(|v| v.as_str().is_some_and(|v| normalise(v) == normalise(value))));
             }
             Ok(text.to_lowercase() == expected["value"].as_str().unwrap().to_lowercase())
         }
@@ -172,6 +209,9 @@ pub(super) fn assess(item: &Item, answer: &MissionAnswer) -> Result<bool, Missio
                     })
                     .collect()
             };
+            if let Some(sequences) = expected["acceptedSequences"].as_array() {
+                return Ok(sequences.iter().any(|s| s == &value["itemIds"]));
+            }
             Ok(labels(&value["itemIds"]) == labels(&expected["itemIds"]))
         }
         ("assign", MissionAnswer::Assign { assignments }) => {
@@ -186,6 +226,22 @@ pub(super) fn assess(item: &Item, answer: &MissionAnswer) -> Result<bool, Missio
                 || assignments.iter().any(|v| !targets.contains(&v.target_id))
             {
                 return invalid();
+            }
+            if expected["rule"] == "counts" {
+                return Ok(targets.iter().all(|target| {
+                    expected["groupCounts"][target].as_u64()
+                        == Some(
+                            assignments
+                                .iter()
+                                .filter(|a| &a.target_id == target)
+                                .count() as u64,
+                        )
+                }));
+            }
+            if let Some(mappings) = expected["acceptedMappings"].as_array() {
+                return Ok(mappings
+                    .iter()
+                    .any(|m| assignments.iter().all(|a| m[&a.object_id] == a.target_id)));
             }
             if expected.get("rule").and_then(Value::as_str) == Some("equal") {
                 let counts: Vec<_> = targets

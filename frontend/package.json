@@ -16,6 +16,7 @@
     "check": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build"
   },
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "7.3.1",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
     "lucide": "1.65.0",

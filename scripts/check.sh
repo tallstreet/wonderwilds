@@ -8,6 +8,9 @@ cargo fmt --all --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
 (cd contracts && npm test && npm run typecheck && npm run check:generated)
+node scripts/export-nsw-icons.mjs --check
+python3 scripts/import-nsw-curriculum.py --check
+python3 -m unittest discover -s content/curriculum/nsw -p 'test_*.py'
 python3 content/curriculum/validate.py
 python3 -m unittest discover -s content/curriculum -p 'test_*.py'
 node content/curriculum/check-schema.mjs

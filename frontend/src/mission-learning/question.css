@@ -429,3 +429,13 @@
   color: #65745d;
   margin-bottom: 4px;
 }
+
+.ww-question-diagram {
+  width: 100%;
+}
+.ww-question-diagram img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}

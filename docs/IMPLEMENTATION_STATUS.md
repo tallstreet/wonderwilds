@@ -5,6 +5,47 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## NSW replacement curriculum — 14 November 2026
+
+Active mission selection now uses the supplied 736-node NSW K–6 graph and its
+8,125 practice items (at least ten distinct items per skill). Ten distinct checks
+support provisional practice readiness; supported exploration is recorded separately
+and can open further practice without claiming ability. Repeated first-check failures
+schedule prerequisite revision and return, preserving progress. The previous 120-node
+packs remain diagnostic fixtures, not the active mission frontier.
+
+All skill resource links are available in the journal. Supplied SVGs are sanitized
+into local images; common structured diagrams and verified optional Font Awesome
+context icons are supported. Exact text normalization and numeric format constraints
+remain server-assessed. Answer banks, audio scripts and producer metadata are private.
+English answer transcription is disabled for the replacement IDs.
+
+Delivery currently includes 6,439 automatically assessed items and 1,686 explicit
+supported workshops. Missing reviewed audio, unimplemented structured/geometry
+controls and authentic human-assessed work remain limitations; retaining ten items
+per skill does not establish ten automatic tests per skill. The complete per-item
+report and rebuilding instructions are in [the active pack](../content/curriculum/nsw/README.md).
+Educator calibration, complete assessment-facet coverage, accessible equivalent
+assessment, secure mastery and release approval remain pending.
+
+Verification: workspace Rust tests, final learning tests (including complete graph
+traversal, bounded storage, prerequisite return, normalization and money notation),
+workspace Clippy/format, shared contract fixtures/typechecking/generation, replacement
+import/integrity tests, existing curriculum/activity/story validators and legacy
+save fixtures passed. Frontend checks include strict types, lint/format, unit tests
+and production build. The complete disposable PostgreSQL suite passed with migration
+0007, ownership, RLS, rollback, exact retries, replay and atomic story effects.
+Browser checks passed for existing controls, replacement diagrams/picture choices,
+brief exposure, keyboard input and desktop/phone layouts; a real disposable API
+journey passed ten distinct items, advancement, retries, reload, the full browser
+transport and resource links. Phone screenshots were inspected.
+
+Node 26 was available rather than Node 24; the existing bundle-size warning remains.
+No persistent demo data was changed, no external learning links were re-audited,
+and no educator, child, reviewed-audio or production approval is claimed. Restart
+the local demo to apply migration 0007 and load the replacement backend.
+
+
 ## Hands-on generated neighbourhood projects — 31 October 2026
 
 Generated neighbourhoods now mix six supported project plans with twelve discovery

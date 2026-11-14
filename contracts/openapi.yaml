@@ -983,6 +983,7 @@
       "MissionLearningFeedback": {
         "$ref": "./schemas/v1.json#/$defs/MissionLearningFeedback"
       },
+      "LearningResource": {"$ref": "./schemas/v1.json#/$defs/LearningResource"},
       "MissionSkillProgress": {
         "$ref": "./schemas/v1.json#/$defs/MissionSkillProgress"
       },

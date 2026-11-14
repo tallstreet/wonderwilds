@@ -363,7 +363,7 @@ export class StoryWorld {
       .filter((skill) => skill.supportedByMission)
       .map((skill) => {
         const status = skill.activityCompleted
-          ? 'Activity complete ✓'
+          ? 'Practice explored ✓'
           : {
               locked: 'Coming later',
               available: 'Ready to try',
@@ -371,7 +371,13 @@ export class StoryWorld {
               ready_for_next: 'Ready for another skill',
               unavailable: 'Not available in this story',
             }[skill.status];
-        return `<li><strong>${escape(skill.objective)} · ${status}</strong><span>${skill.activityCompleted ? 'Finished. We’ll try something different next.' : `${skill.correctChecks} of ${skill.eligibleChecks} independent checks · ${escape(skill.nextStep)}`}</span></li>`;
+        const resources = (skill.learningResources ?? [])
+          .map(
+            (r) =>
+              `<a href="${escape(r.url)}" target="_blank" rel="noopener noreferrer">${escape(r.title)} · ${escape(r.provider)} (${r.audience === 'adult' ? 'grown-up guidance' : 'learning resource'})</a>`,
+          )
+          .join(' · ');
+        return `<li><strong>${escape(skill.objective)} · ${status}</strong><span>${skill.correctChecks} of ${skill.eligibleChecks} independent checks · ${escape(skill.nextStep)}</span>${resources ? `<details><summary>Learning resources</summary><p>Suggested topic links; explore with a grown-up.</p>${resources}</details>` : ''}</li>`;
       })
       .join('');
     const callToAction = this.learning.hasPending

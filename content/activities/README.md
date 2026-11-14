@@ -2,6 +2,11 @@
 
 ## Current mission questions
 
+Active missions use the [NSW replacement pack](../curriculum/nsw/README.md).
+The bank described below remains for historical diagnostic tests.
+
+## Earlier 120-skill mission questions
+
 `skill-exercises-v1.json` is the server-private bank for all 120 skill-map nodes.
 It contains seven interaction types and bounded visual stimuli; public responses
 contain the selected question only, with option IDs shuffled/remapped by Rust.

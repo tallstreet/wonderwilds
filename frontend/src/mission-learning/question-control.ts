@@ -67,7 +67,15 @@ export function mountQuestionControl(
       input.value = option.id;
       input.setAttribute('aria-label', option.label);
       const caption = node('span', 'Choose', 'ww-question-caption');
-      if (option.picture) label.append(activityIcon(option.picture));
+      if (option.diagram)
+        label.append(
+          renderStimulus(doc, {
+            kind: 'diagram',
+            assetId: option.diagram,
+            description: option.label,
+          }),
+        );
+      else if (option.picture) label.append(activityIcon(option.picture));
       else
         label.append(
           node(

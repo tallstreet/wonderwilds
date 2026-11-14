@@ -84,6 +84,8 @@ mod tests {
                     "StoryCommand" => round_trip!(StoryCommand),
                     "StorySnapshot" => round_trip!(StorySnapshot),
                     "MissionTask" => round_trip!(MissionTask),
+                    "QuestionStimulus" => round_trip!(QuestionStimulus),
+                    "LearningResource" => round_trip!(LearningResource),
                     "MissionLearningCommand" => round_trip!(MissionLearningCommand),
                     "MissionLearningAnswer" => round_trip!(MissionLearningAnswer),
                     "MissionLearningFeedback" => round_trip!(MissionLearningFeedback),

@@ -92,17 +92,11 @@ fn answer(task: &PublicTask) -> MissionAnswer {
 }
 
 #[test]
-fn actual_items_advance_the_graph_and_replay_the_same_bounded_progress() {
+fn diagnostic_items_replay_without_becoming_replacement_progress() {
     let graph = CurriculumGraph::load().unwrap();
     let mut state = MissionState::default();
     let mut history = Vec::new();
     for skill in ["M01", "M03", "M04", "M05", "M06"] {
-        assert!(
-            mission::frontier(&state, Some("maths"))
-                .unwrap()
-                .iter()
-                .any(|n| n.skill_id == skill)
-        );
         for seed in 0..12 {
             let sequence = history.len() as u64 + 1;
             let context = if seed < 6 { "pip-bridge" } else { "pip-picnic" };
@@ -155,14 +149,8 @@ fn actual_items_advance_the_graph_and_replay_the_same_bounded_progress() {
             "{skill}"
         );
     }
-    assert!(
-        mission::frontier(&state, Some("maths"))
-            .unwrap()
-            .iter()
-            .any(|n| n.skill_id == "M02")
-    );
     assert_eq!(mission::replay(&history).unwrap(), state);
     assert!(state.observations.len() <= 60);
-    assert_eq!(mission::all_skill_projections(&state).unwrap().len(), 120);
+    assert_eq!(mission::all_skill_projections(&state).unwrap().len(), 736);
     assert!(serde_json::to_vec(&state).unwrap().len() < 64 * 1024);
 }

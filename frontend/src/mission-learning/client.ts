@@ -5,7 +5,7 @@ import type {
 import { ApiFailure } from '../api/client.ts';
 import { isMissionLearningCommand, isMissionLearningSnapshot } from './validation.ts';
 
-const maximumResponseBytes = 64 * 1024;
+const maximumResponseBytes = 2 * 1024 * 1024;
 const maximumCommandBytes = 4096;
 
 /** Profile-scoped mission-learning transport; no learner identity is accepted in a command body. */

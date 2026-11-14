@@ -2,6 +2,8 @@
 //! This does not alter the established independent-transfer mastery policy.
 mod catalogue;
 mod exercises;
+mod progression;
+pub use progression::{frontier, select};
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -14,7 +16,7 @@ use wonderwilds_contracts::{
 use crate::curriculum::{CurriculumGraph, SkillNode};
 
 pub const POLICY_VERSION: &str = "provisional-mission-v1";
-pub const CONTENT_VERSION: &str = "mission-exercises-draft-1";
+pub const CONTENT_VERSION: &str = "nsw-k6-draft-1";
 const QUALIFYING_CHECKS: usize = 8;
 const REQUIRED_CORRECT: usize = 7;
 
@@ -22,6 +24,8 @@ const REQUIRED_CORRECT: usize = 7;
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionState {
     pub policy_version: String,
+    #[serde(default)]
+    pub practice: BTreeMap<String, progression::Practice>,
     /// Monotonic command/evidence sequence; observations below are a bounded latest-item projection.
     pub last_sequence: u64,
     /// Exposure through correct practice or a worked example; never mastery.
@@ -42,6 +46,7 @@ impl Default for MissionState {
     fn default() -> Self {
         Self {
             policy_version: POLICY_VERSION.to_owned(),
+            practice: BTreeMap::new(),
             last_sequence: 0,
             explored_skills: BTreeSet::new(),
             completed_skills: BTreeSet::new(),
@@ -108,6 +113,7 @@ pub struct SkillProjection {
     pub prerequisites: Vec<String>,
     pub status: Status,
     pub supported_by_mission: bool,
+    pub learning_resources: Vec<wonderwilds_contracts::LearningResource>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -986,6 +992,9 @@ pub fn record(
     if eligible && !same_item && state.observations.len() >= 60 {
         return Err(MissionError::InvalidState);
     }
+    if e.skill_id.contains('-') {
+        progression::record(state, &observation);
+    }
     state.last_sequence = e.server_sequence;
     if observation.activity_completed && e.provenance == Provenance::ServerVerified {
         state.completed_skills.insert(e.skill_id.clone());
@@ -1157,6 +1166,9 @@ pub fn summary(skill_id: &str, state: &MissionState) -> Result<SkillSummary, Mis
     if !supported_skill(skill_id) {
         return Err(MissionError::UnsupportedSkill);
     }
+    if skill_id.contains('-') {
+        return Ok(progression::summary(skill_id, state));
+    }
     if !READINESS_SKILLS.contains(&skill_id) {
         return Ok(SkillSummary {
             skill_id: skill_id.into(),
@@ -1277,11 +1289,14 @@ pub fn summary(skill_id: &str, state: &MissionState) -> Result<SkillSummary, Mis
 }
 
 pub fn all_skill_projections(state: &MissionState) -> Result<Vec<SkillProjection>, MissionError> {
-    let graph = CurriculumGraph::load().map_err(|_| MissionError::InvalidState)?;
+    let graph = CurriculumGraph::active().map_err(|_| MissionError::InvalidState)?;
     graph.nodes().map(|node| projection(node, state)).collect()
 }
 
 fn prerequisite_available(skill: &str, prerequisite: &str, state: &MissionState) -> bool {
+    if skill.contains('-') {
+        return progression::completed(prerequisite, state);
+    }
     activity_completed(prerequisite, state)
         || summary(prerequisite, state).is_ok_and(|s| s.status == Status::PracticeReady)
         || (!READINESS_SKILLS.contains(&skill)
@@ -1292,6 +1307,9 @@ fn prerequisite_available(skill: &str, prerequisite: &str, state: &MissionState)
 }
 
 pub fn activity_completed(skill: &str, state: &MissionState) -> bool {
+    if skill.contains('-') {
+        return progression::completed(skill, state);
+    }
     state.completed_skills.contains(skill)
         || state
             .observations
@@ -1299,7 +1317,8 @@ pub fn activity_completed(skill: &str, state: &MissionState) -> bool {
             .any(|o| o.evidence.skill_id == skill && o.evidence.result == ResultKind::Correct)
 }
 
-pub fn frontier(
+#[cfg(test)]
+fn legacy_frontier(
     state: &MissionState,
     subject: Option<&str>,
 ) -> Result<Vec<SkillProjection>, MissionError> {
@@ -1329,12 +1348,13 @@ pub fn frontier(
     Ok(ready)
 }
 
-pub fn select(
+#[cfg(test)]
+fn legacy_select(
     state: &MissionState,
     subject: Option<&str>,
     seed: u64,
 ) -> Result<Option<SkillProjection>, MissionError> {
-    let mut frontier = frontier(state, subject)?;
+    let mut frontier = legacy_frontier(state, subject)?;
     if frontier.is_empty() {
         return Ok(None);
     }
@@ -1409,6 +1429,7 @@ fn projection(node: &SkillNode, state: &MissionState) -> Result<SkillProjection,
         prerequisites: node.prerequisites.clone(),
         status,
         supported_by_mission: supported,
+        learning_resources: node.learning_resources.clone(),
     })
 }
 
@@ -1639,7 +1660,7 @@ mod tests {
     #[test]
     fn graph_frontier_preserves_original_prerequisites_and_exposes_authored_roots() {
         let state = MissionState::default();
-        let initial_frontier = frontier(&state, Some("maths")).unwrap();
+        let initial_frontier = legacy_frontier(&state, Some("maths")).unwrap();
         assert!(initial_frontier.iter().any(|s| s.skill_id == "M01"));
         assert!(initial_frontier.iter().any(|s| s.skill_id == "M02"));
         assert!(!initial_frontier.iter().any(|s| s.skill_id == "M03"));
@@ -1660,7 +1681,7 @@ mod tests {
             Status::PracticeReady
         );
         assert!(
-            frontier(&state, Some("maths"))
+            legacy_frontier(&state, Some("maths"))
                 .unwrap()
                 .iter()
                 .any(|s| s.skill_id == "M03")
@@ -1987,7 +2008,7 @@ mod tests {
         }
         let graph = CurriculumGraph::load().unwrap();
         for _ in 0..115 {
-            let selected = select(&state, None, 0).unwrap().unwrap();
+            let selected = legacy_select(&state, None, 0).unwrap().unwrap();
             if selected.skill_id.len() > 3 {
                 assert!(
                     graph
@@ -2115,7 +2136,7 @@ mod tests {
         let mut seen = BTreeSet::new();
         let mut history = Vec::new();
         for i in 0..120 {
-            let selected = select(&state, None, i).unwrap().unwrap();
+            let selected = legacy_select(&state, None, i).unwrap().unwrap();
             assert!(
                 seen.insert(selected.skill_id.clone()),
                 "repeated {}",
@@ -2137,7 +2158,7 @@ mod tests {
                 Status::PracticeReady
             );
         }
-        assert!(select(&state, None, 0).unwrap().is_none());
+        assert!(legacy_select(&state, None, 0).unwrap().is_none());
         assert_eq!(replay(&history).unwrap(), state);
         assert_eq!(state.completed_skills.len(), 120);
     }

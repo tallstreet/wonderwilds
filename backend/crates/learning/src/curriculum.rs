@@ -13,6 +13,7 @@ pub struct SkillNode {
     pub prerequisites: Vec<String>,
     pub allowed_representations: Vec<String>,
     pub review_status: String,
+    pub learning_resources: Vec<wonderwilds_contracts::LearningResource>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -43,6 +44,8 @@ struct RawNode {
     prerequisites: Vec<String>,
     allowed_representations: Vec<String>,
     review_status: String,
+    #[serde(default)]
+    learning_resources: Vec<wonderwilds_contracts::LearningResource>,
 }
 
 impl CurriculumGraph {
@@ -56,8 +59,28 @@ impl CurriculumGraph {
         ))
         .map_err(|_| GraphError::InvalidPack)?;
 
+        Self::from_nodes(foundation.nodes.into_iter().chain(years.nodes))
+    }
+
+    /// Active NSW replacement. Old packs remain diagnostic fixtures only.
+    pub fn active() -> Result<&'static Self, GraphError> {
+        static GRAPH: std::sync::OnceLock<Result<CurriculumGraph, GraphError>> =
+            std::sync::OnceLock::new();
+        GRAPH
+            .get_or_init(|| {
+                let pack: Pack = serde_json::from_str(include_str!(
+                    "../../../../content/curriculum/nsw/graph-v1.json"
+                ))
+                .map_err(|_| GraphError::InvalidPack)?;
+                Self::from_nodes(pack.nodes)
+            })
+            .as_ref()
+            .map_err(Clone::clone)
+    }
+
+    fn from_nodes(raw_nodes: impl IntoIterator<Item = RawNode>) -> Result<Self, GraphError> {
         let mut nodes = BTreeMap::new();
-        for raw in foundation.nodes.into_iter().chain(years.nodes) {
+        for raw in raw_nodes {
             let node = SkillNode {
                 id: raw.id,
                 subject: raw.subject,
@@ -66,6 +89,7 @@ impl CurriculumGraph {
                 prerequisites: raw.prerequisites,
                 allowed_representations: raw.allowed_representations,
                 review_status: raw.review_status,
+                learning_resources: raw.learning_resources,
             };
             if node.id.is_empty()
                 || node.objective.is_empty()

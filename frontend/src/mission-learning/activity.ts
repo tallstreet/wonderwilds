@@ -314,6 +314,7 @@ export function mountMissionActivity(
     }
     if (
       callbacks.recorder &&
+      !activity.skillId.startsWith('E-') &&
       ((task.interaction.kind === 'number_entry' && task.interaction.fields.length === 1) ||
         (task.interaction.kind === 'single_choice' &&
           ![

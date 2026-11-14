@@ -22,7 +22,7 @@ use wonderwilds_learning::mission::{
 
 const STORAGE_FORMAT: &str = "mission-learning-storage-v2";
 const ZERO_DIGEST: &str = "0000000000000000000000000000000000000000000000000000000000000000";
-const POLICY_EXPLANATION: &str = "Completed activities are not offered again. Incorrect answers receive a different variation of the same skill. Completion unlocks related practice, separately from academic readiness or mastery. Open responses need adult review.";
+const POLICY_EXPLANATION: &str = "Ten distinct items guide progression. Repeated difficulty schedules prerequisite revision before returning. Supported exploration can open related practice but does not establish mastery. Open responses need adult review.";
 
 pub trait Repository: Send + Sync {
     fn readiness(&self) -> Result<(), Error> {
@@ -407,7 +407,7 @@ impl PostgresRepository {
                     "Not available in this mission slice.".to_owned(),
                 )
             };
-            skills.push(json!({"skillId":&node.skill_id,"objective":node.objective,"prerequisites":node.prerequisites,"status":status,"supportedByMission":node.supported_by_mission,"activityCompleted":mission::activity_completed(&node.skill_id, &state.policy),"eligibleChecks":eligible,"correctChecks":correct,"distinctVariants":variants,"distinctContexts":contexts,"distinctRepresentations":representations,"distinctSessions":sessions,"blockers":blockers,"nextStep":next_step}));
+            skills.push(json!({"skillId":&node.skill_id,"objective":node.objective,"prerequisites":node.prerequisites,"learningResources":node.learning_resources,"status":status,"supportedByMission":node.supported_by_mission,"activityCompleted":mission::activity_completed(&node.skill_id, &state.policy),"eligibleChecks":eligible,"correctChecks":correct,"distinctVariants":variants,"distinctContexts":contexts,"distinctRepresentations":representations,"distinctSessions":sessions,"blockers":blockers,"nextStep":next_step}));
         }
         let seed = state.revision.saturating_add(1);
         let frontier_skill_id = mission::select(&state.policy, None, seed)
@@ -439,7 +439,7 @@ impl PostgresRepository {
             value["frontierSkillId"] = json!(skill_id);
         }
         validate("MissionLearningSnapshot", &value).map_err(|_| Error::Unavailable)?;
-        if value.to_string().len() > 65536 {
+        if value.to_string().len() > 2 * 1024 * 1024 {
             return Err(Error::RateLimited);
         }
         Ok(value)
@@ -448,7 +448,7 @@ impl PostgresRepository {
     fn save(tx: &mut Transaction<'_>, profile: &str, state: &LearningState) -> Result<(), Error> {
         let value = serde_json::to_value(state).map_err(|_| Error::Unavailable)?;
         let checkpoint = persistence::envelope(STORAGE_FORMAT, value);
-        if checkpoint.to_string().len() > 262144 {
+        if checkpoint.to_string().len() > 3 * 1024 * 1024 {
             return Err(Error::RateLimited);
         }
         let revision = i64::try_from(state.revision).map_err(|_| Error::Unavailable)?;
@@ -502,7 +502,7 @@ impl PostgresRepository {
             .ok_or(Error::RevisionConflict)?;
         let mut frozen = active.clone();
         frozen.seed = seed;
-        if view["contentVersion"] != "mission-exercises-draft-1" {
+        if view["contentVersion"] != mission::CONTENT_VERSION {
             return Err(Error::RevisionConflict);
         }
         frozen.exercise_id = view["exerciseId"]

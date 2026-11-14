@@ -404,3 +404,28 @@ test('a failed conflict reconciliation read preserves the answer across reload',
   assert.deepEqual(JSON.parse(bodies[0]!).payload, JSON.parse(bodies[2]!).payload);
   assert.equal(store.values.size, 0);
 });
+
+test('replacement graph and resources fit the bounded response transport', async () => {
+  const value = snapshot();
+  value.skills = Array.from({ length: 736 }, (_, index) => ({
+    ...value.skills[0]!,
+    skillId: `E-K-OLC-${index}`,
+    learningResources: [
+      {
+        title: 'Suggested topic resource',
+        url: 'https://www.khanacademy.org/math',
+        provider: 'Khan Academy',
+        audience: 'learner' as const,
+      },
+    ],
+  }));
+  assert.ok(JSON.stringify(value).length > 65536);
+  const client = new MissionLearningClient('profile-1', 'csrf-1', async () => Response.json(value));
+  assert.equal((await client.snapshot()).skills.length, 736);
+  const oversized = new MissionLearningClient(
+    'profile-1',
+    'csrf-1',
+    async () => new Response(' '.repeat(2 * 1024 * 1024 + 1)),
+  );
+  await assert.rejects(oversized.snapshot(), ApiFailure);
+});

@@ -5,7 +5,7 @@ fn all_current_questions_validate_and_accept_only_private_solutions() {
     assert_eq!(bank.schema_version, "1.0");
     assert_eq!(bank.review_status, "pending");
     assert!(!bank.release_enabled);
-    assert_eq!(bank.skills.len(), 120);
+    assert_eq!(bank.skills.len(), 856);
     for skill in &bank.skills {
         for exercise in &skill.exercises {
             assert!(!exercise.facet.is_empty());
@@ -20,13 +20,21 @@ fn all_current_questions_validate_and_accept_only_private_solutions() {
                     .unwrap_or_else(|e| panic!("{}: {:?}", exercise.id, e));
                 assert!(item.hints.len() >= 2);
                 if let Some(answer) = &item.answer {
-                    let answer = if answer.get("rule").is_some() {
+                    let mut answer = if answer.get("rule").is_some() {
                         let objects = item.interaction["items"].as_array().unwrap();
                         let targets = item.interaction["targets"].as_array().unwrap();
                         json!({"kind":"assign","assignments":objects.iter().enumerate().map(|(i,o)|json!({"objectId":o["id"],"targetId":targets[i%targets.len()]["id"]})).collect::<Vec<_>>()})
                     } else {
                         answer.clone()
                     };
+                    for field in [
+                        "sourceScoring",
+                        "sourceInput",
+                        "acceptedSequences",
+                        "acceptedMappings",
+                    ] {
+                        answer.as_object_mut().unwrap().remove(field);
+                    }
                     wonderwilds_contracts::validate("MissionLearningAnswer", &answer).unwrap();
                     let answer: MissionAnswer = serde_json::from_value(answer).unwrap();
                     assert_eq!(
@@ -173,5 +181,66 @@ fn mixed_numbers_accept_equivalent_fractional_parts() {
     assert_eq!(
         assess(item, &serde_json::from_value(value).unwrap()),
         Ok(true)
+    );
+}
+
+#[test]
+fn replacement_text_and_money_preserve_declared_notation() {
+    let items = || {
+        bank()
+            .skills
+            .iter()
+            .filter(|s| s.skill_id.contains('-'))
+            .flat_map(|s| &s.exercises)
+            .flat_map(|e| &e.items)
+    };
+    let text = items()
+        .find(|i| {
+            i.answer.as_ref().is_some_and(|a| {
+                a["sourceScoring"]["normalisation"]["case_sensitive"] == true
+                    && a["value"].as_str().is_some_and(|v| v.to_lowercase() != v)
+            })
+        })
+        .unwrap();
+    let expected = text.answer.as_ref().unwrap()["value"].as_str().unwrap();
+    assert_eq!(
+        assess(
+            text,
+            &MissionAnswer::Text {
+                value: expected.to_lowercase()
+            }
+        ),
+        Ok(false)
+    );
+    assert_eq!(
+        assess(
+            text,
+            &MissionAnswer::Text {
+                value: format!(" {expected} ")
+            }
+        ),
+        Ok(true)
+    );
+    let money = items()
+        .find(|i| {
+            i.answer.as_ref().is_some_and(|a| {
+                a["sourceScoring"]["format_constraints"]["decimal_places_required"] == 2
+            })
+        })
+        .unwrap();
+    let expected = money.answer.as_ref().unwrap()["values"][0]["value"]
+        .as_str()
+        .unwrap();
+    let answer = |value: String| MissionAnswer::Numbers {
+        values: vec![NumberEntry {
+            field_id: "value".into(),
+            value,
+        }],
+    };
+    assert_eq!(assess(money, &answer(expected.into())), Ok(true));
+    assert_eq!(assess(money, &answer(format!("{expected}0"))), Ok(false));
+    assert_eq!(
+        assess(money, &answer("1/2".into())),
+        Err(MissionError::InvalidAnswer)
     );
 }

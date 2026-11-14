@@ -13952,5 +13952,47 @@
       },
       "mode": "continue_story"
     }
+  },
+  {
+    "name": "NSW local diagram",
+    "contract": "QuestionStimulus",
+    "valid": true,
+    "value": {
+      "kind": "diagram",
+      "assetId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "description": "Question diagram"
+    }
+  },
+  {
+    "name": "NSW diagram cannot name remote assets",
+    "contract": "QuestionStimulus",
+    "valid": false,
+    "value": {
+      "kind": "diagram",
+      "assetId": "https://example.com/a.svg",
+      "description": "Question diagram"
+    }
+  },
+  {
+    "name": "NSW resource https link",
+    "contract": "LearningResource",
+    "valid": true,
+    "value": {
+      "title": "Learning",
+      "url": "https://www.khanacademy.org/math",
+      "provider": "Khan Academy",
+      "audience": "learner"
+    }
+  },
+  {
+    "name": "NSW resource rejects script URL",
+    "contract": "LearningResource",
+    "valid": false,
+    "value": {
+      "title": "Learning",
+      "url": "javascript:alert(1)",
+      "provider": "Unknown",
+      "audience": "learner"
+    }
   }
 ]

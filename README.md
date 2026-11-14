@@ -46,8 +46,11 @@ gathering supplies, investigating discoveries and helping characters build
 something. Completing an activity can also complete a step in a mission, giving
 the learning an immediate purpose.
 
-A connected learning map spans Foundation through Year Six. The game tracks
-completed activities and uses the skills they build on to guide the next practice.
+A connected learning map now contains 736 skills from Kindergarten through Year Six,
+with 8,125 practice items and learning-resource links. The game tracks
+distinct practice items and uses prerequisites to guide forward progression and
+revision when a learner struggles. Some items need grown-up support or media that
+is not yet implemented; see the [active curriculum pack](content/curriculum/nsw/README.md).
 Hints, worked examples and a “Let’s do it together” option help learners keep
 moving when they need support. The game checks answers and saves progress;
 AI creates the surrounding stories and artwork.

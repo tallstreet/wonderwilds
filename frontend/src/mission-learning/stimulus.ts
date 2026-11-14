@@ -24,6 +24,27 @@ export function renderStimulus(document: Document, stimulus: QuestionStimulus): 
     return e;
   };
   switch (stimulus.kind) {
+    case 'diagram': {
+      const img = document.createElement('img');
+      img.src = `/assets/learning/nsw/${stimulus.assetId}.svg`;
+      img.alt = stimulus.description;
+      img.style.maxWidth = '100%';
+      img.style.maxHeight = '320px';
+      if (stimulus.exposureMs) {
+        img.addEventListener(
+          'load',
+          () => {
+            document.defaultView?.setTimeout(() => {
+              if (img.isConnected) img.style.visibility = 'hidden';
+            }, stimulus.exposureMs);
+          },
+          { once: true },
+        );
+        root.append(text('p', 'Look at the picture briefly, then answer. You can ask for help.'));
+      }
+      root.append(img);
+      break;
+    }
     case 'audio': {
       const manifest: { assets: { id: string; path: string; reviewStatus: string }[] } =
         audioManifest;

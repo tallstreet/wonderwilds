@@ -4,7 +4,7 @@ use serde_json::{Value, json};
 use std::sync::OnceLock;
 mod marking;
 
-pub const VERSION: &str = "mission-exercises-draft-1";
+pub const VERSION: &str = "nsw-k6-draft-1";
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Item {
@@ -45,10 +45,17 @@ struct Bank {
 fn bank() -> &'static Bank {
     static BANK: OnceLock<Bank> = OnceLock::new();
     BANK.get_or_init(|| {
-        let bank: Bank = serde_json::from_str(include_str!(
+        let mut bank: Bank = serde_json::from_str(include_str!(
             "../../../../../../content/activities/skill-exercises-v1.json"
         ))
         .expect("validated authored exercise bank");
+        let replacement: Bank = serde_json::from_str(include_str!(
+            "../../../../../../content/curriculum/nsw/exercises-v1.json"
+        ))
+        .expect("validated NSW bank");
+        assert_eq!(replacement.review_status, "pending");
+        assert!(!replacement.release_enabled);
+        bank.skills.extend(replacement.skills);
         assert_eq!(bank.schema_version, "1.0");
         assert_eq!(bank.review_status, "pending");
         assert!(!bank.release_enabled);
@@ -115,16 +122,35 @@ pub fn activity(skill: &str, seed: u64, id: &str) -> Result<MissionActivity, Mis
                 *id = json!(mapping[id.as_str().unwrap()]);
             }
         }
+        if let Some(sequences) = item
+            .answer
+            .as_mut()
+            .and_then(|a| a.get_mut("acceptedSequences"))
+            .and_then(Value::as_array_mut)
+        {
+            for sequence in sequences {
+                for id in sequence.as_array_mut().unwrap() {
+                    *id = json!(mapping[id.as_str().unwrap()]);
+                }
+            }
+        }
         for item in items {
             item["id"] = json!(mapping[item["id"].as_str().unwrap()]);
         }
     }
     item.interaction = interaction.clone();
-    let node = CurriculumGraph::load()
-        .map_err(|_| MissionError::InvalidState)?
-        .get(skill)
-        .ok_or(MissionError::UnsupportedSkill)?
-        .clone();
+    let node = if skill.contains('-') {
+        CurriculumGraph::active()
+            .map_err(|_| MissionError::InvalidState)?
+            .get(skill)
+            .cloned()
+    } else {
+        CurriculumGraph::load()
+            .map_err(|_| MissionError::InvalidState)?
+            .get(skill)
+            .cloned()
+    }
+    .ok_or(MissionError::UnsupportedSkill)?;
     let task = PublicTask::Question {
         exercise_id: exercise.id.clone(),
         interaction,
@@ -158,10 +184,7 @@ pub fn activity(skill: &str, seed: u64, id: &str) -> Result<MissionActivity, Mis
     Ok(MissionActivity {
         view,
         key: AssessmentKey::Question(Box::new(item.clone())),
-        canonical_fingerprint: format!(
-            "{}:{}:{}",
-            exercise.id, item.semantic_id, item.representation
-        ),
+        canonical_fingerprint: format!("{}:{}:{}", skill, item.semantic_id, item.representation),
     })
 }
 pub fn assess(item: &Item, answer: &MissionAnswer) -> Result<bool, MissionError> {

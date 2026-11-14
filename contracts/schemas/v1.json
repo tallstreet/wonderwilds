@@ -829,7 +829,7 @@
                 "maxLength": 80
               },
               "minItems": 1,
-              "maxItems": 6,
+              "maxItems": 16,
               "uniqueItems": true
             }
           },
@@ -1297,10 +1297,10 @@
       "type": "object",
       "properties": {
         "title": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "objective": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "objective": { "type": "string", "minLength": 1, "maxLength": 500 },
         "lessonText": { "type": "string", "minLength": 1, "maxLength": 500 },
-        "prompt": { "type": "string", "minLength": 1, "maxLength": 240 },
-        "context": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "prompt": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "context": { "type": "string", "minLength": 1, "maxLength": 500 },
         "representation": { "type": "string", "minLength": 1, "maxLength": 80 }
       },
       "required": ["title", "objective", "lessonText", "prompt", "context", "representation"],
@@ -1382,7 +1382,7 @@
         "skillId": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 10
+          "maxLength": 32
         },
         "contentVersion": {
           "type": "string",
@@ -1459,42 +1459,179 @@
     "MissionSkillProgress": {
       "type": "object",
       "properties": {
-        "skillId": { "type": "string", "minLength": 1, "maxLength": 10 },
-        "objective": { "type": "string", "minLength": 1, "maxLength": 300 },
-        "prerequisites": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 10 }, "maxItems": 20, "uniqueItems": true },
-        "status": { "type": "string", "enum": ["locked", "available", "practising", "ready_for_next", "unavailable"] },
-        "supportedByMission": { "type": "boolean" },
-        "activityCompleted": { "type": "boolean" },
-        "eligibleChecks": { "type": "integer", "minimum": 0, "maximum": 8 },
-        "correctChecks": { "type": "integer", "minimum": 0, "maximum": 8 },
-        "distinctVariants": { "type": "integer", "minimum": 0, "maximum": 8 },
-        "distinctContexts": { "type": "integer", "minimum": 0, "maximum": 8 },
-        "distinctRepresentations": { "type": "integer", "minimum": 0, "maximum": 8 },
-        "distinctSessions": { "type": "integer", "minimum": 0, "maximum": 8 },
-        "blockers": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 160 }, "maxItems": 10 },
-        "nextStep": { "type": "string", "minLength": 1, "maxLength": 300 }
+        "skillId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "prerequisites": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "locked",
+            "available",
+            "practising",
+            "ready_for_next",
+            "unavailable"
+          ]
+        },
+        "supportedByMission": {
+          "type": "boolean"
+        },
+        "activityCompleted": {
+          "type": "boolean"
+        },
+        "eligibleChecks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "correctChecks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "distinctVariants": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "distinctContexts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "distinctRepresentations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "distinctSessions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxItems": 10
+        },
+        "nextStep": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "learningResources": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/LearningResource"
+          }
+        }
       },
-      "required": ["skillId", "objective", "prerequisites", "status", "supportedByMission", "eligibleChecks", "correctChecks", "distinctVariants", "distinctContexts", "distinctRepresentations", "distinctSessions", "blockers", "nextStep"],
+      "required": [
+        "skillId",
+        "objective",
+        "prerequisites",
+        "status",
+        "supportedByMission",
+        "eligibleChecks",
+        "correctChecks",
+        "distinctVariants",
+        "distinctContexts",
+        "distinctRepresentations",
+        "distinctSessions",
+        "blockers",
+        "nextStep"
+      ],
       "additionalProperties": false
     },
     "MissionLearningSnapshot": {
       "type": "object",
       "properties": {
-        "schemaVersion": { "const": "1.0", "type": "string" },
-        "contentVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "policyVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "policyExplanation": { "type": "string", "minLength": 1, "maxLength": 300 },
-        "revision": { "type": "integer", "minimum": 0, "maximum": 1000000000 },
-        "missionId": { "type": "string", "maxLength": 120 },
-        "locationId": { "type": "string", "maxLength": 120 },
-        "available": { "type": "boolean" },
-        "invitation": { "$ref": "#/$defs/MissionInvitation" },
-        "activeActivity": { "$ref": "#/$defs/MissionActivity" },
-        "lastFeedback": { "$ref": "#/$defs/MissionLearningFeedback" },
-        "frontierSkillId": { "type": "string", "maxLength": 10 },
-        "skills": { "type": "array", "items": { "$ref": "#/$defs/MissionSkillProgress" }, "maxItems": 120 }
+        "schemaVersion": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "policyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "policyExplanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "missionId": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "locationId": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "invitation": {
+          "$ref": "#/$defs/MissionInvitation"
+        },
+        "activeActivity": {
+          "$ref": "#/$defs/MissionActivity"
+        },
+        "lastFeedback": {
+          "$ref": "#/$defs/MissionLearningFeedback"
+        },
+        "frontierSkillId": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MissionSkillProgress"
+          },
+          "maxItems": 736
+        }
       },
-      "required": ["schemaVersion", "contentVersion", "policyVersion", "policyExplanation", "revision", "available", "skills"],
+      "required": [
+        "schemaVersion",
+        "contentVersion",
+        "policyVersion",
+        "policyExplanation",
+        "revision",
+        "available",
+        "skills"
+      ],
       "additionalProperties": false
     },
     "InventoryEntry": {
@@ -1700,7 +1837,7 @@
         "skillId": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 10
+          "maxLength": 32
         },
         "variantId": {
           "type": "string",
@@ -4028,6 +4165,40 @@
         }
       ]
     },
+    "LearningResource": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https://",
+          "maxLength": 500
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "audience": {
+          "type": "string",
+          "enum": [
+            "learner",
+            "adult"
+          ]
+        }
+      },
+      "required": [
+        "title",
+        "url",
+        "provider",
+        "audience"
+      ],
+      "additionalProperties": false
+    },
     "QuestionOption": {
       "type": "object",
       "properties": {
@@ -4071,6 +4242,12 @@
             "grape",
             "flame"
           ]
+        },
+        "diagram": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
         }
       },
       "required": [
@@ -4149,7 +4326,7 @@
                 "$ref": "#/$defs/QuestionOption"
               },
               "minItems": 2,
-              "maxItems": 6
+              "maxItems": 16
             }
           },
           "required": [
@@ -4842,6 +5019,37 @@
           "required": [
             "kind",
             "assetId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "diagram"
+            },
+            "assetId": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "exposureMs": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 10000
+            }
+          },
+          "required": [
+            "kind",
+            "assetId",
+            "description"
           ],
           "additionalProperties": false
         }

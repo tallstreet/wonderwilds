@@ -234,6 +234,8 @@ pub struct MissionSkillProgress {
     pub distinct_sessions: u64,
     pub blockers: Vec<String>,
     pub next_step: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub learning_resources: Option<Vec<LearningResource>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -643,11 +645,22 @@ pub struct StorySnapshot {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LearningResource {
+    pub title: String,
+    pub url: String,
+    pub provider: String,
+    pub audience: LearningResourceAudience,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct QuestionOption {
     pub id: String,
     pub label: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub picture: Option<QuestionOptionPicture>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub diagram: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -692,6 +705,7 @@ pub enum QuestionStimulus {
     Variant15(QuestionStimulusVariant15),
     Variant16(QuestionStimulusVariant16),
     Variant17(QuestionStimulusVariant17),
+    Variant18(QuestionStimulusVariant18),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1694,6 +1708,14 @@ pub enum StorySnapshotLocationId {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum LearningResourceAudience {
+    #[serde(rename = "learner")]
+    Learner,
+    #[serde(rename = "adult")]
+    Adult,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum QuestionOptionPicture {
     #[serde(rename = "triangle")]
     Triangle,
@@ -1955,6 +1977,16 @@ pub struct QuestionStimulusVariant16 {
 pub struct QuestionStimulusVariant17 {
     pub kind: QuestionStimulusVariant17Kind,
     pub asset_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct QuestionStimulusVariant18 {
+    pub kind: QuestionStimulusVariant18Kind,
+    pub asset_id: String,
+    pub description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exposure_ms: Option<u64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2739,6 +2771,12 @@ pub enum QuestionStimulusVariant16Kind {
 pub enum QuestionStimulusVariant17Kind {
     #[serde(rename = "audio")]
     Audio,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum QuestionStimulusVariant18Kind {
+    #[serde(rename = "diagram")]
+    Diagram,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

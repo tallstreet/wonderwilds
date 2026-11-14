@@ -1,5 +1,10 @@
 # Activity coverage
 
+Current active coverage (14 November 2026): **736 skills / 8,125 items**, at least
+ten distinct items per skill. See [the replacement pack](../content/curriculum/nsw/README.md)
+for automatic versus supported coverage, resources, images and progression.
+The 120-node inventory below is retained as historical diagnostic documentation.
+
 Updated 31 October 2026. All **120** draft skill-map nodes use the current
 question controls in story missions: **354 exercise families** and
 **3945 original authored question/prompt records**. The controls are direct
