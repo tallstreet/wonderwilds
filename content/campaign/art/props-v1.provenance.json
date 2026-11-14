@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create one original production development game scenery PROP SPRITE ATLAS for Wonderwilds in soft premium dimensional 3D family animation style. TRUE transparent background, square 1536x1536, two equal columns two equal rows, four objects isolated with generous gutters. Warm upper-left light, high overhead three-quarter orthographic view, rounded honey wood/brass, saturated violet/coral/turquoise, no text, no ground plane, no shadows outside objects. Top-left: small care camp consisting of a low violet canopy over a turquoise padded rest mat, rolled coral blanket and small empty wooden supply crate, no fire, food or characters. Top-right: dim bridge beacon, rounded honeywood pedestal with brass arch cradle containing a dark grey unlit moonstone lens, no light ray. Bottom-left: exactly matching bridge beacon restored with warm pale gold illuminated moonstone and subtle compact glow entirely inside cell. Bottom-right: compact garden irrigation control prop: honeywood trough with brass wheel, two short outlet nozzles, turquoise water visible inside trough, no long pipes or landscape. Each object centered within 70 percent cell width and height, no clipping, no paths, no collectible counts. Materials match fluffy rounded Wonderwilds companion art, transparent empty spaces.",
+  "rawSource": "content/campaign/art/sources/props-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-eabea141-8d08-4dca-9905-135f354d56df.png",
+  "processedAsset": "frontend/public/assets/campaign/props-v1.png",
+  "processing": "Byte-for-byte copy; no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/campaign/cast-v1.png",
+    "frontend/public/assets/prop-atlas-v2.png"
+  ],
+  "requestedDimensions": [
+    1536,
+    1536
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "campaign-camp": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "beacon-dim": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "beacon-restored": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "garden-irrigation": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "technicalGateEvidence": "docs/screenshots/campaign/cast-phaser-first-preview.png",
+  "reviewStatus": "pending",
+  "inspection": "Source inspected: matching dim/restored beacon design, clear static camp and irrigation silhouettes, true RGBA and isolated props. Source gutters tight; phone in-game review pending.",
+  "sha256": "7d288d20b531c7cf87ccac646e1f4455a38bd41f92da75f976c54e51ab1d2b4a"
+}

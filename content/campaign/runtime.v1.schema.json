@@ -1,0 +1,471 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wonderwilds.example/content/campaign/runtime.v1.schema.json",
+  "title": "Executable Missing Moonlight campaign, development version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "rules_version",
+    "start_location",
+    "starters",
+    "locations",
+    "companions",
+    "actions",
+    "encounters"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rules_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "start_location": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_:-]*$"
+    },
+    "starters": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_:-]*$"
+      }
+    },
+    "initial_supplies": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_:-]*$"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      }
+    },
+    "locations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_:-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "camp": {
+            "type": "boolean"
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "to": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_:-]*$"
+                },
+                "requires_flags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_:-]*$"
+                  },
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "to",
+                "requires_flags"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "camp",
+          "routes"
+        ]
+      }
+    },
+    "companions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_:-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "affinity": {
+            "enum": [
+              "gleam",
+              "growth",
+              "craft",
+              "rhythm",
+              "tide"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "affinity"
+        ]
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_:-]*$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mission": {
+            "type": "string",
+            "minLength": 1
+          },
+          "location": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_:-]*$"
+          },
+          "kind": {
+            "enum": [
+              "observe",
+              "practice",
+              "learn",
+              "gather",
+              "craft",
+              "field",
+              "puzzle",
+              "choose",
+              "encounter",
+              "recruit",
+              "training",
+              "exchange"
+            ]
+          },
+          "requires_flags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_:-]*$"
+            },
+            "uniqueItems": true
+          },
+          "forbids_flags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_:-]*$"
+            },
+            "uniqueItems": true
+          },
+          "costs": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_:-]*$"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "rewards": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_:-]*$"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "grants_flags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_:-]*$"
+            },
+            "uniqueItems": true
+          },
+          "grant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dialogue": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "speaker": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "speaker",
+                "text"
+              ]
+            }
+          },
+          "learning": {
+            "type": "boolean"
+          },
+          "learning_context": {
+            "type": "string",
+            "minLength": 1
+          },
+          "encounter": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_:-]*$"
+          },
+          "recruit": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_:-]*$"
+          },
+          "puzzle": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_:-]*$"
+              },
+              "operation": {
+                "enum": [
+                  "set_near",
+                  "set_far",
+                  "check",
+                  "reset",
+                  "set_first",
+                  "set_second",
+                  "set_third"
+                ]
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1
+              },
+              "goal": {
+                "type": "object",
+                "minProperties": 1,
+                "propertyNames": {
+                  "enum": [
+                    "near",
+                    "far",
+                    "first",
+                    "second",
+                    "third"
+                  ]
+                },
+                "additionalProperties": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "required": [
+              "id",
+              "operation"
+            ]
+          },
+          "recipient": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_:-]*$"
+          },
+          "milestone": {
+            "enum": [
+              "first_help",
+              "field_partnership",
+              "personal_project",
+              "wayfinder"
+            ]
+          },
+          "field_ability": {
+            "enum": [
+              "brace",
+              "bloom",
+              "resonate",
+              "ferry",
+              "illuminate"
+            ]
+          },
+          "field_method": {
+            "enum": [
+              "companion",
+              "tool"
+            ]
+          },
+          "discovery_for": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_:-]*$"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "mission",
+          "location",
+          "kind",
+          "requires_flags",
+          "forbids_flags",
+          "costs",
+          "rewards",
+          "grants_flags",
+          "grant_id",
+          "dialogue"
+        ]
+      }
+    },
+    "encounters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_:-]*$"
+          },
+          "target": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "turn_limit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pressure_limit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "hazards": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "affinity": {
+            "enum": [
+              "gleam",
+              "growth",
+              "craft",
+              "rhythm",
+              "tide"
+            ]
+          },
+          "win_flags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_:-]*$"
+            },
+            "uniqueItems": true
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "threshold": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "affinity": {
+                  "enum": [
+                    "gleam",
+                    "growth",
+                    "craft",
+                    "rhythm",
+                    "tide"
+                  ]
+                }
+              },
+              "required": [
+                "threshold",
+                "affinity"
+              ]
+            }
+          },
+          "relay": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "round_targets",
+              "required_affinities"
+            ],
+            "properties": {
+              "round_targets": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 8,
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required_affinities": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "target",
+          "turn_limit",
+          "pressure_limit",
+          "hazards",
+          "affinity",
+          "win_flags",
+          "phases"
+        ]
+      }
+    }
+  }
+}

@@ -25,6 +25,30 @@ export default defineConfig(({ command }) => {
     await response.body?.cancel();
     return response.ok;
   };
+  const ownsProfile = async (profileId: string) => {
+    const response = await fetch(`http://127.0.0.1:${apiPort}/api/v1/household/profiles`, {
+      headers: {
+        Cookie: `wonderwilds_session=${demo.session}`,
+        'X-Wonderwilds-Profile': demo.profileId,
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) return false;
+    const body: unknown = await response.json();
+    return (
+      typeof body === 'object' &&
+      body !== null &&
+      'profiles' in body &&
+      Array.isArray(body.profiles) &&
+      body.profiles.some(
+        (profile: unknown) =>
+          typeof profile === 'object' &&
+          profile !== null &&
+          'id' in profile &&
+          profile.id === profileId,
+      )
+    );
+  };
   const transcribe = museHandler(museKey, authorize);
   const characterKey = process.env.MODEL_API_KEY;
   const character = characterHandler(characterKey, authorize);
@@ -94,7 +118,7 @@ export default defineConfig(({ command }) => {
                   return;
                 }
                 if (
-                  !/^\/api\/v1\/(game|commands|story|story\/commands|mission-learning|mission-learning\/commands|encounters\/[a-zA-Z0-9-]+)$/.test(
+                  !/^\/api\/v1\/(game|commands|campaign|campaign\/commands|paired|paired\/commands|household\/profiles|story|story\/commands|mission-learning|mission-learning\/commands|encounters\/[a-zA-Z0-9-]+)$/.test(
                     path,
                   )
                 )
@@ -106,34 +130,49 @@ export default defineConfig(({ command }) => {
                     req.headers['x-csrf-token'] !== demo.browserToken)
                 )
                   return reject(403);
-                if (req.headers['x-wonderwilds-profile'] !== demo.profileId) return reject(403);
-                const upstream = request(
-                  {
-                    hostname: '127.0.0.1',
-                    port: apiPort,
-                    path,
-                    method: req.method,
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Accept: 'application/json',
-                      Cookie: `wonderwilds_session=${demo.session}`,
-                      'X-CSRF-Token': demo.csrf,
-                      'X-Wonderwilds-Profile': demo.profileId,
-                      Origin: 'https://wonderwilds.local',
-                    },
-                  },
-                  (response) => {
-                    res.statusCode = response.statusCode ?? 502;
-                    res.setHeader('Content-Type', 'application/json');
-                    response.pipe(res);
-                  },
-                );
-                upstream.setTimeout(10000, () => upstream.destroy());
-                upstream.on('error', () => {
-                  if (!res.headersSent) res.statusCode = 503;
-                  res.end();
-                });
-                req.pipe(upstream);
+                const selectedProfile = req.headers['x-wonderwilds-profile'];
+                if (
+                  typeof selectedProfile !== 'string' ||
+                  !/^[0-9a-fA-F-]{36}$/.test(selectedProfile)
+                )
+                  return reject(403);
+                // The backend session, not a browser selector, authorizes membership.
+                void (
+                  selectedProfile === demo.profileId
+                    ? Promise.resolve(true)
+                    : ownsProfile(selectedProfile)
+                )
+                  .then((owned) => {
+                    if (!owned) return reject(403);
+                    const upstream = request(
+                      {
+                        hostname: '127.0.0.1',
+                        port: apiPort,
+                        path,
+                        method: req.method,
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Accept: 'application/json',
+                          Cookie: `wonderwilds_session=${demo.session}`,
+                          'X-CSRF-Token': demo.csrf,
+                          'X-Wonderwilds-Profile': selectedProfile,
+                          Origin: 'https://wonderwilds.local',
+                        },
+                      },
+                      (response) => {
+                        res.statusCode = response.statusCode ?? 502;
+                        res.setHeader('Content-Type', 'application/json');
+                        response.pipe(res);
+                      },
+                    );
+                    upstream.setTimeout(10000, () => upstream.destroy());
+                    upstream.on('error', () => {
+                      if (!res.headersSent) res.statusCode = 503;
+                      res.end();
+                    });
+                    req.pipe(upstream);
+                  })
+                  .catch(() => reject(503));
               });
             },
           },

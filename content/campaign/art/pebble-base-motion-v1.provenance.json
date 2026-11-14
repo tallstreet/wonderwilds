@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "pebble-base-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/pebble-base-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/pebble-base-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/pebble-base-motion-v1.png",
+  "sha256": "89ddf15f11886108590828c7799033ad310e7fec67b2369be472424777200890",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/pebble-base-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/characters/cove.png",
+      "sha256": "1d192a6f6f9db7a6b862a6ef9d849630975e8b223f2f6bce22988f9640bfda34",
+      "use": "Pebble BASE form, ONLY UPPER RIGHT: brown and cream fluffy OTTER with rounded small ears, AMBER eyes, thick otter tail, teal vest edged gold, purple diagonal strap and purple shell-shaped satchel. Preserve otter not kitten. Signature: paws gather then gently guide a compact turquoise wave arc, then settle."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      280,
+      558,
+      842,
+      1118,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/pebble-base-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/pebble-base-motion-v1.cleanup-prompt.txt",
+  "technicalPreviewResult": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+  "technicalPreviewEvidence": []
+}

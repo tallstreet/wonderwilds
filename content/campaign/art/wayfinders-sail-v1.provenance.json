@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create new original Wonderwilds production game atlas TRUE TRANSPARENT background square1536x1536 TWO columns TWO rows FOUR equal cells generous gutters each whole sprite within70percent width80percent height. Warm upper-left light high slight overhead3/4 front camera premium dimensional3D family animated style tactile rounded materials violet coral turquoise gold. No text labels borders backdrop ground external shadows. TOP LEFT Sail Wayfinder: original navy-blue-and-white fluffy PUFFIN, huge TEAL eyes broad orange triangular beak orange webbed feet cobalt vest and turquoise scarf. Advanced form retains puffin face adds GOLDEN WIND COMPASS clasp and short layered teal cape with wave-edged gold trim, wings open confident friendly pose, feet88percent cell. TOP RIGHT Bridge seal: one round polished honeygold medal with raised purple BRIDGE ARCH icon and teal ribbon loop, no text. BOTTOM LEFT Bloom seal: one round polished honeygold medal with raised mint FOUR-LEAF flower sprout icon and coral ribbon loop no text. BOTTOM RIGHT Accord seal: one round polished honeygold medal with raised violet EIGHT-POINT CONSTELLATION STAR connected by small turquoise dots and lilac ribbon loop no text. Each isolated and centered, large readable simple symbols, no letters or numbers. Puffin character identifiably distinct from medals, no weapons armor crowns.",
+  "rawSource": "content/campaign/art/sources/wayfinders-sail-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-0aab4f55-a73c-4b15-a440-55dd70ee3616.png",
+  "processedAsset": "frontend/public/assets/campaign/wayfinders-sail-v1.png",
+  "processing": "Byte-for-byte copy; inspected frame boundary metadata only, no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/characters/meadow.png",
+    "frontend/public/assets/characters/orchard.png",
+    "frontend/public/assets/characters/cove.png"
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "sail-wayfinder": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "bridge-seal": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "bloom-seal": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "accord-seal": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "technicalGateEvidence": [
+    "docs/screenshots/campaign/wayfinders-first-phaser.png",
+    "docs/screenshots/campaign/wayfinders-first-phone.png"
+  ],
+  "reviewStatus": "pending",
+  "inspection": "Source inspected full puffin wings/feet, recognizable species, 3 raised icon medals. Static only.",
+  "sha256": "e1baba79b8e951502571ef3b6f6f88f9e2401c959461a8a5b5e853d6feb56f72",
+  "completedTechnicalPreviews": [
+    "docs/screenshots/campaign/forms-group4.png",
+    "docs/screenshots/campaign/forms-group4-phone.png"
+  ],
+  "completedTechnicalPreviewNotes": "2026-11-14 actual createWorld registered sprites inspected desktop1280x800 and phone390x844, three at a time. Synthetic fixtures, avatar hidden to prevent occlusion; no source-frame clipping observed. No gameplay progression or final human approval claim."
+}

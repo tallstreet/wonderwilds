@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Real API + PostgreSQL journey. Run through run-training-qa.mjs on a disposable database.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -26,7 +27,7 @@ page.on('response', response => {
     console.error('API failure', response.status(), response.url());
 });
 try {
-  await page.goto(origin);
+  await gotoLegacy(page, origin);
   await page.waitForSelector('#game canvas');
   const bootstrap = await page.evaluate(async () => (await fetch('/__demo/bootstrap')).json());
   const headers = { 'X-Wonderwilds-Profile': bootstrap.profileId, 'X-CSRF-Token': bootstrap.csrf, Origin: origin };

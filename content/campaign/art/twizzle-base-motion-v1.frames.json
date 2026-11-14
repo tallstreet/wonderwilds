@@ -1,0 +1,273 @@
+{
+  "id": "twizzle-base-motion-v1",
+  "character": "twizzle",
+  "url": "/assets/campaign/twizzle-base-motion-v1.png",
+  "texture": "campaign-twizzle-base-motion-v1",
+  "dimensions": [
+    1122,
+    1402
+  ],
+  "nominalCell": 280.5,
+  "frames": [
+    {
+      "id": "idle-down",
+      "rect": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "foot": [
+        173.0,
+        268
+      ]
+    },
+    {
+      "id": "walk-down-a",
+      "rect": [
+        280,
+        0,
+        281,
+        280
+      ],
+      "foot": [
+        160.5,
+        265
+      ]
+    },
+    {
+      "id": "walk-down-b",
+      "rect": [
+        561,
+        0,
+        281,
+        280
+      ],
+      "foot": [
+        159.0,
+        267
+      ]
+    },
+    {
+      "id": "idle-right",
+      "rect": [
+        842,
+        0,
+        280,
+        280
+      ],
+      "foot": [
+        183.0,
+        268
+      ]
+    },
+    {
+      "id": "walk-right-a",
+      "rect": [
+        0,
+        280,
+        280,
+        283
+      ],
+      "foot": [
+        186.5,
+        267
+      ]
+    },
+    {
+      "id": "walk-right-b",
+      "rect": [
+        280,
+        280,
+        281,
+        283
+      ],
+      "foot": [
+        144.5,
+        270
+      ]
+    },
+    {
+      "id": "idle-up",
+      "rect": [
+        561,
+        280,
+        281,
+        283
+      ],
+      "foot": [
+        146.0,
+        268
+      ]
+    },
+    {
+      "id": "walk-up-a",
+      "rect": [
+        842,
+        280,
+        280,
+        283
+      ],
+      "foot": [
+        111.0,
+        272
+      ]
+    },
+    {
+      "id": "walk-up-b",
+      "rect": [
+        0,
+        563,
+        280,
+        274
+      ],
+      "foot": [
+        151.0,
+        258
+      ]
+    },
+    {
+      "id": "idle-left",
+      "rect": [
+        280,
+        563,
+        281,
+        274
+      ],
+      "foot": [
+        99.0,
+        261
+      ]
+    },
+    {
+      "id": "walk-left-a",
+      "rect": [
+        561,
+        563,
+        281,
+        274
+      ],
+      "foot": [
+        108.0,
+        258
+      ]
+    },
+    {
+      "id": "walk-left-b",
+      "rect": [
+        842,
+        563,
+        280,
+        274
+      ],
+      "foot": [
+        106.0,
+        262
+      ]
+    },
+    {
+      "id": "signature-anticipate",
+      "rect": [
+        0,
+        837,
+        280,
+        274
+      ],
+      "foot": [
+        160.0,
+        261
+      ]
+    },
+    {
+      "id": "signature-release",
+      "rect": [
+        280,
+        837,
+        281,
+        274
+      ],
+      "foot": [
+        157.0,
+        261
+      ]
+    },
+    {
+      "id": "signature-settle",
+      "rect": [
+        561,
+        837,
+        281,
+        274
+      ],
+      "foot": [
+        160.0,
+        262
+      ]
+    },
+    {
+      "id": "cheer-prepare",
+      "rect": [
+        842,
+        837,
+        280,
+        274
+      ],
+      "foot": [
+        156.5,
+        262
+      ]
+    },
+    {
+      "id": "cheer-lift",
+      "rect": [
+        0,
+        1111,
+        280,
+        291
+      ],
+      "foot": [
+        162.0,
+        270
+      ]
+    },
+    {
+      "id": "cheer-settle",
+      "rect": [
+        280,
+        1111,
+        281,
+        291
+      ],
+      "foot": [
+        170.0,
+        268
+      ]
+    },
+    {
+      "id": "rest-settle",
+      "rect": [
+        561,
+        1111,
+        281,
+        291
+      ],
+      "foot": [
+        174.0,
+        268
+      ]
+    },
+    {
+      "id": "rest-asleep",
+      "rect": [
+        842,
+        1111,
+        280,
+        291
+      ],
+      "foot": [
+        170.0,
+        267
+      ]
+    }
+  ]
+}

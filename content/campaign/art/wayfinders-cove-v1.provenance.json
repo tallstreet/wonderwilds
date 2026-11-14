@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create new original Wonderwilds advancement CHARACTER SPRITE ATLAS TRUE transparent background square1536x1536 TWO columns TWO rows FOUR cells. Each fullbody within70percent width80percent height, feet88percent cell, generous gutters warm upper-left light slight overhead3/4 front camera premium tactile fluffy dimensional3D animated family game style rounded glossy eyes violet coral turquoise gold. No text labels borders ground external shadows. TOP LEFT Twizzle Wayfinder: cinnamon-red-and-cream SQUIRREL huge fluffy curled tail VIOLET eyes teal scarf holds short ribbon with star heart flower charms. Evolved adds violet travel waistcoat GOLDEN CHIME clasp and gold-edged teal scarf, tail wholly inside cell. TOP RIGHT Luna Wayfinder: pale aqua-white fluffy SEA KITTEN huge TEAL eyes royal blue suit and cape GOLD crescent chest. Evolved adds short layered blue-and-silver travel mantle GOLDEN LIGHTHOUSE clasp and tiny seashell compass at waist, recognizable sea kitten. BOTTOM LEFT Pebble Wayfinder: brown-and-cream OTTER small rounded ears AMBER eyes long otter tail teal vest and purple seashell satchel. Evolved adds GOLDEN TIDE WAVE clasp, short lilac travel cape and small smooth stone keepsake at belt, distinct otter face not cat. BOTTOM RIGHT Glimmer Wayfinder: mint-teal fuzzy FIREFLY cream face AMBER eyes rounded antennae ending tiny gold lights translucent mint oval wings golden glowing abdomen purple neckerchief. Evolved adds delicate GOLDEN CONSTELLATION wing veins and lilac travel collar with moon clasp, six rounded insect limbs no weapons, antennae and wings fully in cell. Retain base species and faces, modest friendly advancement no crowns.",
+  "rawSource": "content/campaign/art/sources/wayfinders-cove-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-bf734594-4153-446a-8647-4eacb182b9be.png",
+  "processedAsset": "frontend/public/assets/campaign/wayfinders-cove-v1.png",
+  "processing": "Byte-for-byte copy; inspected frame boundary metadata only, no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/characters/meadow.png",
+    "frontend/public/assets/characters/orchard.png",
+    "frontend/public/assets/characters/cove.png"
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "twizzle-wayfinder": [
+      0,
+      0,
+      600,
+      627
+    ],
+    "luna-wayfinder": [
+      600,
+      0,
+      654,
+      627
+    ],
+    "pebble-wayfinder": [
+      0,
+      627,
+      600,
+      627
+    ],
+    "glimmer-wayfinder": [
+      600,
+      627,
+      654,
+      627
+    ]
+  },
+  "technicalGateEvidence": [
+    "docs/screenshots/campaign/wayfinders-first-phaser.png",
+    "docs/screenshots/campaign/wayfinders-first-phone.png"
+  ],
+  "reviewStatus": "pending",
+  "inspection": "Inspected column split600 preserves Glimmer wing extending left of nominal627. Luna gains fin-like ear embellishment; human identity review pending. Static only.",
+  "sha256": "89b51da7dbd8b50943c40dccf94776a906e38fd3b0391056df703d49622845c1",
+  "completedTechnicalPreviews": [
+    "docs/screenshots/campaign/forms-group3.png",
+    "docs/screenshots/campaign/forms-group3-phone.png",
+    "docs/screenshots/campaign/forms-group4.png",
+    "docs/screenshots/campaign/forms-group4-phone.png"
+  ],
+  "completedTechnicalPreviewNotes": "2026-11-14 actual createWorld registered sprites inspected desktop1280x800 and phone390x844, three at a time. Synthetic fixtures, avatar hidden to prevent occlusion; no source-frame clipping observed. No gameplay progression or final human approval claim."
+}

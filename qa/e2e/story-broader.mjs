@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Seven stories, including clues, lasting choices, a new escort and parallel preparations.
 // Run only through run-training-qa.mjs with its fresh disposable database.
 import assert from 'node:assert/strict';
@@ -34,7 +35,7 @@ const observe = currentPage => {
 };
 observe(page);
 try {
-  await page.goto(`${origin}/?story=1`);
+  await gotoLegacy(page, `${origin}/?story=1`);
   await page.locator('#game canvas').waitFor();
   const bootstrap = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
   const get = async path => {
@@ -189,7 +190,7 @@ try {
     });
     page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     observe(page);
-    await page.goto(`${origin}/?story=1`);
+    await gotoLegacy(page, `${origin}/?story=1`);
     await page.locator('#game canvas').waitFor();
     const after = await ready();
     assert.equal(after.revision, before.revision);

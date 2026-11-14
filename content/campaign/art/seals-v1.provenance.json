@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create ONE original Wonderwilds production game SEAL MEDAL sprite atlas TRUE TRANSPARENT background square1536x1536 EXACT TWO columns TWO rows FOUR isolated equal cells with generous transparent margins. Each whole medal within middle70percent width80percent height. Consistent straight-on view slightly high-angle, warm upper-left lighting premium dimensional3D family animated game style round polished honeygold medallions with raised simple purple/turquoise/coral symbols and thick satin ribbon loop. No text letters numbers labels grid background ground or external shadows. All FOUR medals identical outer circular shape scale and rim thickness. TOP LEFT Echo seal: raised PURPLE DOUBLE BELL with two simple curved turquoise sound-wave marks, lavender ribbon loop. TOP RIGHT Harvest seal: raised GOLDEN WHEAT SHEAF backed by coral round apple, mint ribbon loop. BOTTOM LEFT Current seal: raised TURQUOISE FERRY SAIL over two parallel purple river wave lines, coral ribbon loop. BOTTOM RIGHT Tide seal: raised PURPLE SPIRAL SEASHELL over one rounded turquoise breaking wave, skyblue ribbon loop. Symbols chunky simple recognisable at32px, rounded bevels, no microscopic details. Entire medallion and ribbon inside cell. Matching original preschool exploration game polished gold Bridge/Bloom seals.",
+  "rawSource": "content/campaign/art/sources/seals-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-0b81263b-862b-487c-8356-dfafd88419e6.png",
+  "processedAsset": "frontend/public/assets/campaign/seals-v1.png",
+  "processing": "Byte-for-byte copy; no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/campaign/wayfinders-sail-v1.png",
+    "frontend/public/assets/campaign/props-v1.png"
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "echo-seal": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "harvest-seal": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "current-seal": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "tide-seal": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "reviewStatus": "pending",
+  "inspection": "Source inspected clear bell/wheat+apple/ferry/shell silhouettes. Ribbon glow extends beyond central shapes but no adjacent-cell intrusion observed. Static medals.",
+  "sha256": "c834bab29cd449386056c41964d7f84b3762a1e4e47d66b15f6122ed64a18f4e",
+  "phonePreview": "docs/screenshots/campaign/final-static-phone.png",
+  "phonePreviewNotes": "390px viewport browser canvas draws exact source frames; icon32/48px, props80px on checkerboard. Readable symbols and alpha edges; not real scene integration or human approval."
+}

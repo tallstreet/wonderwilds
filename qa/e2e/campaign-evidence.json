@@ -1,0 +1,293 @@
+{
+  "date": "2026-11-14",
+  "scope": "Technical synthetic QA; no human playtest, educator, art or accessibility approval",
+  "providerCredentials": "cleared by campaign runner",
+  "matrixExitCode": 0,
+  "cases": [
+    {
+      "starter": "pip",
+      "orchardOrder": "harvest",
+      "learningControls": "actual browser supported controls",
+      "result": "passed",
+      "revision": 561,
+      "actionCount": 206,
+      "flags": 466,
+      "grants": 411,
+      "seals": [
+        "bridge",
+        "bloom",
+        "echo",
+        "harvest",
+        "current",
+        "tide",
+        "beacon",
+        "accord"
+      ],
+      "companions": {
+        "bramble": 5,
+        "cleo": 5,
+        "flutter": 5,
+        "glimmer": 5,
+        "luna": 5,
+        "nib": 5,
+        "patter": 5,
+        "pebble": 5,
+        "pip": 5,
+        "sail": 5,
+        "tansy": 5,
+        "twizzle": 5
+      },
+      "milestones": 48,
+      "ending": true,
+      "harvestTrialIndex": 69,
+      "currentTrialIndex": 97,
+      "apiAndBrowserRestart": "passed",
+      "canonicalFormToggleAndReload": "passed"
+    },
+    {
+      "starter": "pip",
+      "orchardOrder": "current",
+      "learningControls": "authenticated API begin/finish_together",
+      "result": "passed",
+      "revision": 514,
+      "actionCount": 206,
+      "flags": 466,
+      "grants": 411,
+      "seals": [
+        "bridge",
+        "bloom",
+        "echo",
+        "harvest",
+        "current",
+        "tide",
+        "beacon",
+        "accord"
+      ],
+      "companions": {
+        "bramble": 5,
+        "cleo": 5,
+        "flutter": 5,
+        "glimmer": 5,
+        "luna": 5,
+        "nib": 5,
+        "patter": 5,
+        "pebble": 5,
+        "pip": 5,
+        "sail": 5,
+        "tansy": 5,
+        "twizzle": 5
+      },
+      "milestones": 48,
+      "ending": true,
+      "harvestTrialIndex": 106,
+      "currentTrialIndex": 73,
+      "apiAndBrowserRestart": "passed",
+      "canonicalFormToggleAndReload": "passed"
+    },
+    {
+      "starter": "tansy",
+      "orchardOrder": "harvest",
+      "learningControls": "authenticated API begin/finish_together",
+      "result": "passed",
+      "revision": 575,
+      "actionCount": 205,
+      "flags": 465,
+      "grants": 409,
+      "seals": [
+        "bridge",
+        "bloom",
+        "echo",
+        "harvest",
+        "current",
+        "tide",
+        "beacon",
+        "accord"
+      ],
+      "companions": {
+        "bramble": 5,
+        "cleo": 5,
+        "flutter": 5,
+        "glimmer": 5,
+        "luna": 5,
+        "nib": 5,
+        "patter": 5,
+        "pebble": 5,
+        "pip": 5,
+        "sail": 5,
+        "tansy": 5,
+        "twizzle": 5
+      },
+      "milestones": 48,
+      "ending": true,
+      "harvestTrialIndex": 68,
+      "currentTrialIndex": 96,
+      "apiAndBrowserRestart": "passed",
+      "canonicalFormToggleAndReload": "passed"
+    },
+    {
+      "starter": "tansy",
+      "orchardOrder": "current",
+      "learningControls": "authenticated API begin/finish_together",
+      "result": "passed",
+      "revision": 528,
+      "actionCount": 205,
+      "flags": 465,
+      "grants": 409,
+      "seals": [
+        "bridge",
+        "bloom",
+        "echo",
+        "harvest",
+        "current",
+        "tide",
+        "beacon",
+        "accord"
+      ],
+      "companions": {
+        "bramble": 5,
+        "cleo": 5,
+        "flutter": 5,
+        "glimmer": 5,
+        "luna": 5,
+        "nib": 5,
+        "patter": 5,
+        "pebble": 5,
+        "pip": 5,
+        "sail": 5,
+        "tansy": 5,
+        "twizzle": 5
+      },
+      "milestones": 48,
+      "ending": true,
+      "harvestTrialIndex": 105,
+      "currentTrialIndex": 72,
+      "apiAndBrowserRestart": "passed",
+      "canonicalFormToggleAndReload": "passed"
+    },
+    {
+      "starter": "nib",
+      "orchardOrder": "harvest",
+      "learningControls": "authenticated API begin/finish_together",
+      "result": "passed",
+      "revision": 568,
+      "actionCount": 205,
+      "flags": 466,
+      "grants": 409,
+      "seals": [
+        "bridge",
+        "bloom",
+        "echo",
+        "harvest",
+        "current",
+        "tide",
+        "beacon",
+        "accord"
+      ],
+      "companions": {
+        "bramble": 5,
+        "cleo": 5,
+        "flutter": 5,
+        "glimmer": 5,
+        "luna": 5,
+        "nib": 5,
+        "patter": 5,
+        "pebble": 5,
+        "pip": 5,
+        "sail": 5,
+        "tansy": 5,
+        "twizzle": 5
+      },
+      "milestones": 48,
+      "ending": true,
+      "harvestTrialIndex": 68,
+      "currentTrialIndex": 96,
+      "apiAndBrowserRestart": "passed",
+      "canonicalFormToggleAndReload": "passed"
+    },
+    {
+      "starter": "nib",
+      "orchardOrder": "current",
+      "learningControls": "authenticated API begin/finish_together",
+      "result": "passed",
+      "revision": 520,
+      "actionCount": 205,
+      "flags": 466,
+      "grants": 409,
+      "seals": [
+        "bridge",
+        "bloom",
+        "echo",
+        "harvest",
+        "current",
+        "tide",
+        "beacon",
+        "accord"
+      ],
+      "companions": {
+        "bramble": 5,
+        "cleo": 5,
+        "flutter": 5,
+        "glimmer": 5,
+        "luna": 5,
+        "nib": 5,
+        "patter": 5,
+        "pebble": 5,
+        "pip": 5,
+        "sail": 5,
+        "tansy": 5,
+        "twizzle": 5
+      },
+      "milestones": 48,
+      "ending": true,
+      "harvestTrialIndex": 105,
+      "currentTrialIndex": 72,
+      "apiAndBrowserRestart": "passed",
+      "canonicalFormToggleAndReload": "passed"
+    }
+  ],
+  "m2": {
+    "starters": [
+      "pip",
+      "tansy",
+      "nib"
+    ],
+    "result": "passed",
+    "common": [
+      "actual starter practices and supported learning",
+      "level-two starter before trial",
+      "intentional trial loss and recovery",
+      "reload during trial",
+      "exact uncertain-write retry",
+      "keyboard movement and actual world trail-sign travel",
+      "reversible irrigation choices",
+      "recruitment, care, team change and alcove return",
+      "phone layout"
+    ],
+    "additionalTansyAndNib": [
+      "paired rally/signature replay without repeated grants",
+      "two failed reads after committed rest: blocked refresh recovery"
+    ],
+    "additionalNib": [
+      "fresh mobile touch context and journal tap"
+    ]
+  },
+  "regressions": {
+    "standardSourceAndDismissal": "passed ten URL/viewport combinations including X and Escape; zero campaign writes",
+    "activityBrowser": "passed"
+  },
+  "visualReview": {
+    "fixedCollectionEvidenceCases": [
+      "tansy/current",
+      "nib/harvest",
+      "nib/current"
+    ],
+    "preservedEndingScreenshotCase": "nib/harvest",
+    "paths": "docs/screenshots/campaign/ending-*",
+    "earlierPipAndTansyHarvestScreenshots": "predate card CSS fix; not accepted final layout evidence"
+  },
+  "contentSha256": "31747e9dea47e64957a1b9d99957b6eb120d9c53a52ed985a5de2d8aefb66538",
+  "wireSchemaSha256": "cef5a23d245cbb7e1b09fd353f6d3648c75f668cb2f6fb43ab8341febc978638",
+  "stage": "initial campaign 1.0.0",
+  "contentPath": "content/campaign/runtime.initial.v1.json",
+  "contentVersion": "1.0.0"
+}

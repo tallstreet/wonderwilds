@@ -749,7 +749,7 @@ export class StoryWorld {
     }
   }
 }
-export async function connectStoryWorld(hooks: Hooks) {
+export async function connectStoryWorld(hooks: Hooks, selectedProfileId?: string) {
   const lifecycle = new AbortController();
   const leave = () => lifecycle.abort();
   window.addEventListener('pagehide', leave, { once: true });
@@ -764,15 +764,19 @@ export async function connectStoryWorld(hooks: Hooks) {
   if (lifecycle.signal.aborted) throw new Error('Story page is no longer active');
   window.removeEventListener('pagehide', leave);
   return new StoryWorld(
-    new StoryClient(value.profileId, value.csrf),
-    value.profileId,
+    new StoryClient(selectedProfileId ?? value.profileId, value.csrf),
+    selectedProfileId ?? value.profileId,
     hooks,
-    new MissionLearningClient(value.profileId, value.csrf),
+    new MissionLearningClient(selectedProfileId ?? value.profileId, value.csrf),
     value.voiceInput === true &&
       typeof MediaRecorder !== 'undefined' &&
       typeof navigator.mediaDevices?.getUserMedia === 'function'
-      ? createRecorder(value.csrf, value.profileId)
+      ? createRecorder(value.csrf, selectedProfileId ?? value.profileId)
       : undefined,
-    { profile: value.profileId, csrf: value.csrf, enabled: value.characterGeneration === true },
+    {
+      profile: selectedProfileId ?? value.profileId,
+      csrf: value.csrf,
+      enabled: value.characterGeneration === true,
+    },
   );
 }

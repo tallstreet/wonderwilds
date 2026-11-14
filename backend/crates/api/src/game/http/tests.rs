@@ -48,6 +48,8 @@ fn app() -> (Router, Arc<MemoryRepository>) {
         ])),
     });
     let state = AppState {
+        paired_repository: crate::paired::repository::Repository::new(None),
+        campaign_repository: crate::campaign::repository::Repository::new(None),
         repository: repo.clone(),
         auth: Arc::new(SyntheticAuth),
         story_repository: Arc::new(StoryMemory::new()),

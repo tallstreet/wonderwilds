@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Three connected authored missions through actual Phaser interactions and a disposable API.
 // WW_QA_BROWSER_TEST=qa/e2e/story-series.mjs node qa/e2e/run-training-qa.mjs
 import assert from 'node:assert/strict';
@@ -10,7 +11,7 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 try {
-  await page.goto(`${origin}/?story=1`);
+  await gotoLegacy(page, `${origin}/?story=1`);
   await page.locator('#game canvas').waitFor();
   const bootstrap = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
   const get = async path => {
@@ -163,7 +164,7 @@ try {
   assert.equal(await page.locator('[data-story-history] li').count(), 3);
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await page.screenshot({ path: '/tmp/wonderwilds-story-series-mobile.png', fullPage: true });
-  await page.goto(`${origin}/story.html`);
+  await gotoLegacy(page, `${origin}/story.html`);
   await page.locator('#game canvas').waitFor();
   await page.locator('#missions').click();
   await page.locator('[data-story-mission-status="completed"]').waitFor();

@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "bramble-wayfinder-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/bramble-wayfinder-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/bramble-wayfinder-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/bramble-wayfinder-motion-v1.png",
+  "sha256": "c8d7635b4a86cd0bc5271edff252a5aee19d3c6965659358ba3bb1df458c0825",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/bramble-wayfinder-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/campaign/wayfinders-orchard-v1.png",
+      "sha256": "d5f272adc7c8e2eb3d1622c1a5962ed98ce1d000368ee10247c3a0a8b812f8f7",
+      "use": "BRAMBLE WAYFINDER advanced form, ONLY LOWER LEFT of reference. cream-and-taupe BUNNY with oneupright andonefloppyear, AMBER eyes, plumviolettravelvest, mintleaf-edgedshoulder cape, greenleafscarf andgoldbranchclasp, smallrolledmap atbelt. Keepdistinctbunnyanatomy andsoftface. Signature gathers smallwoodbrace, sets itsteadily, settles."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      278,
+      557,
+      835,
+      1114,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/bramble-wayfinder-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/bramble-wayfinder-motion-v1.cleanup-prompt.txt",
+  "previewEvidence": [
+    "content/campaign/art/native-motion-content-review.v1.json",
+    "content/campaign/art/nonstarter-wayfinder-supplement-review.v1.json"
+  ]
+}

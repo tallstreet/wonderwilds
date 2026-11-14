@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create ONE original Wonderwilds production game ENCOUNTER FEEDBACK EFFECT SPRITE ATLAS. TRUE TRANSPARENT BACKGROUND, landscape1536x1024 EXACT THREE equal columns TWO equal rows SIX equal square cells. One isolated compact effect cluster per cell, each within central65percent width65percent height, broad transparent gutters, no grid lines labels text numbers background ground shadows or characters. Premium polished dimensional3D family game style rounded toy-like sparkling magic, warm upper-left light violet coral turquoise gold. These are SIX static feedback stills, not sequential animation. TOP LEFT Gleam signature effect: soft rounded GOLDEN CRESCENT RING radiating three short warm cream light rays and three small gold stars. TOP MIDDLE Growth signature effect: three MINT LEAVES gently unfurling around one coral flower with a short golden curved arc, no soil pot or ground. TOP RIGHT Craft signature effect: two PURPLE HONEYWOOD BRACE beams crossing within one small turquoise shield outline, three tiny golden rivet sparks. BOTTOM LEFT Rhythm signature effect: two rounded LILAC BELLS with three compact golden echo arcs between them, no musical notes letters or numbers. BOTTOM MIDDLE Tide signature effect: one rounded TURQUOISE SPLASH CURL with three large separate cream droplets and small purple wave arc. BOTTOM RIGHT celebration effect: compact arc of SEVEN tiny rounded star shapes in gold turquoise coral violet around one larger cream-gold central star, no ribbons confetti text trophy or symbols that imply rewards. Effects have soft compact glows contained inside their cells and clean alpha, readable at96px. Distinctive silhouette for each affinity, no screens or buttons. Exact regularly separated3x2cells.",
+  "rawSource": "content/campaign/art/sources/effects-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-6dc32274-3bde-41ea-a513-9eee39f9dc52.png",
+  "processedAsset": "frontend/public/assets/campaign/effects-v1.png",
+  "processing": "Byte-for-byte copy; no raster edits.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/campaign/affinities-a-v1.png",
+    "frontend/public/assets/campaign/affinities-b-v1.png"
+  ],
+  "actualDimensions": [
+    1536,
+    1024
+  ],
+  "frames": {
+    "effect-gleam": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "effect-growth": [
+      512,
+      0,
+      512,
+      512
+    ],
+    "effect-craft": [
+      1024,
+      0,
+      512,
+      512
+    ],
+    "effect-rhythm": [
+      0,
+      512,
+      512,
+      512
+    ],
+    "effect-tide": [
+      512,
+      512,
+      512,
+      512
+    ],
+    "effect-celebration": [
+      1024,
+      512,
+      512,
+      512
+    ]
+  },
+  "reviewStatus": "pending",
+  "inspection": "Source visually inspected six distinct compact rounded effect stills. Alpha min0max254; more than1million neartransparent pixels. Glows broad within cells, pending actual trial preview. Not native frame animation.",
+  "integrationContract": "Frontend agreed confirmed signature yields matching affinity still+text, confirmed cleared encounter celebration still+text. Reduced motion keeps static image; ordinary controls remain HTML/CSS/SVG.",
+  "sha256": "6476576e760352471c628ffad8b0887095bba546c2f405dcff1f7be44d92ff22",
+  "technicalPreviewEvidence": [
+    "docs/screenshots/campaign/trial-signature-desktop.png",
+    "docs/screenshots/campaign/trial-signature-phone.png",
+    "docs/screenshots/campaign/trial-signature-reduced.png",
+    "docs/screenshots/campaign/trial-celebration-desktop.png",
+    "docs/screenshots/campaign/trial-celebration-phone.png",
+    "docs/screenshots/campaign/trial-effect-cleared.png"
+  ],
+  "technicalPreviewNotes": "Actual authoritative Pip Gleam signature after saved2light, reducedmotion still, clears next confirmedtool move, and completedtrial celebration inspected desktop+phone. Other4signatureeffect sourceframes inspected but no dedicatedactualturn screenshots."
+}

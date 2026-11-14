@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Run through run-training-qa.mjs with synthetic Modal credentials and an unavailable
 // loopback endpoint. Uses a disposable profile, never paid calls or demo progress.
 import assert from 'node:assert/strict';
@@ -9,7 +10,7 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 844 } });
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 try {
-  await page.goto(origin);
+  await gotoLegacy(page, origin);
   await page.locator('#game canvas').waitFor();
   const bootstrap = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
   const snapshot = async () => {

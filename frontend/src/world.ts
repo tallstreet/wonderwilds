@@ -1,3 +1,12 @@
+import {
+  preloadCampaignAnimation,
+  syncCampaignAnimations,
+  campaignAnimationCache,
+  registerCampaignAnimation,
+  applyCampaignAnimation,
+  startCampaignPose,
+  type CampaignPose,
+} from './campaign/animation.ts';
 import { itemTexture } from './items.ts';
 import { CUSTOM_TEXTURE, customFacing, customFrame } from './custom-character.ts';
 import { SpeechBubble } from './speech-bubble.ts';
@@ -60,6 +69,7 @@ export function createWorld(
     you!: Phaser.GameObjects.Text;
     prompt!: Phaser.GameObjects.Text;
     lastSave = 0;
+    lastTextureDiagnostic = -Infinity;
     speech!: SpeechBubble;
     paintedRegion = '';
     exitArmed = true;
@@ -80,12 +90,29 @@ export function createWorld(
       preloadWalkCycle(this);
       preloadFacing(this);
       preloadCharacters(this);
+      preloadCampaignAnimation(this, [
+        getState().hero,
+        ...(backend?.companions() ?? (getState().done.length === 3 ? [{ sprite: 'pip' }] : [])).map(
+          (friend) => friend.sprite,
+        ),
+      ]);
     }
     create() {
-      this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+      this.reducedMotion = motionPreference.matches;
+      const changeMotion = () => {
+        this.reducedMotion = motionPreference.matches;
+        this.cameras.main.resetFX();
+        this.paint();
+      };
+      motionPreference.addEventListener('change', changeMotion);
+      this.events.once('shutdown', () =>
+        motionPreference.removeEventListener('change', changeMotion),
+      );
       registerWalkCycle(this);
       registerFacing(this);
       registerCharacters(this);
+      registerCampaignAnimation(this);
       registerAtlas(this.textures.get('hero-atlas'), heroFrames);
       registerAtlas(this.textures.get('prop-atlas'), propFrames);
       const keyboard = this.input.keyboard;
@@ -113,7 +140,16 @@ export function createWorld(
             this.walkTo(this.cameras.main.getWorldPoint(p.x, p.y));
         },
       );
-      this.game.events.on('refresh', () => this.paint());
+      const pose = (id: string, kind: CampaignPose) => {
+        for (const actor of [this.player, ...this.followers.map((follower) => follower.actor)])
+          if (actor?.heroId === id || actor?.heroId === id + '-wayfinder')
+            startCampaignPose(actor, kind, this.time.now);
+      };
+      this.game.events.on('campaign-pose', pose);
+      this.events.once('shutdown', () => this.game.events.off('campaign-pose', pose));
+      const refresh = () => this.paint();
+      this.game.events.on('refresh', refresh);
+      this.events.once('shutdown', () => this.game.events.off('refresh', refresh));
       const updateItemArt = (id: string) => {
         if (!this.textures.exists(itemTexture(id))) return;
         for (const marker of this.markers) {
@@ -135,7 +171,11 @@ export function createWorld(
           : getState().hero;
         this.poseActor(this.player, 0, 0, 0);
       });
-      this.game.events.on('authoritative-position', () => this.paint(true));
+      const authoritativePosition = () => this.paint(true);
+      this.game.events.on('authoritative-position', authoritativePosition);
+      this.events.once('shutdown', () =>
+        this.game.events.off('authoritative-position', authoritativePosition),
+      );
       this.game.events.on('scripted-walk', (point: Point, arrived: () => void) => {
         this.walkTo(point, null, true);
         this.arrival = arrived;
@@ -178,7 +218,9 @@ export function createWorld(
           ? { x: this.player.x, y: this.player.y }
           : getState().position;
       this.tweens.killAll();
-      this.children.removeAll(true);
+      // DisplayList.removeAll(true) skips removal callbacks; it does not destroy
+      // objects like Container.removeAll(true). Text owns UUID canvas textures.
+      for (const child of this.children.getChildren().slice()) child.destroy();
       this.target = null;
       this.route = [];
       this.pending = null;
@@ -245,6 +287,10 @@ export function createWorld(
                     e.prop === 'berry' ? 32 : 96 * npcFacing.scaleY,
                   )
                   .setDepth(y);
+          if (e.passive) {
+            if (backend && e.character) this.label(x, y + 12, e.character, 10);
+            return;
+          }
           // Keep every layer in one container so the symbol never drifts from its badge.
           const badge = this.add.container(x, y - 112).setDepth(y + 100);
           const medallion = this.add.graphics();
@@ -360,6 +406,10 @@ export function createWorld(
       this.addAmbientDetails();
       this.prompt.setVisible(false);
       this.fitCamera();
+      void syncCampaignAnimations(this, [
+        this.player.heroId,
+        ...this.followers.map((follower) => follower.actor.heroId),
+      ]);
     }
     storyShape(x: number, y: number, kind: StoryShape, lit: boolean) {
       const shape = this.add.graphics({ x, y }).setDepth(y);
@@ -577,6 +627,28 @@ export function createWorld(
       return ground;
     }
     poseActor(actor: Actor, dx: number, dy: number, distance: number) {
+      if (
+        applyCampaignAnimation(actor, {
+          dx,
+          dy,
+          distance,
+          now: this.time.now,
+          reducedMotion: this.reducedMotion,
+        })
+      ) {
+        actor.setDepth(actor.y);
+        actor.shadow
+          .setPosition(actor.x, actor.y + 1)
+          .setScale(1)
+          .setAlpha(0.22)
+          .setDepth(actor.y - 0.5);
+        if (actor === this.player) {
+          const surface = document.getElementById(parent)!;
+          surface.dataset.playerTexture = actor.art.texture.key;
+          surface.dataset.playerFrame = String(actor.art.frame.name);
+        }
+        return;
+      }
       const character = availableCharacter(actor.heroId, this.textures);
       const moving = distance > 0.01,
         species = character?.species ?? heroes[actor.heroId]?.species ?? 'kitten';
@@ -660,6 +732,33 @@ export function createWorld(
         .setDepth(actor.y - 0.5);
     }
     update(t: number, delta: number) {
+      if (t - this.lastTextureDiagnostic >= 500) {
+        this.lastTextureDiagnostic = t;
+        const textures = this.textures.getTextureKeys().map((key) => {
+          const sources = this.textures.get(key).source;
+          return {
+            key,
+            width: sources[0]?.width ?? 0,
+            height: sources[0]?.height ?? 0,
+            rgbaBytes: sources.reduce(
+              (total, source) => total + source.width * source.height * 4,
+              0,
+            ),
+          };
+        });
+        const cache = campaignAnimationCache(this);
+        const motion = textures.filter((texture) => cache.keys.includes(texture.key));
+        const surface = document.getElementById(parent);
+        if (surface)
+          surface.dataset.textureResidency = JSON.stringify({
+            textureCount: textures.length,
+            rgbaBytes: textures.reduce((sum, texture) => sum + texture.rgbaBytes, 0),
+            motionCount: motion.length,
+            motionPending: cache.pending,
+            motionRgbaBytes: motion.reduce((sum, texture) => sum + texture.rgbaBytes, 0),
+            motion,
+          });
+      }
       if (!this.player) return;
       this.speech.update(this.player, getState().region, (point) => {
         const camera = this.cameras.main;

@@ -28,6 +28,7 @@ export interface WorldEncounter extends Point {
   short: string;
   character: string;
   sprite?: string;
+  passive?: boolean;
   prop?: string;
   itemId?: string;
   shape?: StoryShape;

@@ -1,0 +1,1332 @@
+{
+  "date": "2026-11-14",
+  "stage": "M6 actual Phaser memory/lifecycle; synthetic renderer fixture",
+  "estimate": "sum(source.width * source.height * 4), not real GPU allocation; excludes driver copies/mipmaps/decoded duplicates",
+  "result": "passed exit0",
+  "registeredNativeSheets": 24,
+  "beforeFix": {
+    "defect": "DisplayList.removeAll(true) detached objects without destroying Text textures",
+    "counts": [
+      34,
+      44,
+      52,
+      60,
+      68,
+      76,
+      84,
+      92,
+      100,
+      108,
+      116,
+      124,
+      132,
+      140,
+      148,
+      156,
+      164
+    ],
+    "orphanTextureGrowthPerRepaint": 8
+  },
+  "viewports": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "initialAssetTransferBytes": 50682273,
+      "initialAssetEncodedBytes": 50674473,
+      "allSwitchAssetTransferBytes": 106460015,
+      "maximumRgbaBytes": 176156272,
+      "maximumMotionCount": 4,
+      "maximumMotionRgbaBytes": 25168704,
+      "samples": [
+        {
+          "team": [
+            "pip",
+            "tansy"
+          ],
+          "textureCount": 34,
+          "rgbaBytes": 163571920,
+          "motionCount": 2,
+          "motionRgbaBytes": 12584352,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip-wayfinder",
+            "tansy-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "nib",
+            "flutter"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-nib-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-flutter-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "nib-wayfinder",
+            "flutter-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176154592,
+          "motionCount": 4,
+          "motionRgbaBytes": 25167024,
+          "motion": [
+            {
+              "key": "campaign-nib-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-flutter-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-nib-wayfinder-motion-v1",
+              "width": 1072,
+              "height": 1467,
+              "rgbaBytes": 6290496
+            },
+            {
+              "key": "campaign-flutter-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "cleo",
+            "bramble"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176154592,
+          "motionCount": 4,
+          "motionRgbaBytes": 25167024,
+          "motion": [
+            {
+              "key": "campaign-nib-wayfinder-motion-v1",
+              "width": 1072,
+              "height": 1467,
+              "rgbaBytes": 6290496
+            },
+            {
+              "key": "campaign-flutter-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-cleo-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-bramble-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "cleo-wayfinder",
+            "bramble-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-cleo-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-bramble-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-cleo-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-bramble-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "patter",
+            "twizzle"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-cleo-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-bramble-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-patter-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-twizzle-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "patter-wayfinder",
+            "twizzle-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-patter-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-twizzle-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-patter-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-twizzle-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "luna",
+            "pebble"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-patter-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-twizzle-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-luna-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pebble-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "luna-wayfinder",
+            "pebble-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-luna-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pebble-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-luna-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pebble-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "sail",
+            "glimmer"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-luna-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pebble-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-sail-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-glimmer-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "sail-wayfinder",
+            "glimmer-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-sail-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-glimmer-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-sail-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-glimmer-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip",
+            "tansy"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-sail-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-glimmer-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip-wayfinder",
+            "tansy-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip",
+            "tansy"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip-wayfinder",
+            "tansy-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip",
+            "tansy"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        }
+      ],
+      "afterSceneRestart": {
+        "textureCount": 36,
+        "rgbaBytes": 176156272,
+        "motionCount": 4,
+        "motionPending": [],
+        "motionRgbaBytes": 25168704,
+        "motion": [
+          {
+            "key": "campaign-pip-base-motion-v1",
+            "width": 1122,
+            "height": 1402,
+            "rgbaBytes": 6292176
+          },
+          {
+            "key": "campaign-tansy-base-motion-v1",
+            "width": 1122,
+            "height": 1402,
+            "rgbaBytes": 6292176
+          },
+          {
+            "key": "campaign-pip-wayfinder-motion-v1",
+            "width": 1122,
+            "height": 1402,
+            "rgbaBytes": 6292176
+          },
+          {
+            "key": "campaign-tansy-wayfinder-motion-v1",
+            "width": 1122,
+            "height": 1402,
+            "rgbaBytes": 6292176
+          }
+        ]
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "initialAssetTransferBytes": 50682273,
+      "initialAssetEncodedBytes": 50674473,
+      "allSwitchAssetTransferBytes": 106460015,
+      "maximumRgbaBytes": 176156272,
+      "maximumMotionCount": 4,
+      "maximumMotionRgbaBytes": 25168704,
+      "samples": [
+        {
+          "team": [
+            "pip",
+            "tansy"
+          ],
+          "textureCount": 34,
+          "rgbaBytes": 163571920,
+          "motionCount": 2,
+          "motionRgbaBytes": 12584352,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip-wayfinder",
+            "tansy-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "nib",
+            "flutter"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-nib-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-flutter-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "nib-wayfinder",
+            "flutter-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176154592,
+          "motionCount": 4,
+          "motionRgbaBytes": 25167024,
+          "motion": [
+            {
+              "key": "campaign-nib-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-flutter-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-nib-wayfinder-motion-v1",
+              "width": 1072,
+              "height": 1467,
+              "rgbaBytes": 6290496
+            },
+            {
+              "key": "campaign-flutter-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "cleo",
+            "bramble"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176154592,
+          "motionCount": 4,
+          "motionRgbaBytes": 25167024,
+          "motion": [
+            {
+              "key": "campaign-nib-wayfinder-motion-v1",
+              "width": 1072,
+              "height": 1467,
+              "rgbaBytes": 6290496
+            },
+            {
+              "key": "campaign-flutter-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-cleo-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-bramble-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "cleo-wayfinder",
+            "bramble-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-cleo-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-bramble-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-cleo-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-bramble-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "patter",
+            "twizzle"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-cleo-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-bramble-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-patter-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-twizzle-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "patter-wayfinder",
+            "twizzle-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-patter-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-twizzle-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-patter-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-twizzle-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "luna",
+            "pebble"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-patter-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-twizzle-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-luna-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pebble-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "luna-wayfinder",
+            "pebble-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-luna-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pebble-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-luna-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pebble-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "sail",
+            "glimmer"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-luna-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pebble-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-sail-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-glimmer-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "sail-wayfinder",
+            "glimmer-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-sail-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-glimmer-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-sail-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-glimmer-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip",
+            "tansy"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-sail-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-glimmer-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip-wayfinder",
+            "tansy-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip",
+            "tansy"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip-wayfinder",
+            "tansy-wayfinder"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        },
+        {
+          "team": [
+            "pip",
+            "tansy"
+          ],
+          "textureCount": 36,
+          "rgbaBytes": 176156272,
+          "motionCount": 4,
+          "motionRgbaBytes": 25168704,
+          "motion": [
+            {
+              "key": "campaign-pip-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-base-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-pip-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            },
+            {
+              "key": "campaign-tansy-wayfinder-motion-v1",
+              "width": 1122,
+              "height": 1402,
+              "rgbaBytes": 6292176
+            }
+          ]
+        }
+      ],
+      "afterSceneRestart": {
+        "textureCount": 36,
+        "rgbaBytes": 176156272,
+        "motionCount": 4,
+        "motionPending": [],
+        "motionRgbaBytes": 25168704,
+        "motion": [
+          {
+            "key": "campaign-pip-base-motion-v1",
+            "width": 1122,
+            "height": 1402,
+            "rgbaBytes": 6292176
+          },
+          {
+            "key": "campaign-tansy-base-motion-v1",
+            "width": 1122,
+            "height": 1402,
+            "rgbaBytes": 6292176
+          },
+          {
+            "key": "campaign-pip-wayfinder-motion-v1",
+            "width": 1122,
+            "height": 1402,
+            "rgbaBytes": 6292176
+          },
+          {
+            "key": "campaign-tansy-wayfinder-motion-v1",
+            "width": 1122,
+            "height": 1402,
+            "rgbaBytes": 6292176
+          }
+        ]
+      }
+    }
+  ],
+  "limits": [
+    "Approximate source RGBA is not actual GPU allocation",
+    "Driver buffers/mipmaps/CSS decoded images are excluded",
+    "Initial static artwork transfer and residency remain substantial",
+    "Physical phone performance and an accepted release memory budget remain unverified"
+  ]
+}

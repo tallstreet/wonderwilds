@@ -1,5 +1,12 @@
 import { connectStoryWorld, type StoryWorld } from './story/world.ts';
 import type Phaser from 'phaser';
+import { CampaignWorld, portrait } from './campaign/world.ts';
+import { MissionLearningClient } from './mission-learning/client.ts';
+import { PairedClient } from './paired/client.ts';
+import { allowedProfile } from './paired/panel.ts';
+import type { HouseholdProfile } from '../../contracts/generated/contracts.ts';
+import { CampaignClient } from './campaign/client.ts';
+import { adventureUrl, earlierAdventureRequested } from './campaign/presentation.ts';
 import './style.css';
 import './redesign.css';
 import './fullscreen.css';
@@ -16,7 +23,7 @@ const escape = (s: string) =>
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c,
   );
 let game: Phaser.Game;
-let story: StoryWorld | undefined;
+let story: StoryWorld | CampaignWorld | undefined;
 let returnFocus: HTMLElement | null = null;
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
 $('#app').innerHTML =
@@ -85,23 +92,117 @@ document.addEventListener('click', (event) => {
   const button = event.target.closest('button');
   if (!button) return;
   if (button.classList.contains('close')) return closeDialog();
+  if (button.id === 'campaign-return') {
+    location.assign(adventureUrl(location.href, false));
+    return;
+  }
   if (button.id === 'fullscreen') return void toggleFullscreen();
   story?.handle(button);
 });
 async function boot() {
+  let startupStage = 'session';
   const tools = document.querySelectorAll<HTMLButtonElement>('.game-hud button, .game-dock button');
   tools.forEach((button) => {
     button.disabled = true;
   });
   try {
     $('#story-source-status').textContent = 'Checking story source…';
-    story = await connectStoryWorld({ open: openDialog, close: closeDialog, toast });
+    const hooks = { open: openDialog, close: closeDialog, toast };
+    const response = await fetch('/__demo/bootstrap', {
+      redirect: 'error',
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) throw new Error('Session unavailable');
+    const bootstrap: unknown = await response.json();
+    if (
+      !bootstrap ||
+      typeof bootstrap !== 'object' ||
+      !('profileId' in bootstrap) ||
+      !('csrf' in bootstrap) ||
+      typeof bootstrap.profileId !== 'string' ||
+      typeof bootstrap.csrf !== 'string'
+    )
+      throw new Error('Invalid session');
+    let profiles: HouseholdProfile[] = [];
+    const requestedPlayer = new URL(location.href).searchParams.get('player');
+    if (!earlierAdventureRequested(location.href) || requestedPlayer) {
+      const directory = new PairedClient(bootstrap.profileId, bootstrap.csrf);
+      try {
+        profiles = (await directory.profiles()).profiles;
+      } catch {
+        if (requestedPlayer)
+          throw new Error(
+            'The selected player could not be verified. Reconnect to choose a household player.',
+          );
+      } finally {
+        directory.destroy();
+      }
+    }
+    const selectedProfile = allowedProfile(requestedPlayer, bootstrap.profileId, profiles);
+    if (earlierAdventureRequested(location.href)) {
+      startupStage = 'earlier adventure';
+      story = await connectStoryWorld(hooks, selectedProfile);
+      const button = document.createElement('button');
+      button.id = 'campaign-return';
+      button.className = 'hud-button';
+      button.textContent = 'Moonlight trail';
+      button.setAttribute('aria-label', 'Return to The Missing Moonlight');
+      document.querySelector('.game-hud nav')?.prepend(button);
+    } else {
+      const campaign = new CampaignWorld(
+        new CampaignClient(selectedProfile, bootstrap.csrf),
+        selectedProfile,
+        hooks,
+        new MissionLearningClient(selectedProfile, bootstrap.csrf),
+        { profiles, client: new PairedClient(selectedProfile, bootstrap.csrf) },
+      );
+      startupStage = 'campaign snapshot';
+      const snapshot = await campaign.load();
+      if (snapshot.adopted) story = campaign;
+      else {
+        const adopt = await new Promise<boolean>((resolve) => {
+          const listeners = new AbortController();
+          const choose = (adopt: boolean) => {
+            listeners.abort();
+            resolve(adopt);
+          };
+          dialog.addEventListener('close', () => choose(false), { signal: listeners.signal });
+          openDialog(
+            `<section class="campaign-panel"><span class="campaign-eyebrow">A new adventure awaits</span><h2 id="dialog-title">Where has the moonlight gone?</h2><div class="campaign-intro-art">${['pip', 'tansy', 'nib'].map(portrait).join('')}</div><p>Meet Hazel, choose a companion and follow a trail of fading light. Restore the bridge and garden together, one small act of courage at a time.</p><p>Your earlier stories and friends stay saved.</p>${snapshot.adoptionBlocked ? '<p class="campaign-hazard">Finish your current activity in the earlier adventure before starting this chapter.</p>' : ''}<div class="campaign-actions"><button id="campaign-start" ${snapshot.adoptionBlocked ? 'disabled' : ''}>Begin The Missing Moonlight</button><button id="campaign-legacy">Continue my earlier adventure</button></div></section>`,
+          );
+          document
+            .querySelector('#campaign-start')
+            ?.addEventListener('click', () => choose(true), { signal: listeners.signal });
+          document
+            .querySelector('#campaign-legacy')
+            ?.addEventListener('click', () => choose(false), { signal: listeners.signal });
+        });
+        closeDialog();
+        if (adopt) {
+          startupStage = 'campaign adoption';
+          await campaign.adopt();
+          story = campaign;
+        } else story = await connectStoryWorld(hooks, selectedProfile);
+      }
+    }
+    if (story instanceof CampaignWorld) {
+      const players = document.createElement('button');
+      players.id = 'players';
+      players.className = 'hud-button';
+      players.textContent = 'Choose player';
+      document.querySelector('.game-hud nav')?.prepend(players);
+    }
+    startupStage = 'world renderer';
     game = (await story.start())!;
     tools.forEach((button) => {
       button.disabled = false;
     });
     toast('Open Missions to continue your story and follow a path.');
-  } catch {
+  } catch (error) {
+    console.error(
+      'Adventure startup failed at ' + startupStage,
+      error instanceof Error ? error.message : 'Unknown error',
+    );
     $('#story-source-status').textContent = 'Story source unavailable';
     const wrongLocalAddress = location.hostname === 'localhost';
     const localAddress = new URL(location.href);

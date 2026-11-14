@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "tansy-base-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/tansy-base-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/tansy-base-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/tansy-base-motion-v1.png",
+  "sha256": "4321f0f9f468546d8f90cf8e17a2371800bcc402fc61a6a5f5b1af31ec970d61",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/tansy-base-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/characters/meadow.png",
+      "sha256": "5a8fd696ca30284465a25bbf2a5475d2d6a172b2ddfa9593b430b6e9fd76a38c",
+      "use": "Tansy BASE form, ONLY UPPER RIGHT: careful kind hedgehog with sage-green leafy quills and peach tips, cream furry face/belly, huge AMBER eyes, mint gardening apron with cream daisy emblem, coral sleeves, small green watering can. Keep these clothes, no cape or crown. Signature: gathers a loose tiny green vine in paws, extends a soft protective vine arch, then lets it settle. Watering can stays small and out of way during walk."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 3 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      280,
+      558,
+      830,
+      1098,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/tansy-base-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/tansy-base-motion-v1.cleanup-prompt.txt",
+  "previewEvidence": [
+    "content/campaign/art/native-motion-content-review.v1.json",
+    "docs/screenshots/campaign/tansy-base-motion-phaser.png",
+    "docs/screenshots/campaign/tansy-base-motion-phone-group1.png",
+    "docs/screenshots/campaign/tansy-base-motion-phone-group2.png",
+    "docs/screenshots/campaign/tansy-base-motion-phone-group3.png",
+    "docs/screenshots/campaign/tansy-base-motion-phone-group4.png"
+  ]
+}

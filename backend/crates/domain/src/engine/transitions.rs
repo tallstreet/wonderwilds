@@ -115,6 +115,80 @@ pub fn apply(
     let mut next = state.clone();
     let mut outcomes = Vec::new();
     match &command.action {
+        Action::CampaignAppearance {
+            creature_id,
+            enabled,
+        } => {
+            let c = content
+                .creatures
+                .get(creature_id)
+                .ok_or(Rejection::NotFound)?;
+            if context.facts.campaign_appearances.get(creature_id) != Some(enabled) {
+                return Err(Rejection::UnverifiedEncounter);
+            }
+            if !state.creatures.contains(creature_id)
+                || (*enabled && state.character_level(content, creature_id) < 5)
+            {
+                return Err(Rejection::Locked);
+            }
+            if *enabled {
+                next.transformed.insert(c.transformation.id.clone());
+            } else {
+                next.transformed.remove(&c.transformation.id);
+            }
+            outcomes.push(Outcome::TransformationSet {
+                creature_id: creature_id.clone(),
+                enabled: *enabled,
+            });
+        }
+
+        Action::CampaignGrant {
+            creature_id,
+            grant_id,
+            xp,
+        } => {
+            if !content.creatures.contains_key(creature_id)
+                || !valid_id(grant_id)
+                || !grant_id.starts_with("campaign:")
+                || context.facts.campaign_grants.get(grant_id) != Some(&(creature_id.clone(), *xp))
+            {
+                return Err(Rejection::UnverifiedEncounter);
+            }
+            if *xp > 0 && !state.creatures.contains(creature_id) {
+                return Err(Rejection::Locked);
+            }
+            // One global milestone identity cannot be redirected to another friend.
+            if state.grants.iter().any(|(id, _)| id == grant_id) {
+                return Err(Rejection::AlreadyCompleted);
+            }
+            next.grants.insert((grant_id.clone(), creature_id.clone()));
+            let mut amount = *xp;
+            // Campaign growth replaces the four original milestones in both
+            // directions. Existing XP is preserved, never reconstructed/inferred.
+            let legacy_level = [
+                "first-help",
+                "field_partnership",
+                "personal_project",
+                "wayfinder",
+            ]
+            .iter()
+            .position(|milestone| grant_id == &format!("campaign:{milestone}:{creature_id}"));
+            if let Some(index) = legacy_level {
+                let legacy = format!("training-{creature_id}-{}", index + 1);
+                if content.training(&legacy).is_some() && !next.training_grants.insert(legacy) {
+                    amount = 0;
+                }
+            }
+            let points = next.character_xp.entry(creature_id.clone()).or_default();
+            *points = points.checked_add(amount).ok_or(Rejection::Overflow)?;
+            next.creatures.insert(creature_id.clone());
+            next.friendship.entry(creature_id.clone()).or_insert(1);
+            outcomes.push(Outcome::CampaignGranted {
+                creature_id: creature_id.clone(),
+                grant_id: grant_id.clone(),
+                xp_granted: amount,
+            });
+        }
         Action::BeginQuest {
             quest_id,
             encounter_id,

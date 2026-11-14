@@ -14,6 +14,16 @@ pub struct Command {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Action {
+    CampaignAppearance {
+        creature_id: String,
+        enabled: bool,
+    },
+    /// Internal transaction command; intentionally absent from public GameCommand.
+    CampaignGrant {
+        creature_id: String,
+        grant_id: String,
+        xp: u32,
+    },
     BeginQuest {
         quest_id: String,
         encounter_id: String,
@@ -57,6 +67,10 @@ pub struct VerifiedCompletion {
 /// `reachable_quests` comes from server world/path validation, never browser XY.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct TrustedFacts {
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    pub campaign_appearances: BTreeMap<String, bool>,
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    pub campaign_grants: BTreeMap<String, (String, u32)>,
     pub issued_encounters: BTreeMap<String, String>,
     pub completed_encounters: BTreeMap<String, VerifiedCompletion>,
     pub reachable_quests: BTreeSet<String>,
@@ -148,6 +162,21 @@ impl State {
             .filter(|&&xp| self.character_xp(id) >= xp)
             .count()
     }
+    pub fn campaign_appearance(&self, content: &Content, id: &str) -> &'static str {
+        if self.character_level(content, id) >= 5
+            && content
+                .creatures
+                .get(id)
+                .is_some_and(|c| self.transformed.contains(&c.transformation.id))
+        {
+            "wayfinder"
+        } else {
+            "base"
+        }
+    }
+    pub fn campaign_granted(&self, id: &str) -> bool {
+        self.grants.iter().any(|(grant, _)| grant == id)
+    }
     pub fn training_completed(&self, id: &str) -> bool {
         self.training_grants.contains(id)
     }
@@ -233,6 +262,11 @@ pub struct Event {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Outcome {
+    CampaignGranted {
+        creature_id: String,
+        grant_id: String,
+        xp_granted: u32,
+    },
     QuestStarted {
         quest_id: String,
         encounter_id: String,

@@ -890,8 +890,468 @@
         },
         "description": "Begin a server-selected activity, submit a server-assessed answer, request support, or abandon the issued activity. The client cannot choose a skill, mission, location, correctness, evidence, or mastery."
       }
+    },
+"/api/v1/campaign": {
+    "get": {
+      "operationId": "getCampaign",
+      "responses": {
+        "200": {
+          "description": "Successful response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignSnapshot"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "INVALID_INPUT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "UNAUTHENTICATED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "403": {
+          "description": "FORBIDDEN",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "NOT_FOUND",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "409": {
+          "description": "REVISION_CONFLICT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "429": {
+          "description": "RATE_LIMITED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "UNAVAILABLE",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        }
+      },
+      "description": "Read The Missing Moonlight adoption status and authored campaign snapshot for the owned profile. Existing story progress is preserved separately; legal actions and expedition state are server-authoritative. Coarse location transitions do not verify browser walking."
     }
   },
+  "/api/v1/campaign/commands": {
+    "post": {
+      "operationId": "executeCampaignCommand",
+      "responses": {
+        "200": {
+          "description": "Successful response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignSnapshot"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "INVALID_INPUT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "UNAUTHENTICATED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "403": {
+          "description": "FORBIDDEN",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "NOT_FOUND",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "409": {
+          "description": "REVISION_CONFLICT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "429": {
+          "description": "RATE_LIMITED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "UNAVAILABLE",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        }
+      },
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CampaignCommand"
+            }
+          }
+        }
+      },
+      "description": "Adopt The Missing Moonlight or execute a revision-bound expedition command. Canonical companion grants and joined learning progress commit atomically. An exact command ID and body retry returns the original response, including after later progress."
+    }
+  },
+  "/api/v1/paired": {
+    "get": {
+      "operationId": "getPairedSnapshot",
+      "responses": {
+        "200": {
+          "description": "Successful response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairedSnapshot"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "INVALID_INPUT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "UNAUTHENTICATED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "403": {
+          "description": "FORBIDDEN",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "NOT_FOUND",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "409": {
+          "description": "REVISION_CONFLICT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "429": {
+          "description": "RATE_LIMITED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "UNAVAILABLE",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        }
+      },
+      "description": "Read The Missing Moonlight adoption status and authored campaign snapshot for the owned profile. Existing story progress is preserved separately; legal actions and expedition state are server-authoritative. Coarse location transitions do not verify browser walking."
+    }
+  },
+  "/api/v1/paired/commands": {
+    "post": {
+      "operationId": "executePairedCommand",
+      "responses": {
+        "200": {
+          "description": "Successful response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairedSnapshot"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "INVALID_INPUT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "UNAUTHENTICATED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "403": {
+          "description": "FORBIDDEN",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "NOT_FOUND",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "409": {
+          "description": "REVISION_CONFLICT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "429": {
+          "description": "RATE_LIMITED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "UNAVAILABLE",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        }
+      },
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PairedCommand"
+            }
+          }
+        }
+      },
+      "description": "Adopt The Missing Moonlight or execute a revision-bound expedition command. Canonical companion grants and joined learning progress commit atomically. An exact command ID and body retry returns the original response, including after later progress."
+    }
+  },
+  "/api/v1/household/profiles": {
+    "get": {
+      "operationId": "getHouseholdProfilesSnapshot",
+      "responses": {
+        "200": {
+          "description": "Successful response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HouseholdProfilesSnapshot"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "INVALID_INPUT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "UNAUTHENTICATED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "403": {
+          "description": "FORBIDDEN",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "NOT_FOUND",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "409": {
+          "description": "REVISION_CONFLICT",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "429": {
+          "description": "RATE_LIMITED",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "UNAVAILABLE",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            }
+          }
+        }
+      },
+      "description": "Read The Missing Moonlight adoption status and authored campaign snapshot for the owned profile. Existing story progress is preserved separately; legal actions and expedition state are server-authoritative. Coarse location transitions do not verify browser walking."
+    }
+  }
+},
   "components": {
     "schemas": {
       "GameCommand": {
@@ -992,8 +1452,80 @@
       },
       "MissionSupportContent": {
         "$ref": "./schemas/v1.json#/$defs/MissionSupportContent"
-      }
-    },
+      },
+"CampaignCompanion": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignCompanion"
+  },
+  "CampaignDialogue": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignDialogue"
+  },
+  "CampaignChoice": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignChoice"
+  },
+  "CampaignAction": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignAction"
+  },
+  "CampaignEncounter": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignEncounter"
+  },
+  "CampaignState": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignState"
+  },
+  "CampaignPhase": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignPhase"
+  },
+  "CampaignEncounterDefinition": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignEncounterDefinition"
+  },
+  "CampaignProjection": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignProjection"
+  },
+  "CampaignLocation": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignLocation"
+  },
+  "CampaignStarter": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignStarter"
+  },
+  "CampaignSnapshot": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignSnapshot"
+  },
+  "CampaignCommand": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignCommand"
+  },
+  "CampaignPuzzle": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignPuzzle"
+  },
+  "HouseholdProfile": {
+    "$ref": "./schemas/v1.json#/$defs/HouseholdProfile"
+  },
+  "HouseholdProfilesSnapshot": {
+    "$ref": "./schemas/v1.json#/$defs/HouseholdProfilesSnapshot"
+  },
+  "PairedOffer": {
+    "$ref": "./schemas/v1.json#/$defs/PairedOffer"
+  },
+  "PairedCompanion": {
+    "$ref": "./schemas/v1.json#/$defs/PairedCompanion"
+  },
+  "PairedKeepsake": {
+    "$ref": "./schemas/v1.json#/$defs/PairedKeepsake"
+  },
+  "PairedTurn": {
+    "$ref": "./schemas/v1.json#/$defs/PairedTurn"
+  },
+  "PairedPractice": {
+    "$ref": "./schemas/v1.json#/$defs/PairedPractice"
+  },
+  "PairedSnapshot": {
+    "$ref": "./schemas/v1.json#/$defs/PairedSnapshot"
+  },
+  "PairedCommand": {
+    "$ref": "./schemas/v1.json#/$defs/PairedCommand"
+  },
+  "CampaignRelay": {
+    "$ref": "./schemas/v1.json#/$defs/CampaignRelay"
+  }
+},
     "securitySchemes": {
       "parentSession": {
         "type": "apiKey",

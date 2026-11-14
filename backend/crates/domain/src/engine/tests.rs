@@ -830,3 +830,195 @@ fn inventory_subtraction_is_checked_and_failed_reward_batches_rollback() {
     );
     assert_eq!(overflow, before);
 }
+
+#[test]
+fn campaign_grants_require_exact_trust_and_replay_without_duplicate_xp() {
+    let content = content();
+    let initial = State::new(&content);
+    let mut state = initial.clone();
+    let mut log = Vec::new();
+    let recruit = Action::CampaignGrant {
+        creature_id: "pip".into(),
+        grant_id: "campaign:recruit:pip".into(),
+        xp: 0,
+    };
+    assert_eq!(
+        apply(
+            &state,
+            &command(&state, recruit.clone()),
+            &content,
+            &context()
+        ),
+        Err(Rejection::UnverifiedEncounter)
+    );
+    let mut ctx = context();
+    ctx.facts
+        .campaign_grants
+        .insert("campaign:recruit:pip".into(), ("pip".into(), 0));
+    execute(&mut state, recruit, &content, ctx, &mut log);
+    assert!(state.creatures().contains("pip"));
+    let training = Action::CampaignGrant {
+        creature_id: "pip".into(),
+        grant_id: "campaign:first-help:pip".into(),
+        xp: 10,
+    };
+    let mut ctx = context();
+    ctx.facts
+        .campaign_grants
+        .insert("campaign:first-help:pip".into(), ("pip".into(), 10));
+    execute(
+        &mut state,
+        training.clone(),
+        &content,
+        ctx.clone(),
+        &mut log,
+    );
+    assert_eq!(state.character_level(&content, "pip"), 2);
+    assert!(state.training_completed("training-pip-1"));
+    assert_eq!(
+        apply(&state, &command(&state, training), &content, &ctx),
+        Err(Rejection::AlreadyCompleted)
+    );
+    assert_eq!(replay(&initial, &content, &log).unwrap(), state);
+    let first = &log[1];
+    let duplicate = apply(&state, &first.command, &content, &first.context).unwrap();
+    assert!(duplicate.duplicate);
+    assert_eq!(duplicate.state.character_xp("pip"), 10);
+}
+
+#[test]
+fn campaign_first_help_preserves_existing_training_reward() {
+    let content = content();
+    let mut state = State::new(&content);
+    state.creatures.insert("pip".into());
+    state.training_grants.insert("training-pip-1".into());
+    state.character_xp.insert("pip".into(), 10);
+    let mut ctx = context();
+    ctx.facts
+        .campaign_grants
+        .insert("campaign:first-help:pip".into(), ("pip".into(), 10));
+    let action = Action::CampaignGrant {
+        creature_id: "pip".into(),
+        grant_id: "campaign:first-help:pip".into(),
+        xp: 10,
+    };
+    let applied = apply(&state, &command(&state, action), &content, &ctx).unwrap();
+    assert_eq!(applied.state.character_xp("pip"), 10);
+    assert!(matches!(
+        &applied.events[0].outcome,
+        Outcome::CampaignGranted { xp_granted: 0, .. }
+    ));
+}
+
+#[test]
+fn all_campaign_growth_milestones_alias_legacy_grants() {
+    let content = content();
+    for (index, milestone) in [
+        "first-help",
+        "field_partnership",
+        "personal_project",
+        "wayfinder",
+    ]
+    .iter()
+    .enumerate()
+    {
+        for legacy_first in [false, true] {
+            let mut state = State::new(&content);
+            state.creatures.insert("pip".into());
+            if legacy_first {
+                state
+                    .training_grants
+                    .insert(format!("training-pip-{}", index + 1));
+                state.character_xp.insert("pip".into(), 10);
+            }
+            let grant = format!("campaign:{milestone}:pip");
+            let mut ctx = context();
+            ctx.facts
+                .campaign_grants
+                .insert(grant.clone(), ("pip".into(), 10));
+            let action = Action::CampaignGrant {
+                creature_id: "pip".into(),
+                grant_id: grant,
+                xp: 10,
+            };
+            let next = apply(&state, &command(&state, action), &content, &ctx)
+                .unwrap()
+                .state;
+            assert_eq!(next.character_xp("pip"), 10);
+            assert!(next.training_completed(&format!("training-pip-{}", index + 1)));
+        }
+    }
+}
+
+#[test]
+fn campaign_appearance_requires_trusted_owned_level_five_and_replays() {
+    let content = content();
+    let mut state = State::new(&content);
+    let action = Action::CampaignAppearance {
+        creature_id: "pip".into(),
+        enabled: true,
+    };
+    let mut ctx = context();
+    assert_eq!(
+        apply(&state, &command(&state, action.clone()), &content, &ctx),
+        Err(Rejection::UnverifiedEncounter)
+    );
+    ctx.facts.campaign_appearances.insert("pip".into(), true);
+    assert_eq!(
+        apply(&state, &command(&state, action.clone()), &content, &ctx),
+        Err(Rejection::Locked)
+    );
+    state.creatures.insert("pip".into());
+    state.character_xp.insert("pip".into(), 30);
+    assert_eq!(
+        apply(&state, &command(&state, action.clone()), &content, &ctx),
+        Err(Rejection::Locked)
+    );
+    state.character_xp.insert("pip".into(), 40);
+    let original = state.clone();
+    let mut log = Vec::new();
+    execute(&mut state, action, &content, ctx, &mut log);
+    assert_eq!(state.campaign_appearance(&content, "pip"), "wayfinder");
+    let mut ctx = context();
+    ctx.facts.campaign_appearances.insert("pip".into(), false);
+    execute(
+        &mut state,
+        Action::CampaignAppearance {
+            creature_id: "pip".into(),
+            enabled: false,
+        },
+        &content,
+        ctx,
+        &mut log,
+    );
+    assert_eq!(state.campaign_appearance(&content, "pip"), "base");
+    assert_eq!(replay(&original, &content, &log).unwrap(), state);
+}
+
+#[test]
+fn empty_campaign_facts_preserve_pre_campaign_receipt_serialization() {
+    assert_eq!(
+        serde_json::to_value(TrustedFacts::default()).unwrap(),
+        serde_json::json!({
+            "issued_encounters": {}, "completed_encounters": {}, "reachable_quests": []
+        })
+    );
+}
+
+#[test]
+fn legacy_transformation_does_not_unlock_campaign_wayfinder_early() {
+    let content = content();
+    let mut state = State::new(&content);
+    state.creatures.insert("pip".into());
+    state
+        .transformed
+        .insert(content.creatures["pip"].transformation.id.clone());
+    assert_eq!(state.campaign_appearance(&content, "pip"), "base");
+    assert!(
+        state
+            .transformed()
+            .contains(&content.creatures["pip"].transformation.id)
+    );
+    state.character_xp.insert("pip".into(), 40);
+    assert_eq!(state.campaign_appearance(&content, "pip"), "wayfinder");
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create ONE original Wonderwilds production game ICON sprite atlas TRUE TRANSPARENT BACKGROUND square1536x1536 EXACT TWO columns TWO rows FOUR separate equal cells generous transparent gutters. Each object within70percent width80percent height, warm upper-left lighting, straight-on premium rounded dimensional3D animated family game look. No text letters labels grid backdrop external shadows or ground. TOP LEFT Beacon seal: one round polished honeygold MEDAL with thick rim and purple satin ribbon loop, raised turquoise LIGHTHOUSE TOWER with simple GOLDEN CRESCENT light above tower. Match polished gold preschool game seal style. TOP RIGHT Gleam affinity symbol: isolated chunky GOLDEN SIX-RAY SUNBURST with cream crescent cutout at centre, no medal rim or ribbon. BOTTOM LEFT Growth affinity symbol: isolated chunky MINT THREE-LEAF SPROUT with short rounded gold stem, no medal rim or ribbon. BOTTOM RIGHT Craft affinity symbol: isolated chunky LILAC WOODEN MALLET crossed with small TURQUOISE ROUNDED GEAR, gold trim, no medal rim or ribbon. All symbols simple readable silhouettes at32px, dimensional rounded toy materials, no microscopic details. Entire objects inside their equal cells with broad empty margins.",
+  "rawSource": "content/campaign/art/sources/affinities-a-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-7118e6e2-726d-4eb0-bb2e-8962976dddaa.png",
+  "processedAsset": "frontend/public/assets/campaign/affinities-a-v1.png",
+  "processing": "Byte-for-byte copy; no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/campaign/wayfinders-sail-v1.png",
+    "frontend/public/assets/campaign/props-v1.png"
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "beacon-seal": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "affinity-gleam": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "affinity-growth": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "affinity-craft": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "reviewStatus": "pending",
+  "inspection": "Source inspected lighthouse medal and clear crescent sunburst/sprout/mallet+gear symbols. Broad transparent gutters, static.",
+  "sha256": "01ffb4adc497177634d8d3ef5499c86143b53a5b540ec7c657d0a17820a6c132",
+  "phonePreview": "docs/screenshots/campaign/final-static-phone.png",
+  "phonePreviewNotes": "390px viewport browser canvas draws exact source frames; icon32/48px, props80px on checkerboard. Readable symbols and alpha edges; not real scene integration or human approval."
+}

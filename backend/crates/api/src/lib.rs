@@ -5,3 +5,7 @@ pub mod mission_learning;
 pub mod story;
 
 mod persistence;
+
+pub mod campaign;
+
+pub mod paired;

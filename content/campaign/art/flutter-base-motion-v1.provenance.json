@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "flutter-base-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/flutter-base-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/flutter-base-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/flutter-base-motion-v1.png",
+  "sha256": "c4507daaeabfa7f9b0c39569e3ca2fd530bcb8f95b0df31568dc907e86f156d5",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/flutter-base-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/characters/meadow.png",
+      "sha256": "5a8fd696ca30284465a25bbf2a5475d2d6a172b2ddfa9593b430b6e9fd76a38c",
+      "use": "Flutter BASE form, ONLY LOWER RIGHT: cream fuzzy MOTH with four rounded lilac/blush petal wings, rounded antennae, huge VIOLET eyes, pink short cape with gold clasp, tiny folded letter. Keep moth wings and original face, never bunny ears. Signature: holds letter close then opens wings to release a small compact bell-like golden resonance ring, then settles."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      278,
+      556,
+      835,
+      1112,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/flutter-base-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/flutter-base-motion-v1.cleanup-prompt.txt",
+  "technicalPreviewResult": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+  "technicalPreviewEvidence": [
+    "docs/screenshots/campaign/native-flutter-phaser.png",
+    "docs/screenshots/campaign/native-flutter-phone-group3.png"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create ONE original Wonderwilds production development game sprite atlas TRUE TRANSPARENT BACKGROUND square1536x1536 TWO columns TWO rows four equal cells. Warm upper-left light high slight overhead3/4 orthographic camera. Premium dimensional3D animated family game style rounded tactile fur wood brass, violet coral turquoise. Each whole object inside middle70percent width80percent height, generous transparent gutters; no clipping text labels grid backdrop external shadows ground or scene. TOP LEFT: small standalone orchard watermill prop with honeywood housing, violet roof, brass axle and rounded wooden waterwheel on side, no stream terrain or paths. TOP RIGHT: original friendly MILL AUTOMATON, squat rounded brass and honeywood robot on two broad feet, big expressive turquoise glass eyes, small circular violet chest panel and rounded mitten hands, no weapons gears exposed or scary teeth, full body neutral ready pose. BOTTOM LEFT: small reusable FERRY RAFT, honeywood planks lashed with rope, raised purple-and-brass corner posts and short turquoise fabric sail on single mast, no passengers or cargo water terrain. BOTTOM RIGHT: Reed, Rowan's original second NPC partner, a long-legged small friendly marsh wading bird with cream fluffy round body, coral beak and slender coral legs, teal wings with violet tips and one tall curved lilac head feather, huge amber eyes, short mint neckerchief with brass chime pendant, wings slightly open calling rhythm. Distinct from moth cat duck puffin and otter. Whole legs feet and feather inside cell, no music notes letters or labels. All props isolated with clean alpha.",
+  "rawSource": "content/campaign/art/sources/orchard-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-e753a2a9-e170-4ee7-a212-463318efaec9.png",
+  "processedAsset": "frontend/public/assets/campaign/orchard-v1.png",
+  "processing": "Byte-for-byte copy; no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/campaign/cast-v1.png",
+    "frontend/public/assets/campaign/props-v1.png"
+  ],
+  "requestedDimensions": [
+    1536,
+    1536
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "orchard-mill": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "mill-automaton": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "ferry-raft": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "reed": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "reviewStatus": "pending",
+  "inspection": "Source inspected: cohesive honeywood/brass machinery, separate reusable raft, unique long-legged Reed NPC partner. Static fronts only; actual region/phone review pending.",
+  "sha256": "751a3d4bf5ada90f28781af863aeb84723ddaf488b834ccc2adccaffd57abc24"
+}

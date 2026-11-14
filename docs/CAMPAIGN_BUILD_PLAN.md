@@ -1,14 +1,19 @@
 # Missing Moonlight build plan
 
-14 November 2026 · Status: planned, not implemented.
+14 November 2026 · Status: authored campaign and initial shared-device mode implemented; human and production acceptance remain open.
+
+See [delivery status](CAMPAIGN_DELIVERY_STATUS.md) for implemented mechanics and
+remaining milestone criteria, and [implementation evidence](IMPLEMENTATION_STATUS.md)
+for checks actually executed. The requirements below remain the acceptance plan;
+they are not all marked complete by the development implementation.
 
 This is the active delivery plan for the authored companion adventure. It replaces
 the older curriculum-first and companion-menu delivery order, while preserving
 those systems. Product scope is the [v2 campaign](../content/campaign/README.md) and
 its [static JSON](../content/campaign/missing-moonlight.v2.json): three regions,
 eight trials, twelve companions, 26 main missions and the interlocking mechanics.
-The user has requested implementation and asset creation; this document sequences
-that work. No new playable system or generated asset is claimed by this plan.
+The user requested implementation and asset creation; this document sequences
+that work. Runtime and asset delivery are recorded separately in the linked evidence.
 
 ## Delivery principles
 

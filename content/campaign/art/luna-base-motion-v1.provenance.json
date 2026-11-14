@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "luna-base-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/luna-base-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/luna-base-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/luna-base-motion-v1.png",
+  "sha256": "831b96a81bf47543dd0ea34d08cdafcd3bacaaa9f1f1c8c8672214437cd2e533",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/luna-base-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/characters/cove.png",
+      "sha256": "1d192a6f6f9db7a6b862a6ef9d849630975e8b223f2f6bce22988f9640bfda34",
+      "use": "Luna BASE form, ONLY UPPER LEFT: pale-aqua and white fluffy SEA KITTEN with huge TEAL eyes, royalblue suit and short blue cape, GOLD CRESCENT chest emblem, silver-blue boots. Preserve soft kitten ears no new fins or horns. Signature: paws draw close, small golden crescent light between paws, then settles."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      278,
+      552,
+      822,
+      1094,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/luna-base-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/luna-base-motion-v1.cleanup-prompt.txt",
+  "technicalPreviewResult": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+  "technicalPreviewEvidence": []
+}

@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Actual Phaser journey against a fresh disposable API/PostgreSQL profile.
 // Run with WW_QA_BROWSER_TEST=qa/e2e/story-world.mjs via run-training-qa.mjs.
 import assert from 'node:assert/strict';
@@ -30,7 +31,7 @@ try {
     value.scene.choices.find(choice => value.sceneInput.availableActions.some(action => action.id === choice.actionId && action.action.type === 'accept_mission')).label = mockChoice;
     await route.fulfill({ response, json: value });
   }, { times: 1 });
-  await page.goto(origin);
+  await gotoLegacy(page, origin);
   await page.locator('#game canvas').waitFor();
   await page.waitForFunction(() => document.querySelector('#game')?.dataset.storyRevision === '0');
   const bootstrap = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
@@ -109,7 +110,7 @@ try {
   // A second tab advances the real server via UI, while this tab retains the lost pause.
   const other = await page.context().newPage();
   other.on('pageerror', error => errors.push(error.message));
-  await other.goto(`${origin}/?story=1`);
+  await gotoLegacy(other, `${origin}/?story=1`);
   await other.locator('#game canvas').waitFor();
   await other.waitForFunction(revision => document.querySelector('#game')?.dataset.storyRevision === String(revision), committedRevision);
   assert.equal(await other.evaluate(() => Object.keys(sessionStorage).some(key => key.startsWith('wonderwilds.story.pending.'))), false);

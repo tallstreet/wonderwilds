@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Synthetic sprites and sessions only; no paid provider calls or progress writes.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -29,7 +30,7 @@ try {
       if (responseMode === 'fail') return route.fulfill({ status: 503 });
       return route.fulfill({ contentType: 'image/png', body: png });
     });
-    await page.goto(origin);
+    await gotoLegacy(page, origin);
     const button = page.getByRole('button', { name: 'Customize my character', exact: true });
     await page.waitForFunction(() => !document.querySelector('#character').disabled);
     assert.equal(await page.title(), 'Wonderwilds • A maths adventure');

@@ -26,6 +26,10 @@ cargo test -p wonderwilds-api --locked postgres_identity_ownership_export_revoca
 cargo test -p wonderwilds-api --locked postgres_atomic_rollback_races_unique_grants_and_profile_ownership -- --ignored --nocapture
 cargo test -p wonderwilds-api --locked postgres_story_atomicity_retry_ownership_export_and_delete -- --ignored --nocapture
 cargo test -p wonderwilds-api --locked postgres_mission_learning_atomicity_retry_ownership_export_and_delete -- --ignored --nocapture
+cargo test -p wonderwilds-api --locked postgres_campaign_adoption_retry_race_canonical_learning_and_lifecycle -- --ignored --nocapture
+cargo test -p wonderwilds-api --locked postgres_paired_roles_attribution_copy_consent_retry_and_lifecycle -- --ignored --nocapture
+cargo test -p wonderwilds-api --locked postgres_campaign_pinned_initial_definition_and_learning_resume -- --ignored --nocapture
+cargo test -p wonderwilds-api --locked postgres_paired_clock_survives_solo_and_active_participant_deletion -- --ignored --nocapture
 # Prove recorded-history drift fails closed without touching repository files.
 "$task_bin/psql" --dbname="$WONDERWILDS_DATABASE_URL" --no-psqlrc --set ON_ERROR_STOP=1 \
     --command "UPDATE public.wonderwilds_schema_history SET sha256=repeat('0',64) WHERE version='0001_parent_profiles.sql'" >/dev/null

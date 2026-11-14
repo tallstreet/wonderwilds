@@ -542,3 +542,162 @@ pub fn digest_id(value: &str) -> String {
     use sha2::{Digest, Sha256};
     format!("{:x}", Sha256::digest(value.as_bytes()))[..40].to_string()
 }
+
+/// Internal trusted campaign grant; never dispatched by the public command API.
+impl Aggregate {
+    pub(crate) fn execute_campaign_grant(
+        &mut self,
+        request: &Value,
+        content: &Content,
+        now: u64,
+        _session: &str,
+    ) -> Result<Value, Error> {
+        let p = &request["payload"];
+        let creature = p["creature_id"].as_str().ok_or(Error::InvalidInput)?;
+        let grant = p["grant_id"].as_str().ok_or(Error::InvalidInput)?;
+        let xp = u32::try_from(p["xp"].as_u64().ok_or(Error::InvalidInput)?)
+            .map_err(|_| Error::InvalidInput)?;
+        if request["expectedRevision"].as_u64() != Some(self.revision) {
+            return Err(Error::RevisionConflict);
+        }
+        let mut facts = TrustedFacts::default();
+        facts
+            .campaign_grants
+            .insert(grant.to_owned(), (creature.to_owned(), xp));
+        let mut candidate = self.clone();
+        candidate.domain_apply(
+            Action::CampaignGrant {
+                creature_id: creature.to_owned(),
+                grant_id: grant.to_owned(),
+                xp,
+            },
+            request["commandId"].as_str().ok_or(Error::InvalidInput)?,
+            content,
+            facts,
+            now,
+        )?;
+        candidate.revision = candidate
+            .revision
+            .checked_add(1)
+            .filter(|r| *r <= 1_000_000_000)
+            .ok_or(Error::RateLimited)?;
+        let response = candidate.snapshot(content)?;
+        *self = candidate;
+        Ok(response)
+    }
+}
+pub(crate) fn campaign_companions(
+    tx: &mut postgres::Transaction<'_>,
+    identity: &Identity,
+) -> Result<Vec<wonderwilds_domain::campaign::CompanionProjection>, Error> {
+    let content = development_content()?;
+    let state = storage::load(tx, &identity.profile_id, &content)?;
+    Ok(state
+        .domain
+        .creatures()
+        .iter()
+        .map(|id| wonderwilds_domain::campaign::CompanionProjection {
+            id: id.clone(),
+            level: state.domain.character_level(&content, id) as u8,
+        })
+        .collect())
+}
+pub(crate) fn campaign_pending(
+    tx: &mut postgres::Transaction<'_>,
+    identity: &Identity,
+) -> Result<bool, Error> {
+    let state = storage::load(tx, &identity.profile_id, &development_content()?)?;
+    Ok(state
+        .encounters
+        .values()
+        .any(|e| !e.completed && !e.abandoned))
+}
+pub(crate) fn campaign_grant(
+    tx: &mut postgres::Transaction<'_>,
+    identity: &Identity,
+    creature: &str,
+    grant: &str,
+    xp: u32,
+) -> Result<(), Error> {
+    let content = development_content()?;
+    let mut state = storage::load(tx, &identity.profile_id, &content)?;
+    if xp == 0 && state.domain.creatures().contains(creature) {
+        return Ok(());
+    }
+    if state.domain.campaign_granted(grant) {
+        return Ok(());
+    }
+    let request = json!({"schemaVersion":"1.0","commandId":format!("campaign-grant-{}",digest_id(grant)),"expectedRevision":state.revision,"payload":{"type":"campaign_grant","creature_id":creature,"grant_id":grant,"xp":xp}});
+    let response = state.execute_campaign_grant(&request, &content, 0, &identity.session_id)?;
+    storage::commit(tx, identity, &state, &content, &request, &response, 0)
+}
+
+impl Aggregate {
+    pub(crate) fn execute_campaign_appearance(
+        &mut self,
+        request: &Value,
+        content: &Content,
+        now: u64,
+        _session: &str,
+    ) -> Result<Value, Error> {
+        let p = &request["payload"];
+        let creature = p["creature_id"].as_str().ok_or(Error::InvalidInput)?;
+        let enabled = p["enabled"].as_bool().ok_or(Error::InvalidInput)?;
+        if request["expectedRevision"].as_u64() != Some(self.revision) {
+            return Err(Error::RevisionConflict);
+        }
+        let mut candidate = self.clone();
+        let mut facts = TrustedFacts::default();
+        facts.campaign_appearances.insert(creature.into(), enabled);
+        candidate.domain_apply(
+            Action::CampaignAppearance {
+                creature_id: creature.into(),
+                enabled,
+            },
+            request["commandId"].as_str().ok_or(Error::InvalidInput)?,
+            content,
+            facts,
+            now,
+        )?;
+        candidate.revision = candidate
+            .revision
+            .checked_add(1)
+            .filter(|r| *r <= 1_000_000_000)
+            .ok_or(Error::RateLimited)?;
+        let response = candidate.snapshot(content)?;
+        *self = candidate;
+        Ok(response)
+    }
+}
+pub(crate) fn campaign_appearance(
+    tx: &mut postgres::Transaction<'_>,
+    identity: &Identity,
+    creature: &str,
+    enabled: bool,
+    command_id: &str,
+) -> Result<(), Error> {
+    let content = development_content()?;
+    let mut state = storage::load(tx, &identity.profile_id, &content)?;
+    let request = json!({"schemaVersion":"1.0","commandId":format!("campaign-form-{}",digest_id(command_id)),"expectedRevision":state.revision,"payload":{"type":"campaign_transform","creature_id":creature,"enabled":enabled}});
+    let response =
+        state.execute_campaign_appearance(&request, &content, 0, &identity.session_id)?;
+    storage::commit(tx, identity, &state, &content, &request, &response, 0)
+}
+pub(crate) fn campaign_appearances(
+    tx: &mut postgres::Transaction<'_>,
+    identity: &Identity,
+) -> Result<BTreeMap<String, String>, Error> {
+    let content = development_content()?;
+    let state = storage::load(tx, &identity.profile_id, &content)?;
+    Ok(state
+        .domain
+        .creatures()
+        .iter()
+        .map(|id| {
+            (
+                id.clone(),
+                state.domain.campaign_appearance(&content, id).into(),
+            )
+        })
+        .collect())
+}

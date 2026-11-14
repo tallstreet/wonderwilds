@@ -1,0 +1,273 @@
+{
+  "id": "bramble-wayfinder-motion-v1",
+  "character": "bramble-wayfinder",
+  "url": "/assets/campaign/bramble-wayfinder-motion-v1.png",
+  "texture": "campaign-bramble-wayfinder-motion-v1",
+  "dimensions": [
+    1122,
+    1402
+  ],
+  "nominalCell": 280.5,
+  "frames": [
+    {
+      "id": "idle-down",
+      "rect": [
+        0,
+        0,
+        280,
+        278
+      ],
+      "foot": [
+        145.0,
+        272
+      ]
+    },
+    {
+      "id": "walk-down-a",
+      "rect": [
+        280,
+        0,
+        281,
+        278
+      ],
+      "foot": [
+        144.0,
+        271
+      ]
+    },
+    {
+      "id": "walk-down-b",
+      "rect": [
+        561,
+        0,
+        281,
+        278
+      ],
+      "foot": [
+        147.5,
+        270
+      ]
+    },
+    {
+      "id": "idle-right",
+      "rect": [
+        842,
+        0,
+        280,
+        278
+      ],
+      "foot": [
+        144.0,
+        271
+      ]
+    },
+    {
+      "id": "walk-right-a",
+      "rect": [
+        0,
+        278,
+        280,
+        279
+      ],
+      "foot": [
+        147.0,
+        269
+      ]
+    },
+    {
+      "id": "walk-right-b",
+      "rect": [
+        280,
+        278,
+        281,
+        279
+      ],
+      "foot": [
+        141.0,
+        269
+      ]
+    },
+    {
+      "id": "idle-up",
+      "rect": [
+        561,
+        278,
+        281,
+        279
+      ],
+      "foot": [
+        138.5,
+        269
+      ]
+    },
+    {
+      "id": "walk-up-a",
+      "rect": [
+        842,
+        278,
+        280,
+        279
+      ],
+      "foot": [
+        165.0,
+        270
+      ]
+    },
+    {
+      "id": "walk-up-b",
+      "rect": [
+        0,
+        557,
+        280,
+        278
+      ],
+      "foot": [
+        150.0,
+        271
+      ]
+    },
+    {
+      "id": "idle-left",
+      "rect": [
+        280,
+        557,
+        281,
+        278
+      ],
+      "foot": [
+        131.0,
+        271
+      ]
+    },
+    {
+      "id": "walk-left-a",
+      "rect": [
+        561,
+        557,
+        281,
+        278
+      ],
+      "foot": [
+        132.0,
+        269
+      ]
+    },
+    {
+      "id": "walk-left-b",
+      "rect": [
+        842,
+        557,
+        280,
+        278
+      ],
+      "foot": [
+        122.5,
+        271
+      ]
+    },
+    {
+      "id": "signature-anticipate",
+      "rect": [
+        0,
+        835,
+        280,
+        279
+      ],
+      "foot": [
+        139.0,
+        271
+      ]
+    },
+    {
+      "id": "signature-release",
+      "rect": [
+        280,
+        835,
+        281,
+        279
+      ],
+      "foot": [
+        153.5,
+        272
+      ]
+    },
+    {
+      "id": "signature-settle",
+      "rect": [
+        561,
+        835,
+        281,
+        279
+      ],
+      "foot": [
+        155.5,
+        271
+      ]
+    },
+    {
+      "id": "cheer-prepare",
+      "rect": [
+        842,
+        835,
+        280,
+        279
+      ],
+      "foot": [
+        137.0,
+        269
+      ]
+    },
+    {
+      "id": "cheer-lift",
+      "rect": [
+        0,
+        1114,
+        280,
+        288
+      ],
+      "foot": [
+        137.5,
+        276
+      ]
+    },
+    {
+      "id": "cheer-settle",
+      "rect": [
+        280,
+        1114,
+        281,
+        288
+      ],
+      "foot": [
+        136.5,
+        278
+      ]
+    },
+    {
+      "id": "rest-settle",
+      "rect": [
+        561,
+        1114,
+        281,
+        288
+      ],
+      "foot": [
+        147.0,
+        278
+      ]
+    },
+    {
+      "id": "rest-asleep",
+      "rect": [
+        842,
+        1114,
+        280,
+        288
+      ],
+      "foot": [
+        150.5,
+        278
+      ]
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Presentation fixtures only: no demo database or provider calls.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -24,7 +25,7 @@ try {
     const bag = page.getByRole('button', { name: 'Open my bag', exact: true });
     for (const inventory of [[], [{ itemId: 'wood', quantity: 3 }, { itemId: 'glow_pebbles', quantity: 2 }], [{ itemId: 'planks', quantity: 1 }]]) {
       snapshot.sceneInput.context.inventory = inventory;
-      await page.goto(origin);
+      await gotoLegacy(page, origin);
       await page.locator('#game canvas').waitFor();
       await page.waitForFunction(() => !document.querySelector('#bag').disabled);
       assert.equal(await page.locator('#explore, #journal, #grownup').count(), 0);

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "cleo-base-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/cleo-base-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/cleo-base-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/cleo-base-motion-v1.png",
+  "sha256": "9db4dc2e80225c51c6049c6c61206bfd4dc4724fca815afaef01e3bed5c2bf6b",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/cleo-base-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/characters/orchard.png",
+      "sha256": "7265618e3996d359919a036bf2acf98bf98f958fd1eb5a07d1d1dcb66dbfc748",
+      "use": "Cleo BASE form, ONLY UPPER LEFT: ginger and cream KITTEN with huge AMBER eyes, turquoise superhero travel suit, golden round leaf chest clasp, RAINBOW short cape, small basket of golden fruit. Preserve rainbow colours and face. Signature: gathers a small leafy sprout, extends a soft green growth arc, settles."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      280,
+      556,
+      836,
+      1107,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/cleo-base-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/cleo-base-motion-v1.cleanup-prompt.txt",
+  "technicalPreviewResult": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+  "technicalPreviewEvidence": []
+}

@@ -1,0 +1,753 @@
+{
+  "schemaVersion": "1.0",
+  "inspectionDate": "2026-11-14",
+  "fixture": "qa/e2e/campaign-motion-preview.mjs",
+  "synthetic": true,
+  "scope": "Five priority starter sheets and nine nonstarter Wayfinder sheets. The separate pilot and nine base sheets have their own technical records.",
+  "results": [
+    {
+      "character": "tansy",
+      "assetId": "tansy-base-motion-v1",
+      "assetSha256": "4321f0f9f468546d8f90cf8e17a2371800bcc402fc61a6a5f5b1af31ec970d61",
+      "frameMetadataSha256": "3c2327579b2bd54d08298cffbbaae5f7c3cf7c17f3e6d4f0ad4544db32467566",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        3
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/tansy-base-motion-phaser.png",
+        "docs/screenshots/campaign/tansy-base-motion-phone-group1.png",
+        "docs/screenshots/campaign/tansy-base-motion-phone-group2.png",
+        "docs/screenshots/campaign/tansy-base-motion-phone-group3.png",
+        "docs/screenshots/campaign/tansy-base-motion-phone-group4.png"
+      ],
+      "captureSha256": {
+        "tansy-base-motion-phaser.png": "d1a0fa927abe6973abc098bee93c0d2b06480667a0bbdcf21043a34df2b547b5",
+        "tansy-base-motion-phone-group1.png": "9a1dcaedd4c5bd832562b67435e466ef9c2c84af6a967cf2d6a6083b18640734",
+        "tansy-base-motion-phone-group2.png": "b2ffd63363c729dfd5b18fc257502863d3a253c83ff61def9e525f661cd8ca1c",
+        "tansy-base-motion-phone-group3.png": "0181a0e3421e1a5d1fd698b4a30e6913663d8a17bdd28e0115942df3f6e5d094",
+        "tansy-base-motion-phone-group4.png": "17e3959de280d8eb431694f6e9344ef6710d50e7dfc7b4c2aba29d1d9a6b7be9"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "nib",
+      "assetId": "nib-base-motion-v1",
+      "assetSha256": "29bf3be6ef0bd1a2829d9c8e3ddbf56003e0783f257a8a755e7eba132b7fd5f6",
+      "frameMetadataSha256": "67e675a3bd875fbbed8f029080fbf6e3d959b72f4c752522d65e098c51196c84",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/nib-base-motion-phaser.png",
+        "docs/screenshots/campaign/nib-base-motion-phone-group1.png",
+        "docs/screenshots/campaign/nib-base-motion-phone-group2.png",
+        "docs/screenshots/campaign/nib-base-motion-phone-group3.png",
+        "docs/screenshots/campaign/nib-base-motion-phone-group4.png"
+      ],
+      "captureSha256": {
+        "nib-base-motion-phaser.png": "5861fac53610ce137a2591da9a11b073564d4e319db463279be12eb236fab2ae",
+        "nib-base-motion-phone-group1.png": "b639e174390dc2550d44fe8a9346b3236d233a05b32c43de495a27c919985b38",
+        "nib-base-motion-phone-group2.png": "c2090043c7b49ee969257f0b4910631df0bee30d478d5b96107c8a2d994e84b0",
+        "nib-base-motion-phone-group3.png": "e5aca61a1b52ce9a3bc5360367f58e9892c36cded78a8547f9f6ed5b9b6fa825",
+        "nib-base-motion-phone-group4.png": "cfc720ca8bc96593a0aa4ef1852339437594caf6a28542e487e58cd6be12531e"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "pip-wayfinder",
+      "assetId": "pip-wayfinder-motion-v1",
+      "assetSha256": "53bf764bfe896007b124b0d3175faae7b226c928dcaad514a5976ed16881e3e2",
+      "frameMetadataSha256": "87141be168b5491fba2b2294a358871a4052f3cfdac7747c003fa36ffd3b453f",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/pip-wayfinder-motion-phaser.png",
+        "docs/screenshots/campaign/pip-wayfinder-motion-phone-group1.png",
+        "docs/screenshots/campaign/pip-wayfinder-motion-phone-group2.png",
+        "docs/screenshots/campaign/pip-wayfinder-motion-phone-group3.png",
+        "docs/screenshots/campaign/pip-wayfinder-motion-phone-group4.png"
+      ],
+      "captureSha256": {
+        "pip-wayfinder-motion-phaser.png": "5aa96cc68b52da860f69005b6bb9f72bd711d61c015542e5686da982a80a4b00",
+        "pip-wayfinder-motion-phone-group1.png": "0a01e80cc851302d1b9d3e2d353c04532d3f052ccad14094d3f1bec8083af6ad",
+        "pip-wayfinder-motion-phone-group2.png": "5ed6434e3655b553b35a0f1ff7a7158fea49d5695b1f8889cf7ae80109a50289",
+        "pip-wayfinder-motion-phone-group3.png": "bea57f904b83a1b697fa91a82bcda5c4b8baf5bd779df9d9ed747e15b939549b",
+        "pip-wayfinder-motion-phone-group4.png": "df21aaa402e4e7364faa95183d593d0c8b9a5ea21811740601d3dcb7820ae969"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "tansy-wayfinder",
+      "assetId": "tansy-wayfinder-motion-v1",
+      "assetSha256": "017584f7321d404801c61693d944a64f8382764a95e008a5fd8195b5dda7e2b5",
+      "frameMetadataSha256": "a5fe739ea0f3b6b4d9ee7b8d5ae65c6413ec92fb02419bbece3232d98526aa51",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        2
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/tansy-wayfinder-motion-phaser.png",
+        "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group1.png",
+        "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group2.png",
+        "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group3.png",
+        "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group4.png"
+      ],
+      "captureSha256": {
+        "tansy-wayfinder-motion-phaser.png": "ce067a28cb0a58cf6b24492e7992c303fdeba759fcddbbd15081f0f05d4cda88",
+        "tansy-wayfinder-motion-phone-group1.png": "2581752bcff2094aa1c2f605e80756ae6b767a4cf09aed98a07772ae547c7dcd",
+        "tansy-wayfinder-motion-phone-group2.png": "8383be8f7c795332e4d895f31a0ce3957e308f61d3b73d9d837c75b7da86bde1",
+        "tansy-wayfinder-motion-phone-group3.png": "00467e3ef18db4f5289a945f3d8e81ed5b994309aa28431ded0c3c7d697cb1a6",
+        "tansy-wayfinder-motion-phone-group4.png": "609e510c2e9e2a7e88efa4276dce69a04557dcc2956f9673ffdfc79c9b27fe7f"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "nib-wayfinder",
+      "assetId": "nib-wayfinder-motion-v1",
+      "assetSha256": "f178243367c3864c4d0c69397623cfd69053f8afd9ed0561ffee1005e1f905f0",
+      "frameMetadataSha256": "fc7f0b1dfc52300c2f43446e6317658a39cbc7f724002a9b918462ff405595f1",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/nib-wayfinder-motion-phaser.png",
+        "docs/screenshots/campaign/nib-wayfinder-motion-phone-group1.png",
+        "docs/screenshots/campaign/nib-wayfinder-motion-phone-group2.png",
+        "docs/screenshots/campaign/nib-wayfinder-motion-phone-group3.png",
+        "docs/screenshots/campaign/nib-wayfinder-motion-phone-group4.png"
+      ],
+      "captureSha256": {
+        "nib-wayfinder-motion-phaser.png": "ef181da6688b23b5fa351fec415cf094936a1c20036072463b29782471089c5b",
+        "nib-wayfinder-motion-phone-group1.png": "8c5d3b5c792b38672b2fbdc14a31465d34842d874e70d4881527f2981e3205c9",
+        "nib-wayfinder-motion-phone-group2.png": "f5656377a9de36f30c58b64c60a6ae3363a8da23b8a6a1851756dfe35fb5aeec",
+        "nib-wayfinder-motion-phone-group3.png": "c09eaaf8b13d42682f94c8860eabd5551beaf458b4f81cd22519cc1647cfbbd6",
+        "nib-wayfinder-motion-phone-group4.png": "44083859a8926e7ca4e9d3a20ddb6a5abfec2fad25a209fe9e73f669b8bdbfa4"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "flutter-wayfinder",
+      "assetId": "flutter-wayfinder-motion-v1",
+      "assetSha256": "80e20fcf94744af28fefd82d9eeb999d4238764424db50db4b7564b8fc8baece",
+      "frameMetadataSha256": "fe16f5a14e23408a689fc652e6f49f2dfd5809ff604ef6a4e3430207f7662c6c",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "content/campaign/art/nonstarter-wayfinder-supplement-review.v1.json"
+      ],
+      "captureSha256": {
+        "flutter-wayfinder-motion-phaser.png": "0dbe9ee14de1af878e378408058b72b4c639804e5ba02130eed8d92b66be5ae8",
+        "flutter-wayfinder-motion-phone-group1.png": "f66159e99c1438f07f30b6c87ddfccc4277648a40a556fa52746e5acf882a53a",
+        "flutter-wayfinder-motion-phone-group2.png": "ebe55641c0aeb30e8f2130ec27a50c1dbfefa25cdc9b47ce592fb3abe3e3a13a",
+        "flutter-wayfinder-motion-phone-group3.png": "724feb559a27b1a4296e17ce9531f724cb40b12773bb23c73e7b2abd5b41b75f",
+        "flutter-wayfinder-motion-phone-group4.png": "d140623d3640496c5d32b88a63f61e3c989c1bb90bce72d23dd41af91df46c87"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "cleo-wayfinder",
+      "assetId": "cleo-wayfinder-motion-v1",
+      "assetSha256": "96ba6e593648fbe4250a1da09e590c1056bf5f7185a061681bcba6ddd1990a72",
+      "frameMetadataSha256": "0d872b1eabc5e4e12a460fbf6f2019fe2ed5766b8454953baf52f9cb4da9e46a",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "content/campaign/art/nonstarter-wayfinder-supplement-review.v1.json"
+      ],
+      "captureSha256": {
+        "cleo-wayfinder-motion-phaser.png": "7877cd37293b480c66eef198fd53b0bfd94dac492a7039c910740681e4b7524f",
+        "cleo-wayfinder-motion-phone-group1.png": "5374f93b99949601af886f5e501e937601e4701b5a759bf49d5ce1bf55db11cf",
+        "cleo-wayfinder-motion-phone-group2.png": "6853318ba083fa3cf2f7ce9e4f6721a5ba9f459b0d30720b235e1174223c1241",
+        "cleo-wayfinder-motion-phone-group3.png": "5f85a8b57a5b7288c83f1f5cd6d82222e53c5d861ec2fc52e466dc3fcfa492b0",
+        "cleo-wayfinder-motion-phone-group4.png": "214cff0e801e518ca67ef74e66c9a0919e3bcd4129db5ec352421f30143af2a6"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "bramble-wayfinder",
+      "assetId": "bramble-wayfinder-motion-v1",
+      "assetSha256": "c8d7635b4a86cd0bc5271edff252a5aee19d3c6965659358ba3bb1df458c0825",
+      "frameMetadataSha256": "0e5dc0b6fa7bfb854c8af0d8ea9122a1fa152d33fa5d9cdaf1af3acfdaf5440a",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "content/campaign/art/nonstarter-wayfinder-supplement-review.v1.json"
+      ],
+      "captureSha256": {
+        "bramble-wayfinder-motion-phaser.png": "ef7d115758af4ea612888ba0db682986d025394fc1811aee6b6e94c93e481b26",
+        "bramble-wayfinder-motion-phone-group1.png": "a4af2804e68e31794ce39cfa4ae4986c569459eb33167f07d49b5545e56f2ae4",
+        "bramble-wayfinder-motion-phone-group2.png": "9a4114eea72cb97b814613ef749583ba2e916d07d39062d93e3a1978b496493c",
+        "bramble-wayfinder-motion-phone-group3.png": "b7138507677ec722b2d4955491afb1e4c8d23ac16cab9cf67f4f6d214a22ae57",
+        "bramble-wayfinder-motion-phone-group4.png": "0d0d0d9ecb1a02f446d752645ef367743fc8ca9d7ea543b6c79447d17b1617d7"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "patter-wayfinder",
+      "assetId": "patter-wayfinder-motion-v1",
+      "assetSha256": "696a643c2e3ed244812df0771cdb962cb0d73eef6eb3c778abed2c135ce7b3ec",
+      "frameMetadataSha256": "0cc852c1d2298f0c3516a7fd23f891888c005d20e85f875c4c93559ade863aac",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "content/campaign/art/nonstarter-wayfinder-supplement-review.v1.json"
+      ],
+      "captureSha256": {
+        "patter-wayfinder-motion-phaser.png": "58c863838781d96ec0eb272c10f315288ec5d55c25f897df474e584ebe321657",
+        "patter-wayfinder-motion-phone-group1.png": "60c053e02b79a57e0a9723e3941592c6c12ea26d47f5bb0e9795d95ebbd4b2af",
+        "patter-wayfinder-motion-phone-group2.png": "d7760c2368c559df4ca4b09ed5bd82d64b7e5cc7202304abbff5575bee0c5b52",
+        "patter-wayfinder-motion-phone-group3.png": "b579cc2431a653a4b120128ad4b87437f318f98cf4297ec7a7bab673bd3fdd53",
+        "patter-wayfinder-motion-phone-group4.png": "ea510bd385c131497882e7b64304ceb752e2ff92acd83d0c3dbd783344c9b7ca"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "twizzle-wayfinder",
+      "assetId": "twizzle-wayfinder-motion-v1",
+      "assetSha256": "f16cc6c5b246c2f82d608c9e9c3813c5fe0a05d11dfbe1f9d9ee9784f455a5ce",
+      "frameMetadataSha256": "fb7a31990f8048e29b3c2fee5f8ef5f5720aeffd86025b7e80ce79821aa21677",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/twizzle-wayfinder-native-phaser.png",
+        "docs/screenshots/campaign/twizzle-wayfinder-native-phone-group3.png"
+      ],
+      "captureSha256": {
+        "twizzle-wayfinder-motion-phaser.png": "de2e257178bc4ce190883fda9b7f7fbac4edb3c653e6ad5dc014c3d83f9fe0cc",
+        "twizzle-wayfinder-motion-phone-group1.png": "4d3127c670a055e6da4d3cd61af3367ac8a1a9e4711a9482d9856b14bdd203a4",
+        "twizzle-wayfinder-motion-phone-group2.png": "0ec479cf46aa4b58e7f751dc7b3379ce0eda632339d047c2f2408d6b714df2f1",
+        "twizzle-wayfinder-motion-phone-group3.png": "10d31ce937baa827935ab306b04d6b973e1944ca8f9098c6f8e1f96bd0027d84",
+        "twizzle-wayfinder-motion-phone-group4.png": "c476eb539e1cbbe3b451ee21cbd25d6422ca8f2ced7a485dcecf8f7c1d923a65"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "luna-wayfinder",
+      "assetId": "luna-wayfinder-motion-v1",
+      "assetSha256": "bcb7cb5d791e42f815d04159e23ca0b9ae919d608ffc704574ff20ec18cde995",
+      "frameMetadataSha256": "6abc4844b00db730f9920b89387a809005923de6f7971cf1793c9ca8be6d8ad1",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/luna-wayfinder-native-phaser.png",
+        "docs/screenshots/campaign/luna-wayfinder-native-phone-group3.png"
+      ],
+      "captureSha256": {
+        "luna-wayfinder-motion-phaser.png": "4016580e729718d439ebc89c56c0ca26dd533283602a72a0ae23684db964caf1",
+        "luna-wayfinder-motion-phone-group1.png": "b89e918dc266315326ef77102d2d680bf0dac43eefca0680db3a86248311930e",
+        "luna-wayfinder-motion-phone-group2.png": "245ceb98e35164f3870008189617300253f4545076f4c00a7f0533fe88073bab",
+        "luna-wayfinder-motion-phone-group3.png": "3c23162c39d493def78a54588e290eeea663523cb3c536590b95209d4e1f2b24",
+        "luna-wayfinder-motion-phone-group4.png": "4a461983f604dd7b7290cfa7ca6fc0d86af36fc806b0bb4f7bd516db63538dda"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "pebble-wayfinder",
+      "assetId": "pebble-wayfinder-motion-v1",
+      "assetSha256": "a05621e3befcb9272f919c297c689328edcac65e96774d0eea8f03775d93c026",
+      "frameMetadataSha256": "7a58225b1dd6a234ee5a1ce816e6583a15ba4aed044d2ba55d5b68bf3325cffd",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/pebble-wayfinder-native-phaser.png",
+        "docs/screenshots/campaign/pebble-wayfinder-native-phone-group3.png"
+      ],
+      "captureSha256": {
+        "pebble-wayfinder-motion-phaser.png": "7eebcdf4d94b58b00742923a1df0ec341f429cb8b0787c658a6d0c7147a15af4",
+        "pebble-wayfinder-motion-phone-group1.png": "cef72efc1720612ffaec2a769d46489a7857477673a72c87594eb2e3b0f798f2",
+        "pebble-wayfinder-motion-phone-group2.png": "b44b569422455e4bd46e4eb3eb78932ad8e29a942612f48d0f38755436ac9900",
+        "pebble-wayfinder-motion-phone-group3.png": "211f7c1802dee920eb77f3693160f1869d34c2b984f813a29a4b5fdb06032919",
+        "pebble-wayfinder-motion-phone-group4.png": "26664a9ab3684d53da56e0cb9d7359dde6de3e8eb024c923caa81630faf4835b"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "glimmer-wayfinder",
+      "assetId": "glimmer-wayfinder-motion-v1",
+      "assetSha256": "51ee733a56cc817b1bc06e28355c5f96d9734e6f4d68731ec016d18c2fcca149",
+      "frameMetadataSha256": "6d4de01dd9dce6f6e228db6815f2ed13289d72775a3c86dadf789291fa279e6b",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/glimmer-wayfinder-native-phaser.png",
+        "docs/screenshots/campaign/glimmer-wayfinder-native-phone-group3.png"
+      ],
+      "captureSha256": {
+        "glimmer-wayfinder-motion-phaser.png": "1bd5255e941262e0425de85d9eb98842be2a4209ca8863dfda42beb40ecadf19",
+        "glimmer-wayfinder-motion-phone-group1.png": "d02ae61af55c6715deacf5b8861e8860c9a40c705ac7dba059ab77059b063059",
+        "glimmer-wayfinder-motion-phone-group2.png": "a9a1868298e21be0c8301a0f3f159799bfd8ebd6bda28ecd65cb73b4bcada74a",
+        "glimmer-wayfinder-motion-phone-group3.png": "655067af5ad7f5df39efd7ae0d55b8f7f5ca1bf3d4d04b7f03824f87b8575d08",
+        "glimmer-wayfinder-motion-phone-group4.png": "cf19a70b3737f8c3f2cc23d17e57e7b47456e491e402d09d3365e3c58ebea16b"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    },
+    {
+      "character": "sail-wayfinder",
+      "assetId": "sail-wayfinder-motion-v1",
+      "assetSha256": "9a9737f93d87d874a161e30ff4196cc258445128a0238ca80931f5ee502892a6",
+      "frameMetadataSha256": "8e417c7396f66fd621eb14392d4b6c8bf6a4b4fffd9ba3277d19c94378afd9f6",
+      "assertionsPassed": {
+        "nativeFrameNames": 20,
+        "distinctHeadings": 4,
+        "noSoftwareFlip": true,
+        "timedCanonicalSignatureFrames": [
+          "signature-anticipate",
+          "signature-release",
+          "signature-settle",
+          "idle-down"
+        ],
+        "reducedMotionStillSelection": true
+      },
+      "desktopPosesVisuallyInspected": 20,
+      "phoneGroupsCaptured": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "viewports": {
+        "desktop": [
+          1280,
+          800
+        ],
+        "phone": [
+          390,
+          844
+        ]
+      },
+      "representativeEvidence": [
+        "docs/screenshots/campaign/sail-wayfinder-native-phaser.png",
+        "docs/screenshots/campaign/sail-wayfinder-native-phone-group3.png"
+      ],
+      "captureSha256": {
+        "sail-wayfinder-motion-phaser.png": "95ad34552fbf1592aa94167935f56786ebe51c5091b606b7f649dba542365a44",
+        "sail-wayfinder-motion-phone-group1.png": "800b473f960a01f57f8a239ea62bb46d089ebe98acbd7165ad900906be99dc67",
+        "sail-wayfinder-motion-phone-group2.png": "bd87710c431d01e18bc3a4ed2f8dc15d37aa2666ecfe1da73f5b2ae05de26db7",
+        "sail-wayfinder-motion-phone-group3.png": "51d92f84abbc3656e8bcdbf16f6fdce6eed3a25eda208db7b13046d3bf8ef2b8",
+        "sail-wayfinder-motion-phone-group4.png": "a90e671b93e187e76f5638c32548f4bec093398c61c47149eefed68114b5384d"
+      },
+      "result": "passed technical renderer/visual review; human approval pending"
+    }
+  ],
+  "reviewStatus": "pending",
+  "limitations": [
+    "Minimal two-stride directional loops and static directional idles, not polished high-frame-count locomotion or breathing loops.",
+    "Ordinary world foreground occlusion and ambient butterflies are not source frame clipping.",
+    "Technical source/renderer review is not audience, educator, rights or human artwork approval."
+  ]
+}

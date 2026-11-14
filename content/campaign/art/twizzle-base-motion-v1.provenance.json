@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "twizzle-base-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/twizzle-base-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/twizzle-base-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/twizzle-base-motion-v1.png",
+  "sha256": "4b09674b0733160175e4399a5953d934852299e760c8634606b0cef0625a30ee",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/twizzle-base-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/characters/orchard.png",
+      "sha256": "7265618e3996d359919a036bf2acf98bf98f958fd1eb5a07d1d1dcb66dbfc748",
+      "use": "Twizzle BASE form, ONLY LOWER RIGHT: cinnamon-red and cream SQUIRREL with fluffy curled bushy tail, VIOLET eyes, turquoise scarf with gold clasp, short brown diagonal charm belt holding gold star pink heart teal flower. Keep squirrel face/tail and accessories. Signature: draws charm ribbon close, gently rings tiny golden charm with small resonance arc, then settles."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      280,
+      563,
+      837,
+      1111,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/twizzle-base-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/twizzle-base-motion-v1.cleanup-prompt.txt",
+  "technicalPreviewResult": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+  "technicalPreviewEvidence": []
+}

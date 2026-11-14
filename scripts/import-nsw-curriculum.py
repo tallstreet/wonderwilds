@@ -58,6 +58,14 @@ def icon_svg(name):
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+str(icon['width'])+' '+str(icon['height'])+'">'+''.join('<path fill="#35684b" d="'+escape(p)+'"/>' for p in icon['paths'])+'</svg>'
 
 
+def clock_coordinate(value):
+    """Keep libm's insignificant last bits out of content-addressed SVG hashes."""
+    # A millionth of a view-box unit is far below display precision. Strip both
+    # trailing zeroes and negative zero so cardinal hands have stable spelling.
+    text = f'{value:.6f}'.rstrip('0').rstrip('.')
+    return '0' if text == '-0' else text
+
+
 def visual(v):
     kind = v['kind']
     if kind == 'svg':
@@ -86,10 +94,10 @@ def visual(v):
         body = '<circle cx="50" cy="50" r="46" fill="white" stroke="#254b3a"/>'
         for n in v['dial_labels']:
             a = n * math.pi / 6
-            body += f'<text x="{50+38*math.sin(a)}" y="{53-38*math.cos(a)}" font-size="8" text-anchor="middle">{n}</text>'
+            body += f'<text x="{clock_coordinate(50+38*math.sin(a))}" y="{clock_coordinate(53-38*math.cos(a))}" font-size="8" text-anchor="middle">{n}</text>'
         for key, length in [('hour',26),('minute',38)]:
             a = v[f'{key}_angle_degrees']*math.pi/180
-            body += f'<line x1="50" y1="50" x2="{50+length*math.sin(a)}" y2="{50-length*math.cos(a)}" stroke="#254b3a" stroke-width="2"/>'
+            body += f'<line x1="50" y1="50" x2="{clock_coordinate(50+length*math.sin(a))}" y2="{clock_coordinate(50-length*math.cos(a))}" stroke="#254b3a" stroke-width="2"/>'
     elif kind in ('ten_frame', 'ten_frames', 'hundred_grid', 'array'):
         if kind == 'array':
             rows, cols = v['rows'], v['columns']; filled = set(range(rows*cols))

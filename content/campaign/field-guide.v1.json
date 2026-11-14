@@ -1,0 +1,126 @@
+{
+  "version": "1.0.0",
+  "title": "Our field guide",
+  "friends": [
+    {
+      "id": "pip",
+      "name": "Pip",
+      "habitat": "bridge",
+      "location": "bridge_bank",
+      "clue": "A little reflected light pauses beside a sheltered mark.",
+      "preference": "wait",
+      "observation": "Pip tips his lantern, then pauses to look again.",
+      "approachHint": "Wait quietly so Pip has time to look."
+    },
+    {
+      "id": "tansy",
+      "name": "Tansy",
+      "habitat": "garden",
+      "location": "flower_garden",
+      "clue": "A careful friend is making room around rescued seedlings.",
+      "preference": "help",
+      "observation": "Tansy is holding a loose stem away from a new shoot.",
+      "approachHint": "Offer to help with one small garden job."
+    },
+    {
+      "id": "nib",
+      "name": "Nib",
+      "habitat": "picnic camp",
+      "location": "picnic_clearing",
+      "clue": "A small builder has made a wobbly practice puzzle beside camp.",
+      "preference": "play",
+      "observation": "Nib rolls a round twig toward a little brace and grins.",
+      "approachHint": "Invite Nib to try the playful practice puzzle together."
+    },
+    {
+      "id": "flutter",
+      "name": "Flutter",
+      "habitat": "echo hollow",
+      "location": "echo_hollow",
+      "clue": "Three tiny shakes in a leaf repeat beside the hollow.",
+      "preference": "wait",
+      "observation": "Flutter is watching a leaf tremble and waiting for the next little signal.",
+      "approachHint": "Wait and listen, or watch the visible leaf marks, beside Flutter."
+    },
+    {
+      "id": "cleo",
+      "name": "Cleo",
+      "habitat": "mill workbench",
+      "location": "old_mill",
+      "clue": "Two different shelf pieces wait beside a little workbench.",
+      "preference": "help",
+      "observation": "Cleo is trying to hold a shelf and choose its next piece at the same time.",
+      "approachHint": "Offer to hold one piece while Cleo tries the other."
+    },
+    {
+      "id": "bramble",
+      "name": "Bramble",
+      "habitat": "mill delivery door",
+      "location": "old_mill",
+      "clue": "A steady friend checks both handles before lifting a crate.",
+      "preference": "help",
+      "observation": "Bramble is looking at a crate with two handles.",
+      "approachHint": "Offer to take one handle before Bramble lifts."
+    },
+    {
+      "id": "patter",
+      "name": "Patter",
+      "habitat": "courier landing",
+      "location": "courier_pond",
+      "clue": "A cheerful courier has put a rest mark on the delivery map.",
+      "preference": "wait",
+      "observation": "Patter sets down a parcel beside a marked rest bench.",
+      "approachHint": "Wait for Patter’s rest instead of asking for a race."
+    },
+    {
+      "id": "twizzle",
+      "name": "Twizzle",
+      "habitat": "ridge signal post",
+      "location": "garland_ridge",
+      "clue": "A bright little flag moves with an unfinished tune.",
+      "preference": "play",
+      "observation": "Twizzle tries a tiny tune, then waves its matching flag.",
+      "approachHint": "Play one short call-and-answer signal with Twizzle."
+    },
+    {
+      "id": "luna",
+      "name": "Luna",
+      "habitat": "cove dusk path",
+      "location": "cove_hub",
+      "clue": "A gentle lamp marks one small turn at the edge of dusk.",
+      "preference": "wait",
+      "observation": "Luna looks at the first marked turn and takes a slow breath.",
+      "approachHint": "Wait beside Luna until she is ready for one small step."
+    },
+    {
+      "id": "pebble",
+      "name": "Pebble",
+      "habitat": "tide markers",
+      "location": "shell_beach",
+      "clue": "Someone has drawn a fresh line beside an old tide mark.",
+      "preference": "help",
+      "observation": "Pebble compares the old mark with today’s water.",
+      "approachHint": "Offer to help check the mark before using it."
+    },
+    {
+      "id": "sail",
+      "name": "Sail",
+      "habitat": "lookout guide rail",
+      "location": "harbour_lookout",
+      "clue": "A guide flag is folded beside someone who usually waves goodbye.",
+      "preference": "play",
+      "observation": "Sail turns the folded flag into a little route-finding game.",
+      "approachHint": "Invite Sail to join the guide game rather than watch from shore."
+    },
+    {
+      "id": "glimmer",
+      "name": "Glimmer",
+      "habitat": "sanctuary shelter path",
+      "location": "star_island",
+      "clue": "Soft glowing marks lead between quiet rescued creatures.",
+      "preference": "help",
+      "observation": "Glimmer checks a shelter and leaves room for a resting visitor.",
+      "approachHint": "Offer gentle help marking the path between shelters."
+    }
+  ]
+}

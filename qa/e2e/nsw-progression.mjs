@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Real API and journal checks; run only through the disposable training QA runner.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -7,7 +8,7 @@ const origin=process.env.WW_DEMO_TEST_URL??'http://127.0.0.1:5180';
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH});
 try{
  const page=await browser.newPage({viewport:{width:390,height:844}});
- await page.goto(origin);await page.locator('#game canvas').waitFor();
+ await gotoLegacy(page, origin);await page.locator('#game canvas').waitFor();
  const bootstrap=await(await page.request.get(origin+'/__demo/bootstrap')).json();
  const headers={'X-Wonderwilds-Profile':bootstrap.profileId,'X-CSRF-Token':bootstrap.csrf,Origin:origin};
  const get=async path=>{const r=await page.request.get(origin+path,{headers});assert.equal(r.status(),200);return r.json();};

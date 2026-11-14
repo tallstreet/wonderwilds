@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "1.0",
+  "inspectionDate": "2026-11-14",
+  "synthetic": true,
+  "scope": "Campaign assets agent supplements domain agent subset inspection by visually inspecting all four phone groups for each of five remaining starter sets. No additional timed assertion rerun claimed.",
+  "results": [
+    {
+      "assetId": "tansy-base-motion-v1",
+      "assetSha256": "4321f0f9f468546d8f90cf8e17a2371800bcc402fc61a6a5f5b1af31ec970d61",
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "posesVisuallyInspected": 20,
+      "result": "No source-frame clipping, identity/readability or foot-anchor defect observed across all four actual Phaser phone groups. Minimal native movement poses distinct; no final human approval claim.",
+      "evidence": [
+        "docs/screenshots/campaign/tansy-base-motion-phone-group1.png",
+        "docs/screenshots/campaign/tansy-base-motion-phone-group2.png",
+        "docs/screenshots/campaign/tansy-base-motion-phone-group3.png",
+        "docs/screenshots/campaign/tansy-base-motion-phone-group4.png"
+      ]
+    },
+    {
+      "assetId": "nib-base-motion-v1",
+      "assetSha256": "29bf3be6ef0bd1a2829d9c8e3ddbf56003e0783f257a8a755e7eba132b7fd5f6",
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "posesVisuallyInspected": 20,
+      "result": "No source-frame clipping, identity/readability or foot-anchor defect observed across all four actual Phaser phone groups. Minimal native movement poses distinct; no final human approval claim.",
+      "evidence": [
+        "docs/screenshots/campaign/nib-base-motion-phone-group1.png",
+        "docs/screenshots/campaign/nib-base-motion-phone-group2.png",
+        "docs/screenshots/campaign/nib-base-motion-phone-group3.png",
+        "docs/screenshots/campaign/nib-base-motion-phone-group4.png"
+      ]
+    },
+    {
+      "assetId": "pip-wayfinder-motion-v1",
+      "assetSha256": "53bf764bfe896007b124b0d3175faae7b226c928dcaad514a5976ed16881e3e2",
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "posesVisuallyInspected": 20,
+      "result": "No source-frame clipping, identity/readability or foot-anchor defect observed across all four actual Phaser phone groups. Minimal native movement poses distinct; no final human approval claim.",
+      "evidence": [
+        "docs/screenshots/campaign/pip-wayfinder-motion-phone-group1.png",
+        "docs/screenshots/campaign/pip-wayfinder-motion-phone-group2.png",
+        "docs/screenshots/campaign/pip-wayfinder-motion-phone-group3.png",
+        "docs/screenshots/campaign/pip-wayfinder-motion-phone-group4.png"
+      ]
+    },
+    {
+      "assetId": "tansy-wayfinder-motion-v1",
+      "assetSha256": "017584f7321d404801c61693d944a64f8382764a95e008a5fd8195b5dda7e2b5",
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "posesVisuallyInspected": 20,
+      "result": "No source-frame clipping, identity/readability or foot-anchor defect observed across all four actual Phaser phone groups. Minimal native movement poses distinct; no final human approval claim.",
+      "evidence": [
+        "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group1.png",
+        "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group2.png",
+        "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group3.png",
+        "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group4.png"
+      ]
+    },
+    {
+      "assetId": "nib-wayfinder-motion-v1",
+      "assetSha256": "f178243367c3864c4d0c69397623cfd69053f8afd9ed0561ffee1005e1f905f0",
+      "phoneGroupsVisuallyInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "posesVisuallyInspected": 20,
+      "result": "No source-frame clipping, identity/readability or foot-anchor defect observed across all four actual Phaser phone groups. Minimal native movement poses distinct; no final human approval claim.",
+      "evidence": [
+        "docs/screenshots/campaign/nib-wayfinder-motion-phone-group1.png",
+        "docs/screenshots/campaign/nib-wayfinder-motion-phone-group2.png",
+        "docs/screenshots/campaign/nib-wayfinder-motion-phone-group3.png",
+        "docs/screenshots/campaign/nib-wayfinder-motion-phone-group4.png"
+      ]
+    }
+  ]
+}

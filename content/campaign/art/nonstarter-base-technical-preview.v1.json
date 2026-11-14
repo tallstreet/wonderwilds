@@ -1,0 +1,199 @@
+{
+  "schemaVersion": "1.0",
+  "inspectionDate": "2026-11-14",
+  "fixture": "qa/e2e/campaign-motion-preview.mjs",
+  "synthetic": true,
+  "viewports": [
+    [
+      1280,
+      800
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "scope": "9 base sets only. All45 captures inspected; retain five representative PNGs plus per-character results instead of duplicating all45 images. No progression/reward or final human approval claim.",
+  "results": [
+    {
+      "character": "flutter",
+      "assetId": "flutter-base-motion-v1",
+      "assetSha256": "c4507daaeabfa7f9b0c39569e3ca2fd530bcb8f95b0df31568dc907e86f156d5",
+      "frameMetadataSha256": "038d51d6b4fe2640ba8155d99a5ab684e8dbc0d2be22e7449babca84e50c640f",
+      "command": "node qa/e2e/campaign-motion-preview.mjs /tmp/native-flutter flutter",
+      "result": "passed",
+      "assertions": [
+        "20 actual native frame/anchor registrations",
+        "4 distinct directional selections",
+        "native walk/signature/cheer/rest selection",
+        "timed game-event signature anticipate/release/settle/idle",
+        "reduced-motion heading stills",
+        "no browser page errors"
+      ],
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "retainedRepresentativeEvidence": [
+        "docs/screenshots/campaign/native-flutter-phaser.png",
+        "docs/screenshots/campaign/native-flutter-phone-group3.png"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "character": "cleo",
+      "assetId": "cleo-base-motion-v1",
+      "assetSha256": "9db4dc2e80225c51c6049c6c61206bfd4dc4724fca815afaef01e3bed5c2bf6b",
+      "frameMetadataSha256": "5e3d418605b5b453a54c4d7d56fc8c7069271bc1cd59316b23ec6713ef992e71",
+      "command": "node qa/e2e/campaign-motion-preview.mjs /tmp/native-cleo cleo",
+      "result": "passed",
+      "assertions": [
+        "20 actual native frame/anchor registrations",
+        "4 distinct directional selections",
+        "native walk/signature/cheer/rest selection",
+        "timed game-event signature anticipate/release/settle/idle",
+        "reduced-motion heading stills",
+        "no browser page errors"
+      ],
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "retainedRepresentativeEvidence": [],
+      "reviewStatus": "pending"
+    },
+    {
+      "character": "bramble",
+      "assetId": "bramble-base-motion-v1",
+      "assetSha256": "48d300ee50fc1b36debd17f8bde91b462bdbdbc6b225057c87b0707cbdbaaae8",
+      "frameMetadataSha256": "838daa8599b0d1221dc38975c49569d30a06b85f0494492e48028df3feb40ba0",
+      "command": "node qa/e2e/campaign-motion-preview.mjs /tmp/native-bramble bramble",
+      "result": "passed",
+      "assertions": [
+        "20 actual native frame/anchor registrations",
+        "4 distinct directional selections",
+        "native walk/signature/cheer/rest selection",
+        "timed game-event signature anticipate/release/settle/idle",
+        "reduced-motion heading stills",
+        "no browser page errors"
+      ],
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "retainedRepresentativeEvidence": [
+        "docs/screenshots/campaign/native-bramble-phone-group2.png"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "character": "patter",
+      "assetId": "patter-base-motion-v1",
+      "assetSha256": "1b1490e3dad8f13d02a26ca98677bf9e58c1021e5d1fbe4abef76785bb10a632",
+      "frameMetadataSha256": "2d555c48c4c1d89c224117c1123bfccf9d6665b999ba8983fba7bec16f433b89",
+      "command": "node qa/e2e/campaign-motion-preview.mjs /tmp/native-patter patter",
+      "result": "passed",
+      "assertions": [
+        "20 actual native frame/anchor registrations",
+        "4 distinct directional selections",
+        "native walk/signature/cheer/rest selection",
+        "timed game-event signature anticipate/release/settle/idle",
+        "reduced-motion heading stills",
+        "no browser page errors"
+      ],
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "retainedRepresentativeEvidence": [],
+      "reviewStatus": "pending"
+    },
+    {
+      "character": "twizzle",
+      "assetId": "twizzle-base-motion-v1",
+      "assetSha256": "4b09674b0733160175e4399a5953d934852299e760c8634606b0cef0625a30ee",
+      "frameMetadataSha256": "8ce771ef158ec07b9ac63be132afdf13e629615421c1452ce0721e9aad430662",
+      "command": "node qa/e2e/campaign-motion-preview.mjs /tmp/native-twizzle twizzle",
+      "result": "passed",
+      "assertions": [
+        "20 actual native frame/anchor registrations",
+        "4 distinct directional selections",
+        "native walk/signature/cheer/rest selection",
+        "timed game-event signature anticipate/release/settle/idle",
+        "reduced-motion heading stills",
+        "no browser page errors"
+      ],
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "retainedRepresentativeEvidence": [],
+      "reviewStatus": "pending"
+    },
+    {
+      "character": "luna",
+      "assetId": "luna-base-motion-v1",
+      "assetSha256": "831b96a81bf47543dd0ea34d08cdafcd3bacaaa9f1f1c8c8672214437cd2e533",
+      "frameMetadataSha256": "a2247f49495632f1177b3de1853baa239fc7258f0033da2758fda660e36a3c19",
+      "command": "node qa/e2e/campaign-motion-preview.mjs /tmp/native-luna luna",
+      "result": "passed",
+      "assertions": [
+        "20 actual native frame/anchor registrations",
+        "4 distinct directional selections",
+        "native walk/signature/cheer/rest selection",
+        "timed game-event signature anticipate/release/settle/idle",
+        "reduced-motion heading stills",
+        "no browser page errors"
+      ],
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "retainedRepresentativeEvidence": [],
+      "reviewStatus": "pending"
+    },
+    {
+      "character": "pebble",
+      "assetId": "pebble-base-motion-v1",
+      "assetSha256": "89ddf15f11886108590828c7799033ad310e7fec67b2369be472424777200890",
+      "frameMetadataSha256": "e041c0f085c5c66b00136de14aaebe54f7f9ddb98312e921439681ffecb7ad6f",
+      "command": "node qa/e2e/campaign-motion-preview.mjs /tmp/native-pebble pebble",
+      "result": "passed",
+      "assertions": [
+        "20 actual native frame/anchor registrations",
+        "4 distinct directional selections",
+        "native walk/signature/cheer/rest selection",
+        "timed game-event signature anticipate/release/settle/idle",
+        "reduced-motion heading stills",
+        "no browser page errors"
+      ],
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "retainedRepresentativeEvidence": [],
+      "reviewStatus": "pending"
+    },
+    {
+      "character": "glimmer",
+      "assetId": "glimmer-base-motion-v1",
+      "assetSha256": "ea9a2531ec6aa9c8761ee0c9153066f0baccc391506f96cced11625ed15c7b3d",
+      "frameMetadataSha256": "172a73b4d893e02c9f2714b700667de668cf781d21979f6112612eb0e4310792",
+      "command": "node qa/e2e/campaign-motion-preview.mjs /tmp/native-glimmer glimmer",
+      "result": "passed",
+      "assertions": [
+        "20 actual native frame/anchor registrations",
+        "4 distinct directional selections",
+        "native walk/signature/cheer/rest selection",
+        "timed game-event signature anticipate/release/settle/idle",
+        "reduced-motion heading stills",
+        "no browser page errors"
+      ],
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "retainedRepresentativeEvidence": [
+        "docs/screenshots/campaign/native-glimmer-phone-group3.png"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "character": "sail",
+      "assetId": "sail-base-motion-v1",
+      "assetSha256": "80064fc5fee8dda5f84b3ec6b932d7582879c0686b57a59b962a9004ee3ba034",
+      "frameMetadataSha256": "1468e2f7dbeb592f3dccac764ee0ed1d34763404b1e621a688627a83f1407c08",
+      "command": "node qa/e2e/campaign-motion-preview.mjs /tmp/native-sail sail",
+      "result": "passed",
+      "assertions": [
+        "20 actual native frame/anchor registrations",
+        "4 distinct directional selections",
+        "native walk/signature/cheer/rest selection",
+        "timed game-event signature anticipate/release/settle/idle",
+        "reduced-motion heading stills",
+        "no browser page errors"
+      ],
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "retainedRepresentativeEvidence": [
+        "docs/screenshots/campaign/native-sail-phaser.png"
+      ],
+      "reviewStatus": "pending"
+    }
+  ]
+}

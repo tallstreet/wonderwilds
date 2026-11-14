@@ -14,6 +14,17 @@ static CACHE: OnceLock<Result<ContractCache, String>> = OnceLock::new();
 /// Validate bounds and closed-object semantics before deserializing a wire model.
 /// Only checked-in definitions enter the cache; caller strings cannot grow it.
 pub fn validate(contract: &str, value: &serde_json::Value) -> Result<(), String> {
+    validator(contract)?
+        .validate(value)
+        .map_err(|error| error.to_string())
+}
+
+/// Compile a known contract before entering a profile transaction.
+pub fn prepare(contract: &str) -> Result<(), String> {
+    validator(contract).map(|_| ())
+}
+
+fn validator(contract: &str) -> Result<&'static jsonschema::Validator, String> {
     let cache = CACHE
         .get_or_init(|| {
             let schema: serde_json::Value =
@@ -42,12 +53,18 @@ pub fn validate(contract: &str, value: &serde_json::Value) -> Result<(), String>
         })
         .as_ref()
         .map_err(Clone::clone)?;
-    validator.validate(value).map_err(|error| error.to_string())
+    Ok(validator)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn preparation_compiles_known_contracts_without_accepting_invalid_data() {
+        assert!(prepare("CampaignSnapshot").is_ok());
+        assert!(validate("CampaignSnapshot", &serde_json::Value::Null).is_err());
+        assert!(prepare("untrusted-contract-name").is_err());
+    }
     #[test]
     fn shared_positive_and_negative_fixtures() {
         let cases: serde_json::Value =
@@ -68,6 +85,11 @@ mod tests {
                     }};
                 }
                 match name {
+                    "PairedCommand" => round_trip!(PairedCommand),
+                    "PairedSnapshot" => round_trip!(PairedSnapshot),
+                    "HouseholdProfilesSnapshot" => round_trip!(HouseholdProfilesSnapshot),
+                    "CampaignCommand" => round_trip!(CampaignCommand),
+                    "CampaignSnapshot" => round_trip!(CampaignSnapshot),
                     "GameCommand" => round_trip!(GameCommand),
                     "GameSnapshot" => round_trip!(GameSnapshot),
                     "EncounterInstance" => round_trip!(EncounterInstance),

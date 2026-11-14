@@ -114,6 +114,8 @@ impl crate::mission_learning::repository::Repository for DisabledMissionLearning
 }
 #[derive(Clone)]
 pub struct AppState {
+    pub(crate) paired_repository: crate::paired::repository::Repository,
+    pub(crate) campaign_repository: crate::campaign::repository::Repository,
     repository: Arc<dyn Repository>,
     pub(crate) auth: Arc<dyn Authenticator>,
     pub(crate) story_provider:
@@ -154,7 +156,40 @@ impl AppState {
     /// Development server supports private Unix-socket PostgreSQL only. A
     /// production adapter must configure verified DB TLS and an identity issuer.
     pub fn development(connection: Option<String>, origin: String) -> Result<Self, Error> {
+        // Compile public contracts and immutable content before any profile lock.
+        // Cold browser boot requests arrive together; schema compilation must
+        // never consume their bounded database lock wait.
+        for contract in [
+            "PairedCommand",
+            "PairedSnapshot",
+            "HouseholdProfilesSnapshot",
+            "CampaignCommand",
+            "CampaignSnapshot",
+            "GameCommand",
+            "GameSnapshot",
+            "StoryCommand",
+            "StorySnapshot",
+            "StoryMissionPlan",
+            "StoryScene",
+            "StorySceneInput",
+            "MissionLearningCommand",
+            "MissionLearningSnapshot",
+            "MissionActivity",
+            "MissionLearningAnswer",
+            "LearningEvidence",
+            "Answer",
+            "EncounterInstance",
+        ] {
+            wonderwilds_contracts::prepare(contract).map_err(|_| Error::Unavailable)?;
+        }
+        wonderwilds_content::campaign().map_err(|_| Error::Unavailable)?;
+        wonderwilds_learning::mission::all_skill_projections(
+            &wonderwilds_learning::mission::MissionState::default(),
+        )
+        .map_err(|_| Error::Unavailable)?;
         let content = development_content()?;
+        let paired_repository = crate::paired::repository::Repository::new(connection.clone());
+        let campaign_repository = crate::campaign::repository::Repository::new(connection.clone());
         let story_repository: Arc<dyn crate::story::repository::Repository> = match &connection {
             Some(value) => Arc::new(crate::story::repository::PostgresRepository::new(
                 value.clone(),
@@ -190,6 +225,8 @@ impl AppState {
                 (Arc::new(DisabledRepository), Arc::new(DisabledAuth), false)
             };
         Ok(Self {
+            paired_repository,
+            campaign_repository,
             repository,
             auth,
             story_repository,
@@ -225,6 +262,20 @@ pub fn router(state: AppState) -> Router {
             get(|| async { Json(json!({"status":"ok","mode":"authored-development"})) }),
         )
         .route("/readyz", get(ready))
+        .route(
+            "/api/v1/household/profiles",
+            get(crate::paired::http::profiles),
+        )
+        .route("/api/v1/paired", get(crate::paired::http::snapshot))
+        .route(
+            "/api/v1/paired/commands",
+            post(crate::paired::http::command),
+        )
+        .route("/api/v1/campaign", get(crate::campaign::http::snapshot))
+        .route(
+            "/api/v1/campaign/commands",
+            post(crate::campaign::http::command),
+        )
         .route("/api/v1/story", get(crate::story::http::snapshot))
         .route("/api/v1/story/commands", post(crate::story::http::command))
         .route(
@@ -253,7 +304,7 @@ async fn ready(App(state): App<AppState>) -> Result<Json<Value>, Error> {
         .clone()
         .try_acquire_owned()
         .map_err(|_| Error::RateLimited)?;
-    tokio::task::spawn_blocking(move||{let _permit=permit;state.repository.readiness()?;state.story_repository.readiness()?;state.mission_learning_repository.readiness()?;Ok(Json(json!({"status":"ready","mode":"authored-development","releaseReady":false,"contentReview":"pending"}))) }).await.map_err(|_|Error::Unavailable)?
+    tokio::task::spawn_blocking(move||{let _permit=permit;state.repository.readiness()?;state.story_repository.readiness()?;state.campaign_repository.readiness()?;state.paired_repository.readiness()?;state.mission_learning_repository.readiness()?;Ok(Json(json!({"status":"ready","mode":"authored-development","releaseReady":false,"contentReview":"pending"}))) }).await.map_err(|_|Error::Unavailable)?
 }
 fn now() -> Result<u64, Error> {
     std::time::SystemTime::now()

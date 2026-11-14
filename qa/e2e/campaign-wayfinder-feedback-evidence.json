@@ -1,0 +1,20 @@
+{
+  "result": "passed exit0",
+  "stage": "synthetic valid level-four fixture plus real joined completion",
+  "contentVersion": "1.1.0",
+  "beforeLevel": 4,
+  "afterLevel": 5,
+  "forcedAppearance": false,
+  "academicCorrectChecks": 0,
+  "checks": [
+    "no feedback before uncertain response confirmed",
+    "exact same learning/appearance retries",
+    "no repeated canonical XP",
+    "named original/new art",
+    "reversible canonical appearance",
+    "reload no transient replay",
+    "reduced motion stable final form"
+  ],
+  "fixtureCommand": "ignored postgres_seed_wayfinder_ui_fixture with strict disposable-cluster/profile guards",
+  "scope": "Synthetic canonical level4 + authored Wayfinder-ready state, not completed campaign; real joined HTTP completion drives4\u21925"
+}

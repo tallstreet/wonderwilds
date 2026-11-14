@@ -4,6 +4,24 @@ use crate::persistence as checkpoints;
 use postgres::Transaction;
 
 const FORMAT: &str = "game-current-1";
+
+/// Only persisted, digest-checked receipts enter this dispatcher. HTTP continues
+/// to use Aggregate::execute, whose public schema excludes campaign grants.
+fn execute_recorded(
+    state: &mut Aggregate,
+    request: &Value,
+    content: &Content,
+    now: u64,
+    session: &str,
+) -> Result<Value, Error> {
+    if request["payload"]["type"] == "campaign_grant" {
+        state.execute_campaign_grant(request, content, now, session)
+    } else if request["payload"]["type"] == "campaign_transform" {
+        state.execute_campaign_appearance(request, content, now, session)
+    } else {
+        state.execute(request, content, now, session)
+    }
+}
 pub(super) fn encode(state: &Aggregate, content: &Content) -> Result<Value, Error> {
     Ok(checkpoints::envelope(
         FORMAT,
@@ -86,14 +104,14 @@ pub(super) fn load(
             if row.get::<_, String>(3) != checkpoints::receipt(&request, &response, &replay) {
                 return Err(Error::Unavailable);
             }
-            let result = prior
-                .execute(
-                    &request,
-                    content,
-                    replay["now"].as_u64().ok_or(Error::Unavailable)?,
-                    replay["session"].as_str().ok_or(Error::Unavailable)?,
-                )
-                .map_err(|_| Error::Unavailable)?;
+            let result = execute_recorded(
+                &mut prior,
+                &request,
+                content,
+                replay["now"].as_u64().ok_or(Error::Unavailable)?,
+                replay["session"].as_str().ok_or(Error::Unavailable)?,
+            )
+            .map_err(|_| Error::Unavailable)?;
             if result != response || encode(&prior, content)? != *value {
                 return Err(Error::Unavailable);
             }
@@ -230,6 +248,16 @@ pub(super) fn commit(
             tx.execute("INSERT INTO wonderwilds.reward_grants(profile_id,reward_definition,quest_instance) VALUES($1::text::uuid,$2,$3)", &[&profile,reward_id,quest_id]).map_err(|_|Error::Unavailable)?;
         }
     }
+    for event in &state.events {
+        if let engine::Outcome::CampaignGranted {
+            grant_id,
+            creature_id,
+            ..
+        } = &event.outcome
+        {
+            tx.execute("INSERT INTO wonderwilds.reward_grants(profile_id,reward_definition,quest_instance) VALUES($1::text::uuid,$2,$3)", &[&profile,grant_id,creature_id]).map_err(|_|Error::Unavailable)?;
+        }
+    }
     for record in &state.domain_records {
         let id = record["command"]["commandId"]
             .as_str()
@@ -310,14 +338,14 @@ pub(super) fn rebuild(
             if row.get::<_, String>(4) != checkpoints::receipt(&request, &expected, &replay) {
                 return Err(Error::Unavailable);
             }
-            let response = state
-                .execute(
-                    &request,
-                    content,
-                    replay["now"].as_u64().ok_or(Error::Unavailable)?,
-                    replay["session"].as_str().ok_or(Error::Unavailable)?,
-                )
-                .map_err(|_| Error::Unavailable)?;
+            let response = execute_recorded(
+                &mut state,
+                &request,
+                content,
+                replay["now"].as_u64().ok_or(Error::Unavailable)?,
+                replay["session"].as_str().ok_or(Error::Unavailable)?,
+            )
+            .map_err(|_| Error::Unavailable)?;
             if response != expected {
                 return Err(Error::Unavailable);
             }

@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Integrated story practice against the runner's fresh disposable database.
 // Run with WW_QA_BROWSER_TEST=qa/e2e/mission-learning.mjs via run-training-qa.mjs.
 import assert from 'node:assert/strict';
@@ -17,7 +18,7 @@ await page.addInitScript((value) => {
 }, guestSave);
 
 try {
-  await page.goto(`${origin}/?story=1`);
+  await gotoLegacy(page, `${origin}/?story=1`);
   await page.locator('#game canvas').waitFor();
   const bootstrap = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
   const profileHeaders = { 'X-Wonderwilds-Profile': bootstrap.profileId };
@@ -299,7 +300,8 @@ try {
   const started = await learningSnapshot();
   const activity = started.activeActivity;
   assert.ok(activity.storyStep, 'The task is bound to the selected mission action');
-  assert.equal(activity.skillId, 'M01');
+  assert.equal(activity.skillId, 'M-K-001');
+  const firstSkill = activity.skillId;
   assert.equal(activity.task.kind, 'question');
   assert.equal(await page.locator('.ww-mission-context').textContent(), activity.storyStep.introduction);
   assert.equal((await storySnapshot()).revision, acceptedResponse.ok() ? initialStory.revision + 1 : -1);
@@ -322,8 +324,9 @@ try {
   assert.equal(await page.getByRole('button',{name:'Continue the story',exact:true}).count(),0);
   const firstCorrect = await learningSnapshot();
   assert.equal(firstCorrect.activeActivity,undefined);
-  assert.equal(firstCorrect.skills.find(s=>s.skillId==='M01').activityCompleted,true);
-  assert.notEqual(firstCorrect.frontierSkillId,'M01');
+  assert.equal(firstCorrect.skills.find(s=>s.skillId===firstSkill).activityCompleted,false, 'One story task does not meet ten-item readiness');
+  assert.equal(firstCorrect.skills.find(s=>s.skillId===firstSkill).eligibleChecks,1);
+  assert.equal(firstCorrect.frontierSkillId,firstSkill);
   const sendStory = async (snapshot,payload,id) => {
     const response = await page.request.post(`${origin}/api/v1/story/commands`,{headers:commandHeaders,data:{schemaVersion:'1.0',commandId:id,expectedRevision:snapshot.revision,payload}});
     assert.equal(response.status(),200); return response.json();
@@ -339,9 +342,12 @@ try {
   await page.locator('dialog[open] [data-story-action="exchange"]').click();
   await page.locator('.ww-mission-activity').waitFor();
   const second = (await learningSnapshot()).activeActivity;
-  assert.equal(second.skillId,'M03','The completed matching skill must not return');
+  assert.equal(second.skillId,firstSkill,'The frontier remains until enough distinct independent practice');
   const beforeWrong = (await storySnapshot()).revision;
-  const wrong=fixtureAnswer(second);wrong.values[0].value='99';
+  const wrong=fixtureAnswer(second);
+  if(wrong.kind==='numbers')wrong.values[0].value='99';
+  else if(wrong.kind==='choice')wrong.choiceId=second.task.interaction.options.find(option=>option.id!==wrong.choiceId).id;
+  else assert.fail(`Expected active subitising number/choice item, got ${wrong.kind}`);
   await enterAnswer(page,second,wrong);
   let wrongBody;
   await page.route('**/api/v1/mission-learning/commands',async route=>{
@@ -403,9 +409,10 @@ try {
   await page.getByRole('button',{name:'Check answer',exact:true}).click();
   await page.locator('dialog').waitFor({state:'hidden'});
   const done=await learningSnapshot();
-  assert.equal(done.skills.find(s=>s.skillId==='M03').activityCompleted,true);
-  assert.equal(done.skills.find(s=>s.skillId==='M03').correctChecks,0,'A corrected answer must not become independent evidence');
-  assert.notEqual(done.frontierSkillId,'M01'); assert.notEqual(done.frontierSkillId,'M03');
+  assert.equal(done.skills.find(s=>s.skillId===firstSkill).activityCompleted,false);
+  assert.equal(done.skills.find(s=>s.skillId===firstSkill).eligibleChecks,2,'The original wrong first check remains an eligible unsuccessful check');
+  assert.equal(done.skills.find(s=>s.skillId===firstSkill).correctChecks,1,'A corrected answer must not add an independent correct check');
+  assert.equal(done.frontierSkillId,firstSkill);
   currentStory=await storySnapshot();
   const home=currentStory.sceneInput.availableActions.find(a=>a.action.type==='travel' && a.action.destinationId==='bridge_bank');
   await sendStory(currentStory,{type:'choose',actionId:home.id},'travel-home');
@@ -415,7 +422,7 @@ try {
   await page.locator('[data-story-action="assemble"]').click();
   await page.locator('.ww-mission-activity').waitFor();
   const third=(await learningSnapshot()).activeActivity;
-  assert.ok(!['M01','M03'].includes(third.skillId));
+  assert.equal(third.skillId,firstSkill);
   // Travel changes story revisions while the original step remains legal.
   // A correct answer must finish the activity and apply that same action once.
   let moved = await storySnapshot();
@@ -426,17 +433,19 @@ try {
   await enterAnswer(page,third);
   await page.getByRole('button',{name:'Check answer',exact:true}).click();
   await page.locator('dialog').waitFor({state:'hidden'});
-  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).activityCompleted,true);
+  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).activityCompleted,false);
+  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).eligibleChecks,3);
+  assert.equal((await learningSnapshot()).skills.find(s=>s.skillId===third.skillId).correctChecks,2);
   assert.equal((await storySnapshot()).revision,moved.revision+1);
   assert.equal(await page.locator('#game').getAttribute('data-story-bridge'),'repaired');
   await page.reload(); await page.locator('#game canvas').waitFor();
   const restored=await learningSnapshot();
   assert.equal(restored.activeActivity,undefined);
-  assert.ok(!['M01','M03',third.skillId].includes(restored.frontierSkillId));
+  assert.equal(restored.frontierSkillId,firstSkill);
   assert.deepEqual(await get('/api/v1/game'),originalGame);
   assert.equal(await page.evaluate(()=>localStorage.getItem('starwhisker.meadow.v1')),guestSave);
   assert.deepEqual(errors,[]);
-  console.log('PASS: completed activities close automatically and stay completed; incorrect answers get a new same-skill variant; exact retry/reload preserve the issued question and story atomicity.');
+  console.log('PASS: story tasks close automatically without inventing ten-item skill readiness; incorrect answers get a new same-skill variant; exact retry/reload preserve the issued question and story atomicity.');
 
 } catch (error) {
   console.error(

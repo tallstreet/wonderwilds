@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create ONE original Wonderwilds production development SPRITE ATLAS with TRUE TRANSPARENT BACKGROUND. Square1536x1536 TWO columns TWO rows four equal cells, each isolated within middle72percent width80percent height; generous gutters. Warm upper-left light slight high overhead3/4 orthographic camera, premium rounded dimensional3D family animated game art, tactile fur and polished honeywood brass, violet coral turquoise. No text labels borders ground planes external shadows landscape or paths. TOP LEFT: Vell, original thoughtful elderly BADGER inventor, soft grey fluffy fur cream forehead stripe black side markings huge expressive amber eyes round brass spectacles perched on forehead, purple work coat mint shirt coral tool belt, holding small closed brass notebook, friendly misguided determined expression not frightening villain, full body short sturdy silhouette with recognizable badger ears. TOP RIGHT: small standalone coastal lighthouse LENS apparatus, honeywood tripod pedestal with rounded brass ring holding pale turquoise crystalline circular lens, coral adjustment knob, no building sea or landscape. BOTTOM LEFT: Observatory apparatus, compact original moonlight collector machine, low circular violet-and-brass base with three rounded brass curved arms holding central frosted transparent orb, small turquoise valve wheel, moon-shaped brass fittings, no wires beyond frame, no lights rays or smoke, empty machine no characters. BOTTOM RIGHT: sanctuary shrine, small honeywood open arch in shape of leaf with rounded cream stone basin inside, three small purple flowers and turquoise cloth tied to side, no creature no ground no path. Entire full-body Vell and whole props in frame with clean alpha, no clipping, no words anywhere. These are reusable isolated game props not scenes.",
+  "rawSource": "content/campaign/art/sources/finale-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-e4baa645-3e26-4b03-86e5-7c4087675b5d.png",
+  "processedAsset": "frontend/public/assets/campaign/finale-v1.png",
+  "processing": "Byte-for-byte copy; no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/campaign/cast-v1.png",
+    "frontend/public/assets/campaign/props-v1.png"
+  ],
+  "requestedDimensions": [
+    1536,
+    1536
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "vell": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "lighthouse-lens": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "observatory-machine": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "sanctuary": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "reviewStatus": "pending",
+  "inspection": "Source inspected: distinct badger inventor silhouette with spectacles/notebook; isolated lens/machine/sanctuary match rounded dimensional materials. Static only. Real scene and phone review pending.",
+  "sha256": "3cbbcaa2c0f65e5b47cae6fd1070acb9795cdc44eb7626b92940d69902a57d50"
+}

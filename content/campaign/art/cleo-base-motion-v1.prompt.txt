@@ -1,0 +1,12 @@
+Create a NEW actual frame-animation atlas for ONE original Wonderwilds companion, matching ONLY the specified individual in the attached identity reference. Other reference characters MUST NOT appear. Premium dimensional preschool 3D family-game miniature style, tactile fur/feathers, glossy eyes, round readable silhouette, warm upper-left light, slight high camera. TRUE TRANSPARENT background. No ground plane, outside shadow, text, borders, numbers, labels, stray colored alpha fragments, or detached body parts. Clean transparent gutters.
+Technical contract: portrait1536x1920, exactly FOUR equal columns and FIVE equal rows, TWENTY equal cells. One WHOLE BODY character in each cell, same design and apparent scale throughout, middle76% width/84%height, plantedfeet90%height, ears/tail/quills/wings fullyinsidecell. Actual articulated pose changes, no duplicates merely shifted/scaled. Four distinct heading views, never borrow another character.
+Read left to right rows top to bottom:
+row1: down/front idle; downwalk leftfoot/rightarm forward; downwalk rightfoot/leftarm forward; rightprofile idle.
+row2: rightprofilewalk leftfootforward; rightprofilewalk rightfootforward; rear/up idle noface; rear/upwalk leftfootforward.
+row3: rear/upwalk rightfootforward; leftprofile idle; leftprofilewalk leftfootforward; leftprofilewalk rightfootforward.
+row4: signature anticipate; signature release; signature settle; cheerprepare gentlecrouch.
+row5: cheerlift botharmsraised happy feetontiptoes baseline; cheersettle onepawwave; restsitting eyeshalfclosed; restsameposition eyesclosed headrelaxed.
+Walk legs/arms/cape actuallyalternate, torsoheightconsistent. Signature3frames show described friendlyability, effects withincell, no violence. Cheer3frames distinct. Rest2frames same seatedposition relaxed eyesclosing. Preserve the costume/species of the specified identity exactly. ALL20 cellsmust be distinctnativeposes.
+
+IDENTITY AND ABILITY:
+Cleo BASE form, ONLY UPPER LEFT: ginger and cream KITTEN with huge AMBER eyes, turquoise superhero travel suit, golden round leaf chest clasp, RAINBOW short cape, small basket of golden fruit. Preserve rainbow colours and face. Signature: gathers a small leafy sprout, extends a soft green growth arc, settles.

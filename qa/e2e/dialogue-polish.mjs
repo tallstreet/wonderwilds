@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Presentation-only fixtures: no demo database or provider requests.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -22,7 +23,7 @@ try {
       return route.fulfill({ json: snapshot });
     });
     const load = async () => {
-      await page.goto(`${origin}/?story=1`);
+      await gotoLegacy(page, `${origin}/?story=1`);
       await page.locator('#game canvas').waitFor();
       await page.waitForFunction(() => document.querySelector('#game').dataset.storyRevision === '3');
     };

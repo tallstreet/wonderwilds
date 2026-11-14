@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "pip-wayfinder-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/pip-wayfinder-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/pip-wayfinder-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/pip-wayfinder-motion-v1.png",
+  "sha256": "53bf764bfe896007b124b0d3175faae7b226c928dcaad514a5976ed16881e3e2",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/pip-wayfinder-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/campaign/wayfinders-meadow-v1.png",
+      "sha256": "113a900579932e1e1c64d20f76564b2535c993d696bc5dcff9f20ff781748782",
+      "use": "Pip WAYFINDER form, ONLY UPPER LEFT: peach-and-cream fluffy kitten, TEAL eyes, violet soft travel suit, turquoise-and-violet short layered mantle with golden MOON CRESCENT clasp (not star), small warm lantern-shaped edging, tiny goldcompass at belt. Distinct advancedform costume exactlyreference, not purple superhero baseform. Signature: gathers a small soft gold light between paws, extends tiny luminous arc, settles as sparklesfade."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      281,
+      559,
+      834,
+      1112,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/pip-wayfinder-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/pip-wayfinder-motion-v1.cleanup-prompt.txt",
+  "previewEvidence": [
+    "content/campaign/art/native-motion-content-review.v1.json",
+    "docs/screenshots/campaign/pip-wayfinder-motion-phaser.png",
+    "docs/screenshots/campaign/pip-wayfinder-motion-phone-group1.png",
+    "docs/screenshots/campaign/pip-wayfinder-motion-phone-group2.png",
+    "docs/screenshots/campaign/pip-wayfinder-motion-phone-group3.png",
+    "docs/screenshots/campaign/pip-wayfinder-motion-phone-group4.png"
+  ]
+}

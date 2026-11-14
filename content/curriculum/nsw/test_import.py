@@ -2,8 +2,10 @@
 import hashlib
 import importlib.util
 import json
+import math
 import pathlib
 import unittest
+from unittest.mock import patch
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 spec = importlib.util.spec_from_file_location('nsw_import', ROOT/'scripts/import-nsw-curriculum.py')
@@ -61,6 +63,33 @@ class ReplacementTests(unittest.TestCase):
         source_item = self.source['skills'][0]['practice_items'][0]
         with self.assertRaises(compiler.Unsupported):
             compiler.convert(self.source['skills'][0], {**source_item,'stimulus':{'audio':{'script':'private answer'}}})
+
+    def test_clock_coordinates_ignore_platform_trig_roundoff(self):
+        def clocks(value):
+            if isinstance(value, dict):
+                if value.get('kind') == 'analogue_clock':
+                    yield value
+                for child in value.values():
+                    yield from clocks(child)
+            elif isinstance(value, list):
+                for child in value:
+                    yield from clocks(child)
+
+        visuals = list(clocks(self.source))
+        self.assertTrue(visuals)
+        sine, cosine = math.sin, math.cos
+        # Simulate the last-bit differences observed between host libm builds.
+        # The complete generated SVG (and therefore its hash) must remain equal.
+        with patch.object(compiler, 'asset', side_effect=lambda svg: svg):
+            expected = [compiler.visual(v) for v in visuals]
+            for direction in (math.inf, -math.inf):
+                with patch.object(math, 'sin', side_effect=lambda a: math.nextafter(sine(a), direction)), \
+                     patch.object(math, 'cos', side_effect=lambda a: math.nextafter(cosine(a), direction)):
+                    self.assertEqual([compiler.visual(v) for v in visuals], expected)
+        self.assertEqual(compiler.clock_coordinate(-0.0), '0')
+        self.assertEqual(compiler.clock_coordinate(-0.000000001), '0')
+        self.assertEqual(compiler.clock_coordinate(50.00000000000001), '50')
+        self.assertEqual(compiler.clock_coordinate(12.3456789), '12.345679')
 
 
 if __name__ == '__main__': unittest.main()

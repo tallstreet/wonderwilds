@@ -707,55 +707,162 @@
         {
           "type": "object",
           "properties": {
-            "type": { "const": "begin_step", "type": "string" },
-            "actionId": { "type": "string", "minLength": 1, "maxLength": 120 },
-            "storyRevision": { "type": "integer", "minimum": 0, "maximum": 1000000000 }
+            "type": {
+              "const": "begin_step",
+              "type": "string"
+            },
+            "actionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "storyRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
           },
-          "required": ["type", "actionId", "storyRevision"], "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": { "const": "finish_together", "type": "string" },
-            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 },
-            "variantId": { "type": "string", "minLength": 1, "maxLength": 120 }
-          },
-          "required": ["type", "encounterId"], "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": { "type": { "const": "begin", "type": "string" } },
-          "required": ["type"],
+          "required": [
+            "type",
+            "actionId",
+            "storyRevision"
+          ],
           "additionalProperties": false
         },
         {
           "type": "object",
           "properties": {
-            "type": { "const": "answer", "type": "string" },
-            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 },
-            "variantId": { "type": "string", "minLength": 1, "maxLength": 120 },
-            "answer": { "$ref": "#/$defs/MissionLearningAnswer" }
+            "type": {
+              "const": "finish_together",
+              "type": "string"
+            },
+            "encounterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "variantId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
           },
-          "required": ["type", "encounterId", "answer"],
+          "required": [
+            "type",
+            "encounterId"
+          ],
           "additionalProperties": false
         },
         {
           "type": "object",
           "properties": {
-            "type": { "const": "support", "type": "string" },
-            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 },
-            "kind": { "type": "string", "enum": ["hint", "worked_example"] }
+            "type": {
+              "const": "begin",
+              "type": "string"
+            }
           },
-          "required": ["type", "encounterId", "kind"],
+          "required": [
+            "type"
+          ],
           "additionalProperties": false
         },
         {
           "type": "object",
           "properties": {
-            "type": { "const": "abandon", "type": "string" },
-            "encounterId": { "type": "string", "minLength": 1, "maxLength": 120 }
+            "type": {
+              "const": "answer",
+              "type": "string"
+            },
+            "encounterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "variantId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "answer": {
+              "$ref": "#/$defs/MissionLearningAnswer"
+            }
           },
-          "required": ["type", "encounterId"],
+          "required": [
+            "type",
+            "encounterId",
+            "answer"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "support",
+              "type": "string"
+            },
+            "encounterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "hint",
+                "worked_example"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "encounterId",
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "abandon",
+              "type": "string"
+            },
+            "encounterId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "type",
+            "encounterId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "begin_campaign_step",
+              "type": "string"
+            },
+            "actionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "campaignRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "type",
+            "actionId",
+            "campaignRevision"
+          ],
           "additionalProperties": false
         }
       ]
@@ -5053,6 +5160,1442 @@
           ],
           "additionalProperties": false
         }
+      ]
+    },
+    "CampaignCompanion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "appearance": {
+          "type": "string",
+          "enum": [
+            "base",
+            "wayfinder"
+          ]
+        },
+        "affinity": {
+          "type": "string",
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "id",
+        "level"
+      ]
+    },
+    "CampaignDialogue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "speaker": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "speaker",
+        "text"
+      ]
+    },
+    "CampaignChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ]
+    },
+    "CampaignAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "requires_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 256
+        },
+        "forbids_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 256
+        },
+        "costs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "maxProperties": 128
+        },
+        "rewards": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "maxProperties": 128
+        },
+        "grants_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 256
+        },
+        "encounter": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "recruit": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "dialogue": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CampaignDialogue"
+          },
+          "maxItems": 256
+        },
+        "mission": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "kind": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "grant_id": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "learning_context": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 2000
+        },
+        "learning": {
+          "type": "boolean"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CampaignChoice"
+          },
+          "maxItems": 256
+        },
+        "puzzle": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CampaignPuzzle"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recipient": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "milestone": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "field_ability": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "field_method": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "discovery_for": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "location",
+        "requires_flags",
+        "forbids_flags",
+        "costs",
+        "rewards",
+        "grants_flags",
+        "encounter",
+        "recruit",
+        "dialogue",
+        "mission",
+        "kind",
+        "grant_id",
+        "learning_context",
+        "learning",
+        "choices",
+        "puzzle",
+        "recipient",
+        "milestone",
+        "field_ability",
+        "field_method",
+        "discovery_for"
+      ]
+    },
+    "CampaignEncounter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "progress": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "pressure": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "turns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "tool_charges": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "partner_bonus": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "bonus_source": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "replay": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "progress",
+        "pressure",
+        "turns",
+        "tool_charges",
+        "partner_bonus",
+        "bonus_source",
+        "replay"
+      ]
+    },
+    "CampaignState": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "campaign_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "content_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "rules_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 4096,
+          "description": "Matches the campaign authority persisted-state limit."
+        },
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "maxProperties": 128
+        },
+        "team": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 2
+        },
+        "energy": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "maxProperties": 128
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 4096,
+          "description": "Matches the campaign authority persisted-state limit."
+        },
+        "starter": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "encounter": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CampaignEncounter"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "campaign_id",
+        "content_version",
+        "rules_version",
+        "location",
+        "flags",
+        "items",
+        "team",
+        "energy",
+        "grants",
+        "starter",
+        "encounter"
+      ]
+    },
+    "CampaignPhase": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "threshold": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "affinity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "threshold",
+        "affinity"
+      ]
+    },
+    "CampaignEncounterDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "target": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "turn_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "pressure_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "hazards": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "maxItems": 256
+        },
+        "affinity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "win_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 256
+        },
+        "phases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CampaignPhase"
+          },
+          "maxItems": 256
+        },
+        "relay": {
+          "$ref": "#/$defs/CampaignRelay"
+        }
+      },
+      "required": [
+        "id",
+        "target",
+        "turn_limit",
+        "pressure_limit",
+        "hazards",
+        "affinity",
+        "win_flags",
+        "phases"
+      ]
+    },
+    "CampaignProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/CampaignState"
+        },
+        "legal_actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CampaignAction"
+          },
+          "maxItems": 4096,
+          "description": "Bounded public subset of immutable authored actions; persisted campaign bookkeeping is capped at 4096."
+        },
+        "travel": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 256
+        },
+        "companions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CampaignCompanion"
+          },
+          "maxItems": 12
+        },
+        "encounter_definition": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CampaignEncounterDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "legal_actions",
+        "travel",
+        "companions",
+        "encounter_definition"
+      ]
+    },
+    "CampaignLocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "camp": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "camp"
+      ]
+    },
+    "CampaignStarter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "affinity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "affinity"
+      ]
+    },
+    "CampaignSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "adopted": {
+          "type": "boolean"
+        },
+        "adoptionBlocked": {
+          "type": "boolean"
+        },
+        "campaign": {
+          "$ref": "#/$defs/CampaignProjection"
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CampaignLocation"
+          },
+          "maxItems": 256
+        },
+        "starters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CampaignStarter"
+          },
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "revision",
+        "adopted",
+        "adoptionBlocked",
+        "locations",
+        "starters"
+      ]
+    },
+    "CampaignCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "commandId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "adopt"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "choose_starter"
+                },
+                "companion_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "companion_id"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "travel"
+                },
+                "location_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "location_id"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "action"
+                },
+                "action_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "action_id"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "set_team"
+                },
+                "companion_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "type",
+                "companion_ids"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "camp"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "care"
+                },
+                "companion_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "kind": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "companion_id",
+                "kind"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "craft"
+                },
+                "recipe": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "recipe"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "encounter_turn"
+                },
+                "companion_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "movement": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "companion_id",
+                "movement"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "replay"
+                },
+                "encounter_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "encounter_id"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "commandId",
+        "expectedRevision",
+        "payload"
+      ]
+    },
+    "CampaignPuzzle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "operation": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "value": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "goal": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "maxLength": 120
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "operation",
+        "value",
+        "goal"
+      ]
+    },
+    "HouseholdProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "abilityBand": {
+          "type": "string",
+          "enum": [
+            "beginning",
+            "growing",
+            "stretching"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "abilityBand"
+      ]
+    },
+    "HouseholdProfilesSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HouseholdProfile"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "profiles"
+      ]
+    },
+    "PairedOffer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profileId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "keepsakeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "profileId",
+        "keepsakeId"
+      ]
+    },
+    "PairedCompanion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profileId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "companionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "profileId",
+        "companionId"
+      ]
+    },
+    "PairedKeepsake": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "keepsakeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sourceProfileId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        }
+      },
+      "required": [
+        "keepsakeId"
+      ]
+    },
+    "PairedTurn": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profileId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "companionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "navigator",
+            "keeper"
+          ]
+        },
+        "movement": {
+          "type": "string",
+          "enum": [
+            "scout",
+            "rest",
+            "brace",
+            "rally"
+          ]
+        }
+      },
+      "required": [
+        "profileId",
+        "companionId",
+        "role",
+        "movement"
+      ]
+    },
+    "PairedPractice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "progress": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "pressure": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "turns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "nextRole": {
+          "type": "string",
+          "enum": [
+            "navigator",
+            "keeper"
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "active",
+            "won",
+            "retry"
+          ]
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PairedTurn"
+          },
+          "maxItems": 8
+        }
+      },
+      "required": [
+        "progress",
+        "pressure",
+        "turns",
+        "nextRole",
+        "outcome",
+        "history"
+      ]
+    },
+    "PairedSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "actorProfileId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "solo",
+            "paired"
+          ]
+        },
+        "navigatorProfileId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "keeperProfileId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "offers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PairedOffer"
+          },
+          "maxItems": 2
+        },
+        "confirmedProfileIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 36
+          },
+          "maxItems": 2
+        },
+        "exchangeComplete": {
+          "type": "boolean"
+        },
+        "companions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PairedCompanion"
+          },
+          "maxItems": 2
+        },
+        "availableCompanions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CampaignCompanion"
+          },
+          "maxItems": 12
+        },
+        "availableKeepsakeIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 32
+        },
+        "completedPractices": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "legalMovements": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 2
+        },
+        "practiceTarget": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "practicePressureLimit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "practiceTurnLimit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "practice": {
+          "$ref": "#/$defs/PairedPractice"
+        },
+        "keepsakes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PairedKeepsake"
+          },
+          "maxItems": 128,
+          "description": "Most recent 128 independently owned copies; keepsakeCount includes older copies and profile export includes all."
+        },
+        "keepsakeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "revision",
+        "actorProfileId",
+        "mode",
+        "offers",
+        "confirmedProfileIds",
+        "exchangeComplete",
+        "companions",
+        "availableCompanions",
+        "availableKeepsakeIds",
+        "completedPractices",
+        "legalMovements",
+        "practiceTarget",
+        "practicePressureLimit",
+        "practiceTurnLimit",
+        "keepsakes"
+      ]
+    },
+    "PairedCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "commandId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "start"
+                },
+                "partnerProfileId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 36
+                }
+              },
+              "required": [
+                "type",
+                "partnerProfileId"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "swap_roles"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "select_companion"
+                },
+                "companionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "companionId"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "start_practice"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "practice_turn"
+                },
+                "movement": {
+                  "type": "string",
+                  "enum": [
+                    "scout",
+                    "rest",
+                    "brace",
+                    "rally"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "movement"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "offer_keepsake"
+                },
+                "keepsakeId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "type",
+                "keepsakeId"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "confirm_exchange"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "continue_solo"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "commandId",
+        "expectedRevision",
+        "payload"
+      ]
+    },
+    "CampaignRelay": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "round_targets": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "maxItems": 3
+        },
+        "required_affinities": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2
+        }
+      },
+      "required": [
+        "round_targets",
+        "required_affinities"
       ]
     }
   }

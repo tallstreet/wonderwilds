@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Real disposable API/database, mocked artwork provider response. No paid calls.
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
@@ -25,7 +26,7 @@ try {
       });
       await route.fulfill({ contentType: 'image/png', body: Buffer.from(image, 'base64') });
     });
-    await page.goto(origin);
+    await gotoLegacy(page, origin);
     await page.locator('#game canvas').waitFor();
     await page.waitForFunction(() => !document.querySelector('#bag').disabled);
     const source = index ? 'find_ribbon' : 'find_clover';

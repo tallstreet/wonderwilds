@@ -271,3 +271,101 @@ route/placement instructions or guide buttons), and completes real crafting and
 both lantern placements with supported learning and reload. Select it with
 `WW_QA_BROWSER_TEST` in the same runner, with both Modal credential variables
 empty to use authored content. It never advances the persistent demo profile.
+
+## Authored campaign checks
+
+`node qa/e2e/campaign-run.mjs` runs the real Bridge/Bloom browser journey with
+Pip, Tansy and Nib, each in its own newly-created disposable PostgreSQL cluster.
+It clears provider credentials and uses the ordinary authenticated local demo
+bridge. The campaign-only Vite configuration disables automatic file reloads;
+explicit browser reloads still exercise persisted application state. Default
+interactive development and the existing training runner remain unchanged.
+Set `WW_CAMPAIGN_STARTERS=pip` to run one starter. Use `WW_QA_SKIP_BUILD=1` only
+when the API binary already matches the campaign content and contract sources.
+
+`node qa/e2e/campaign-longplay-run.mjs` runs the three starters through both
+Orchard orders, two isolated cases at a time on ports 3010/3011 and 5190/5191.
+`WW_CAMPAIGN_ORDERS=harvest` selects one order. This checks the actual order of
+Harvest and Current trial actions, supported learning transactions, authored puzzle
+configurations, eight seals, all twelve companions at level five, forty-eight
+milestones, the ending and API/browser restart persistence. Failures stop new
+cases and let active disposable runners clean up. Logs and JSON evidence are
+written under `/tmp/campaign-longplay-STARTER-ORDER.*`; successful screenshot
+coverage is written under `/tmp/campaign-ending-STARTER-ORDER-*`.
+Pip/Harvest uses actual browser supported activity controls throughout. The other
+five cases use authenticated API `begin_campaign_step`/`finish_together` commands
+for learning, then render the real final UI and check form/reload/phone behavior.
+The three M2 journeys independently exercise each starter’s actual controls.
+Set `WW_CAMPAIGN_STAGE=1.1` to keep continuation artifacts separate from the
+initial campaign evidence. Longplay records guided request timings with an
+eight-second budget and any guided retreats. An unbeaten board is attempted once
+per team, companion-level and ability state so an optional retreat cannot starve
+further exploration; later progress permits another attempt. Completion requires
+Rowan's three-round relay and two contributing affinities when present in content.
+
+The M2 journey additionally checks keyboard movement, trial failure/recovery,
+reload during a trial, an exact retry after a lost committed response, actual
+world trail-sign interaction, recruitment/care/team changes, a return visit,
+paired practice without repeated grants, phone layout and recovery when reads
+fail after a confirmed write. Automated checks are technical evidence; they do
+not establish educator, narrative, accessibility or child playtest approval.
+
+`campaign-art-preview.mjs` is a separately labelled synthetic renderer fixture,
+not evidence of earned companion levels. It uses standalone Vite on port 5185.
+
+The 14 November 2026 run is recorded in [campaign-evidence.json](campaign-evidence.json):
+all three M2 journeys and all six full starter/order cases passed, along with the
+activity browser suite and the ten standard URL/viewport cases. The standard
+suite also checks onboarding X/Escape dismissal without a campaign write. Actual
+full saves contain 465–466 flags and 409–411 grants, so the earlier 256-item wire
+bound was insufficient; the corrected bounded contract was exercised by every
+completed case. Accepted final collection screenshots come from Tansy/Current
+and both Nib cases after the card layout fix. The preserved `ending-*` images in
+`docs/screenshots/campaign/` are from Nib/Harvest. Earlier Pip and Tansy/Harvest
+screenshots predate that CSS fix and are not final layout evidence.
+
+## Current legacy-reader and M6 continuation checks
+
+Current story fixtures and journeys use `legacy-entry.mjs` to request the supported
+`?adventure=earlier` reader explicitly. This preserves new onboarding coverage in
+`story-source-status.mjs` while making legacy gameplay intent explicit. Both bank
+and workshop routes of `story-world.mjs` were rerun against fresh PostgreSQL and
+passed, including joined learning, retry/reload, shared crossing and phone layout.
+The real `mission-learning.mjs` journey was also rerun: its private fixtures now
+include the active NSW question bank, and it distinguishes task completion from
+ten-item skill readiness and an eligible unsuccessful first check from an
+independent correct check. It exposed and verifies the fixed recovery of a
+resolved task after a definitive conflict while whole-skill readiness is false.
+Retained tests for the already-retired inspector/assessed interfaces, such as
+`story-browser.mjs` and `backend-world.mjs`, are historical; the earlier-reader
+entry helper does not revive those interfaces or establish that those scripts pass.
+
+For technical accessibility checks, run:
+
+```sh
+WW_CAMPAIGN_STARTERS=pip \
+WW_QA_BROWSER_TEST=qa/e2e/campaign-accessibility.mjs \
+node qa/e2e/campaign-run.mjs
+```
+
+The four controlled browser cases check unavailable narration, asynchronous
+speech-service failure, synchronous speech rejection and a live change to reduced
+motion. They verify written fallback, heading/launcher focus, keyboard dialogue,
+narration cancellation, actionable-control contrast/target checks, visually static
+reduced-motion idle rendering and preserved keyboard movement. They do not replace
+native screen-reader testing, audible OS voice review, physical phone performance
+measurements, consented child playtesting or production identity/privacy review.
+`campaign-trial-preview.mjs` creates a real authoritative Bridge trial for semantic
+progressbar and confirmed-signature/cleared-effect/celebration inspection; it does
+not invent a completed campaign save.
+
+`campaign-paired.mjs` uses `WW_QA_SECOND_PROFILE=1` in the disposable runner to
+provision a second synthetic profile under the same synthetic parent. It earns
+both starters and each Rowan ribbon through real authored campaign commands;
+companions, XP and gift items are not seeded. It checks explicit household/profile
+selection, owned companions, actor-attributed tactical turns, boundary role swaps,
+reload, two separately confirmed original-backed keepsake copies, exact lost-save
+retry, no companion/XP/academic-evidence transfers and solo continuation. Before
+confirmation it asserts both exact offered items and stable player codes are
+visible. The accepted run is recorded in `campaign-paired-evidence.json`; this is
+shared-device technical evidence, not network or consented child playtesting.

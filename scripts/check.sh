@@ -18,6 +18,11 @@ python3 content/activities/validate.py
 python3 -m unittest discover -s content/activities -p 'test_*.py'
 python3 content/story/validate.py
 python3 content/creatures/art/validate.py
+node content/campaign/check.mjs
+node content/campaign/check-v2.mjs
+node content/campaign/check-runtime.mjs
+CAMPAIGN_PACK=content/campaign/runtime.initial.v1.json node content/campaign/check-runtime.mjs
+python3 content/campaign/art/validate.py
 python3 -m unittest discover -s content/story -p 'test_*.py'
 python3 -m unittest discover -s qa/story-eval -p 'test_*.py'
 (cd frontend && npm run check)

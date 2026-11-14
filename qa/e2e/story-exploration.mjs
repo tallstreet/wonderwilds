@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Real world, API, and disposable PostgreSQL regression. Never run against demo data.
 import assert from 'node:assert/strict';
 import { finishInlineStep } from './inline-step.mjs';
@@ -9,7 +10,7 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 try {
-  await page.goto(`${origin}/?story=1`);
+  await gotoLegacy(page, `${origin}/?story=1`);
   await page.locator('#game canvas').waitFor();
   const bootstrap = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
   const snapshot = async () => {

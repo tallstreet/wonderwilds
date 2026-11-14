@@ -222,15 +222,13 @@ export class MissionLearningSession {
         )
           throw error;
         const snapshot = await this.refresh();
-        const completed = snapshot.skills.some(
-          (skill) => payload.variantId?.startsWith(`${skill.skillId}-`) && skill.activityCompleted,
-        );
-        if (completed && snapshot.activeActivity?.id !== payload.encounterId) {
+        // A definitive rejection followed by a different/absent bound task cannot
+        // be retried against a new question. Skill readiness may need many items.
+        if (snapshot.activeActivity?.id !== payload.encounterId) {
           this.storage.removeItem(this.storageKey);
           this.pending = undefined;
           return snapshot;
         }
-        if (snapshot.activeActivity?.id !== payload.encounterId) throw error;
         const command: MissionLearningCommand = {
           ...original,
           commandId: this.commandId(),

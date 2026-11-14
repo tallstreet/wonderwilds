@@ -429,3 +429,39 @@ test('replacement graph and resources fit the bounded response transport', async
   );
   await assert.rejects(oversized.snapshot(), ApiFailure);
 });
+
+test('a definitively stale answered task clears pending even before whole-skill readiness', async () => {
+  for (const changed of ['absent', 'new-question']) {
+    const store = storage();
+    let reads = 0,
+      sends = 0;
+    const resolved = issuedSnapshot(6);
+    resolved.skills[0]!.activityCompleted = false;
+    if (changed === 'absent') delete resolved.activeActivity;
+    else if (changed === 'new-question') resolved.activeActivity!.id = 'next-question';
+    else resolved.activeActivity!.variantId = 'M03-practice-v3-01';
+    const session = new MissionLearningSession(
+      {
+        snapshot: async () => (++reads === 1 ? issuedSnapshot(3) : resolved),
+        send: async () => {
+          sends++;
+          throw new ApiFailure('REVISION_CONFLICT', 409);
+        },
+      },
+      'profile-' + changed,
+      store,
+    );
+    await session.refresh();
+    const result = await session.choose({
+      type: 'answer',
+      encounterId: 'issued-question',
+      variantId: 'M03-practice-v3-00',
+      answer: { kind: 'choice', choiceId: 'a' },
+    });
+    assert.equal(result, resolved);
+    assert.equal(session.hasPending, false);
+    assert.equal(sends, 1);
+    assert.equal(store.values.size, 0);
+    assert.equal(result.skills[0]!.activityCompleted, false);
+  }
+});

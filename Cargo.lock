@@ -2080,7 +2080,9 @@ dependencies = [
 name = "wonderwilds-content"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
  "wonderwilds-contracts",
+ "wonderwilds-domain",
 ]
 
 [[package]]

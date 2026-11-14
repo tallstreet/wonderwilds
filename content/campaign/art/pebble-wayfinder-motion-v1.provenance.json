@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "pebble-wayfinder-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/pebble-wayfinder-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/pebble-wayfinder-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/pebble-wayfinder-motion-v1.png",
+  "sha256": "a05621e3befcb9272f919c297c689328edcac65e96774d0eea8f03775d93c026",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/pebble-wayfinder-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/campaign/wayfinders-cove-v1.png",
+      "sha256": "89b51da7dbd8b50943c40dccf94776a906e38fd3b0391056df703d49622845c1",
+      "use": "PEBBLE WAYFINDER advanced form, ONLY LOWER LEFT of reference. softbrown-andcream OTTER withAMBEReyes, roundedears, longtaperedtail, tealshortvest withgoldtrim, lilaccape withpaleswirls andgoldwaveclasp, smallpurpleshellsatchel andsmoothstonekeepsake. Keep otteranatomy notbunny. Signature gathers a tinywatercurl, gentlyguides smallwaterarc, settles."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      280,
+      559,
+      838,
+      1118,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/pebble-wayfinder-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/pebble-wayfinder-motion-v1.cleanup-prompt.txt",
+  "previewEvidence": [
+    "content/campaign/art/native-motion-content-review.v1.json",
+    "docs/screenshots/campaign/pebble-wayfinder-native-phaser.png",
+    "docs/screenshots/campaign/pebble-wayfinder-native-phone-group3.png"
+  ]
+}

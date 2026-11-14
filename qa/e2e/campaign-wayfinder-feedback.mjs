@@ -1,0 +1,94 @@
+// Explicit trusted synthetic level-four fixture; real joined completion drives 4→5.
+// This verifies transient feedback, not a newly completed campaign.
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { writeFile } from 'node:fs/promises';
+import { chromium } from 'playwright';
+const origin = process.env.WW_DEMO_TEST_URL ?? 'http://127.0.0.1:5198';
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH ?? '/usr/bin/chromium' });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = []; page.on('pageerror', error => errors.push(error.message));
+const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+try {
+  const bootstrap = await (await page.request.get(origin + '/__demo/bootstrap')).json();
+  const get = async path => {
+    const response = await page.request.get(origin + '/api/v1/' + path, { headers: { 'X-Wonderwilds-Profile': bootstrap.profileId } });
+    assert.equal(response.status(), 200); return response.json();
+  };
+  const friend = snapshot => snapshot.campaign.companions.find(entry => entry.id === 'pip');
+  const initial = await get('campaign');
+  assert.equal(friend(initial).level, 4, 'Trusted fixture must be canonical level four');
+  assert.equal(friend(initial).appearance, 'base');
+  assert.ok(initial.campaign.legal_actions.some(action => action.id === 'train_pip_wayfinder'));
+  await page.goto(origin); await page.locator('#campaign-missions').waitFor();
+  assert.equal(await page.locator('[data-form-notice]').count(), 0);
+  await page.locator('[data-campaign-command="train_pip_wayfinder"]').click();
+  while (await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).count()) await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).click();
+  await page.getByRole('button', { name: 'Practise together', exact: true }).click();
+  await page.locator('.ww-mission-activity').waitFor();
+  let learningBody;
+  await page.route('**/api/v1/mission-learning/commands', async route => {
+    learningBody = route.request().postData();
+    const response = await route.fetch(); assert.equal(response.status(), 200); await route.abort('failed');
+  }, { times: 1 });
+  await page.getByRole('button', { name: /^(Let’s do it together|Finish activity)$/ }).click();
+  await page.getByRole('button', { name: 'Retry the same saved action', exact: true }).waitFor();
+  assert.equal(await page.locator('[data-form-notice]').count(), 0, 'No earned feedback before a confirmed saved response');
+  assert.equal(friend(await get('campaign')).level, 5, 'Authoritative joined transaction already committed level five');
+  const committedGame = hash(await get('game'));
+  const retry = page.waitForRequest(request => request.url().endsWith('/mission-learning/commands'));
+  await page.getByRole('button', { name: 'Retry the same saved action', exact: true }).click();
+  assert.equal((await retry).postData(), learningBody);
+  await page.locator('[data-form-notice="earned"][data-form-friend="pip"]').waitFor();
+  await page.getByRole('heading', { name: 'Pip Wayfinder earned!', exact: true }).waitFor();
+  assert.equal(hash(await get('game')), committedGame, 'Exact completion retry grants no repeated XP');
+  const earned = await get('campaign'); assert.equal(friend(earned).level, 5); assert.equal(friend(earned).appearance, 'base', 'Earning does not force appearance');
+  await page.screenshot({ path: '/tmp/campaign-wayfinder-earned-desktop.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: '/tmp/campaign-wayfinder-earned-phone.png', fullPage: true });
+  await page.reload(); await page.locator('#campaign-missions').waitFor();
+  assert.equal(await page.locator('[data-form-notice]').count(), 0, 'Reload does not replay earned celebration');
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.locator('#campaign-team').click();
+  const payload = { type: 'care', companion_id: 'pip', kind: 'appearance_wayfinder' };
+  let appearanceBody;
+  await page.route('**/api/v1/campaign/commands', async route => {
+    appearanceBody = route.request().postData();
+    const response = await route.fetch(); assert.equal(response.status(), 200); await route.abort('failed');
+  }, { times: 1 });
+  await page.locator(`[data-campaign-payload='${JSON.stringify(payload)}']`).click();
+  await page.locator('#campaign-retry').waitFor();
+  assert.equal(await page.locator('[data-form-notice="changed"]').count(), 0, 'No appearance feedback before confirmed response');
+  const committedAppearance = hash(await get('game'));
+  const appearanceRetry = page.waitForRequest(request => request.url().endsWith('/campaign/commands'));
+  await page.locator('#campaign-retry').click(); assert.equal((await appearanceRetry).postData(), appearanceBody);
+  await page.locator('[data-form-notice="changed"][data-form-friend="pip"]').waitFor();
+  assert.equal(hash(await get('game')), committedAppearance, 'Exact appearance retry does not mutate twice');
+  assert.equal(friend(await get('campaign')).appearance, 'wayfinder');
+  assert.ok(await page.locator('.campaign-form-transition').evaluate(node => node.classList.contains('is-transition')));
+  await page.screenshot({ path: '/tmp/campaign-wayfinder-change-desktop.png', fullPage: true });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  assert.equal(await page.locator('.campaign-form-previous').evaluate(node => getComputedStyle(node).display), 'none');
+  assert.equal(await page.locator('.campaign-form-current').evaluate(node => getComputedStyle(node).animationName), 'none');
+  assert.equal(await page.locator('.campaign-form-current').evaluate(node => getComputedStyle(node).opacity), '1');
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.screenshot({ path: '/tmp/campaign-wayfinder-change-reduced-phone.png', fullPage: true });
+  await page.reload(); await page.locator('#campaign-missions').waitFor();
+  assert.equal(await page.locator('[data-form-notice]').count(), 0, 'Reload does not replay appearance feedback');
+  assert.equal(friend(await get('campaign')).appearance, 'wayfinder');
+  await page.locator('#campaign-team').click();
+  const original = { type: 'care', companion_id: 'pip', kind: 'appearance_base' };
+  const saved = page.waitForResponse(response => response.url().endsWith('/campaign/commands') && response.request().postDataJSON()?.payload?.kind === 'appearance_base');
+  await page.locator(`[data-campaign-payload='${JSON.stringify(original)}']`).click(); assert.equal((await saved).status(), 200);
+  await page.locator('[data-form-notice="changed"]').waitFor();
+  assert.equal(friend(await get('campaign')).appearance, 'base', 'Original appearance remains reversible');
+  const learning = await get('mission-learning');
+  assert.ok(learning.skills.every(skill => skill.correctChecks === 0), 'Supported growth does not invent independent correct checks');
+  assert.deepEqual(errors, []);
+  await writeFile('/tmp/campaign-wayfinder-feedback-evidence.json', JSON.stringify({ result: 'passed', stage: 'synthetic valid level-four fixture plus real joined completion', contentVersion: earned.campaign.state.content_version, beforeLevel: 4, afterLevel: 5, forcedAppearance: false, academicCorrectChecks: 0, checks: ['no feedback before uncertain response confirmed','exact same learning/appearance retries','no repeated canonical XP','named original/new art','reversible canonical appearance','reload no transient replay','reduced motion stable final form'] }, null, 2));
+  console.log('PASS actual joined 4→5 Wayfinder feedback, uncertain saves, canonical once, reversible form/reload and reduced motion');
+} catch (error) {
+  await page.screenshot({ path: '/tmp/campaign-wayfinder-feedback-failure.png', fullPage: true }).catch(() => {});
+  console.error((await page.locator('body').innerText()).slice(-5000)); throw error;
+} finally { await browser.close(); }

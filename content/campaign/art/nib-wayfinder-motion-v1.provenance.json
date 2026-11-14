@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "nib-wayfinder-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/nib-wayfinder-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/nib-wayfinder-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/nib-wayfinder-motion-v1.png",
+  "sha256": "f178243367c3864c4d0c69397623cfd69053f8afd9ed0561ffee1005e1f905f0",
+  "actualDimensions": [
+    1072,
+    1467
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/nib-wayfinder-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/campaign/wayfinders-meadow-v1.png",
+      "sha256": "113a900579932e1e1c64d20f76564b2535c993d696bc5dcff9f20ff781748782",
+      "use": "Nib WAYFINDER form, ONLY LOWER LEFT: taupe-and-cream fieldmouse, huge round pinklinedears, AMBER eyes, long thin tail, short VIOLET travelvest with GOLD WOVEN BRIDGE clasp, broad LAVENDER scarf tips, diagonal BROWN seedsatchel with rolledmap. Preserve exactadvancedcostume, no kittenfeatures. Signature: gathers a littlewoodbrace, steadies it in front, then settles leaving it beside paws."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      296,
+      586,
+      874,
+      1166,
+      1467
+    ],
+    "columnCuts": [
+      0,
+      268,
+      536,
+      804,
+      1072
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/nib-wayfinder-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/nib-wayfinder-motion-v1.cleanup-prompt.txt",
+  "previewEvidence": [
+    "content/campaign/art/native-motion-content-review.v1.json",
+    "docs/screenshots/campaign/nib-wayfinder-motion-phaser.png",
+    "docs/screenshots/campaign/nib-wayfinder-motion-phone-group1.png",
+    "docs/screenshots/campaign/nib-wayfinder-motion-phone-group2.png",
+    "docs/screenshots/campaign/nib-wayfinder-motion-phone-group3.png",
+    "docs/screenshots/campaign/nib-wayfinder-motion-phone-group4.png"
+  ]
+}

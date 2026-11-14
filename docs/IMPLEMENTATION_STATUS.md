@@ -1,9 +1,160 @@
 # Wonderwilds implementation evidence
 
-Foundation evidence recorded 28 October 2026; integration updates dated below. Broader roadmap: [Wonderwilds implementation plan](WONDERWILDS_IMPLEMENTATION_PLAN.md) v1.2. Active delivery sequence: [Implementation plan](IMPLEMENTATION_PLAN.md), with [curriculum mission integration](CURRICULUM_MISSION_PLAN.md) implemented for the first five-skill path. Validation counts in earlier sections describe their original delivery, not the latest checkout.
+Foundation evidence recorded 28 October 2026; integration updates dated below. Broader roadmap: [Wonderwilds implementation plan](WONDERWILDS_IMPLEMENTATION_PLAN.md) v1.2. Active delivery sequence: [Campaign build plan](CAMPAIGN_BUILD_PLAN.md), with [curriculum mission integration](CURRICULUM_MISSION_PLAN.md) implemented for the first five-skill path. Validation counts in earlier sections describe their original delivery, not the latest checkout.
 Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
+
+## Campaign continuation — content 1.1 and shared-device play
+
+The implementation continues beyond the initial solo baseline below. Content 1.1
+adds remembered Sail/Rowan responses, two fossil-guided optional discoveries and
+Rowan's three-round relay requiring two contributing affinities. Existing 1.0
+campaigns keep their original immutable definition: the retained source matches
+the recorded baseline hash exactly. A real database regression resumes a saved
+1.0 learning activity after restart under the new adapter.
+
+Shared-device play now selects actual profiles owned by the authenticated
+household. Each player selects their own companion, takes navigator/keeper turns,
+and swaps roles without changing who owns learning evidence. A separate shared
+practice board awards no academic evidence or companion XP. Keepsake sharing
+requires both exact offers and both players' confirmations; it grants separate
+copies while preserving the originals. Either participant can continue solo.
+Network invitations and cross-household play remain the later sub-milestone.
+
+Migration 0009 adds RLS-protected paired progress, actor-bound receipts and copied
+keepsakes. Migration 0010 preserves a monotonic household revision when participants
+are deleted, preventing stale commands from acquiring a reused revision. Disposable tests pass ownership, exact retries, races, rollback,
+export/deletion, and source deletion with another player's copy preserved. The
+operator command `python3 scripts/add-local-demo-player.py --create-player
+--ability-band beginning` explicitly creates one fresh synthetic player in the
+isolated local demo; it never silently invents a partner or copies learning state.
+
+The independent aggregate check and full PostgreSQL suite passed after these
+changes. Additional actual legacy bank/workshop and learning-recovery browser
+journeys passed. Accessibility browser checks cover initial/live reduced motion,
+keyboard/focus, phone targets, contrast and three read-aloud failure modes. These
+are technical checks; the [audience playtest protocol](CAMPAIGN_PLAYTEST.md) records
+what still requires observed sessions and actual human review.
+
+Static coverage includes all eight seals, five affinity icons, key landmarks and
+confirmed-action effects. All 24 base/form motion atlases contain 480 native pose
+frames with measured anchors and preserved provenance. Actual renderer checks and
+technical visual review cover desktop and phone groups; the cycles are intentionally
+minimal, and this is not human art approval.
+
+The final paired browser run passed on the migration-0010 API. Earned-form UI checks
+passed real joined 4→5 completion from a labelled synthetic fixture, uncertain-save
+recovery, once-only canonical XP, reversible appearance selection, reload and reduced
+motion. The strict texture sweep passed all twelve base/form switches and scene
+restart: 34 initial textures, 36 warmed textures with no growth, and at most four
+native motion textures (~24 MiB). Total estimated decoded RGBA was ~156 MiB initially
+and ~168 MiB at peak; initial art transfer was ~48 MiB. These are source-dimension
+estimates, not actual GPU allocations or physical-phone approval. The sweep found
+and verified the fix for orphaned Text textures during scene repaint.
+
+The final guided planner searches compact combat state with a 5,000-state bound,
+prioritising progress, pressure and turns. This fixes both late-save latency and
+budget exhaustion before longer winning continuations. All 75 domain tests pass,
+including 228 complete guided wins across the 19 non-practice boards, three starter
+pairs, both team orders and full/depleted energy. A genuinely unwinnable state
+retreats without losing supplies or discoveries. The browser harness also records
+retreats and prevents an optional retry from starving exploration.
+
+Content 1.1 has passing coverage for all six starter/Orchard-order combinations:
+eight seals, the ending, twelve canonical level-five companions, all 48 milestones,
+the three-round/two-affinity Rowan relay, API restart, browser reload and appearance
+persistence. Evidence was obtained in two batches: four Pip/Tansy cases passed with
+the compact breadth-first planner; both Nib cases were rerun successfully after the
+final best-first planner fix. This is not a claim that all six ran on one final
+binary. The final Nib cases recorded zero guided retreats and maximum guided HTTP
+times of 407.7 ms and 473.0 ms. Earlier four cases peaked between 481 and 1,037 ms.
+One full Pip/Harvest journey used actual learning UI controls; the other five used
+authenticated learning commands plus real browser assertions. No assertion that
+every optional post-game board was played through the browser follows; the domain
+regressions cover every board.
+
+The final API binary also passed the two-player browser journey with migration
+0010. Independent final checks passed the full PostgreSQL suite through all ten
+migrations, workspace Clippy, 75 domain tests, 174 frontend tests and production
+build, both immutable/current content validators, art validation and diff checks.
+The only build advisory is the existing Vite chunk-size warning.
+
+Durable machine-readable evidence is in
+[`campaign-1.1-evidence.json`](../qa/e2e/campaign-1.1-evidence.json),
+[`campaign-paired-evidence.json`](../qa/e2e/campaign-paired-evidence.json),
+[`campaign-memory-evidence.json`](../qa/e2e/campaign-memory-evidence.json),
+[`campaign-wayfinder-feedback-evidence.json`](../qa/e2e/campaign-wayfinder-feedback-evidence.json)
+and [`campaign-m6-evidence.json`](../qa/e2e/campaign-m6-evidence.json).
+Earlier six-case evidence below remains explicitly evidence for content 1.0.
+Human playtesting, artwork/accessibility/release approval, physical-phone performance
+review and the later network pairing sub-milestone remain open; no approval is
+inferred from these technical results.
+
+## Initial playable solo baseline — content 1.0, 14 November 2026
+
+Six SOL subagents implemented content, domain rules, persistence/contracts,
+frontend, development artwork and browser QA. The integration owner reviewed the
+combined work, fixed compatibility and late-game defects, and ran the aggregate
+checks. The [delivery matrix](CAMPAIGN_DELIVERY_STATUS.md) separates implemented
+behavior from the build plan's outstanding production acceptance criteria.
+
+The current entry supports explicit adoption of **The Missing Moonlight** while
+preserving the earlier adventure. The authored runtime contains 26 main missions,
+sixteen locations, eight keeper trials, both Orchard orders, twelve recruitable
+companions and 48 contextual growth milestones. Reversible puzzles, five field
+abilities with free tool alternatives, two-companion tactics, supplies, recovery,
+learning activities, discovery clues, persistent forms, the ending and post-game
+boards run through server-authoritative commands. No provider key is required.
+
+Verified evidence:
+
+- `bash scripts/check.sh` passed: workspace Rust tests/format/Clippy, contracts,
+  content validation, reproducible NSW import, 156 frontend tests, strict types,
+  lint/format, production build and legacy fixtures. The final domain suite has
+  67 tests; the runtime checker validates 260 actions and twenty negative cases.
+- `sh scripts/check-postgres.sh` passed on disposable databases, including migration
+  0008, campaign adoption, ownership/RLS, retries/races, canonical grants, learning
+  joins, rollback, export/deletion and migration drift checks. Additional tests
+  passed cold concurrent reads and reads following supported learning. Maximal
+  authored checkpoint insertion passed at 47,795 PostgreSQL JSON bytes, below the
+  65,536-byte receipt limit, with all twelve canonical friends at level five.
+- All three opening journeys passed real desktop/phone browser checks: starter
+  practice, Bridge/Bloom, wrong/correct irrigation, defeat/recovery, encounter
+  reload, recruitment/team/care and free field tools. Tests include a dropped
+  response with exact retry, confirmed-write refresh failure recovery, signatures
+  and Rally, and an actual mobile touch context.
+- The standard browser suite passed all ten desktop/phone entry and source-status
+  cases; the existing activity suite passed all six activity families.
+- All twelve static forms were inspected in actual Phaser at desktop and phone
+  sizes. Screenshots are in `docs/screenshots/campaign/`. Full-collection visual
+  review found overlapping desktop card buttons; a narrow responsive CSS fix and
+  completed-collection journal guidance were applied and rechecked.
+
+The full six-case campaign matrix passed: Pip, Tansy and Nib each completed both
+asserted Orchard orders, eight seals, the ending, twelve canonical level-five
+companions and all 48 milestones. Every case verified API restart, browser reload
+and persistent form selection. Pip/Harvest used the real supported-learning UI
+throughout; the other five used authenticated API learning commands and real final
+browser checks. This is automated playability evidence, not six human playtests.
+Representative final desktop/phone screenshots are
+`docs/screenshots/campaign/ending-{team,journal,guide}-{desktop,phone}.png`.
+
+Final review also found and fixed an adoption-dialog dismissal softlock. The
+expanded standard browser suite passed close-button and Escape dismissal at both
+viewport sizes, verifying the earlier adventure loads with zero campaign writes.
+The final frontend format/type/build checks passed after these narrow fixes.
+
+Run `sh scripts/local-demo.sh`, open `http://127.0.0.1:5173`, and choose **Begin
+The Missing Moonlight**. Restart an existing local demo to apply migration 0008.
+Persistent `.local-demo` data was not used by these tests or reset.
+
+This is a playable development implementation of the solo runtime, not completion
+of every build-plan acceptance criterion. Animation sets, remaining production
+art, observed balance and child/parent playtesting, reviewed narration,
+accessibility/release approvals and human paired expeditions remain open. Static
+forms and automated playthroughs do not establish those approvals. Existing Vite
+bundle-size advice remains. See the delivery matrix for exact omissions.
 
 ## Campaign build planning — 14 November 2026
 

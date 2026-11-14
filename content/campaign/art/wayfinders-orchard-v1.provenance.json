@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create new original Wonderwilds advancement CHARACTER SPRITE ATLAS TRUE transparent background square1536x1536 TWO columns TWO rows FOUR cells. Each fullbody within70percent width80percent height, feet88percent cell, generous gutters, warm upper-left light slight overhead3/4 front camera premium fluffy dimensional3D animated family game style rounded glossy eyes violet coral turquoise gold. No labels text borders ground external shadows. TOP LEFT Flutter Wayfinder: cream fuzzy MOTH, four rounded lilac/blush petal wings, short rounded antennae huge VIOLET eyes, tiny folded letter. Evolved form retains face and species adds GOLDEN CHIME patterns on wing tips, short purple travel collar with moonstone clasp, confident open wings wholly inside cell. TOP RIGHT Cleo Wayfinder: ginger-and-cream fluffy KITTEN AMBER eyes turquoise suit RAINBOW short cape, basket of golden fruit. Evolved form retains face adds GOLDEN ORCHARD LEAF clasp, neatly layered rainbow travel mantle and small seed map at belt. BOTTOM LEFT Bramble Wayfinder: cream fluffy BUNNY long ears with one softly bent, AMBER eyes purple travel vest green leafy scarf. Evolved adds GOLDEN BRANCH buckle, rounded mint shoulder cape, small rolled plan at waist. BOTTOM RIGHT Patter Wayfinder: golden-yellow DUCKLING turquoise eyes orange beak webbed feet green crossbody mail satchel. Evolved adds teal-and-gold short travel vest, GOLDEN WAVE satchel clasp and small folded ferry map, wings slightly open. Identity retained no kitten ears on noncats, friendly modest growth no weapons armor or crowns, clear unique species silhouettes; all extremities inside cell.",
+  "rawSource": "content/campaign/art/sources/wayfinders-orchard-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-41447754-3fee-452c-b6af-3545753c1836.png",
+  "processedAsset": "frontend/public/assets/campaign/wayfinders-orchard-v1.png",
+  "processing": "Byte-for-byte copy; inspected frame boundary metadata only, no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/characters/meadow.png",
+    "frontend/public/assets/characters/orchard.png",
+    "frontend/public/assets/characters/cove.png"
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "flutter-wayfinder": [
+      0,
+      0,
+      627,
+      590
+    ],
+    "cleo-wayfinder": [
+      627,
+      0,
+      627,
+      590
+    ],
+    "bramble-wayfinder": [
+      0,
+      590,
+      627,
+      664
+    ],
+    "patter-wayfinder": [
+      627,
+      590,
+      627,
+      664
+    ]
+  },
+  "technicalGateEvidence": [
+    "docs/screenshots/campaign/wayfinders-first-phaser.png",
+    "docs/screenshots/campaign/wayfinders-first-phone.png"
+  ],
+  "reviewStatus": "pending",
+  "inspection": "Inspected row split590 preserves Bramble ear extending above nominal627. Static pose only.",
+  "sha256": "d5f272adc7c8e2eb3d1622c1a5962ed98ce1d000368ee10247c3a0a8b812f8f7",
+  "completedTechnicalPreviews": [
+    "docs/screenshots/campaign/forms-group2.png",
+    "docs/screenshots/campaign/forms-group2-phone.png",
+    "docs/screenshots/campaign/forms-group3.png",
+    "docs/screenshots/campaign/forms-group3-phone.png"
+  ],
+  "completedTechnicalPreviewNotes": "2026-11-14 actual createWorld registered sprites inspected desktop1280x800 and phone390x844, three at a time. Synthetic fixtures, avatar hidden to prevent occlusion; no source-frame clipping observed. No gameplay progression or final human approval claim."
+}

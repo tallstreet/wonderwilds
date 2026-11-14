@@ -105,3 +105,42 @@ a disposable migrated UTF8 database, runs ownership/session/lifecycle checks and
 explicit game transaction rollback/race tests under a non-superuser role, then
 drops it. It must be allowed to access the private local socket. Do not run those
 fixtures against production or a database containing user data.
+
+`GET /api/v1/campaign` and `POST /api/v1/campaign/commands` expose the authored
+Missing Moonlight campaign through the same verified session, profile, Origin and
+CSRF boundary. A profile explicitly sends `adopt`; active legacy activities defer
+adoption, while saved legacy stories and canonical companions remain available.
+Campaign commands use their own expected revision and durable original-response
+receipts. A repeated ID with a changed body conflicts. The numbered campaign
+migration adds forced-RLS progress/receipts with profile export and cascading deletion.
+Unsupported storage/content/rules versions return recoverable `UNAVAILABLE`, preserving
+stored progress. Campaign scenes never consult a generation provider.
+
+Campaign learning uses the existing mission-learning endpoint with
+`begin_campaign_step`, an action ID and campaign revision. The server freezes the
+content version, action and companion recipient. Supported and independent
+completion commit the existing learning evidence, campaign step and canonical
+milestone grant under the same profile lock. Changing the team cannot redirect
+that reward. A no-longer-legal campaign action leaves completed learning evidence
+intact. Campaign and legacy training milestones share grant aliases to prevent
+duplicate XP. Companion ownership, XP and reversible Wayfinder appearance remain
+in the existing canonical game aggregate and its replayable event/receipt stream.
+
+Shared-device pairing uses `GET /api/v1/household/profiles`, `GET /api/v1/paired`
+and revision-bound `POST /api/v1/paired/commands`. Only profiles owned by the
+verified parent are selectable. The selected profile remains the answering learner;
+role swaps change navigator/keeper permissions and never move academic evidence.
+Each participant chooses an actually owned companion for a bounded, alternating
+practice board. Practice grants no XP or academic evidence. Both selected players
+must offer an existing whitelisted collectible and confirm the exact offers before
+reciprocal keepsake copies are recorded. Originals and personal campaign progress
+remain independently owned. Continuing solo preserves them. This is shared-device
+play; network invitations and asset transfers remain unimplemented.
+
+An operator can explicitly add another actual synthetic profile to the isolated
+local demo with `python3 scripts/add-local-demo-player.py --create-player
+--ability-band beginning` (one shell line). This command accepts only the fixed
+`.local-demo` database and checks its synthetic identity issuer; it never modifies
+another database or creates a profile automatically. The new profile must choose
+its own starter and earn its own collectibles. Profile creation through a public
+identity-provider-backed account UI remains outside the development API.

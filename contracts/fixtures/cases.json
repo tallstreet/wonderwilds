@@ -13994,5 +13994,222 @@
       "provider": "Unknown",
       "audience": "learner"
     }
+  },
+{
+  "name": "Campaign adoption command",
+  "contract": "CampaignCommand",
+  "valid": true,
+  "value": {
+    "schemaVersion": "1.0",
+    "commandId": "campaign-adopt-1",
+    "expectedRevision": 0,
+    "payload": {
+      "type": "adopt"
+    }
   }
+},
+{
+  "name": "Campaign command rejects asserted assessment",
+  "contract": "CampaignCommand",
+  "valid": false,
+  "value": {
+    "schemaVersion": "1.0",
+    "commandId": "campaign-adopt-1",
+    "expectedRevision": 0,
+    "payload": {
+      "type": "adopt"
+    },
+    "verifiedLearning": true
+  }
+},
+{
+  "name": "Campaign unadopted snapshot",
+  "contract": "CampaignSnapshot",
+  "valid": true,
+  "value": {
+    "schemaVersion": "1.0",
+    "revision": 0,
+    "adopted": false,
+    "adoptionBlocked": false,
+    "locations": [],
+    "starters": []
+  }
+},
+{
+  "name": "Campaign starter command",
+  "contract": "CampaignCommand",
+  "valid": true,
+  "value": {
+    "schemaVersion": "1.0",
+    "commandId": "starter-command",
+    "expectedRevision": 1,
+    "payload": {
+      "type": "choose_starter",
+      "companion_id": "pip"
+    }
+  }
+},
+{
+  "name": "Campaign command rejects client learning verification",
+  "contract": "CampaignCommand",
+  "valid": false,
+  "value": {
+    "schemaVersion": "1.0",
+    "commandId": "starter-command",
+    "expectedRevision": 1,
+    "payload": {
+      "type": "action",
+      "action_id": "bridge_plan",
+      "verified_learning": true
+    }
+  }
+},
+{
+  "name": "Campaign team is bounded",
+  "contract": "CampaignCommand",
+  "valid": false,
+  "value": {
+    "schemaVersion": "1.0",
+    "commandId": "starter-command",
+    "expectedRevision": 1,
+    "payload": {
+      "type": "set_team",
+      "companion_ids": [
+        "pip",
+        "tansy",
+        "nib"
+      ]
+    }
+  }
+},
+{
+  "name": "Campaign adopted canonical projection",
+  "contract": "CampaignSnapshot",
+  "valid": true,
+  "value": {
+    "schemaVersion": "1.0",
+    "revision": 2,
+    "adopted": true,
+    "adoptionBlocked": false,
+    "campaign": {
+      "state": {
+        "campaign_id": "missing-moonlight",
+        "content_version": "1.0.0",
+        "rules_version": "campaign-1",
+        "location": "bridge_bank",
+        "flags": [
+          "starter_chosen"
+        ],
+        "items": {},
+        "team": [
+          "pip"
+        ],
+        "energy": {
+          "pip": 3
+        },
+        "grants": [],
+        "starter": "pip",
+        "encounter": null
+      },
+      "legal_actions": [],
+      "travel": [],
+      "companions": [
+        {
+          "id": "pip",
+          "level": 1,
+          "appearance": "base",
+          "affinity": "stone"
+        }
+      ],
+      "encounter_definition": null
+    },
+    "locations": [],
+    "starters": []
+  }
+},
+{
+  "name": "Household actual owned profile listing",
+  "contract": "HouseholdProfilesSnapshot",
+  "valid": true,
+  "value": {
+    "schemaVersion": "1.0",
+    "profiles": [
+      {
+        "id": "10000000-0000-0000-0000-000000000002",
+        "abilityBand": "beginning"
+      },
+      {
+        "id": "10000000-0000-0000-0000-000000000003",
+        "abilityBand": "growing"
+      }
+    ]
+  }
+},
+{
+  "name": "Paired explicit start",
+  "contract": "PairedCommand",
+  "valid": true,
+  "value": {
+    "schemaVersion": "1.0",
+    "commandId": "pair-start",
+    "expectedRevision": 0,
+    "payload": {
+      "type": "start",
+      "partnerProfileId": "10000000-0000-0000-0000-000000000003"
+    }
+  }
+},
+{
+  "name": "Paired actor cannot be supplied in command",
+  "contract": "PairedCommand",
+  "valid": false,
+  "value": {
+    "schemaVersion": "1.0",
+    "commandId": "pair-start",
+    "expectedRevision": 0,
+    "payload": {
+      "type": "start",
+      "partnerProfileId": "10000000-0000-0000-0000-000000000003"
+    },
+    "actorProfileId": "10000000-0000-0000-0000-000000000003"
+  }
+},
+{
+  "name": "Paired solo projection",
+  "contract": "PairedSnapshot",
+  "valid": true,
+  "value": {
+    "schemaVersion": "1.0",
+    "revision": 0,
+    "actorProfileId": "10000000-0000-0000-0000-000000000002",
+    "mode": "solo",
+    "offers": [],
+    "confirmedProfileIds": [],
+    "exchangeComplete": false,
+    "companions": [],
+    "availableCompanions": [],
+    "availableKeepsakeIds": [],
+    "completedPractices": 0,
+    "legalMovements": [],
+    "practiceTarget": 6,
+    "practicePressureLimit": 5,
+    "practiceTurnLimit": 8,
+    "keepsakes": [],
+    "keepsakeCount": 0
+  }
+},
+{
+  "name": "Paired practice rejects unknown turn move",
+  "contract": "PairedCommand",
+  "valid": false,
+  "value": {
+    "schemaVersion": "1.0",
+    "commandId": "pair-start",
+    "expectedRevision": 0,
+    "payload": {
+      "type": "practice_turn",
+      "movement": "award_xp"
+    }
+  }
+}
 ]

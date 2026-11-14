@@ -1,13 +1,32 @@
 # The Missing Moonlight
 
-Authored game specification, revised 14 November 2026. **Not implemented or loaded
-by the game.** Review is pending; release activation remains disabled.
+Authored campaign development content, revised 14 November 2026. Narrative,
+educator, artwork and accessibility reviews remain pending. Release activation is
+not approved.
 
-The current source is [missing-moonlight.v2.json](missing-moonlight.v2.json), with
-[schema.v2.json](schema.v2.json). It supersedes the short Moonlight Trail proposal.
-The v1 files remain as an explicitly superseded design, not another active campaign.
-Existing runtime story content, provider integrations, saves and pack hashes are
-unchanged. AI-generated scenes and campaigns are future extensions.
+The executable development pack is [runtime.v1.json](runtime.v1.json), validated
+against [runtime.v1.schema.json](runtime.v1.schema.json). It contains all 26 main
+missions across sixteen locations, 260 finite actions and 22 tactical boards:
+three free starter practices, eight keeper trials, three Rowan contests and eight
+post-game variants. Seven opening missions form the first playtest checkpoint.
+All twelve friends have invitations, four distinct recipient-pinned growth scenes,
+a personal keepsake and an optional habitat cache. Fossils, copied clues, the early
+island and the sanctuary are executable finite actions. The Rust campaign loader
+interprets these rules; see root implementation status for actual API, persistence,
+UI and end-to-end evidence. Authored content coverage is not a claim that every
+system in the build plan has been implemented or playtested.
+
+The [full story treatment](TREATMENT.md) follows all 26 main-story beats and resolves
+the collectors' continuing orders, local restoration versus the central reserve,
+eight grounded beacon lines, lens recovery before Illuminate and Rowan's distinct
+partners Moss and Reed. Its main-story and personal-conflict material now has finite
+runtime definitions. Narrative, educator and audience review remain pending.
+
+[missing-moonlight.v2.json](missing-moonlight.v2.json), with
+[schema.v2.json](schema.v2.json), remains the complete **design specification**;
+it is preserved unchanged as design history and is not loaded as executable rules.
+The v1 Moonlight Trail files remain superseded history. Legacy story content and
+integrity hashes are unchanged. Generated campaign extensions remain future work.
 
 ## The experience we are building
 
@@ -269,7 +288,7 @@ There are finite, visible completion goals, not a claim of endless generated con
 Follow the [build plan](../../docs/CAMPAIGN_BUILD_PLAN.md) for implementation order,
 asset batches, state integration and milestone acceptance.
 
-The first implementation slice must prove **interaction between systems**: starter
+The first playtest checkpoint must prove **interaction between systems**: starter
 choice, a meaningful team/technique decision, the Bridge trial, a changed route,
 a recruitable second friend, care recovery and a return-visit reward. A character
 picker and XP bar alone do not meet it. Next deliver Bloom/Echo and the Meadow
@@ -284,11 +303,12 @@ and ID. Existing saves need opt-in campaign adoption and an explicit old/new gra
 mapping. Preserve current progress, inventory, ownership, appearances, learning
 records and pending missions. No demo reset or historical reward inference.
 
-The v2 JSON is an authoring contract. Story dialogue, scene blocking, exact world
-coordinates, full personal-quest tasks, transformation artwork, runtime action
-bindings and production save migrations remain work. Mission objective prose is
-not executable code. Some side quests still have prose outcomes rather than a full
-state graph. Those gaps must be resolved before a runtime loader enables content.
+The v2 JSON is a design contract. Runtime v1 replaces its objective prose with
+finite executable main-story, friendship, growth and side-quest actions. Scene
+blocking, exact world coordinates, production transformation art, full narrated
+accessibility and audience playtesting still require their own evidence. The
+treatment itself is never interpreted as executable code. Human paired expeditions
+remain a separate implementation milestone.
 
 An LLM may later propose new instances of this format from approved catalogues.
 It cannot invent assessment, new executable mechanics, reward policies or existing
@@ -300,6 +320,7 @@ reachability, supported paths and narrative quality, not just JSON validity.
 With the existing `contracts/` npm dependencies installed:
 
 ```sh
+node content/campaign/check-runtime.mjs # executable first-slice schema/references/supplies
 node content/campaign/check-v2.mjs
 node content/campaign/check.mjs # superseded v1 design regression only
 ```
@@ -313,3 +334,57 @@ trial. The search checks the universal/signature/keeper subset; two-friend combo
 upgrades, puzzles, expedition persistence and social exchanges still require runtime
 tests. It does not prove balance, accessible UI, full narrative playability or
 educator approval. Existing story release and integrity gates remain unchanged.
+
+
+Executable checks reject duplicate action/grant IDs, missing locations, routes,
+flags, encounters and recruits; contradictory prerequisites; unfunded quest-material
+consumption; unreachable puzzle goals; repeatable puzzle rewards; unmarked learning;
+and circular campaign dependencies, incomplete main-mission coverage, and missing
+recipient-specific growth gates. Twenty negative mutations exercise these
+failures. Branch/plank quantities are conserved exactly. The closure check deliberately
+overapproximates mutually exclusive choices and tactical victories: it is a content
+sanity check, not a domain completion witness. Rust transition tests must establish
+actual starter paths, supported joins, retry semantics and board outcomes.
+
+Puzzle controls set two irrigation destinations or three ordered chime/valve
+positions, check an explicit goal, or reset.
+Wrong routing never consumes a resource. The check reveals the result; dialogue is
+not parsed for effects. Garden designs are mutually exclusive persistent flags.
+Starter choice and canonical ownership are Rust commands; friendship invitations do
+not remove an owned companion, and the first post-Bloom recruitment locks further
+Bloom recruitment. Nib's later invitation is not pulled forward from Echo.
+
+
+The runtime content contract deliberately differs from the public wire schema.
+`requires_flags` and `forbids_flags` are conjunctive predicates; `costs` and `rewards`
+are integer supply deltas committed once. `grants_flags` persist story, seal, tool,
+choice and prop consequences. `encounter` references a typed board; `puzzle` selects
+a supported reversible control operation with an explicit goal. `learning: true`
+requires a verified learning join; `recipient` and `milestone` pin a unique growth
+reward, with the learning engine selecting the private task from the current
+curriculum frontier. Player-facing `learning_context` contains only the short
+concrete invitation. Story progress never reads an academic mastery label.
+
+Canonical growth grant identity is companion plus milestone, independent of action
+ID. The bridge preparation's unpinned first-help binds the selected team lead;
+that starter's later named first-help scene cannot award it again. Late recruits
+can complete all four story-unlocked milestones in order. The checked schema does
+not substitute for transaction/idempotency tests of this binding.
+
+
+All five licensed field abilities have explicit companion and free-tool methods.
+Brace opens a return alcove; Bloom opens the hollow path; Resonate opens the Orchard
+gate; Ferry reaches the opening island; Illuminate reveals the Observatory ascent.
+Each pair shares one lasting outcome and completion predicate, so choosing the
+other method cannot repeat a cache reward. Matching companion affinity and the
+licensed seal are checked by Rust, while tool methods require the permanent free
+kit. Opening projects borrow equipment before earning their own seals.
+
+
+[field-guide.v1.json](field-guide.v1.json) is the separate public twelve-friend
+catalogue: names, habitats, visible clues, observations and respectful preferences.
+Every unowned friend has an observation and wait/help/play approaches. The stated
+preference opens the existing contextual help project; another respectful approach
+saves a further clue without spending supplies, losing trust or closing the right
+approach. Canonical ownership hides redundant discovery/help/invitation actions.
+The original story eligibility gates and supported help rewards remain intact.

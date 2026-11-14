@@ -45,6 +45,8 @@ struct ActiveActivity {
     exercise_id: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     inline_step: Option<InlineStep>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    campaign_step: Option<crate::campaign::repository::LearningStep>,
     id: String,
     skill_id: String,
     seed: u64,
@@ -284,7 +286,7 @@ impl PostgresRepository {
 
     fn active_activity(active: &ActiveActivity) -> Result<(MissionActivity, Value), Error> {
         let context_id = format!("{}:{}", active.mission_id, active.location_id);
-        let context_text = if active.inline_step.is_some() {
+        let context_text = if active.inline_step.is_some() || active.campaign_step.is_some() {
             "Organise discovery markers for the next mission step.".to_owned()
         } else {
             let invite =
@@ -308,6 +310,9 @@ impl PostgresRepository {
         if let Some(step) = &active.inline_step {
             view["storyStep"] =
                 json!({"label":step.label,"introduction":"Pip has a little challenge for you."});
+        }
+        if let Some(step) = &active.campaign_step {
+            view["storyStep"] = json!({"label":step.label,"introduction":step.introduction});
         }
         view["support"] = json!({"hintCount":active.hint_count,"workedExample":active.worked_example,"readAloud":active.read_aloud});
         if let (Some(kind), Some(text)) = (&active.revealed_kind, &active.revealed_text) {
@@ -591,7 +596,7 @@ impl Repository for PostgresRepository {
         let payload = &request["payload"];
         let mut event: Option<(u64, String, Value)> = None;
         match payload["type"].as_str().ok_or(Error::InvalidInput)? {
-            "begin" | "begin_step" => {
+            "begin" | "begin_step" | "begin_campaign_step" => {
                 if state.active.is_some() {
                     return Err(Error::RevisionConflict);
                 }
@@ -607,6 +612,23 @@ impl Repository for PostgresRepository {
                 } else {
                     None
                 };
+                let campaign_step = if payload["type"] == "begin_campaign_step" {
+                    Some(crate::campaign::repository::learning_step(
+                        &mut tx,
+                        identity,
+                        payload["actionId"].as_str().ok_or(Error::InvalidInput)?,
+                        payload["campaignRevision"]
+                            .as_u64()
+                            .ok_or(Error::InvalidInput)?,
+                    )?)
+                } else {
+                    None
+                };
+                let campaign_context = campaign_step.as_ref().map(|s| MissionLearningContext {
+                    mission_id: s.mission.clone(),
+                    location_id: s.location.clone(),
+                    story_revision: s.campaign_revision,
+                });
                 let inline_context = step.as_ref().map(|s| MissionLearningContext {
                     mission_id: s.mission_id.clone(),
                     location_id: s.location_id.clone(),
@@ -614,9 +636,10 @@ impl Repository for PostgresRepository {
                 });
                 let context = inline_context
                     .as_ref()
+                    .or(campaign_context.as_ref())
                     .or(context.as_ref())
                     .ok_or(Error::NotFound)?;
-                if step.is_none() {
+                if step.is_none() && campaign_step.is_none() {
                     invitation(&context.mission_id, &context.location_id).ok_or(Error::NotFound)?;
                 }
                 let selected =
@@ -642,6 +665,7 @@ impl Repository for PostgresRepository {
                 state.active = Some(ActiveActivity {
                     exercise_id,
                     inline_step: step,
+                    campaign_step,
                     id,
                     skill_id: selected.skill_id,
                     seed,
@@ -714,6 +738,14 @@ impl Repository for PostgresRepository {
                 if outcome.correct {
                     if let Some(step) = &active.inline_step {
                         complete_inline_step(
+                            &mut tx,
+                            identity,
+                            step,
+                            request["commandId"].as_str().ok_or(Error::InvalidInput)?,
+                        )?;
+                    }
+                    if let Some(step) = &active.campaign_step {
+                        crate::campaign::repository::complete_learning(
                             &mut tx,
                             identity,
                             step,
@@ -827,6 +859,14 @@ impl Repository for PostgresRepository {
                             request["commandId"].as_str().ok_or(Error::InvalidInput)?,
                         )?;
                     }
+                }
+                if together && let Some(step) = &active.campaign_step {
+                    crate::campaign::repository::complete_learning(
+                        &mut tx,
+                        identity,
+                        step,
+                        request["commandId"].as_str().ok_or(Error::InvalidInput)?,
+                    )?;
                 }
                 let activity = if let Some(variant) = variant {
                     Self::issued_question(&mut tx, &identity.profile_id, &active, variant)?
@@ -952,4 +992,14 @@ impl PostgresRepository {
             provenance: Provenance::ServerVerified,
         }
     }
+}
+
+/// Inspect validated legacy pending learning before explicit campaign adoption.
+pub(crate) fn pending_activity(
+    tx: &mut Transaction<'_>,
+    identity: &Identity,
+) -> Result<bool, Error> {
+    Ok(PostgresRepository::load(tx, &identity.profile_id)?
+        .active
+        .is_some())
 }

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create ONE original Wonderwilds production game PROP SPRITE ATLAS TRUE TRANSPARENT BACKGROUND square1536x1536 EXACT TWO columns TWO rows FOUR equal cells generous empty gutters. Whole object centered within70percent cellwidth78percent height. Warm upper-left lighting high slight overhead3/4 orthographic camera premium dimensional3D family animated game style rounded honeywood brass violet coral turquoise materials. No text labels numbers grid background ground scenes paths external shadows or creatures. TOP LEFT chime tower: compact standalone three-post honeywood frame with violet rounded pagoda roof, three different-sized brass hanging bells and turquoise tuning wheel, base purple stone low plinth. TOP RIGHT tide refuge: compact reusable raised honeywood shelter platform with violet shell-shaped canopy, two turquoise padded resting mats under canopy and short rounded ramp, no water rocks landscape or animals. BOTTOM LEFT habitat cache CLOSED: low honeywood oval chest with brass corner fittings teal leaf clasp and purple lid, small sculpted leaves at sides no contents or ground. BOTTOM RIGHT SAME habitat cache OPEN: exact matching oval chest size angle and materials with lid raised, empty dark interior, no treasures sparkles or collectible quantities. Keep chest footprints matching, whole lids inside cells. Rounded safe toy-like forms readable at80px, clean transparent alpha, no clipping.",
+  "rawSource": "content/campaign/art/sources/landmarks-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-812a2cb8-b97c-4a07-9382-14641e293570.png",
+  "processedAsset": "frontend/public/assets/campaign/landmarks-v1.png",
+  "processing": "Byte-for-byte copy; no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/campaign/wayfinders-sail-v1.png",
+    "frontend/public/assets/campaign/props-v1.png"
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "chime-tower": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "tide-refuge": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "habitat-cache-closed": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "habitat-cache-open": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "reviewStatus": "pending",
+  "inspection": "Source inspected bells/refuge/cache before-after. Cache footprints closely matched, open interior empty so runtime controls rewards. Static.",
+  "sha256": "56460efe69b94e7ee768f945fbfd4695c8de2c052bc779b5770a4b636b1d41c5",
+  "phonePreview": "docs/screenshots/campaign/final-static-phone.png",
+  "phonePreviewNotes": "390px viewport browser canvas draws exact source frames; icon32/48px, props80px on checkerboard. Readable symbols and alpha edges; not real scene integration or human approval."
+}

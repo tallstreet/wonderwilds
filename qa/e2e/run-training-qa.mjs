@@ -59,8 +59,14 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA wonderwilds TO ww_d
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA wonderwilds TO ww_demo_runtime;
 INSERT INTO wonderwilds.parents(id,identity_issuer,identity_subject) VALUES('${parentId}','synthetic-training-qa','training-qa');
 INSERT INTO wonderwilds.profiles(id,parent_id,ability_band) VALUES('${profileId}','${parentId}','beginning');
+${env.WW_QA_SECOND_PROFILE === '1' ? `INSERT INTO wonderwilds.profiles(id,parent_id,ability_band) VALUES('10000000-0000-0000-0000-000000000003','${parentId}','beginning');` : ''}
 INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,reauthenticated_at) VALUES(decode('${digest(session)}','hex'),decode('${digest(csrf)}','hex'),'${parentId}',now()+interval '1 hour',now());`;
   run(join(pgBin, 'psql'), ['--dbname', database, '-X', '-q', '-v', 'ON_ERROR_STOP=1'], { input: sql });
+  if (env.WW_QA_WAYFINDER_FIXTURE === '1') {
+    run(cargo, ['test', '-p', 'wonderwilds-api', '--locked', 'postgres_seed_wayfinder_ui_fixture', '--', '--ignored', '--nocapture'], {
+      env: { ...env, WW_QA_ALLOW_WAYFINDER_FIXTURE: '1', WW_STORY_TEST_DATABASE_URL: database, WW_QA_SEED_PROFILE_ID: profileId, WW_QA_SEED_PARENT_ID: parentId },
+    });
+  }
   const configPath = join(temp, 'session.json');
   await writeFile(configPath, JSON.stringify({ session, csrf, profileId, browserToken: randomBytes(32).toString('hex') }), { mode: 0o600 });
   if (process.env.WW_QA_SKIP_BUILD !== '1') run(cargo, ['build', '-p', 'wonderwilds-api', '--locked']);
@@ -78,7 +84,7 @@ INSERT INTO wonderwilds.sessions(token_digest,csrf_digest,parent_id,expires_at,r
   };
   let api = startApi();
   await waitReady(`http://127.0.0.1:${apiPort}/readyz`, api);
-  const vite = spawn(process.execPath, ['frontend/node_modules/vite/bin/vite.js', 'frontend', '--host', '127.0.0.1', '--port', vitePort, '--strictPort'], {
+  const vite = spawn(process.execPath, ['frontend/node_modules/vite/bin/vite.js', 'frontend', '--host', '127.0.0.1', '--port', vitePort, '--strictPort', ...(env.WW_QA_VITE_CONFIG ? ['--config', env.WW_QA_VITE_CONFIG] : [])], {
     cwd: root, env: { ...env, WW_LOCAL_DEMO_CONFIG: configPath, WW_DEMO_PORT: vitePort, WW_DEMO_API_PORT: apiPort }, stdio: 'inherit',
   });
   children.push(vite);

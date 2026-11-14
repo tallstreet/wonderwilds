@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "1.0",
+  "inspectionDate": "2026-11-14",
+  "fixture": "qa/e2e/campaign-motion-preview.mjs",
+  "synthetic": true,
+  "scope": "Four Wayfinder sets reviewed by campaign assets agent; producing content agent owns other five and timed assertion results.",
+  "results": [
+    {
+      "character": "flutter-wayfinder",
+      "assetId": "flutter-wayfinder-motion-v1",
+      "assetSha256": "80e20fcf94744af28fefd82d9eeb999d4238764424db50db4b7564b8fc8baece",
+      "frameMetadataSha256": "fe16f5a14e23408a689fc652e6f49f2dfd5809ff604ef6a4e3430207f7662c6c",
+      "result": "passed technical visual inspection",
+      "desktopPosesInspected": 20,
+      "phoneGroupsInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "visualInspection": "Actual native20poses inspected desktop and four phone groups. Original species and advanced costume retained; articulated directional strides/signature/cheer/rest distinct, ears/wings/tails/feet intact. No source-frame clipping, detached opaque haze or foot-anchor defect observed. This visual review does not independently rerun timed assertions, which producing agent reports passed. Human review pending.",
+      "representativeEvidence": [
+        "docs/screenshots/campaign/flutter-wayfinder-native-phaser.png"
+      ]
+    },
+    {
+      "character": "cleo-wayfinder",
+      "assetId": "cleo-wayfinder-motion-v1",
+      "assetSha256": "96ba6e593648fbe4250a1da09e590c1056bf5f7185a061681bcba6ddd1990a72",
+      "frameMetadataSha256": "0d872b1eabc5e4e12a460fbf6f2019fe2ed5766b8454953baf52f9cb4da9e46a",
+      "result": "passed technical visual inspection",
+      "desktopPosesInspected": 20,
+      "phoneGroupsInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "visualInspection": "Actual native20poses inspected desktop and four phone groups. Original species and advanced costume retained; articulated directional strides/signature/cheer/rest distinct, ears/wings/tails/feet intact. No source-frame clipping, detached opaque haze or foot-anchor defect observed. This visual review does not independently rerun timed assertions, which producing agent reports passed. Human review pending.",
+      "representativeEvidence": []
+    },
+    {
+      "character": "bramble-wayfinder",
+      "assetId": "bramble-wayfinder-motion-v1",
+      "assetSha256": "c8d7635b4a86cd0bc5271edff252a5aee19d3c6965659358ba3bb1df458c0825",
+      "frameMetadataSha256": "0e5dc0b6fa7bfb854c8af0d8ea9122a1fa152d33fa5d9cdaf1af3acfdaf5440a",
+      "result": "passed technical visual inspection",
+      "desktopPosesInspected": 20,
+      "phoneGroupsInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "visualInspection": "Actual native20poses inspected desktop and four phone groups. Original species and advanced costume retained; articulated directional strides/signature/cheer/rest distinct, ears/wings/tails/feet intact. No source-frame clipping, detached opaque haze or foot-anchor defect observed. This visual review does not independently rerun timed assertions, which producing agent reports passed. Human review pending.",
+      "representativeEvidence": []
+    },
+    {
+      "character": "patter-wayfinder",
+      "assetId": "patter-wayfinder-motion-v1",
+      "assetSha256": "696a643c2e3ed244812df0771cdb962cb0d73eef6eb3c778abed2c135ce7b3ec",
+      "frameMetadataSha256": "0cc852c1d2298f0c3516a7fd23f891888c005d20e85f875c4c93559ade863aac",
+      "result": "passed technical visual inspection",
+      "desktopPosesInspected": 20,
+      "phoneGroupsInspected": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "visualInspection": "Actual native20poses inspected desktop and four phone groups. Original species and advanced costume retained; articulated directional strides/signature/cheer/rest distinct, ears/wings/tails/feet intact. No source-frame clipping, detached opaque haze or foot-anchor defect observed. This visual review does not independently rerun timed assertions, which producing agent reports passed. Human review pending.",
+      "representativeEvidence": [
+        "docs/screenshots/campaign/patter-wayfinder-native-phone-group3.png"
+      ]
+    }
+  ]
+}

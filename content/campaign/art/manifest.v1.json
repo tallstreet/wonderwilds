@@ -1,0 +1,4732 @@
+{
+  "schemaVersion": "1.0",
+  "auditDate": "2026-11-14",
+  "reviewStatus": "pending",
+  "purpose": "Campaign production audit; not a release approval or replacement of frozen legacy manifests.",
+  "units": "Pixels: frames are source x/y/width/height; targetDimensions and worldFootprint are proposed display pixels, not navigation blockers.",
+  "generationGate": "Do not batch generate until one starter atlas is previewed in actual Phaser renderer and anchor/frame/direction/padding contract recorded.",
+  "assets": [
+    {
+      "id": "companion-pip",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/meadow.png",
+      "url": "/assets/characters/meadow.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "5a8fd696ca30284465a25bbf2a5475d2d6a172b2ddfa9593b430b6e9fd76a38c",
+      "provenance": "content/creatures/art/meadow.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M2",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-tansy",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/meadow.png",
+      "url": "/assets/characters/meadow.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "5a8fd696ca30284465a25bbf2a5475d2d6a172b2ddfa9593b430b6e9fd76a38c",
+      "provenance": "content/creatures/art/meadow.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M2",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-nib",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/meadow.png",
+      "url": "/assets/characters/meadow.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "5a8fd696ca30284465a25bbf2a5475d2d6a172b2ddfa9593b430b6e9fd76a38c",
+      "provenance": "content/creatures/art/meadow.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M2",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-flutter",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/meadow.png",
+      "url": "/assets/characters/meadow.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "5a8fd696ca30284465a25bbf2a5475d2d6a172b2ddfa9593b430b6e9fd76a38c",
+      "provenance": "content/creatures/art/meadow.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M3",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-cleo",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/orchard.png",
+      "url": "/assets/characters/orchard.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7265618e3996d359919a036bf2acf98bf98f958fd1eb5a07d1d1dcb66dbfc748",
+      "provenance": "content/creatures/art/orchard.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M4",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-bramble",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/orchard.png",
+      "url": "/assets/characters/orchard.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7265618e3996d359919a036bf2acf98bf98f958fd1eb5a07d1d1dcb66dbfc748",
+      "provenance": "content/creatures/art/orchard.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M4",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-patter",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/orchard.png",
+      "url": "/assets/characters/orchard.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7265618e3996d359919a036bf2acf98bf98f958fd1eb5a07d1d1dcb66dbfc748",
+      "provenance": "content/creatures/art/orchard.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M4",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-twizzle",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/orchard.png",
+      "url": "/assets/characters/orchard.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7265618e3996d359919a036bf2acf98bf98f958fd1eb5a07d1d1dcb66dbfc748",
+      "provenance": "content/creatures/art/orchard.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M4",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-luna",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/cove.png",
+      "url": "/assets/characters/cove.png",
+      "frame": [
+        0,
+        0,
+        660,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "1d192a6f6f9db7a6b862a6ef9d849630975e8b223f2f6bce22988f9640bfda34",
+      "provenance": "content/creatures/art/cove.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-pebble",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/cove.png",
+      "url": "/assets/characters/cove.png",
+      "frame": [
+        660,
+        0,
+        594,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "1d192a6f6f9db7a6b862a6ef9d849630975e8b223f2f6bce22988f9640bfda34",
+      "provenance": "content/creatures/art/cove.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-glimmer",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/cove.png",
+      "url": "/assets/characters/cove.png",
+      "frame": [
+        0,
+        627,
+        660,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "1d192a6f6f9db7a6b862a6ef9d849630975e8b223f2f6bce22988f9640bfda34",
+      "provenance": "content/creatures/art/cove.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "companion-sail",
+      "kind": "companion",
+      "source": "frontend/public/assets/characters/cove.png",
+      "url": "/assets/characters/cove.png",
+      "frame": [
+        660,
+        627,
+        594,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "1d192a6f6f9db7a6b862a6ef9d849630975e8b223f2f6bce22988f9640bfda34",
+      "provenance": "content/creatures/art/cove.v1.json",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "bridge-frame",
+      "kind": "prop",
+      "source": "frontend/public/assets/prop-atlas-v2.png",
+      "url": "/assets/prop-atlas-v2.png",
+      "frame": [
+        25,
+        105,
+        470,
+        270
+      ],
+      "sourceDimensions": [
+        1774,
+        887
+      ],
+      "sha256": "de1e38a3cec948c9d08b142de57f623fd74f0c264b3381f74ae4ff48b515938f",
+      "provenance": "frontend/docs/CONSISTENT_ART.md",
+      "availablePoses": [
+        "static"
+      ],
+      "desiredPoses": [],
+      "targetDimensions": [
+        470,
+        270
+      ],
+      "worldFootprint": [
+        180,
+        72
+      ],
+      "milestone": "M2",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "plank",
+      "kind": "prop",
+      "source": "frontend/public/assets/prop-atlas-v2.png",
+      "url": "/assets/prop-atlas-v2.png",
+      "frame": [
+        606,
+        25,
+        110,
+        385
+      ],
+      "sourceDimensions": [
+        1774,
+        887
+      ],
+      "sha256": "de1e38a3cec948c9d08b142de57f623fd74f0c264b3381f74ae4ff48b515938f",
+      "provenance": "frontend/docs/CONSISTENT_ART.md",
+      "availablePoses": [
+        "static"
+      ],
+      "desiredPoses": [],
+      "targetDimensions": [
+        110,
+        385
+      ],
+      "worldFootprint": [
+        12,
+        72
+      ],
+      "milestone": "M2",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "garden-sleeping",
+      "kind": "prop",
+      "source": "frontend/public/assets/prop-atlas-v2.png",
+      "url": "/assets/prop-atlas-v2.png",
+      "frame": [
+        879,
+        95,
+        415,
+        284
+      ],
+      "sourceDimensions": [
+        1774,
+        887
+      ],
+      "sha256": "de1e38a3cec948c9d08b142de57f623fd74f0c264b3381f74ae4ff48b515938f",
+      "provenance": "frontend/docs/CONSISTENT_ART.md",
+      "availablePoses": [
+        "static"
+      ],
+      "desiredPoses": [],
+      "targetDimensions": [
+        415,
+        284
+      ],
+      "worldFootprint": [
+        120,
+        80
+      ],
+      "milestone": "M2",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "garden-blooming",
+      "kind": "prop",
+      "source": "frontend/public/assets/prop-atlas-v2.png",
+      "url": "/assets/prop-atlas-v2.png",
+      "frame": [
+        1344,
+        93,
+        410,
+        286
+      ],
+      "sourceDimensions": [
+        1774,
+        887
+      ],
+      "sha256": "de1e38a3cec948c9d08b142de57f623fd74f0c264b3381f74ae4ff48b515938f",
+      "provenance": "frontend/docs/CONSISTENT_ART.md",
+      "availablePoses": [
+        "static"
+      ],
+      "desiredPoses": [],
+      "targetDimensions": [
+        410,
+        286
+      ],
+      "worldFootprint": [
+        120,
+        80
+      ],
+      "milestone": "M2",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "picnic",
+      "kind": "prop",
+      "source": "frontend/public/assets/prop-atlas-v2.png",
+      "url": "/assets/prop-atlas-v2.png",
+      "frame": [
+        20,
+        480,
+        477,
+        350
+      ],
+      "sourceDimensions": [
+        1774,
+        887
+      ],
+      "sha256": "de1e38a3cec948c9d08b142de57f623fd74f0c264b3381f74ae4ff48b515938f",
+      "provenance": "frontend/docs/CONSISTENT_ART.md",
+      "availablePoses": [
+        "static"
+      ],
+      "desiredPoses": [],
+      "targetDimensions": [
+        477,
+        350
+      ],
+      "worldFootprint": [
+        100,
+        70
+      ],
+      "milestone": "M2",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; in-game campaign review pending"
+    },
+    {
+      "id": "hazel",
+      "kind": "npc",
+      "source": "frontend/public/assets/campaign/cast-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "reaction"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/cast-v1.provenance.json",
+      "url": "/assets/campaign/cast-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "a9134c8e8a059c34cddba1efb8f8ff1b848797f9b398f6e5abd96707b26d6c94",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 source and actual Phaser preview inspected: docs/screenshots/campaign/cast-phaser-first-preview.png; silhouettes and cutouts clear, opening labels crowded; phone review pending"
+    },
+    {
+      "id": "rowan",
+      "kind": "npc",
+      "source": "frontend/public/assets/campaign/cast-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "reaction"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/cast-v1.provenance.json",
+      "url": "/assets/campaign/cast-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "a9134c8e8a059c34cddba1efb8f8ff1b848797f9b398f6e5abd96707b26d6c94",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 source and actual Phaser preview inspected: docs/screenshots/campaign/cast-phaser-first-preview.png; silhouettes and cutouts clear, opening labels crowded; phone review pending"
+    },
+    {
+      "id": "rowan-partner",
+      "kind": "npc",
+      "source": "frontend/public/assets/campaign/cast-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "reaction"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/cast-v1.provenance.json",
+      "url": "/assets/campaign/cast-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "a9134c8e8a059c34cddba1efb8f8ff1b848797f9b398f6e5abd96707b26d6c94",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 source and actual Phaser preview inspected: docs/screenshots/campaign/cast-phaser-first-preview.png; silhouettes and cutouts clear, opening labels crowded; phone review pending",
+      "characterName": "Moss",
+      "spriteId": "moss"
+    },
+    {
+      "id": "collector-cart",
+      "kind": "prop",
+      "source": "frontend/public/assets/campaign/cast-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        256,
+        256
+      ],
+      "worldFootprint": [
+        80,
+        48
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/cast-v1.provenance.json",
+      "url": "/assets/campaign/cast-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "a9134c8e8a059c34cddba1efb8f8ff1b848797f9b398f6e5abd96707b26d6c94",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "camp",
+      "kind": "prop",
+      "source": "frontend/public/assets/campaign/props-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        256,
+        256
+      ],
+      "worldFootprint": [
+        100,
+        70
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/props-v1.provenance.json",
+      "url": "/assets/campaign/props-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7d288d20b531c7cf87ccac646e1f4455a38bd41f92da75f976c54e51ab1d2b4a",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; phone game review pending",
+      "spriteId": "campaign-camp"
+    },
+    {
+      "id": "bridge-dim-beacon",
+      "kind": "prop",
+      "source": "frontend/public/assets/campaign/props-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        256,
+        256
+      ],
+      "worldFootprint": [
+        48,
+        48
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/props-v1.provenance.json",
+      "url": "/assets/campaign/props-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7d288d20b531c7cf87ccac646e1f4455a38bd41f92da75f976c54e51ab1d2b4a",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; phone game review pending",
+      "spriteId": "beacon-dim"
+    },
+    {
+      "id": "bridge-restored-beacon",
+      "kind": "prop",
+      "source": "frontend/public/assets/campaign/props-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        256,
+        256
+      ],
+      "worldFootprint": [
+        48,
+        48
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/props-v1.provenance.json",
+      "url": "/assets/campaign/props-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7d288d20b531c7cf87ccac646e1f4455a38bd41f92da75f976c54e51ab1d2b4a",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; phone game review pending",
+      "spriteId": "beacon-restored"
+    },
+    {
+      "id": "garden-dim-beacon",
+      "kind": "prop",
+      "source": "frontend/public/assets/campaign/props-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        256,
+        256
+      ],
+      "worldFootprint": [
+        48,
+        48
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/props-v1.provenance.json",
+      "url": "/assets/campaign/props-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7d288d20b531c7cf87ccac646e1f4455a38bd41f92da75f976c54e51ab1d2b4a",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; phone game review pending",
+      "spriteId": "beacon-dim"
+    },
+    {
+      "id": "garden-restored-beacon",
+      "kind": "prop",
+      "source": "frontend/public/assets/campaign/props-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        256,
+        256
+      ],
+      "worldFootprint": [
+        48,
+        48
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/props-v1.provenance.json",
+      "url": "/assets/campaign/props-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7d288d20b531c7cf87ccac646e1f4455a38bd41f92da75f976c54e51ab1d2b4a",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; phone game review pending",
+      "spriteId": "beacon-restored"
+    },
+    {
+      "id": "bridge-seal",
+      "kind": "icon",
+      "source": "frontend/public/assets/campaign/wayfinders-sail-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-sail-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-sail-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "e1baba79b8e951502571ef3b6f6f88f9e2401c959461a8a5b5e853d6feb56f72",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected full puffin wings/feet, recognizable species, 3 raised icon medals. Static only."
+    },
+    {
+      "id": "bloom-seal",
+      "kind": "icon",
+      "source": "frontend/public/assets/campaign/wayfinders-sail-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-sail-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-sail-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "e1baba79b8e951502571ef3b6f6f88f9e2401c959461a8a5b5e853d6feb56f72",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected full puffin wings/feet, recognizable species, 3 raised icon medals. Static only."
+    },
+    {
+      "id": "vell",
+      "kind": "npc",
+      "source": "frontend/public/assets/campaign/finale-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "reaction"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/finale-v1.provenance.json",
+      "url": "/assets/campaign/finale-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "3cbbcaa2c0f65e5b47cae6fd1070acb9795cdc44eb7626b92940d69902a57d50",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "pip-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-meadow-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M3",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-meadow-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-meadow-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "113a900579932e1e1c64d20f76564b2535c993d696bc5dcff9f20ff781748782",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group1.png",
+          "docs/screenshots/campaign/forms-group1-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "tansy-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-meadow-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M3",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-meadow-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-meadow-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "113a900579932e1e1c64d20f76564b2535c993d696bc5dcff9f20ff781748782",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group1.png",
+          "docs/screenshots/campaign/forms-group1-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "nib-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-meadow-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M3",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-meadow-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-meadow-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "113a900579932e1e1c64d20f76564b2535c993d696bc5dcff9f20ff781748782",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group1.png",
+          "docs/screenshots/campaign/forms-group1-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "flutter-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-orchard-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        590
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-orchard-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-orchard-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "d5f272adc7c8e2eb3d1622c1a5962ed98ce1d000368ee10247c3a0a8b812f8f7",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group2.png",
+          "docs/screenshots/campaign/forms-group2-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "cleo-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-orchard-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        590
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-orchard-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-orchard-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "d5f272adc7c8e2eb3d1622c1a5962ed98ce1d000368ee10247c3a0a8b812f8f7",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group2.png",
+          "docs/screenshots/campaign/forms-group2-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "bramble-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-orchard-v1.png",
+      "frame": [
+        0,
+        590,
+        627,
+        664
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-orchard-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-orchard-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "d5f272adc7c8e2eb3d1622c1a5962ed98ce1d000368ee10247c3a0a8b812f8f7",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group2.png",
+          "docs/screenshots/campaign/forms-group2-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "patter-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-orchard-v1.png",
+      "frame": [
+        627,
+        590,
+        627,
+        664
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-orchard-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-orchard-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "d5f272adc7c8e2eb3d1622c1a5962ed98ce1d000368ee10247c3a0a8b812f8f7",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group3.png",
+          "docs/screenshots/campaign/forms-group3-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "twizzle-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-cove-v1.png",
+      "frame": [
+        0,
+        0,
+        600,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-cove-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-cove-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "89b51da7dbd8b50943c40dccf94776a906e38fd3b0391056df703d49622845c1",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group3.png",
+          "docs/screenshots/campaign/forms-group3-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "luna-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-cove-v1.png",
+      "frame": [
+        600,
+        0,
+        654,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-cove-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-cove-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "89b51da7dbd8b50943c40dccf94776a906e38fd3b0391056df703d49622845c1",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group3.png",
+          "docs/screenshots/campaign/forms-group3-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "pebble-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-cove-v1.png",
+      "frame": [
+        0,
+        627,
+        600,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-cove-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-cove-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "89b51da7dbd8b50943c40dccf94776a906e38fd3b0391056df703d49622845c1",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group4.png",
+          "docs/screenshots/campaign/forms-group4-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "glimmer-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-cove-v1.png",
+      "frame": [
+        600,
+        627,
+        654,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-cove-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-cove-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "89b51da7dbd8b50943c40dccf94776a906e38fd3b0391056df703d49622845c1",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group4.png",
+          "docs/screenshots/campaign/forms-group4-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "sail-wayfinder",
+      "kind": "form",
+      "source": "frontend/public/assets/campaign/wayfinders-sail-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "portrait",
+        "idle",
+        "walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-sail-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-sail-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "e1baba79b8e951502571ef3b6f6f88f9e2401c959461a8a5b5e853d6feb56f72",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 actual registered Phaser frames inspected at desktop and phone; no clipping/source-frame defect observed. Static front only; human design/rights review pending.",
+      "technicalPreview": {
+        "fixture": "qa/e2e/campaign-art-preview.mjs",
+        "synthetic": true,
+        "viewports": [
+          [
+            1280,
+            800
+          ],
+          [
+            390,
+            844
+          ]
+        ],
+        "evidence": [
+          "docs/screenshots/campaign/forms-group4.png",
+          "docs/screenshots/campaign/forms-group4-phone.png"
+        ],
+        "result": "Source-to-registered-Phaser-frame inspected: recognizable species/costume silhouette, whole sprite visible, no frame clipping at desktop or phone. Technical rendering check only; no progression or human design approval."
+      }
+    },
+    {
+      "id": "affinity-gleam",
+      "kind": "icon",
+      "source": "frontend/public/assets/campaign/affinities-a-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/affinities-a-v1.provenance.json",
+      "url": "/assets/campaign/affinities-a-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "01ffb4adc497177634d8d3ef5499c86143b53a5b540ec7c657d0a17820a6c132",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected lighthouse medal and clear crescent sunburst/sprout/mallet+gear symbols. Broad transparent gutters, static.",
+      "spriteId": "affinity-gleam",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "affinity-growth",
+      "kind": "icon",
+      "source": "frontend/public/assets/campaign/affinities-a-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/affinities-a-v1.provenance.json",
+      "url": "/assets/campaign/affinities-a-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "01ffb4adc497177634d8d3ef5499c86143b53a5b540ec7c657d0a17820a6c132",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected lighthouse medal and clear crescent sunburst/sprout/mallet+gear symbols. Broad transparent gutters, static.",
+      "spriteId": "affinity-growth",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "affinity-craft",
+      "kind": "icon",
+      "source": "frontend/public/assets/campaign/affinities-a-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/affinities-a-v1.provenance.json",
+      "url": "/assets/campaign/affinities-a-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "01ffb4adc497177634d8d3ef5499c86143b53a5b540ec7c657d0a17820a6c132",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected lighthouse medal and clear crescent sunburst/sprout/mallet+gear symbols. Broad transparent gutters, static.",
+      "spriteId": "affinity-craft",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "affinity-tide",
+      "kind": "icon",
+      "source": "frontend/public/assets/campaign/affinities-b-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/affinities-b-v1.provenance.json",
+      "url": "/assets/campaign/affinities-b-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7e05e9a15ff354cce849ff27e5d60c9467d29f97f8c7cd8ab381fc976d972c68",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected bell/wave/fossil/rubbing distinguishable without colour. Static.",
+      "spriteId": "affinity-tide",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "affinity-rhythm",
+      "kind": "icon",
+      "source": "frontend/public/assets/campaign/affinities-b-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/affinities-b-v1.provenance.json",
+      "url": "/assets/campaign/affinities-b-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7e05e9a15ff354cce849ff27e5d60c9467d29f97f8c7cd8ab381fc976d972c68",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected bell/wave/fossil/rubbing distinguishable without colour. Static.",
+      "spriteId": "affinity-rhythm",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "region-meadow",
+      "kind": "landscape",
+      "source": "frontend/public/assets/clover-meadow-v2.png",
+      "url": "/assets/clover-meadow-v2.png",
+      "frame": [
+        0,
+        0,
+        1598,
+        984
+      ],
+      "sourceDimensions": [
+        1598,
+        984
+      ],
+      "sha256": "421f77ccab86d5759a71abd2e1b3a62b308ce9a3d691b36b15bbfb864563bf78",
+      "provenance": "frontend/docs/CONSISTENT_ART.md",
+      "availablePoses": [
+        "static"
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        1598,
+        984
+      ],
+      "worldFootprint": [
+        1598,
+        984
+      ],
+      "milestone": "M2",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; contains baked paths/scenery; campaign state props must remain separate"
+    },
+    {
+      "id": "region-orchard",
+      "kind": "landscape",
+      "source": "frontend/public/assets/peachy-orchard-v2.png",
+      "url": "/assets/peachy-orchard-v2.png",
+      "frame": [
+        0,
+        0,
+        1599,
+        984
+      ],
+      "sourceDimensions": [
+        1599,
+        984
+      ],
+      "sha256": "ac87cc2811e1be6c08b895c486df2343f7899c57a981801e5f278a870a15b764",
+      "provenance": "frontend/docs/CONSISTENT_ART.md",
+      "availablePoses": [
+        "static"
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        1599,
+        984
+      ],
+      "worldFootprint": [
+        1599,
+        984
+      ],
+      "milestone": "M4",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; contains baked paths/scenery; campaign state props must remain separate"
+    },
+    {
+      "id": "region-cove",
+      "kind": "landscape",
+      "source": "frontend/public/assets/starlight-cove-v2.png",
+      "url": "/assets/starlight-cove-v2.png",
+      "frame": [
+        0,
+        0,
+        1599,
+        984
+      ],
+      "sourceDimensions": [
+        1599,
+        984
+      ],
+      "sha256": "a3dd4d320a187a62c139a62d4ed4a1fdb58dda89d8178c06d4a946e69684eb34",
+      "provenance": "frontend/docs/CONSISTENT_ART.md",
+      "availablePoses": [
+        "static"
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        1599,
+        984
+      ],
+      "worldFootprint": [
+        1599,
+        984
+      ],
+      "milestone": "M5",
+      "status": "existing-development",
+      "reviewStatus": "pending",
+      "visualInspection": "2026-11-14 source inspected; contains baked paths/scenery; campaign state props must remain separate"
+    },
+    {
+      "id": "garden-irrigation",
+      "kind": "prop",
+      "source": "frontend/public/assets/campaign/props-v1.png",
+      "url": "/assets/campaign/props-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7d288d20b531c7cf87ccac646e1f4455a38bd41f92da75f976c54e51ab1d2b4a",
+      "provenance": "content/campaign/art/props-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        72,
+        48
+      ],
+      "milestone": "M2",
+      "reviewStatus": "pending",
+      "spriteId": "garden-irrigation"
+    },
+    {
+      "id": "lighthouse-lens",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        64,
+        48
+      ],
+      "milestone": "M5",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/finale-v1.png",
+      "url": "/assets/campaign/finale-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "3cbbcaa2c0f65e5b47cae6fd1070acb9795cdc44eb7626b92940d69902a57d50",
+      "provenance": "content/campaign/art/finale-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "observatory-machine",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        64,
+        48
+      ],
+      "milestone": "M5",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/finale-v1.png",
+      "url": "/assets/campaign/finale-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "3cbbcaa2c0f65e5b47cae6fd1070acb9795cdc44eb7626b92940d69902a57d50",
+      "provenance": "content/campaign/art/finale-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "sanctuary",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        64,
+        48
+      ],
+      "milestone": "M5",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/finale-v1.png",
+      "url": "/assets/campaign/finale-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "3cbbcaa2c0f65e5b47cae6fd1070acb9795cdc44eb7626b92940d69902a57d50",
+      "provenance": "content/campaign/art/finale-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "orchard-mill",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        64,
+        48
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/orchard-v1.png",
+      "url": "/assets/campaign/orchard-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "751a3d4bf5ada90f28781af863aeb84723ddaf488b834ccc2adccaffd57abc24",
+      "provenance": "content/campaign/art/orchard-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "mill-automaton",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        64,
+        48
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/orchard-v1.png",
+      "url": "/assets/campaign/orchard-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "751a3d4bf5ada90f28781af863aeb84723ddaf488b834ccc2adccaffd57abc24",
+      "provenance": "content/campaign/art/orchard-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "ferry-raft",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        64,
+        48
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/orchard-v1.png",
+      "url": "/assets/campaign/orchard-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "751a3d4bf5ada90f28781af863aeb84723ddaf488b834ccc2adccaffd57abc24",
+      "provenance": "content/campaign/art/orchard-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "reed",
+      "kind": "npc",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        64,
+        48
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/orchard-v1.png",
+      "url": "/assets/campaign/orchard-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "751a3d4bf5ada90f28781af863aeb84723ddaf488b834ccc2adccaffd57abc24",
+      "provenance": "content/campaign/art/orchard-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "front-idle"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "accord-seal",
+      "kind": "icon",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M5",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/wayfinders-sail-v1.png",
+      "url": "/assets/campaign/wayfinders-sail-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "e1baba79b8e951502571ef3b6f6f88f9e2401c959461a8a5b5e853d6feb56f72",
+      "provenance": "content/campaign/art/wayfinders-sail-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected full puffin wings/feet, recognizable species, 3 raised icon medals. Static only."
+    },
+    {
+      "id": "moonburst",
+      "kind": "icon",
+      "source": "frontend/public/assets/campaign/wayfinders-meadow-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M3",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "provenance": "content/campaign/art/wayfinders-meadow-v1.provenance.json",
+      "url": "/assets/campaign/wayfinders-meadow-v1.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "113a900579932e1e1c64d20f76564b2535c993d696bc5dcff9f20ff781748782",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "2026-11-14 source inspected; actual Phaser review pending"
+    },
+    {
+      "id": "echo-seal",
+      "kind": "icon",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/seals-v1.png",
+      "url": "/assets/campaign/seals-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "c834bab29cd449386056c41964d7f84b3762a1e4e47d66b15f6122ed64a18f4e",
+      "provenance": "content/campaign/art/seals-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected clear bell/wheat+apple/ferry/shell silhouettes. Ribbon glow extends beyond central shapes but no adjacent-cell intrusion observed. Static medals.",
+      "spriteId": "echo-seal",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "harvest-seal",
+      "kind": "icon",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/seals-v1.png",
+      "url": "/assets/campaign/seals-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "c834bab29cd449386056c41964d7f84b3762a1e4e47d66b15f6122ed64a18f4e",
+      "provenance": "content/campaign/art/seals-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected clear bell/wheat+apple/ferry/shell silhouettes. Ribbon glow extends beyond central shapes but no adjacent-cell intrusion observed. Static medals.",
+      "spriteId": "harvest-seal",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "current-seal",
+      "kind": "icon",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/seals-v1.png",
+      "url": "/assets/campaign/seals-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "c834bab29cd449386056c41964d7f84b3762a1e4e47d66b15f6122ed64a18f4e",
+      "provenance": "content/campaign/art/seals-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected clear bell/wheat+apple/ferry/shell silhouettes. Ribbon glow extends beyond central shapes but no adjacent-cell intrusion observed. Static medals.",
+      "spriteId": "current-seal",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "tide-seal",
+      "kind": "icon",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/seals-v1.png",
+      "url": "/assets/campaign/seals-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "c834bab29cd449386056c41964d7f84b3762a1e4e47d66b15f6122ed64a18f4e",
+      "provenance": "content/campaign/art/seals-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected clear bell/wheat+apple/ferry/shell silhouettes. Ribbon glow extends beyond central shapes but no adjacent-cell intrusion observed. Static medals.",
+      "spriteId": "tide-seal",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "beacon-seal",
+      "kind": "icon",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/affinities-a-v1.png",
+      "url": "/assets/campaign/affinities-a-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "01ffb4adc497177634d8d3ef5499c86143b53a5b540ec7c657d0a17820a6c132",
+      "provenance": "content/campaign/art/affinities-a-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected lighthouse medal and clear crescent sunburst/sprout/mallet+gear symbols. Broad transparent gutters, static.",
+      "spriteId": "beacon-seal",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "fossil-keepsake",
+      "kind": "icon",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/affinities-b-v1.png",
+      "url": "/assets/campaign/affinities-b-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7e05e9a15ff354cce849ff27e5d60c9467d29f97f8c7cd8ab381fc976d972c68",
+      "provenance": "content/campaign/art/affinities-b-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected bell/wave/fossil/rubbing distinguishable without colour. Static.",
+      "spriteId": "fossil-keepsake",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "clue-rubbing",
+      "kind": "icon",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        64,
+        64
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M4",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/affinities-b-v1.png",
+      "url": "/assets/campaign/affinities-b-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "7e05e9a15ff354cce849ff27e5d60c9467d29f97f8c7cd8ab381fc976d972c68",
+      "provenance": "content/campaign/art/affinities-b-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected bell/wave/fossil/rubbing distinguishable without colour. Static.",
+      "spriteId": "clue-rubbing",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "chime-tower",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        80,
+        64
+      ],
+      "milestone": "M5",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/landmarks-v1.png",
+      "url": "/assets/campaign/landmarks-v1.png",
+      "frame": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "56460efe69b94e7ee768f945fbfd4695c8de2c052bc779b5770a4b636b1d41c5",
+      "provenance": "content/campaign/art/landmarks-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected bells/refuge/cache before-after. Cache footprints closely matched, open interior empty so runtime controls rewards. Static.",
+      "spriteId": "chime-tower",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "tide-refuge",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        80,
+        64
+      ],
+      "milestone": "M5",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/landmarks-v1.png",
+      "url": "/assets/campaign/landmarks-v1.png",
+      "frame": [
+        627,
+        0,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "56460efe69b94e7ee768f945fbfd4695c8de2c052bc779b5770a4b636b1d41c5",
+      "provenance": "content/campaign/art/landmarks-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected bells/refuge/cache before-after. Cache footprints closely matched, open interior empty so runtime controls rewards. Static.",
+      "spriteId": "tide-refuge",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "habitat-cache-closed",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        80,
+        64
+      ],
+      "milestone": "M5",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/landmarks-v1.png",
+      "url": "/assets/campaign/landmarks-v1.png",
+      "frame": [
+        0,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "56460efe69b94e7ee768f945fbfd4695c8de2c052bc779b5770a4b636b1d41c5",
+      "provenance": "content/campaign/art/landmarks-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected bells/refuge/cache before-after. Cache footprints closely matched, open interior empty so runtime controls rewards. Static.",
+      "spriteId": "habitat-cache-closed",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "habitat-cache-open",
+      "kind": "prop",
+      "desiredPoses": [
+        "static"
+      ],
+      "targetDimensions": [
+        128,
+        128
+      ],
+      "worldFootprint": [
+        80,
+        64
+      ],
+      "milestone": "M5",
+      "reviewStatus": "pending",
+      "source": "frontend/public/assets/campaign/landmarks-v1.png",
+      "url": "/assets/campaign/landmarks-v1.png",
+      "frame": [
+        627,
+        627,
+        627,
+        627
+      ],
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sha256": "56460efe69b94e7ee768f945fbfd4695c8de2c052bc779b5770a4b636b1d41c5",
+      "provenance": "content/campaign/art/landmarks-v1.provenance.json",
+      "status": "generated-development",
+      "availablePoses": [
+        "static"
+      ],
+      "visualInspection": "Source inspected bells/refuge/cache before-after. Cache footprints closely matched, open interior empty so runtime controls rewards. Static.",
+      "spriteId": "habitat-cache-open",
+      "technicalPreview": {
+        "synthetic": true,
+        "method": "Browser canvas source-frame review; icons at32/48px and props80px in390px viewport; not Phaser world integration",
+        "evidence": [
+          "docs/screenshots/campaign/final-static-phone.png"
+        ],
+        "result": "Shapes readable, transparent edges visible on checkerboard; no clipping observed. Technical inspection only; final human review pending."
+      }
+    },
+    {
+      "id": "pip-base-motion-pilot",
+      "kind": "animation-pilot",
+      "source": "frontend/public/assets/campaign/pip-base-motion-v1.png",
+      "url": "/assets/campaign/pip-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        278
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "fea851e9d3532e141b07e4679868f36f62f03bd70e4ad8b8e44d8d0d6a1281fc",
+      "provenance": "content/campaign/art/pip-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/pip-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source inspected, then twenty native frames rendered through actual createWorld/Phaser registration at desktop1280x800 and four phone390x844 groups. All four directional idles/two-stride walks, signature/cheer/rest poses inspected without source-frame clipping. Actual timed signature traverses all three frames then returns to idle. Existing pink/gold ambient butterflies are world decorations, not atlas fragments. Raw low-alpha gutter haze was reduced with a generated cleanup edit. This synthetic renderer fixture does not establish canonical reward progression or human art approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "docs/screenshots/campaign/pip-motion-pilot-phaser.png",
+          "docs/screenshots/campaign/pip-motion-pilot-phone-group1.png",
+          "docs/screenshots/campaign/pip-motion-pilot-phone-group2.png",
+          "docs/screenshots/campaign/pip-motion-pilot-phone-group3.png",
+          "docs/screenshots/campaign/pip-motion-pilot-phone-group4.png"
+        ],
+        "result": "Content agent reports actual Phaser20frames+timed signature test passed and visual inspection no source-frame clipping; original pink floating shapes determined existing ambient butterflies, not clipped sprite fragments. Human approval pending."
+      }
+    },
+    {
+      "id": "effect-gleam",
+      "kind": "effect",
+      "source": "frontend/public/assets/campaign/effects-v1.png",
+      "url": "/assets/campaign/effects-v1.png",
+      "frame": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "sha256": "6476576e760352471c628ffad8b0887095bba546c2f405dcff1f7be44d92ff22",
+      "provenance": "content/campaign/art/effects-v1.provenance.json",
+      "availablePoses": [
+        "static-effect"
+      ],
+      "desiredPoses": [
+        "static-effect"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Actual authoritative confirmed Pip signature shows readable Gleam bitmap and saved2light explanation; desktop,phone,reducedmotion inspected. Static effect clears on next confirmed tool move. Human approval pending; no native effect animation claim.",
+      "technicalPreview": {
+        "synthetic": false,
+        "evidence": [
+          "docs/screenshots/campaign/trial-signature-desktop.png",
+          "docs/screenshots/campaign/trial-signature-phone.png",
+          "docs/screenshots/campaign/trial-signature-reduced.png"
+        ],
+        "result": "Actual authoritative confirmed Pip signature shows readable Gleam bitmap and saved2light explanation; desktop,phone,reducedmotion inspected. Static effect clears on next confirmed tool move.",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "id": "effect-growth",
+      "kind": "effect",
+      "source": "frontend/public/assets/campaign/effects-v1.png",
+      "url": "/assets/campaign/effects-v1.png",
+      "frame": [
+        512,
+        0,
+        512,
+        512
+      ],
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "sha256": "6476576e760352471c628ffad8b0887095bba546c2f405dcff1f7be44d92ff22",
+      "provenance": "content/campaign/art/effects-v1.provenance.json",
+      "availablePoses": [
+        "static-effect"
+      ],
+      "desiredPoses": [
+        "static-effect"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source frame inspected; matching confirmed-signature selection implemented in frontend. This individual affinity has no dedicated actual-turn screenshot in this record. Human approval pending; no native effect animation claim.",
+      "technicalPreview": {
+        "synthetic": false,
+        "evidence": [],
+        "result": "Source frame inspected; matching confirmed-signature selection implemented in frontend. This individual affinity has no dedicated actual-turn screenshot in this record.",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "id": "effect-craft",
+      "kind": "effect",
+      "source": "frontend/public/assets/campaign/effects-v1.png",
+      "url": "/assets/campaign/effects-v1.png",
+      "frame": [
+        1024,
+        0,
+        512,
+        512
+      ],
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "sha256": "6476576e760352471c628ffad8b0887095bba546c2f405dcff1f7be44d92ff22",
+      "provenance": "content/campaign/art/effects-v1.provenance.json",
+      "availablePoses": [
+        "static-effect"
+      ],
+      "desiredPoses": [
+        "static-effect"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source frame inspected; matching confirmed-signature selection implemented in frontend. This individual affinity has no dedicated actual-turn screenshot in this record. Human approval pending; no native effect animation claim.",
+      "technicalPreview": {
+        "synthetic": false,
+        "evidence": [],
+        "result": "Source frame inspected; matching confirmed-signature selection implemented in frontend. This individual affinity has no dedicated actual-turn screenshot in this record.",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "id": "effect-rhythm",
+      "kind": "effect",
+      "source": "frontend/public/assets/campaign/effects-v1.png",
+      "url": "/assets/campaign/effects-v1.png",
+      "frame": [
+        0,
+        512,
+        512,
+        512
+      ],
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "sha256": "6476576e760352471c628ffad8b0887095bba546c2f405dcff1f7be44d92ff22",
+      "provenance": "content/campaign/art/effects-v1.provenance.json",
+      "availablePoses": [
+        "static-effect"
+      ],
+      "desiredPoses": [
+        "static-effect"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source frame inspected; matching confirmed-signature selection implemented in frontend. This individual affinity has no dedicated actual-turn screenshot in this record. Human approval pending; no native effect animation claim.",
+      "technicalPreview": {
+        "synthetic": false,
+        "evidence": [],
+        "result": "Source frame inspected; matching confirmed-signature selection implemented in frontend. This individual affinity has no dedicated actual-turn screenshot in this record.",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "id": "effect-tide",
+      "kind": "effect",
+      "source": "frontend/public/assets/campaign/effects-v1.png",
+      "url": "/assets/campaign/effects-v1.png",
+      "frame": [
+        512,
+        512,
+        512,
+        512
+      ],
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "sha256": "6476576e760352471c628ffad8b0887095bba546c2f405dcff1f7be44d92ff22",
+      "provenance": "content/campaign/art/effects-v1.provenance.json",
+      "availablePoses": [
+        "static-effect"
+      ],
+      "desiredPoses": [
+        "static-effect"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source frame inspected; matching confirmed-signature selection implemented in frontend. This individual affinity has no dedicated actual-turn screenshot in this record. Human approval pending; no native effect animation claim.",
+      "technicalPreview": {
+        "synthetic": false,
+        "evidence": [],
+        "result": "Source frame inspected; matching confirmed-signature selection implemented in frontend. This individual affinity has no dedicated actual-turn screenshot in this record.",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "id": "effect-celebration",
+      "kind": "effect",
+      "source": "frontend/public/assets/campaign/effects-v1.png",
+      "url": "/assets/campaign/effects-v1.png",
+      "frame": [
+        1024,
+        512,
+        512,
+        512
+      ],
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "sha256": "6476576e760352471c628ffad8b0887095bba546c2f405dcff1f7be44d92ff22",
+      "provenance": "content/campaign/art/effects-v1.provenance.json",
+      "availablePoses": [
+        "static-effect"
+      ],
+      "desiredPoses": [
+        "static-effect"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        0,
+        0
+      ],
+      "milestone": "M2",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Actual authoritative cleared Bridge encounter shows celebration bitmap+text desktop/phone, no clipping. Human approval pending; no native effect animation claim.",
+      "technicalPreview": {
+        "synthetic": false,
+        "evidence": [
+          "docs/screenshots/campaign/trial-celebration-desktop.png",
+          "docs/screenshots/campaign/trial-celebration-phone.png"
+        ],
+        "result": "Actual authoritative cleared Bridge encounter shows celebration bitmap+text desktop/phone, no clipping.",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "id": "flutter-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/flutter-base-motion-v1.png",
+      "url": "/assets/campaign/flutter-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        278
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "c4507daaeabfa7f9b0c39569e3ca2fd530bcb8f95b0df31568dc907e86f156d5",
+      "provenance": "content/campaign/art/flutter-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/flutter-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "docs/screenshots/campaign/native-flutter-phaser.png",
+          "docs/screenshots/campaign/native-flutter-phone-group3.png"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "cleo-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/cleo-base-motion-v1.png",
+      "url": "/assets/campaign/cleo-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "9db4dc2e80225c51c6049c6c61206bfd4dc4724fca815afaef01e3bed5c2bf6b",
+      "provenance": "content/campaign/art/cleo-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/cleo-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "technicalPreview": {
+        "result": "passed technical renderer inspection; human review pending",
+        "record": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+        "evidence": [],
+        "synthetic": true
+      }
+    },
+    {
+      "id": "bramble-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/bramble-base-motion-v1.png",
+      "url": "/assets/campaign/bramble-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        277
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "48d300ee50fc1b36debd17f8bde91b462bdbdbc6b225057c87b0707cbdbaaae8",
+      "provenance": "content/campaign/art/bramble-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/bramble-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "docs/screenshots/campaign/native-bramble-phone-group2.png"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "tansy-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/tansy-base-motion-v1.png",
+      "url": "/assets/campaign/tansy-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "4321f0f9f468546d8f90cf8e17a2371800bcc402fc61a6a5f5b1af31ec970d61",
+      "provenance": "content/campaign/art/tansy-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/tansy-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 3 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval. Additional assets-agent review inspected all four phone groups/all20poses with no clipping/identity/foot-anchor defect.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/tansy-base-motion-phaser.png",
+          "docs/screenshots/campaign/tansy-base-motion-phone-group1.png",
+          "docs/screenshots/campaign/tansy-base-motion-phone-group2.png",
+          "docs/screenshots/campaign/tansy-base-motion-phone-group3.png",
+          "docs/screenshots/campaign/tansy-base-motion-phone-group4.png",
+          "content/campaign/art/starter-motion-phone-supplement-review.v1.json"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "nib-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/nib-base-motion-v1.png",
+      "url": "/assets/campaign/nib-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        281
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "29bf3be6ef0bd1a2829d9c8e3ddbf56003e0783f257a8a755e7eba132b7fd5f6",
+      "provenance": "content/campaign/art/nib-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/nib-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval. Additional assets-agent review inspected all four phone groups/all20poses with no clipping/identity/foot-anchor defect.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/nib-base-motion-phaser.png",
+          "docs/screenshots/campaign/nib-base-motion-phone-group1.png",
+          "docs/screenshots/campaign/nib-base-motion-phone-group2.png",
+          "docs/screenshots/campaign/nib-base-motion-phone-group3.png",
+          "docs/screenshots/campaign/nib-base-motion-phone-group4.png",
+          "content/campaign/art/starter-motion-phone-supplement-review.v1.json"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "pip-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/pip-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/pip-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        281
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "53bf764bfe896007b124b0d3175faae7b226c928dcaad514a5976ed16881e3e2",
+      "provenance": "content/campaign/art/pip-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/pip-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval. Additional assets-agent review inspected all four phone groups/all20poses with no clipping/identity/foot-anchor defect.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/pip-wayfinder-motion-phaser.png",
+          "docs/screenshots/campaign/pip-wayfinder-motion-phone-group1.png",
+          "docs/screenshots/campaign/pip-wayfinder-motion-phone-group2.png",
+          "docs/screenshots/campaign/pip-wayfinder-motion-phone-group3.png",
+          "docs/screenshots/campaign/pip-wayfinder-motion-phone-group4.png",
+          "content/campaign/art/starter-motion-phone-supplement-review.v1.json"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "tansy-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/tansy-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/tansy-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        288
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "017584f7321d404801c61693d944a64f8382764a95e008a5fd8195b5dda7e2b5",
+      "provenance": "content/campaign/art/tansy-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/tansy-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 2 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval. Additional assets-agent review inspected all four phone groups/all20poses with no clipping/identity/foot-anchor defect.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/tansy-wayfinder-motion-phaser.png",
+          "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group1.png",
+          "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group2.png",
+          "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group3.png",
+          "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group4.png",
+          "content/campaign/art/starter-motion-phone-supplement-review.v1.json"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "nib-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/nib-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/nib-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        268,
+        296
+      ],
+      "sourceDimensions": [
+        1072,
+        1467
+      ],
+      "sha256": "f178243367c3864c4d0c69397623cfd69053f8afd9ed0561ffee1005e1f905f0",
+      "provenance": "content/campaign/art/nib-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/nib-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval. Additional assets-agent review inspected all four phone groups/all20poses with no clipping/identity/foot-anchor defect.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/nib-wayfinder-motion-phaser.png",
+          "docs/screenshots/campaign/nib-wayfinder-motion-phone-group1.png",
+          "docs/screenshots/campaign/nib-wayfinder-motion-phone-group2.png",
+          "docs/screenshots/campaign/nib-wayfinder-motion-phone-group3.png",
+          "docs/screenshots/campaign/nib-wayfinder-motion-phone-group4.png",
+          "content/campaign/art/starter-motion-phone-supplement-review.v1.json"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "patter-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/patter-base-motion-v1.png",
+      "url": "/assets/campaign/patter-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        278
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "1b1490e3dad8f13d02a26ca98677bf9e58c1021e5d1fbe4abef76785bb10a632",
+      "provenance": "content/campaign/art/patter-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/patter-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "technicalPreview": {
+        "result": "passed technical renderer inspection; human review pending",
+        "record": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+        "evidence": [],
+        "synthetic": true
+      }
+    },
+    {
+      "id": "twizzle-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/twizzle-base-motion-v1.png",
+      "url": "/assets/campaign/twizzle-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "4b09674b0733160175e4399a5953d934852299e760c8634606b0cef0625a30ee",
+      "provenance": "content/campaign/art/twizzle-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/twizzle-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "technicalPreview": {
+        "result": "passed technical renderer inspection; human review pending",
+        "record": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+        "evidence": [],
+        "synthetic": true
+      }
+    },
+    {
+      "id": "luna-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/luna-base-motion-v1.png",
+      "url": "/assets/campaign/luna-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        278
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "831b96a81bf47543dd0ea34d08cdafcd3bacaaa9f1f1c8c8672214437cd2e533",
+      "provenance": "content/campaign/art/luna-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/luna-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "technicalPreview": {
+        "result": "passed technical renderer inspection; human review pending",
+        "record": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+        "evidence": [],
+        "synthetic": true
+      }
+    },
+    {
+      "id": "pebble-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/pebble-base-motion-v1.png",
+      "url": "/assets/campaign/pebble-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "89ddf15f11886108590828c7799033ad310e7fec67b2369be472424777200890",
+      "provenance": "content/campaign/art/pebble-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/pebble-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "technicalPreview": {
+        "result": "passed technical renderer inspection; human review pending",
+        "record": "content/campaign/art/nonstarter-base-technical-preview.v1.json",
+        "evidence": [],
+        "synthetic": true
+      }
+    },
+    {
+      "id": "glimmer-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/glimmer-base-motion-v1.png",
+      "url": "/assets/campaign/glimmer-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        276
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "ea9a2531ec6aa9c8761ee0c9153066f0baccc391506f96cced11625ed15c7b3d",
+      "provenance": "content/campaign/art/glimmer-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/glimmer-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "docs/screenshots/campaign/native-glimmer-phone-group3.png"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "sail-base-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/sail-base-motion-v1.png",
+      "url": "/assets/campaign/sail-base-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        278
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "80064fc5fee8dda5f84b3ec6b932d7582879c0686b57a59b962a9004ee3ba034",
+      "provenance": "content/campaign/art/sail-base-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/sail-base-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Desktop all20 poses and phone four groups all20 poses inspected; recognizable original species/costume, intact ears/tails/wings, no source-frame clipping or detached opaque haze observed. Foot anchors visually coherent for minimal two-stride cycle. Ambient butterflies are world decorations, not atlas artifacts.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "docs/screenshots/campaign/native-sail-phaser.png"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "flutter-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/flutter-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/flutter-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "80e20fcf94744af28fefd82d9eeb999d4238764424db50db4b7564b8fc8baece",
+      "provenance": "content/campaign/art/flutter-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/flutter-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "content/campaign/art/nonstarter-wayfinder-supplement-review.v1.json"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "cleo-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/cleo-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/cleo-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "96ba6e593648fbe4250a1da09e590c1056bf5f7185a061681bcba6ddd1990a72",
+      "provenance": "content/campaign/art/cleo-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/cleo-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "content/campaign/art/nonstarter-wayfinder-supplement-review.v1.json"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "bramble-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/bramble-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/bramble-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        278
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "c8d7635b4a86cd0bc5271edff252a5aee19d3c6965659358ba3bb1df458c0825",
+      "provenance": "content/campaign/art/bramble-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/bramble-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "content/campaign/art/nonstarter-wayfinder-supplement-review.v1.json"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "patter-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/patter-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/patter-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "696a643c2e3ed244812df0771cdb962cb0d73eef6eb3c778abed2c135ce7b3ec",
+      "provenance": "content/campaign/art/patter-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/patter-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "content/campaign/art/nonstarter-wayfinder-supplement-review.v1.json"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "twizzle-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/twizzle-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/twizzle-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        284
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "f16cc6c5b246c2f82d608c9e9c3813c5fe0a05d11dfbe1f9d9ee9784f455a5ce",
+      "provenance": "content/campaign/art/twizzle-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/twizzle-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/twizzle-wayfinder-native-phaser.png",
+          "docs/screenshots/campaign/twizzle-wayfinder-native-phone-group3.png"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "luna-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/luna-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/luna-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "bcb7cb5d791e42f815d04159e23ca0b9ae919d608ffc704574ff20ec18cde995",
+      "provenance": "content/campaign/art/luna-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/luna-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/luna-wayfinder-native-phaser.png",
+          "docs/screenshots/campaign/luna-wayfinder-native-phone-group3.png"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "pebble-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/pebble-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/pebble-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "a05621e3befcb9272f919c297c689328edcac65e96774d0eea8f03775d93c026",
+      "provenance": "content/campaign/art/pebble-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/pebble-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/pebble-wayfinder-native-phaser.png",
+          "docs/screenshots/campaign/pebble-wayfinder-native-phone-group3.png"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "glimmer-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/glimmer-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/glimmer-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        276
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "51ee733a56cc817b1bc06e28355c5f96d9734e6f4d68731ec016d18c2fcca149",
+      "provenance": "content/campaign/art/glimmer-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/glimmer-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/glimmer-wayfinder-native-phaser.png",
+          "docs/screenshots/campaign/glimmer-wayfinder-native-phone-group3.png"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    },
+    {
+      "id": "sail-wayfinder-motion-v1",
+      "kind": "animation-development",
+      "source": "frontend/public/assets/campaign/sail-wayfinder-motion-v1.png",
+      "url": "/assets/campaign/sail-wayfinder-motion-v1.png",
+      "frame": [
+        0,
+        0,
+        280,
+        281
+      ],
+      "sourceDimensions": [
+        1122,
+        1402
+      ],
+      "sha256": "9a9737f93d87d874a161e30ff4196cc258445128a0238ca80931f5ee502892a6",
+      "provenance": "content/campaign/art/sail-wayfinder-motion-v1.provenance.json",
+      "frameMetadata": "content/campaign/art/sail-wayfinder-motion-v1.frames.json",
+      "availablePoses": [
+        "idle-down",
+        "idle-right",
+        "idle-up",
+        "idle-left",
+        "two-stride-walk-down",
+        "two-stride-walk-right",
+        "two-stride-walk-up",
+        "two-stride-walk-left",
+        "three-frame-signature",
+        "three-frame-cheer",
+        "two-frame-rest"
+      ],
+      "desiredPoses": [
+        "directional-idle",
+        "directional-walk",
+        "signature",
+        "cheer",
+        "rest"
+      ],
+      "targetDimensions": [
+        96,
+        96
+      ],
+      "worldFootprint": [
+        32,
+        24
+      ],
+      "milestone": "M5",
+      "status": "generated-development",
+      "reviewStatus": "pending",
+      "visualInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 1,2,3,4 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+      "technicalPreview": {
+        "synthetic": true,
+        "evidence": [
+          "content/campaign/art/native-motion-content-review.v1.json",
+          "docs/screenshots/campaign/sail-wayfinder-native-phaser.png",
+          "docs/screenshots/campaign/sail-wayfinder-native-phone-group3.png"
+        ],
+        "result": "Technical source/renderer inspection recorded; final human review pending."
+      }
+    }
+  ],
+  "boardPresentation": {
+    "implementation": "frontend/src/campaign/world.ts encounter() HTML controls with CSS/SVG",
+    "status": "existing-development",
+    "reviewStatus": "pending",
+    "notes": "Actual trial desktop/phone inspected: companion+cart portraits, light progress,pressure,turns,current affinity phase,hazard and text visible; remaining move controls in scrollable semantic HTML. This is presentation evidence, not balance/accessibility/human approval.",
+    "evidence": [
+      "docs/screenshots/campaign/trial-board-desktop.png",
+      "docs/screenshots/campaign/trial-board-phone.png"
+    ]
+  }
+}

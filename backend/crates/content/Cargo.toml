@@ -7,3 +7,5 @@ license.workspace = true
 
 [dependencies]
 wonderwilds-contracts.workspace = true
+wonderwilds-domain.workspace = true
+serde_json.workspace = true

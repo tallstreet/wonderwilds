@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-14",
+  "stage": "M6 technical UI and preserved legacy-reader continuation",
+  "initialCampaignCompletionEvidence": "campaign-evidence.json (unchanged sixcase version1.0.0 stage)",
+  "legacyRealJourneys": {
+    "bank": "passed exit0",
+    "workshop": "passed exit0",
+    "missionLearningActiveNsw": "passed exit0"
+  },
+  "m6": {
+    "result": "passed exit0",
+    "speechModes": [
+      "API unavailable",
+      "asynchronous service failure",
+      "synchronous rejection"
+    ],
+    "focus": [
+      "dialogue heading",
+      "next-page heading",
+      "Escape launcher restoration"
+    ],
+    "motion": [
+      "initial reduced preference pixel-stillness",
+      "live normal-to-reduced preference pixel-stillness",
+      "keyboard movement remains usable"
+    ],
+    "controls": [
+      "nonempty dialogue action controls contrast >=4.5",
+      "dialogue action controls minimum24px targets"
+    ]
+  },
+  "trialSemanticPreview": {
+    "result": "passed exit0",
+    "checks": [
+      "accessible progressbar name Light restored",
+      "signature follows confirmed server save",
+      "next saved move clears signature effect",
+      "completed trial shows celebration with text",
+      "phone no horizontal overflow"
+    ],
+    "screenshots": "docs/screenshots/campaign/trial-*"
+  },
+  "resolvedDefects": [
+    "synchronous speech rejection lacked fallback",
+    "live reduced-motion change did not update Phaser",
+    "resolved learning task conflict incorrectly required whole-skill readiness",
+    "native trial progressbar lacked an accessible name",
+    "DisplayList repaint detached objects rather than destroying their Text textures"
+  ],
+  "notEstablished": [
+    "human child playtest findings",
+    "native screen-reader audit",
+    "audible OS narration quality",
+    "physical phone performance and real GPU allocation",
+    "educator/narrative/art/privacy/operations approval"
+  ],
+  "textureResidency": "passed; see campaign-memory-evidence.json (strict warmed totals and scene restart, all24 native sheets)"
+}

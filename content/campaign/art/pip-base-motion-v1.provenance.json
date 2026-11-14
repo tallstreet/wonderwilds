@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "pip-base-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "purpose": "First actual articulated campaign animation pilot; not a claim of twenty-four completed base/form animation sets.",
+  "promptFile": "content/campaign/art/pip-base-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/pip-base-motion-v1-cleaned.png",
+  "processedAsset": "frontend/public/assets/campaign/pip-base-motion-v1.png",
+  "processing": "Generated cleanup edit with image_gen.imagegen removes detached fragments/colored alpha haze. Original generation and edited source preserved. Public PNG is byte-for-byte edited source; no programmatic pixel edits. Runtime registers measured frames/boot anchors.",
+  "sha256": "fea851e9d3532e141b07e4679868f36f62f03bd70e4ad8b8e44d8d0d6a1281fc",
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/characters/meadow.png",
+      "sha256": "5a8fd696ca30284465a25bbf2a5475d2d6a172b2ddfa9593b430b6e9fd76a38c",
+      "use": "Only upper-left Pip identity/style; other three characters excluded."
+    }
+  ],
+  "frameMetadata": "content/campaign/art/pip-base-motion-v1.frames.json",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "limitations": [
+    "Two-frame directional stride is a minimal cycle, not a polished four/eight-frame locomotion set.",
+    "Directional idle is one still per heading; no breathing/blink loop.",
+    "Only Pip base form; the other eleven base and twelve Wayfinder motion sets are not covered.",
+    "Human art/accessibility approval pending."
+  ],
+  "technicalInspection": "Source inspected, then twenty native frames rendered through actual createWorld/Phaser registration at desktop1280x800 and four phone390x844 groups. All four directional idles/two-stride walks, signature/cheer/rest poses inspected without source-frame clipping. Actual timed signature traverses all three frames then returns to idle. Existing pink/gold ambient butterflies are world decorations, not atlas fragments. Raw low-alpha gutter haze was reduced with a generated cleanup edit. This synthetic renderer fixture does not establish canonical reward progression or human art approval.",
+  "originalGenerationSource": "content/campaign/art/sources/pip-base-motion-v1.png",
+  "cleanupPromptFile": "content/campaign/art/pip-base-motion-v1.cleanup-prompt.txt",
+  "previewEvidence": [
+    "docs/screenshots/campaign/pip-motion-pilot-phaser.png",
+    "docs/screenshots/campaign/pip-motion-pilot-phone-group1.png",
+    "docs/screenshots/campaign/pip-motion-pilot-phone-group2.png",
+    "docs/screenshots/campaign/pip-motion-pilot-phone-group3.png",
+    "docs/screenshots/campaign/pip-motion-pilot-phone-group4.png"
+  ]
+}

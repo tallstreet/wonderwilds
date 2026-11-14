@@ -1,0 +1,60 @@
+{
+  "result": "passed",
+  "contentVersion": "1.1.0",
+  "sourceRewards": "Actual Bridge and Rowan first ribbon for each profile",
+  "profiles": {
+    "10000000-0000-0000-0000-000000000002": "pip",
+    "10000000-0000-0000-0000-000000000003": "tansy"
+  },
+  "history": [
+    {
+      "companionId": "pip",
+      "movement": "scout",
+      "profileId": "10000000-0000-0000-0000-000000000002",
+      "role": "navigator"
+    },
+    {
+      "companionId": "tansy",
+      "movement": "brace",
+      "profileId": "10000000-0000-0000-0000-000000000003",
+      "role": "keeper"
+    },
+    {
+      "companionId": "pip",
+      "movement": "scout",
+      "profileId": "10000000-0000-0000-0000-000000000002",
+      "role": "navigator"
+    },
+    {
+      "companionId": "tansy",
+      "movement": "brace",
+      "profileId": "10000000-0000-0000-0000-000000000003",
+      "role": "keeper"
+    }
+  ],
+  "assertions": [
+    "owned household selection",
+    "own companions only",
+    "explicit actor turn attribution",
+    "reload",
+    "automatic and manual role swaps",
+    "no XP or academic evidence changes",
+    "two-sided consent",
+    "exact uncertain confirmation retry after reload",
+    "single copies with originals retained",
+    "phone layout",
+    "solo continuation"
+  ],
+  "finalVerification": {
+    "result": "passed exit0",
+    "log": "/tmp/campaign-paired-clock10-final-browser.log",
+    "binarySha256": "74dce19548ba8877b5b81558e459fb3429952cf474a33be7036915fe79d21296",
+    "migration": "0010_paired_household_clock.sql",
+    "migrationSha256": "84c211afd04c68cd0e2a3ce535cdf04f70a60efaa118c16217c9c845a29e7f58",
+    "pairedSourcesSha256": {
+      "backend/crates/api/src/paired/mod.rs": "df077a239c39bd71ed481fd087be5990162473a70f9c88b81d529943333e0226",
+      "backend/crates/api/src/paired/http.rs": "654d247753cec8edad6ba29155a5b43c909c9eddc9ccb5a39657072dae677e30",
+      "backend/crates/api/src/paired/repository.rs": "71bdbdc0322a45118414f98a2e04443aa8f8bb0865079f3d7fa3f03efe173383"
+    }
+  }
+}

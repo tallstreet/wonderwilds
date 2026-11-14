@@ -88,6 +88,7 @@ pub enum MissionLearningPayload {
     Variant4(MissionLearningPayloadVariant4),
     Variant5(MissionLearningPayloadVariant5),
     Variant6(MissionLearningPayloadVariant6),
+    Variant7(MissionLearningPayloadVariant7),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -709,6 +710,289 @@ pub enum QuestionStimulus {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCompanion {
+    pub id: String,
+    pub level: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub appearance: Option<CampaignCompanionAppearance>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affinity: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignDialogue {
+    pub speaker: String,
+    pub text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignChoice {
+    pub id: String,
+    pub label: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignAction {
+    pub id: String,
+    pub label: String,
+    pub location: String,
+    #[serde(rename = "requires_flags")]
+    pub requires_flags: Vec<String>,
+    #[serde(rename = "forbids_flags")]
+    pub forbids_flags: Vec<String>,
+    pub costs: std::collections::BTreeMap<String, u64>,
+    pub rewards: std::collections::BTreeMap<String, u64>,
+    #[serde(rename = "grants_flags")]
+    pub grants_flags: Vec<String>,
+    pub encounter: Option<String>,
+    pub recruit: Option<String>,
+    pub dialogue: Vec<CampaignDialogue>,
+    pub mission: String,
+    pub kind: String,
+    #[serde(rename = "grant_id")]
+    pub grant_id: String,
+    #[serde(rename = "learning_context")]
+    pub learning_context: Option<String>,
+    pub learning: bool,
+    pub choices: Vec<CampaignChoice>,
+    pub puzzle: CampaignActionPuzzle,
+    pub recipient: Option<String>,
+    pub milestone: Option<String>,
+    #[serde(rename = "field_ability")]
+    pub field_ability: Option<String>,
+    #[serde(rename = "field_method")]
+    pub field_method: Option<String>,
+    #[serde(rename = "discovery_for")]
+    pub discovery_for: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignEncounter {
+    pub id: String,
+    pub progress: u64,
+    pub pressure: u64,
+    pub turns: u64,
+    #[serde(rename = "tool_charges")]
+    pub tool_charges: u64,
+    #[serde(rename = "partner_bonus")]
+    pub partner_bonus: u64,
+    #[serde(rename = "bonus_source")]
+    pub bonus_source: Option<String>,
+    pub replay: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignState {
+    #[serde(rename = "campaign_id")]
+    pub campaign_id: String,
+    #[serde(rename = "content_version")]
+    pub content_version: String,
+    #[serde(rename = "rules_version")]
+    pub rules_version: String,
+    pub location: String,
+    pub flags: Vec<String>,
+    pub items: std::collections::BTreeMap<String, u64>,
+    pub team: Vec<String>,
+    pub energy: std::collections::BTreeMap<String, u64>,
+    pub grants: Vec<String>,
+    pub starter: Option<String>,
+    pub encounter: CampaignStateEncounter,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignPhase {
+    pub threshold: u64,
+    pub affinity: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignEncounterDefinition {
+    pub id: String,
+    pub target: u64,
+    #[serde(rename = "turn_limit")]
+    pub turn_limit: u64,
+    #[serde(rename = "pressure_limit")]
+    pub pressure_limit: u64,
+    pub hazards: Vec<u64>,
+    pub affinity: String,
+    #[serde(rename = "win_flags")]
+    pub win_flags: Vec<String>,
+    pub phases: Vec<CampaignPhase>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relay: Option<CampaignRelay>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignProjection {
+    pub state: CampaignState,
+    #[serde(rename = "legal_actions")]
+    pub legal_actions: Vec<CampaignAction>,
+    pub travel: Vec<String>,
+    pub companions: Vec<CampaignCompanion>,
+    #[serde(rename = "encounter_definition")]
+    pub encounter_definition: CampaignProjectionEncounterDefinition,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignLocation {
+    pub id: String,
+    pub name: String,
+    pub camp: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignStarter {
+    pub id: String,
+    pub name: String,
+    pub affinity: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignSnapshot {
+    pub schema_version: CampaignSnapshotSchemaVersion,
+    pub revision: u64,
+    pub adopted: bool,
+    pub adoption_blocked: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub campaign: Option<CampaignProjection>,
+    pub locations: Vec<CampaignLocation>,
+    pub starters: Vec<CampaignStarter>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommand {
+    pub schema_version: CampaignCommandSchemaVersion,
+    pub command_id: String,
+    pub expected_revision: u64,
+    pub payload: CampaignCommandPayload,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignPuzzle {
+    pub id: String,
+    pub operation: String,
+    pub value: Option<String>,
+    pub goal: CampaignPuzzleGoal,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct HouseholdProfile {
+    pub id: String,
+    pub ability_band: HouseholdProfileAbilityBand,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct HouseholdProfilesSnapshot {
+    pub schema_version: HouseholdProfilesSnapshotSchemaVersion,
+    pub profiles: Vec<HouseholdProfile>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedOffer {
+    pub profile_id: String,
+    pub keepsake_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCompanion {
+    pub profile_id: String,
+    pub companion_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedKeepsake {
+    pub keepsake_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_profile_id: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedTurn {
+    pub profile_id: String,
+    pub companion_id: String,
+    pub role: PairedTurnRole,
+    pub movement: PairedTurnMovement,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedPractice {
+    pub progress: u64,
+    pub pressure: u64,
+    pub turns: u64,
+    pub next_role: PairedPracticeNextRole,
+    pub outcome: PairedPracticeOutcome,
+    pub history: Vec<PairedTurn>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedSnapshot {
+    pub schema_version: PairedSnapshotSchemaVersion,
+    pub revision: u64,
+    pub actor_profile_id: String,
+    pub mode: PairedSnapshotMode,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub navigator_profile_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keeper_profile_id: Option<String>,
+    pub offers: Vec<PairedOffer>,
+    pub confirmed_profile_ids: Vec<String>,
+    pub exchange_complete: bool,
+    pub companions: Vec<PairedCompanion>,
+    pub available_companions: Vec<CampaignCompanion>,
+    pub available_keepsake_ids: Vec<String>,
+    pub completed_practices: u64,
+    pub legal_movements: Vec<String>,
+    pub practice_target: u64,
+    pub practice_pressure_limit: u64,
+    pub practice_turn_limit: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub practice: Option<PairedPractice>,
+    pub keepsakes: Vec<PairedKeepsake>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keepsake_count: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCommand {
+    pub schema_version: PairedCommandSchemaVersion,
+    pub command_id: String,
+    pub expected_revision: u64,
+    pub payload: PairedCommandPayload,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignRelay {
+    #[serde(rename = "round_targets")]
+    pub round_targets: Vec<u64>,
+    #[serde(rename = "required_affinities")]
+    pub required_affinities: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GeneratedNeighbourhoodSprite {
     #[serde(rename = "pip")]
     Pip,
@@ -965,6 +1249,14 @@ pub struct MissionLearningPayloadVariant5 {
 pub struct MissionLearningPayloadVariant6 {
     pub r#type: MissionLearningPayloadVariant6Type,
     pub encounter_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningPayloadVariant7 {
+    pub r#type: MissionLearningPayloadVariant7Type,
+    pub action_id: String,
+    pub campaign_revision: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1990,6 +2282,156 @@ pub struct QuestionStimulusVariant18 {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCompanionAppearance {
+    #[serde(rename = "base")]
+    Base,
+    #[serde(rename = "wayfinder")]
+    Wayfinder,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CampaignActionPuzzle {
+    Variant1(CampaignPuzzle),
+    Variant2(()),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CampaignStateEncounter {
+    Variant1(CampaignEncounter),
+    Variant2(()),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CampaignProjectionEncounterDefinition {
+    Variant1(CampaignEncounterDefinition),
+    Variant2(()),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignSnapshotSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CampaignCommandPayload {
+    Variant1(CampaignCommandPayloadVariant1),
+    Variant2(CampaignCommandPayloadVariant2),
+    Variant3(CampaignCommandPayloadVariant3),
+    Variant4(CampaignCommandPayloadVariant4),
+    Variant5(CampaignCommandPayloadVariant5),
+    Variant6(CampaignCommandPayloadVariant6),
+    Variant7(CampaignCommandPayloadVariant7),
+    Variant8(CampaignCommandPayloadVariant8),
+    Variant9(CampaignCommandPayloadVariant9),
+    Variant10(CampaignCommandPayloadVariant10),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CampaignPuzzleGoal {
+    Variant1(std::collections::BTreeMap<String, String>),
+    Variant2(()),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum HouseholdProfileAbilityBand {
+    #[serde(rename = "beginning")]
+    Beginning,
+    #[serde(rename = "growing")]
+    Growing,
+    #[serde(rename = "stretching")]
+    Stretching,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum HouseholdProfilesSnapshotSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedTurnRole {
+    #[serde(rename = "navigator")]
+    Navigator,
+    #[serde(rename = "keeper")]
+    Keeper,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedTurnMovement {
+    #[serde(rename = "scout")]
+    Scout,
+    #[serde(rename = "rest")]
+    Rest,
+    #[serde(rename = "brace")]
+    Brace,
+    #[serde(rename = "rally")]
+    Rally,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedPracticeNextRole {
+    #[serde(rename = "navigator")]
+    Navigator,
+    #[serde(rename = "keeper")]
+    Keeper,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedPracticeOutcome {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "won")]
+    Won,
+    #[serde(rename = "retry")]
+    Retry,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedSnapshotSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedSnapshotMode {
+    #[serde(rename = "solo")]
+    Solo,
+    #[serde(rename = "paired")]
+    Paired,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandSchemaVersion {
+    #[serde(rename = "1.0")]
+    V10,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum PairedCommandPayload {
+    Variant1(PairedCommandPayloadVariant1),
+    Variant2(PairedCommandPayloadVariant2),
+    Variant3(PairedCommandPayloadVariant3),
+    Variant4(PairedCommandPayloadVariant4),
+    Variant5(PairedCommandPayloadVariant5),
+    Variant6(PairedCommandPayloadVariant6),
+    Variant7(PairedCommandPayloadVariant7),
+    Variant8(PairedCommandPayloadVariant8),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GeneratedNeighbourhoodStepsItemMechanic {
     #[serde(rename = "inspect")]
     Inspect,
@@ -2187,6 +2629,12 @@ pub enum MissionLearningPayloadVariant5Kind {
 pub enum MissionLearningPayloadVariant6Type {
     #[serde(rename = "abandon")]
     Abandon,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningPayloadVariant7Type {
+    #[serde(rename = "begin_campaign_step")]
+    BeginCampaignStep,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2780,6 +3228,135 @@ pub enum QuestionStimulusVariant18Kind {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant1 {
+    pub r#type: CampaignCommandPayloadVariant1Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant2 {
+    pub r#type: CampaignCommandPayloadVariant2Type,
+    #[serde(rename = "companion_id")]
+    pub companion_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant3 {
+    pub r#type: CampaignCommandPayloadVariant3Type,
+    #[serde(rename = "location_id")]
+    pub location_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant4 {
+    pub r#type: CampaignCommandPayloadVariant4Type,
+    #[serde(rename = "action_id")]
+    pub action_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant5 {
+    pub r#type: CampaignCommandPayloadVariant5Type,
+    #[serde(rename = "companion_ids")]
+    pub companion_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant6 {
+    pub r#type: CampaignCommandPayloadVariant6Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant7 {
+    pub r#type: CampaignCommandPayloadVariant7Type,
+    #[serde(rename = "companion_id")]
+    pub companion_id: String,
+    pub kind: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant8 {
+    pub r#type: CampaignCommandPayloadVariant8Type,
+    pub recipe: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant9 {
+    pub r#type: CampaignCommandPayloadVariant9Type,
+    #[serde(rename = "companion_id")]
+    pub companion_id: String,
+    pub movement: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CampaignCommandPayloadVariant10 {
+    pub r#type: CampaignCommandPayloadVariant10Type,
+    #[serde(rename = "encounter_id")]
+    pub encounter_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCommandPayloadVariant1 {
+    pub r#type: PairedCommandPayloadVariant1Type,
+    pub partner_profile_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCommandPayloadVariant2 {
+    pub r#type: PairedCommandPayloadVariant2Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCommandPayloadVariant3 {
+    pub r#type: PairedCommandPayloadVariant3Type,
+    pub companion_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCommandPayloadVariant4 {
+    pub r#type: PairedCommandPayloadVariant4Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCommandPayloadVariant5 {
+    pub r#type: PairedCommandPayloadVariant5Type,
+    pub movement: PairedCommandPayloadVariant5Movement,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCommandPayloadVariant6 {
+    pub r#type: PairedCommandPayloadVariant6Type,
+    pub keepsake_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCommandPayloadVariant7 {
+    pub r#type: PairedCommandPayloadVariant7Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PairedCommandPayloadVariant8 {
+    pub r#type: PairedCommandPayloadVariant8Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum StoryScenePresentationItemVariant1Type {
     #[serde(rename = "dialogue")]
     Dialogue,
@@ -2801,4 +3378,124 @@ pub enum StoryCommandPayloadVariant1Type {
 pub enum StoryCommandPayloadVariant2Type {
     #[serde(rename = "acknowledge")]
     Acknowledge,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant1Type {
+    #[serde(rename = "adopt")]
+    Adopt,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant2Type {
+    #[serde(rename = "choose_starter")]
+    ChooseStarter,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant3Type {
+    #[serde(rename = "travel")]
+    Travel,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant4Type {
+    #[serde(rename = "action")]
+    Action,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant5Type {
+    #[serde(rename = "set_team")]
+    SetTeam,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant6Type {
+    #[serde(rename = "camp")]
+    Camp,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant7Type {
+    #[serde(rename = "care")]
+    Care,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant8Type {
+    #[serde(rename = "craft")]
+    Craft,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant9Type {
+    #[serde(rename = "encounter_turn")]
+    EncounterTurn,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CampaignCommandPayloadVariant10Type {
+    #[serde(rename = "replay")]
+    Replay,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandPayloadVariant1Type {
+    #[serde(rename = "start")]
+    Start,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandPayloadVariant2Type {
+    #[serde(rename = "swap_roles")]
+    SwapRoles,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandPayloadVariant3Type {
+    #[serde(rename = "select_companion")]
+    SelectCompanion,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandPayloadVariant4Type {
+    #[serde(rename = "start_practice")]
+    StartPractice,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandPayloadVariant5Type {
+    #[serde(rename = "practice_turn")]
+    PracticeTurn,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandPayloadVariant5Movement {
+    #[serde(rename = "scout")]
+    Scout,
+    #[serde(rename = "rest")]
+    Rest,
+    #[serde(rename = "brace")]
+    Brace,
+    #[serde(rename = "rally")]
+    Rally,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandPayloadVariant6Type {
+    #[serde(rename = "offer_keepsake")]
+    OfferKeepsake,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandPayloadVariant7Type {
+    #[serde(rename = "confirm_exchange")]
+    ConfirmExchange,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PairedCommandPayloadVariant8Type {
+    #[serde(rename = "continue_solo")]
+    ContinueSolo,
 }

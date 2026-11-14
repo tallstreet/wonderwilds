@@ -1,0 +1,273 @@
+{
+  "id": "cleo-wayfinder-motion-v1",
+  "character": "cleo-wayfinder",
+  "url": "/assets/campaign/cleo-wayfinder-motion-v1.png",
+  "texture": "campaign-cleo-wayfinder-motion-v1",
+  "dimensions": [
+    1122,
+    1402
+  ],
+  "nominalCell": 280.5,
+  "frames": [
+    {
+      "id": "idle-down",
+      "rect": [
+        0,
+        0,
+        280,
+        280
+      ],
+      "foot": [
+        153.5,
+        271
+      ]
+    },
+    {
+      "id": "walk-down-a",
+      "rect": [
+        280,
+        0,
+        281,
+        280
+      ],
+      "foot": [
+        144.0,
+        270
+      ]
+    },
+    {
+      "id": "walk-down-b",
+      "rect": [
+        561,
+        0,
+        281,
+        280
+      ],
+      "foot": [
+        139.0,
+        272
+      ]
+    },
+    {
+      "id": "idle-right",
+      "rect": [
+        842,
+        0,
+        280,
+        280
+      ],
+      "foot": [
+        147.5,
+        271
+      ]
+    },
+    {
+      "id": "walk-right-a",
+      "rect": [
+        0,
+        280,
+        280,
+        278
+      ],
+      "foot": [
+        155.0,
+        268
+      ]
+    },
+    {
+      "id": "walk-right-b",
+      "rect": [
+        280,
+        280,
+        281,
+        278
+      ],
+      "foot": [
+        156.5,
+        268
+      ]
+    },
+    {
+      "id": "idle-up",
+      "rect": [
+        561,
+        280,
+        281,
+        278
+      ],
+      "foot": [
+        141.5,
+        269
+      ]
+    },
+    {
+      "id": "walk-up-a",
+      "rect": [
+        842,
+        280,
+        280,
+        278
+      ],
+      "foot": [
+        145.5,
+        269
+      ]
+    },
+    {
+      "id": "walk-up-b",
+      "rect": [
+        0,
+        558,
+        280,
+        280
+      ],
+      "foot": [
+        147.5,
+        269
+      ]
+    },
+    {
+      "id": "idle-left",
+      "rect": [
+        280,
+        558,
+        281,
+        280
+      ],
+      "foot": [
+        133.5,
+        268
+      ]
+    },
+    {
+      "id": "walk-left-a",
+      "rect": [
+        561,
+        558,
+        281,
+        280
+      ],
+      "foot": [
+        122.5,
+        268
+      ]
+    },
+    {
+      "id": "walk-left-b",
+      "rect": [
+        842,
+        558,
+        280,
+        280
+      ],
+      "foot": [
+        130.5,
+        268
+      ]
+    },
+    {
+      "id": "signature-anticipate",
+      "rect": [
+        0,
+        838,
+        280,
+        272
+      ],
+      "foot": [
+        156.5,
+        260
+      ]
+    },
+    {
+      "id": "signature-release",
+      "rect": [
+        280,
+        838,
+        281,
+        272
+      ],
+      "foot": [
+        145.0,
+        258
+      ]
+    },
+    {
+      "id": "signature-settle",
+      "rect": [
+        561,
+        838,
+        281,
+        272
+      ],
+      "foot": [
+        158.0,
+        260
+      ]
+    },
+    {
+      "id": "cheer-prepare",
+      "rect": [
+        842,
+        838,
+        280,
+        272
+      ],
+      "foot": [
+        151.0,
+        261
+      ]
+    },
+    {
+      "id": "cheer-lift",
+      "rect": [
+        0,
+        1110,
+        280,
+        292
+      ],
+      "foot": [
+        126.0,
+        275
+      ]
+    },
+    {
+      "id": "cheer-settle",
+      "rect": [
+        280,
+        1110,
+        281,
+        292
+      ],
+      "foot": [
+        144.5,
+        274
+      ]
+    },
+    {
+      "id": "rest-settle",
+      "rect": [
+        561,
+        1110,
+        281,
+        292
+      ],
+      "foot": [
+        160.0,
+        275
+      ]
+    },
+    {
+      "id": "rest-asleep",
+      "rect": [
+        842,
+        1110,
+        280,
+        292
+      ],
+      "foot": [
+        159.0,
+        275
+      ]
+    }
+  ]
+}

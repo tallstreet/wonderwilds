@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // A light woodcutter hint and real placement mechanics from the reported state.
 // Always run through run-training-qa.mjs against its fresh disposable database.
 import assert from 'node:assert/strict';
@@ -11,7 +12,7 @@ const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 try {
-  await page.goto(origin); await page.locator('#game canvas').waitFor();
+  await gotoLegacy(page, origin); await page.locator('#game canvas').waitFor();
   const b = await (await page.request.get(`${origin}/__demo/bootstrap`)).json();
   const headers = { 'X-Wonderwilds-Profile': b.profileId, 'X-CSRF-Token': b.csrf, Origin: origin };
   const snapshot = async () => (await page.request.get(`${origin}/api/v1/story`, { headers })).json();

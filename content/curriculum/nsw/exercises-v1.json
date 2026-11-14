@@ -22742,7 +22742,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "4e60ebb1c4850ede22066365ba4e3aeda3c9d1a6412d43d8687bd13caf4e020f",
+                  "assetId": "2d3eb69336b6ea78e8815a33108019f330b12780b3294af4fab86f779c1dcf62",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -22811,17 +22811,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "4e60ebb1c4850ede22066365ba4e3aeda3c9d1a6412d43d8687bd13caf4e020f"
+                    "diagram": "2d3eb69336b6ea78e8815a33108019f330b12780b3294af4fab86f779c1dcf62"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "24bd04fa61459240476764baaf88a315ac2b5d1d028f20511c9cf978db17b20b"
+                    "diagram": "187793c9a6a2cb3a3c6f75700f30f39f6ec1042197061ba06e9d840c9729b19b"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "1e908e9acdff1d755780eaa0831c2ea1b36b609eda78d5eba7f548eb0bd6a516"
+                    "diagram": "6ccf9067006632af1d2eec8b6f20e8fe40df9061e923c9e9b2eb3eb1830b8be4"
                   }
                 ]
               },
@@ -22854,7 +22854,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "24bd04fa61459240476764baaf88a315ac2b5d1d028f20511c9cf978db17b20b",
+                  "assetId": "187793c9a6a2cb3a3c6f75700f30f39f6ec1042197061ba06e9d840c9729b19b",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -22923,17 +22923,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "714086fb68ba20f20d7d957d01e3a34331e202c22cde1f1e42f0b97afb5e30fc"
+                    "diagram": "3ea8134b7ac109683fd86111fb3d43bbb60e6b1bef92231b95a75dbe13e15c3c"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "03db926acc4fc10c54a3ea0195cf431e6339ca8bf4feaab7deb4461de1011efc"
+                    "diagram": "4cf3fc02512aa81d3a4bc24838ce6f083d0e40223bd5e60c95a2fbabf58f07d9"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "24bd04fa61459240476764baaf88a315ac2b5d1d028f20511c9cf978db17b20b"
+                    "diagram": "187793c9a6a2cb3a3c6f75700f30f39f6ec1042197061ba06e9d840c9729b19b"
                   }
                 ]
               },
@@ -22966,7 +22966,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "714086fb68ba20f20d7d957d01e3a34331e202c22cde1f1e42f0b97afb5e30fc",
+                  "assetId": "3ea8134b7ac109683fd86111fb3d43bbb60e6b1bef92231b95a75dbe13e15c3c",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -23035,17 +23035,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "2384162bc1683b6823c6edee333b734233798fdbafac14f0f6b9315ee97cc517"
+                    "diagram": "78494490dbf9176d98c37f06a7770b5d81c0e7ea842dfa20b753d389abca580d"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "714086fb68ba20f20d7d957d01e3a34331e202c22cde1f1e42f0b97afb5e30fc"
+                    "diagram": "3ea8134b7ac109683fd86111fb3d43bbb60e6b1bef92231b95a75dbe13e15c3c"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "d6fd67c28204fd347a1b5dd18ab0462815c82eec7dcf00f5c5fb12381c7a51d7"
+                    "diagram": "590db9dc57bce4a06f56c525701087f078c0e23fe0ae514547373c7657a208dd"
                   }
                 ]
               },
@@ -23078,7 +23078,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "d6fd67c28204fd347a1b5dd18ab0462815c82eec7dcf00f5c5fb12381c7a51d7",
+                  "assetId": "590db9dc57bce4a06f56c525701087f078c0e23fe0ae514547373c7657a208dd",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -23147,17 +23147,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "d6fd67c28204fd347a1b5dd18ab0462815c82eec7dcf00f5c5fb12381c7a51d7"
+                    "diagram": "590db9dc57bce4a06f56c525701087f078c0e23fe0ae514547373c7657a208dd"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "8eeb00131bd6c17cd5e0196affb948bc91a80dfd441e5479da34eb9561d301d8"
+                    "diagram": "45d6661af539e29a118c3d02ce4d809689a6d8638a46a129cc6ab8a4072e5d80"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "171c1360770558e1067aad3643aad8e8e781e9d12ecffc3760dbc86c6c6d5029"
+                    "diagram": "fbaac3262d68388b9ab792e0f23a5e7ec7d5795d9450ba0707cbac492ce22f32"
                   }
                 ]
               },
@@ -23190,7 +23190,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "8eeb00131bd6c17cd5e0196affb948bc91a80dfd441e5479da34eb9561d301d8",
+                  "assetId": "45d6661af539e29a118c3d02ce4d809689a6d8638a46a129cc6ab8a4072e5d80",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -23259,17 +23259,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "3afcd44c05110f3f4866c5cb93b8e15422e3f963642f82b19dded972a4e18347"
+                    "diagram": "3bd24a756885430fc8d6d1b9bbcb416c423cfb7f24817073aac5af414dbc9030"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "8a3e69f57d8ea837daa9fed3a20f027bc713cba18097c778c2297b195ab5c3ac"
+                    "diagram": "0c7f08a0764d64465b3dcb3e447961aaaf50c57d7277a26ce0190623710eb449"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "8eeb00131bd6c17cd5e0196affb948bc91a80dfd441e5479da34eb9561d301d8"
+                    "diagram": "45d6661af539e29a118c3d02ce4d809689a6d8638a46a129cc6ab8a4072e5d80"
                   }
                 ]
               },
@@ -23302,7 +23302,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "3afcd44c05110f3f4866c5cb93b8e15422e3f963642f82b19dded972a4e18347",
+                  "assetId": "3bd24a756885430fc8d6d1b9bbcb416c423cfb7f24817073aac5af414dbc9030",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -23371,17 +23371,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "158b39672d8184bf07bb04e771d88e9c7256d0a8cb5df520749b97082147ce98"
+                    "diagram": "e0ed9fb395eeda03fc42d3ef88d12ec340d1a2000368f34de399840401a21037"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "3afcd44c05110f3f4866c5cb93b8e15422e3f963642f82b19dded972a4e18347"
+                    "diagram": "3bd24a756885430fc8d6d1b9bbcb416c423cfb7f24817073aac5af414dbc9030"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "1e908e9acdff1d755780eaa0831c2ea1b36b609eda78d5eba7f548eb0bd6a516"
+                    "diagram": "6ccf9067006632af1d2eec8b6f20e8fe40df9061e923c9e9b2eb3eb1830b8be4"
                   }
                 ]
               },
@@ -23414,7 +23414,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "1e908e9acdff1d755780eaa0831c2ea1b36b609eda78d5eba7f548eb0bd6a516",
+                  "assetId": "6ccf9067006632af1d2eec8b6f20e8fe40df9061e923c9e9b2eb3eb1830b8be4",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -23483,17 +23483,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "1e908e9acdff1d755780eaa0831c2ea1b36b609eda78d5eba7f548eb0bd6a516"
+                    "diagram": "6ccf9067006632af1d2eec8b6f20e8fe40df9061e923c9e9b2eb3eb1830b8be4"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "03db926acc4fc10c54a3ea0195cf431e6339ca8bf4feaab7deb4461de1011efc"
+                    "diagram": "4cf3fc02512aa81d3a4bc24838ce6f083d0e40223bd5e60c95a2fbabf58f07d9"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "4e60ebb1c4850ede22066365ba4e3aeda3c9d1a6412d43d8687bd13caf4e020f"
+                    "diagram": "2d3eb69336b6ea78e8815a33108019f330b12780b3294af4fab86f779c1dcf62"
                   }
                 ]
               },
@@ -23526,7 +23526,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "03db926acc4fc10c54a3ea0195cf431e6339ca8bf4feaab7deb4461de1011efc",
+                  "assetId": "4cf3fc02512aa81d3a4bc24838ce6f083d0e40223bd5e60c95a2fbabf58f07d9",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -23595,17 +23595,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "2384162bc1683b6823c6edee333b734233798fdbafac14f0f6b9315ee97cc517"
+                    "diagram": "78494490dbf9176d98c37f06a7770b5d81c0e7ea842dfa20b753d389abca580d"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "24bd04fa61459240476764baaf88a315ac2b5d1d028f20511c9cf978db17b20b"
+                    "diagram": "187793c9a6a2cb3a3c6f75700f30f39f6ec1042197061ba06e9d840c9729b19b"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "03db926acc4fc10c54a3ea0195cf431e6339ca8bf4feaab7deb4461de1011efc"
+                    "diagram": "4cf3fc02512aa81d3a4bc24838ce6f083d0e40223bd5e60c95a2fbabf58f07d9"
                   }
                 ]
               },
@@ -23638,7 +23638,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "2384162bc1683b6823c6edee333b734233798fdbafac14f0f6b9315ee97cc517",
+                  "assetId": "78494490dbf9176d98c37f06a7770b5d81c0e7ea842dfa20b753d389abca580d",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -23707,17 +23707,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "714086fb68ba20f20d7d957d01e3a34331e202c22cde1f1e42f0b97afb5e30fc"
+                    "diagram": "3ea8134b7ac109683fd86111fb3d43bbb60e6b1bef92231b95a75dbe13e15c3c"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "2384162bc1683b6823c6edee333b734233798fdbafac14f0f6b9315ee97cc517"
+                    "diagram": "78494490dbf9176d98c37f06a7770b5d81c0e7ea842dfa20b753d389abca580d"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "171c1360770558e1067aad3643aad8e8e781e9d12ecffc3760dbc86c6c6d5029"
+                    "diagram": "fbaac3262d68388b9ab792e0f23a5e7ec7d5795d9450ba0707cbac492ce22f32"
                   }
                 ]
               },
@@ -23750,7 +23750,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "171c1360770558e1067aad3643aad8e8e781e9d12ecffc3760dbc86c6c6d5029",
+                  "assetId": "fbaac3262d68388b9ab792e0f23a5e7ec7d5795d9450ba0707cbac492ce22f32",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -23819,17 +23819,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "171c1360770558e1067aad3643aad8e8e781e9d12ecffc3760dbc86c6c6d5029"
+                    "diagram": "fbaac3262d68388b9ab792e0f23a5e7ec7d5795d9450ba0707cbac492ce22f32"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "8a3e69f57d8ea837daa9fed3a20f027bc713cba18097c778c2297b195ab5c3ac"
+                    "diagram": "0c7f08a0764d64465b3dcb3e447961aaaf50c57d7277a26ce0190623710eb449"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "d6fd67c28204fd347a1b5dd18ab0462815c82eec7dcf00f5c5fb12381c7a51d7"
+                    "diagram": "590db9dc57bce4a06f56c525701087f078c0e23fe0ae514547373c7657a208dd"
                   }
                 ]
               },
@@ -23862,7 +23862,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "8a3e69f57d8ea837daa9fed3a20f027bc713cba18097c778c2297b195ab5c3ac",
+                  "assetId": "0c7f08a0764d64465b3dcb3e447961aaaf50c57d7277a26ce0190623710eb449",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -23931,17 +23931,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "158b39672d8184bf07bb04e771d88e9c7256d0a8cb5df520749b97082147ce98"
+                    "diagram": "e0ed9fb395eeda03fc42d3ef88d12ec340d1a2000368f34de399840401a21037"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "8eeb00131bd6c17cd5e0196affb948bc91a80dfd441e5479da34eb9561d301d8"
+                    "diagram": "45d6661af539e29a118c3d02ce4d809689a6d8638a46a129cc6ab8a4072e5d80"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "8a3e69f57d8ea837daa9fed3a20f027bc713cba18097c778c2297b195ab5c3ac"
+                    "diagram": "0c7f08a0764d64465b3dcb3e447961aaaf50c57d7277a26ce0190623710eb449"
                   }
                 ]
               },
@@ -23974,7 +23974,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "158b39672d8184bf07bb04e771d88e9c7256d0a8cb5df520749b97082147ce98",
+                  "assetId": "e0ed9fb395eeda03fc42d3ef88d12ec340d1a2000368f34de399840401a21037",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -24043,17 +24043,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "3afcd44c05110f3f4866c5cb93b8e15422e3f963642f82b19dded972a4e18347"
+                    "diagram": "3bd24a756885430fc8d6d1b9bbcb416c423cfb7f24817073aac5af414dbc9030"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "158b39672d8184bf07bb04e771d88e9c7256d0a8cb5df520749b97082147ce98"
+                    "diagram": "e0ed9fb395eeda03fc42d3ef88d12ec340d1a2000368f34de399840401a21037"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "4e60ebb1c4850ede22066365ba4e3aeda3c9d1a6412d43d8687bd13caf4e020f"
+                    "diagram": "2d3eb69336b6ea78e8815a33108019f330b12780b3294af4fab86f779c1dcf62"
                   }
                 ]
               },
@@ -50830,7 +50830,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "97fd2138af2c709baca76525f36534bdadf64d9ac0b9ae35049d367f48355ebf",
+                  "assetId": "c4d012dac62b6a29d28fd90e435e502580a161624b25683bff3b35edfeb00319",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -50884,17 +50884,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "97fd2138af2c709baca76525f36534bdadf64d9ac0b9ae35049d367f48355ebf"
+                    "diagram": "c4d012dac62b6a29d28fd90e435e502580a161624b25683bff3b35edfeb00319"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "4e60ebb1c4850ede22066365ba4e3aeda3c9d1a6412d43d8687bd13caf4e020f"
+                    "diagram": "2d3eb69336b6ea78e8815a33108019f330b12780b3294af4fab86f779c1dcf62"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "63e789ee886c793e767e54393b3c4849b5a056d9e06d02ca8230a0d2e7c5ddd7"
+                    "diagram": "828374d6fd9ec3bcca66338d3b3c9a442edaea289cbff4339dfedbc328b7286d"
                   }
                 ]
               },
@@ -50927,7 +50927,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "63e789ee886c793e767e54393b3c4849b5a056d9e06d02ca8230a0d2e7c5ddd7",
+                  "assetId": "828374d6fd9ec3bcca66338d3b3c9a442edaea289cbff4339dfedbc328b7286d",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -50981,17 +50981,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "24bd04fa61459240476764baaf88a315ac2b5d1d028f20511c9cf978db17b20b"
+                    "diagram": "187793c9a6a2cb3a3c6f75700f30f39f6ec1042197061ba06e9d840c9729b19b"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "51b27b43fdbb627bbe22563c203e64eddc26d1a3981400687eb630a67165a5a8"
+                    "diagram": "d5961269f5d6722dd6d83f2c2715a9fc8cae22d28fc174aed6dcb204298ccf54"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "63e789ee886c793e767e54393b3c4849b5a056d9e06d02ca8230a0d2e7c5ddd7"
+                    "diagram": "828374d6fd9ec3bcca66338d3b3c9a442edaea289cbff4339dfedbc328b7286d"
                   }
                 ]
               },
@@ -51024,7 +51024,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "51b27b43fdbb627bbe22563c203e64eddc26d1a3981400687eb630a67165a5a8",
+                  "assetId": "d5961269f5d6722dd6d83f2c2715a9fc8cae22d28fc174aed6dcb204298ccf54",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51078,17 +51078,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "20032560f714a42b298f518113ac6ea9a5cea41175aabfbaf6a744aaee5d35d8"
+                    "diagram": "7174e1e4e77bc75271afd8a11c9644482b3e16c350344f94fdd2401daf65efb3"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "51b27b43fdbb627bbe22563c203e64eddc26d1a3981400687eb630a67165a5a8"
+                    "diagram": "d5961269f5d6722dd6d83f2c2715a9fc8cae22d28fc174aed6dcb204298ccf54"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "714086fb68ba20f20d7d957d01e3a34331e202c22cde1f1e42f0b97afb5e30fc"
+                    "diagram": "3ea8134b7ac109683fd86111fb3d43bbb60e6b1bef92231b95a75dbe13e15c3c"
                   }
                 ]
               },
@@ -51121,7 +51121,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "20032560f714a42b298f518113ac6ea9a5cea41175aabfbaf6a744aaee5d35d8",
+                  "assetId": "7174e1e4e77bc75271afd8a11c9644482b3e16c350344f94fdd2401daf65efb3",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51175,17 +51175,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "20032560f714a42b298f518113ac6ea9a5cea41175aabfbaf6a744aaee5d35d8"
+                    "diagram": "7174e1e4e77bc75271afd8a11c9644482b3e16c350344f94fdd2401daf65efb3"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "d6fd67c28204fd347a1b5dd18ab0462815c82eec7dcf00f5c5fb12381c7a51d7"
+                    "diagram": "590db9dc57bce4a06f56c525701087f078c0e23fe0ae514547373c7657a208dd"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "0172d5f581a5835384c4286fab92fc290ac0391ab1b14f585638458ee5c3cb82"
+                    "diagram": "b03f564bbb86b7a21bac815a689c22d4dbc11b5dc4bf20c6b95da3984812b76e"
                   }
                 ]
               },
@@ -51218,7 +51218,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "0172d5f581a5835384c4286fab92fc290ac0391ab1b14f585638458ee5c3cb82",
+                  "assetId": "b03f564bbb86b7a21bac815a689c22d4dbc11b5dc4bf20c6b95da3984812b76e",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51272,17 +51272,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "8eeb00131bd6c17cd5e0196affb948bc91a80dfd441e5479da34eb9561d301d8"
+                    "diagram": "45d6661af539e29a118c3d02ce4d809689a6d8638a46a129cc6ab8a4072e5d80"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "24b969c47650cfac1cd95b7b15f767139a86aa9eb199a2282e45a9f598365a2c"
+                    "diagram": "7f8cade8da78683ba1c6b953a425ab495484d1481a54b5b82f10b4290cc11f92"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "0172d5f581a5835384c4286fab92fc290ac0391ab1b14f585638458ee5c3cb82"
+                    "diagram": "b03f564bbb86b7a21bac815a689c22d4dbc11b5dc4bf20c6b95da3984812b76e"
                   }
                 ]
               },
@@ -51315,7 +51315,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "24b969c47650cfac1cd95b7b15f767139a86aa9eb199a2282e45a9f598365a2c",
+                  "assetId": "7f8cade8da78683ba1c6b953a425ab495484d1481a54b5b82f10b4290cc11f92",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51369,17 +51369,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "4f5f3690ec26a1f2410f9b21243d65f8ace5e92a141ddb793a12db7f890877c0"
+                    "diagram": "c27527e3df23b19daecb7780af641ae272180a2754d429a74c91dfdf754b8e1c"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "24b969c47650cfac1cd95b7b15f767139a86aa9eb199a2282e45a9f598365a2c"
+                    "diagram": "7f8cade8da78683ba1c6b953a425ab495484d1481a54b5b82f10b4290cc11f92"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "3afcd44c05110f3f4866c5cb93b8e15422e3f963642f82b19dded972a4e18347"
+                    "diagram": "3bd24a756885430fc8d6d1b9bbcb416c423cfb7f24817073aac5af414dbc9030"
                   }
                 ]
               },
@@ -51412,7 +51412,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "4f5f3690ec26a1f2410f9b21243d65f8ace5e92a141ddb793a12db7f890877c0",
+                  "assetId": "c27527e3df23b19daecb7780af641ae272180a2754d429a74c91dfdf754b8e1c",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51466,17 +51466,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "4f5f3690ec26a1f2410f9b21243d65f8ace5e92a141ddb793a12db7f890877c0"
+                    "diagram": "c27527e3df23b19daecb7780af641ae272180a2754d429a74c91dfdf754b8e1c"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "1e908e9acdff1d755780eaa0831c2ea1b36b609eda78d5eba7f548eb0bd6a516"
+                    "diagram": "6ccf9067006632af1d2eec8b6f20e8fe40df9061e923c9e9b2eb3eb1830b8be4"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "96ec4b9d34070e37ff0f04a4455460e6ec64d0b1861c7ddc69223ae4e895932b"
+                    "diagram": "8908486c37d8633957ff5bb0fe1dda35814bff2959279ee47095502f88982c54"
                   }
                 ]
               },
@@ -51509,7 +51509,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "96ec4b9d34070e37ff0f04a4455460e6ec64d0b1861c7ddc69223ae4e895932b",
+                  "assetId": "8908486c37d8633957ff5bb0fe1dda35814bff2959279ee47095502f88982c54",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51563,17 +51563,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "03db926acc4fc10c54a3ea0195cf431e6339ca8bf4feaab7deb4461de1011efc"
+                    "diagram": "4cf3fc02512aa81d3a4bc24838ce6f083d0e40223bd5e60c95a2fbabf58f07d9"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "70bd543c07e8604753713824a11d57c0c8f92b20042ed858781d1a182393fbaa"
+                    "diagram": "e72b733ce908946f698a9abf0047059484c999a8aa047ed4beef78f3ece0075f"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "96ec4b9d34070e37ff0f04a4455460e6ec64d0b1861c7ddc69223ae4e895932b"
+                    "diagram": "8908486c37d8633957ff5bb0fe1dda35814bff2959279ee47095502f88982c54"
                   }
                 ]
               },
@@ -51606,7 +51606,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "70bd543c07e8604753713824a11d57c0c8f92b20042ed858781d1a182393fbaa",
+                  "assetId": "e72b733ce908946f698a9abf0047059484c999a8aa047ed4beef78f3ece0075f",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51660,17 +51660,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "dd3e9192d3fa608127a50fda2830b9a0133bc814d194805e72990abe4e8b8ff1"
+                    "diagram": "0b5184da7ad1b9049d325f4049099771219727a4d343cd61a2d9b9a8d73078c4"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "70bd543c07e8604753713824a11d57c0c8f92b20042ed858781d1a182393fbaa"
+                    "diagram": "e72b733ce908946f698a9abf0047059484c999a8aa047ed4beef78f3ece0075f"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "2384162bc1683b6823c6edee333b734233798fdbafac14f0f6b9315ee97cc517"
+                    "diagram": "78494490dbf9176d98c37f06a7770b5d81c0e7ea842dfa20b753d389abca580d"
                   }
                 ]
               },
@@ -51703,7 +51703,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "dd3e9192d3fa608127a50fda2830b9a0133bc814d194805e72990abe4e8b8ff1",
+                  "assetId": "0b5184da7ad1b9049d325f4049099771219727a4d343cd61a2d9b9a8d73078c4",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51757,17 +51757,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "dd3e9192d3fa608127a50fda2830b9a0133bc814d194805e72990abe4e8b8ff1"
+                    "diagram": "0b5184da7ad1b9049d325f4049099771219727a4d343cd61a2d9b9a8d73078c4"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "171c1360770558e1067aad3643aad8e8e781e9d12ecffc3760dbc86c6c6d5029"
+                    "diagram": "fbaac3262d68388b9ab792e0f23a5e7ec7d5795d9450ba0707cbac492ce22f32"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "2a9d5c2de5939470f4e95e4cffa0595673b01e985f1cf6cfb84a7d964f704b8c"
+                    "diagram": "00f1afc89b9a2b086f6570ea2b34861dd651c25e8662494e676d6ac73d8d54c4"
                   }
                 ]
               },
@@ -51800,7 +51800,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "2a9d5c2de5939470f4e95e4cffa0595673b01e985f1cf6cfb84a7d964f704b8c",
+                  "assetId": "00f1afc89b9a2b086f6570ea2b34861dd651c25e8662494e676d6ac73d8d54c4",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51854,17 +51854,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "8a3e69f57d8ea837daa9fed3a20f027bc713cba18097c778c2297b195ab5c3ac"
+                    "diagram": "0c7f08a0764d64465b3dcb3e447961aaaf50c57d7277a26ce0190623710eb449"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "c5f6a97aa7039d9f8468be1166d504c47f5c1096b35863f5485a1ac7e3626baf"
+                    "diagram": "236c0268f0843e613e0f9edd11adb7fadf5945c6c0e4d0fe6386f0bdec53b504"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "2a9d5c2de5939470f4e95e4cffa0595673b01e985f1cf6cfb84a7d964f704b8c"
+                    "diagram": "00f1afc89b9a2b086f6570ea2b34861dd651c25e8662494e676d6ac73d8d54c4"
                   }
                 ]
               },
@@ -51897,7 +51897,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "c5f6a97aa7039d9f8468be1166d504c47f5c1096b35863f5485a1ac7e3626baf",
+                  "assetId": "236c0268f0843e613e0f9edd11adb7fadf5945c6c0e4d0fe6386f0bdec53b504",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -51951,17 +51951,17 @@
                   {
                     "id": "a",
                     "label": "Picture 1",
-                    "diagram": "97fd2138af2c709baca76525f36534bdadf64d9ac0b9ae35049d367f48355ebf"
+                    "diagram": "c4d012dac62b6a29d28fd90e435e502580a161624b25683bff3b35edfeb00319"
                   },
                   {
                     "id": "b",
                     "label": "Picture 2",
-                    "diagram": "c5f6a97aa7039d9f8468be1166d504c47f5c1096b35863f5485a1ac7e3626baf"
+                    "diagram": "236c0268f0843e613e0f9edd11adb7fadf5945c6c0e4d0fe6386f0bdec53b504"
                   },
                   {
                     "id": "c",
                     "label": "Picture 3",
-                    "diagram": "158b39672d8184bf07bb04e771d88e9c7256d0a8cb5df520749b97082147ce98"
+                    "diagram": "e0ed9fb395eeda03fc42d3ef88d12ec340d1a2000368f34de399840401a21037"
                   }
                 ]
               },
@@ -78848,7 +78848,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "764212a85d37cc2be7420f7855d8a94b1d8833a8e87ec0d82255d1be6a4c8e04",
+                  "assetId": "514b0b077b9344c0f80d7bbdf262a1f2e5abdd342f375a7fa6d1b01582a4d825",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -78942,7 +78942,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "36d1356dcb0d023023782a55cb8cae33d47aa651eaa710bee60d17fa1de33820",
+                  "assetId": "23a44659301b61c0f81c275f11e19a337008ce1a21f5dbd6f0a72ad3e6a5a911",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79036,7 +79036,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "f2951c723ab8fa9655099ab9a3dcfcea4ea13d56ca24d0e5a07a2bd9d8a143d8",
+                  "assetId": "ba1c0ace7e36dec09e98ae0ee7544654524211e545ea6dca276e7edeaff8c2e2",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79130,7 +79130,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "e0edf02bce414576800cd2c4175d307c11d58801b702a61cbec0f12b27a97ea4",
+                  "assetId": "a72b84cc759ce8e4414f7ca0ef87ecc6a046a8bb4781fd1a9f48986c4cb96672",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79224,7 +79224,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "b9eaf3b8957693808ff810b9205c40b96fd03866f96b86bfb4d8f445406d78d8",
+                  "assetId": "ab8114bd54ad3a7c05d1e9597c8a8d027c03785a0233f6dbe71c1cb1e9e0e385",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79318,7 +79318,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "7bdaf5b1689113e55ccedf56403f1d70e768e481ac5ec2a6cf68356e6c7e066f",
+                  "assetId": "e9870fc03c151f80d8b5cee0f025e9f13570fa28ffcd482df59d2f165fe12234",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79412,7 +79412,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "9526b67e1034d916dfe75c6d34bf7eee8f1ebc1fdc8c1cc09a5c33eaa30e768b",
+                  "assetId": "c525a56d51753be870c973ef119a648ec6bb055a23074b9aeedc903e6ad78799",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79506,7 +79506,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "5ca3bbf5f3af8ff318642fd646d8e9cac6b7dc3bd575b9154d2d35cb0663c02f",
+                  "assetId": "3fc51a74b47334b55200b27142a331af874926e295294d2b51c0e0c1516ba1e5",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79600,7 +79600,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "a21c7349277de93b763e889a9f7c65c053542ffbcec20db807de4ec61e847c1c",
+                  "assetId": "1359e1bc7c38557af35de5199d302e5a7e39b48b76906509f49a5be2cebe0fca",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79694,7 +79694,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "59f6d8b4bb89905e37d82e57e15fe293d322206db9fe3704b9e7d65a801520c5",
+                  "assetId": "58c71bc75329bbab5ffd6c1ff872822e5342622f533d683876e618cba2dc9a66",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79788,7 +79788,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "51994d0f46f301a0c34e7da8928709108cb738fe4e110a790e650060ab1870ad",
+                  "assetId": "51fc6f3b2f6a1e0aaf4a84be66e4373dbd82cb88e151f33a89280ad6199140fe",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -79882,7 +79882,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "868919aec6d0558100ae8defdee019a7dc1f4a29531cda617ba9ca7135e4b8b2",
+                  "assetId": "16fd04d75db82b76e3ca0a0716019dd0e2a262909e3053733193bcd15fb96bcd",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -116516,7 +116516,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "77deb48dfbc145b7ea108beb52f4e8baf214ec59d570b212f2bf89333f0872b8",
+                  "assetId": "04bc1f782911c2e20829cab3b4a24f99e76552e6a88f9cb98d7d1dd31e30b820",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -116610,7 +116610,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "7f2fc91f33a9f4d3a5c9e2f265056567c4004e9139312bb685e5bfbcb41f3f54",
+                  "assetId": "03503dacef4551f10cc75bbef1364dc16eb04f3abede31aff8203ff4c6c2b717",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -116704,7 +116704,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "03b7b0a3d479b4c23602d2397d400e8c69d2c9f27dd0eb68c76861cff78bdf55",
+                  "assetId": "f5401ad3a78dd3af82701b58c74291feb2e2eedcc56adac7131daec5d1b553db",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -116798,7 +116798,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "c6505cf0e9a6015e67aa19780410d67f1102f622dd883fcd3dca400b9d285420",
+                  "assetId": "66172947611a9fdeefd6274f1dc7e4ac7258eaa5852a2054eb70d18f484877d2",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],
@@ -116892,7 +116892,7 @@
               "stimuli": [
                 {
                   "kind": "diagram",
-                  "assetId": "34b901bd96948fb9c9c3df3e3b9713e9821f042235883e6b0009e08c5861f5a1",
+                  "assetId": "53a4bb5383e428c5c6228c767af9c31be96608a7f3ccf1aa7056d838eee15348",
                   "description": "Question diagram. Ask for an accessible supported activity if needed."
                 }
               ],

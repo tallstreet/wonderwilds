@@ -1,3 +1,4 @@
+import { gotoLegacy } from './legacy-entry.mjs';
 // Read-only presentation regression; synthetic snapshots, no demo data or provider calls.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -32,7 +33,7 @@ try {
       return route.fulfill({ json: snapshot });
     });
     const open = async () => {
-      await page.goto(origin);
+      await gotoLegacy(page, origin);
       await page.waitForFunction(() => document.querySelector('#game').dataset.storyRevision === '3', { timeout: 15000 });
       await page.locator('#missions').click();
     };

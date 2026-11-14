@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create NEW original Wonderwilds game character advancement sprite atlas. TRUE TRANSPARENT background square1536x1536 exact TWO columns TWO rows four equal cells generous gutters. Full body centered within70 percent width and80 percent height, feet88 percent cell, consistent warm upper-left light, slight high overhead three-quarter front camera. Premium dimensional preschool3D animated family game style, fluffy tactile fur enormous glossy expressive eyes rounded accessories, violet coral turquoise gold. No text labels borders backdrop ground planes external shadows. TOP LEFT: Pip Wayfinder, peach-and-cream fluffy kitten with huge TEAL eyes, violet adventurer suit and turquoise short cape, recognizable round kitten face. Advanced form adds elegant GOLD MOON CRESCENT chest clasp instead of star, short layered turquoise-and-violet travel mantle edged with small warm lantern shapes, tiny golden compass at belt. Slightly more confident upright pose, kitten proportions retained. TOP RIGHT: Tansy Wayfinder, careful kind HEDGEHOG with sage-green leaf-shaped overlapping quills and peach tips, cream fluffy face/belly AMBER eyes, mint gardening apron, small watering cup. Advanced form adds arching pair of GOLDEN LEAF quills at crown, short lilac travel cape with luminous leaf border, small seed-kit belt. Clearly hedgehog not kitten, retain gentle recognizable face. BOTTOM LEFT: Nib Wayfinder, taupe-and-cream FIELD MOUSE with VERY LARGE ROUND pink-lined ears, AMBER eyes, long thin curved tail fully inside cell, lavender scarf, diagonal brown seed satchel. Advanced form adds short violet travel vest with GOLDEN WOVEN BRIDGE clasp and a rolled map on satchel, broad lavender scarf tips forming distinct confident silhouette, one hand open offering seed. Mouse proportions retained. BOTTOM RIGHT: one isolated small gold-and-turquoise MOONBURST decorative emblem with rounded eight rays and central cream crescent, no letters, not a character. All three forms original, modest non-frightening growth, same species and core face identity, no crowns swords armor weapons. Regular separate grid no clipped ears quills or tail.",
+  "rawSource": "content/campaign/art/sources/wayfinders-meadow-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-6f87b054-01a2-4928-9968-03c71a44cd8d.png",
+  "processedAsset": "frontend/public/assets/campaign/wayfinders-meadow-v1.png",
+  "processing": "Byte-for-byte copy; no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/characters/meadow.png",
+    "frontend/public/assets/campaign/cast-v1.png"
+  ],
+  "requestedDimensions": [
+    1536,
+    1536
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "pip-wayfinder": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "tansy-wayfinder": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "nib-wayfinder": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "moonburst": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "reviewStatus": "pending",
+  "inspection": "Source inspected: original species/eye/costume identity retained, distinct crescent/leaf/bridge motifs. Static front pose only. Small warm glow extends outside silhouettes; actual game alignment and phone scale pending.",
+  "sha256": "113a900579932e1e1c64d20f76564b2535c993d696bc5dcff9f20ff781748782",
+  "technicalPreview": [
+    "docs/screenshots/campaign/wayfinders-first-phaser.png",
+    "docs/screenshots/campaign/wayfinders-first-phone.png"
+  ],
+  "technicalPreviewNotes": "Actual createWorld synthetic visual fixture, not progress/unlock evidence. Desktop three recognizable species no frame clipping. Phone Tansy and Nib readable; Pip outside camera viewport, so not full all-three phone review. World camera edge cuts Nib viewport, not atlas clipping. Gate allows remaining forms source production; human review pending.",
+  "completedTechnicalPreviews": [
+    "docs/screenshots/campaign/forms-group1.png",
+    "docs/screenshots/campaign/forms-group1-phone.png"
+  ],
+  "completedTechnicalPreviewNotes": "2026-11-14 actual createWorld registered sprites inspected desktop1280x800 and phone390x844, three at a time. Synthetic fixtures, avatar hidden to prevent occlusion; no source-frame clipping observed. No gameplay progression or final human approval claim."
+}

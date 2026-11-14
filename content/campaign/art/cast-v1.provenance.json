@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create ONE new production development sprite atlas for an original preschool exploration game Wonderwilds. True transparent background. Square canvas 1536x1536, exactly TWO columns and TWO rows equal cells. No lettering, labels, borders, backdrop, ground planes or external shadows. Warm upper-left sunlight, premium dimensional 3D animated family game style, tactile fluffy fur and rounded polished wood/brass, enormous expressive eyes, saturated violet/coral/turquoise accents. Friendly original designs. Each object entirely within its own cell, middle 76% width and 80% height, generous transparent gutters. All feet or wheel bottoms at 88% cell height. High slight overhead three-quarter camera consistent across all sprites. TOP LEFT: Rowan, friendly young red fox explorer, cinnamon-red fur, cream muzzle, dark brown paws, distinct triangular fox ears and full white-tipped bushy tail, teal travel vest, coral neckerchief, small golden compass medallion, cheerful energetic stance, full body. TOP RIGHT: Hazel, wise kind small tawny owl guide, round feathered head, short rounded wings, cream facial disks, amber eyes, purple waistcoat with mint scarf, small closed field-guide book held at side, full body. BOTTOM LEFT: Moss, Rowan's unique mossback companion, a small original quadruped tortoise-like mossback with rounded dark teal shell covered by soft moss-green pads and three pale golden smooth stones, cream face, very short sturdy rounded feet, large friendly amber eyes, turquoise harness with tiny brass lantern. Distinct shell silhouette; no hedgehog quills, no cat ears, no copying any recruitable pet. BOTTOM RIGHT: one brass-and-honeywood collector handcart, two large rounded wheels, empty shallow open wooden tray with brass moonstone mount and curved handle, subtle violet metal fittings, no driver or contents. Each sprite centered, full object visible, separate regular grid, crisp alpha edges, no clipping. No superhero chest stars. No text anywhere.",
+  "rawSource": "content/campaign/art/sources/cast-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-03924b26-d473-42dd-8d1b-7e12d363796a.png",
+  "processedAsset": "frontend/public/assets/campaign/cast-v1.png",
+  "processing": "Byte-for-byte copy; source pixels retained intact.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/hero-atlas-v2.png",
+    "frontend/public/assets/characters/meadow.png",
+    "frontend/public/assets/prop-atlas-v2.png"
+  ],
+  "requestedDimensions": [
+    1536,
+    1536
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "rowan": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "hazel": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "moss": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "collector-cart": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "reviewStatus": "pending",
+  "inspection": "Actual output visually inspected 2026-11-14. Consistent rounded dimensional materials and distinct fox/owl/mossback silhouettes. Tight upper Rowan ear gutter and bottom Moss feet require actual in-game clipping/scale review. No directional animation coverage. Cart contains decorative moonstone mount rather than collectible inventory.",
+  "rendererContract": {
+    "origin": [
+      0.5,
+      1
+    ],
+    "npcDisplayHeight": 96,
+    "partnerDisplayHeight": 72,
+    "directions": [
+      "front"
+    ],
+    "padding": "Generated gutters are tighter than requested; retained source pending game review.",
+    "reducedMotion": "Use same static front frame.",
+    "actualRendererOrigin": [
+      0.5,
+      0.96
+    ],
+    "actualMarkerDisplayDimensions": [
+      86,
+      96
+    ],
+    "notes": "Actual world marker origin .5,.96 and fixed 86x96 observed in renderer; initial .5,1/72px partner agreement remains target."
+  },
+  "sha256": "a9134c8e8a059c34cddba1efb8f8ff1b848797f9b398f6e5abd96707b26d6c94",
+  "technicalPreview": "docs/screenshots/campaign/cast-phaser-first-preview.png",
+  "technicalPreviewNotes": "Actual Phaser cutouts render clearly, recognizable fox/owl/mossback. Opening cluster label/player overlap reported for frontend fix. Not human art approval."
+}

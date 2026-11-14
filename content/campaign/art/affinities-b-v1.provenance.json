@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "generatedDate": "2026-11-14",
+  "method": "image_gen.imagegen",
+  "prompt": "Create ONE original Wonderwilds production game ICON sprite atlas TRUE TRANSPARENT BACKGROUND square1536x1536 EXACT TWO columns TWO rows FOUR equal cells, isolated object centered within70percent width75percent height generous empty gutters. Warm upper-left lighting straight-on slight high-angle camera premium rounded dimensional3D animated preschool game style polished toy materials violet coral turquoise gold. No letters text labels grid backdrop ground external shadows. TOP LEFT Rhythm affinity symbol: one chunky PURPLE BELL with thick golden lip and turquoise round clapper, two short gold curved sound-wave marks, simple identifiable at32px, no medal rim or ribbon. TOP RIGHT Tide affinity symbol: one chunky TURQUOISE CURLING WAVE with cream foam cap and purple curved base, no medal rim or ribbon, simple recognizable at32px. BOTTOM LEFT fossil keepsake icon: one rounded warm cream oval stone with raised lilac SPIRAL SHELL fossil impression, gold tiny sparkle inset, no floating effects. BOTTOM RIGHT clue rubbing icon: one short rolled honeycream parchment with large simple turquoise LIGHTHOUSE drawing and single purple crescent impression, no words letters numbers or map paths. Entire shapes visible wholly within each cell. Shared warm rounded dimensional materials, no sharp corners or microscopic detail.",
+  "rawSource": "content/campaign/art/sources/affinities-b-v1.png",
+  "originalToolOutput": "/workspace/generated_images/exec-64e0a3ae-00a7-4b0d-a667-6e6275137a9c.png",
+  "processedAsset": "frontend/public/assets/campaign/affinities-b-v1.png",
+  "processing": "Byte-for-byte copy; no raster editing.",
+  "references": [],
+  "styleInspectionReferences": [
+    "frontend/public/assets/campaign/wayfinders-sail-v1.png",
+    "frontend/public/assets/campaign/props-v1.png"
+  ],
+  "actualDimensions": [
+    1254,
+    1254
+  ],
+  "frames": {
+    "affinity-rhythm": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "affinity-tide": [
+      627,
+      0,
+      627,
+      627
+    ],
+    "fossil-keepsake": [
+      0,
+      627,
+      627,
+      627
+    ],
+    "clue-rubbing": [
+      627,
+      627,
+      627,
+      627
+    ]
+  },
+  "reviewStatus": "pending",
+  "inspection": "Source inspected bell/wave/fossil/rubbing distinguishable without colour. Static.",
+  "sha256": "7e05e9a15ff354cce849ff27e5d60c9467d29f97f8c7cd8ab381fc976d972c68",
+  "phonePreview": "docs/screenshots/campaign/final-static-phone.png",
+  "phonePreviewNotes": "390px viewport browser canvas draws exact source frames; icon32/48px, props80px on checkerboard. Readable symbols and alpha edges; not real scene integration or human approval."
+}

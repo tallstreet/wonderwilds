@@ -78,10 +78,57 @@ and limitations.
 
 ## Development
 
+### The Missing Moonlight campaign
+
+Run `sh scripts/local-demo.sh`, open `http://127.0.0.1:5173/`, and choose
+**Begin The Missing Moonlight**. The authored campaign needs no model credentials.
+Choose Pip, Tansy or Nib, restore eight beacons across three regions, and discover
+twelve companions. Learning support, camp recovery and free keeper tools provide
+routes through the adventure for every starter. Progress, rewards and chosen
+companion appearances are saved by the backend.
+
+Adoption preserves earlier stories and friends. Finish an existing activity before
+adopting; the campaign journal also offers a route back to the earlier adventure.
+Do not reset the demo database to switch adventures. Restart the launcher after
+updating so it applies migrations through 0010 and loads the bundled campaign.
+
+This is a development playtest build. All twelve companions have bundled base and
+Wayfinder pose sets with minimal walk, signature, cheer and rest cycles. Human
+playtesting, physical-device performance review and final artwork approval remain
+open.
+See [campaign delivery status](docs/CAMPAIGN_DELIVERY_STATUS.md) for the acceptance
+matrix and [implementation evidence](docs/IMPLEMENTATION_STATUS.md) for executed
+checks. **Play together** supports two saved players in the same household on one
+device: select each player explicitly, bring their own friend, take alternating
+roles, and confirm both keepsake offers. Solo progress and learning evidence remain
+independent. Network invitations and cross-household play are a later milestone.
+
+For a local-demo second player, run the explicit operator command below while the
+demo is running, then reload and choose the new saved player:
+
+```sh
+python3 scripts/add-local-demo-player.py --create-player --ability-band beginning
+```
+
+This creates one fresh synthetic profile in the isolated demo household; it does
+not copy another player's progress. Choose a starter in each player's own adventure
+before starting shared practice.
+
+Campaign checks use disposable synthetic databases:
+
+```sh
+node qa/e2e/campaign-run.mjs
+node qa/e2e/campaign-longplay-run.mjs
+```
+
+The first exercises the opening browser journey for each starter; the second
+checks the complete campaign with each starter and both Orchard orders, using
+API progression and the real supported-learning browser controls.
+
 The game runs in `frontend/`, with a Rust backend and PostgreSQL database for
 saved progress and learning activities.
-The active work follows the [implementation plan](docs/IMPLEMENTATION_PLAN.md) and
-[curriculum mission integration](docs/CURRICULUM_MISSION_PLAN.md): profile-owned
+The active work follows the [campaign build plan](docs/CAMPAIGN_BUILD_PLAN.md), using
+[curriculum mission integration](docs/CURRICULUM_MISSION_PLAN.md) for profile-owned
 practice through the existing curriculum graph inside story missions. The
 [companion progression plan](docs/COMPANION_PROGRESSION_PLAN.md) remains the
 supporting specification for creature expansion.

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "assetId": "tansy-wayfinder-motion-v1",
+  "generatedAt": "2026-11-14",
+  "generator": "image_gen.imagegen",
+  "reviewStatus": "pending",
+  "promptFile": "content/campaign/art/tansy-wayfinder-motion-v1.prompt.txt",
+  "rawSource": "content/campaign/art/sources/tansy-wayfinder-motion-v1.png",
+  "processedAsset": "frontend/public/assets/campaign/tansy-wayfinder-motion-v1.png",
+  "sha256": "017584f7321d404801c61693d944a64f8382764a95e008a5fd8195b5dda7e2b5",
+  "actualDimensions": [
+    1122,
+    1402
+  ],
+  "requestedDimensions": [
+    1536,
+    1920
+  ],
+  "frameMetadata": "content/campaign/art/tansy-wayfinder-motion-v1.frames.json",
+  "sourceReferences": [
+    {
+      "path": "frontend/public/assets/campaign/wayfinders-meadow-v1.png",
+      "sha256": "113a900579932e1e1c64d20f76564b2535c993d696bc5dcff9f20ff781748782",
+      "use": "Tansy WAYFINDER form, ONLY UPPER RIGHT: careful hedgehog, sage-green leafquills peach tips, creamface and huge AMBER eyes, mint gardening apron, pair of arching GOLDEN LEAF quills at crown, short LILAC travel cape with warmgold leafborder, seedkitbelt, tinywateringcup. Preserve exactadvancedcostume. Signature: gathers a tinyvine, extends a protective curved vinearch, then settles."
+    }
+  ],
+  "processing": "Imagegen background-cleanup edit; original generation and edited source preserved. Public PNG copied byte-for-byte from edited source, no programmatic pixel edits. Runtime frame rectangles/ground anchors measured separately.",
+  "availablePoses": [
+    "idle-down",
+    "idle-right",
+    "idle-up",
+    "idle-left",
+    "two-stride-walk-down",
+    "two-stride-walk-right",
+    "two-stride-walk-up",
+    "two-stride-walk-left",
+    "three-frame-signature",
+    "three-frame-cheer",
+    "two-frame-rest"
+  ],
+  "technicalInspection": "Source and all twenty actual Phaser desktop poses inspected; phone groups 2 visually reviewed from four captured groups. Species/costume recognizable, genuinely distinct headings and articulated strides/signature/cheer/rest, intact ears/tail/quills/wings, no source-frame clipping or ground-anchor defect observed. Timed actual-world signature follows canonical companion event and returns to idle. Synthetic renderer fixture does not establish canonical earned progression or human art/accessibility approval.",
+  "measurement": {
+    "rowCuts": [
+      0,
+      288,
+      560,
+      839,
+      1115,
+      1402
+    ],
+    "columnCuts": [
+      0,
+      280,
+      561,
+      842,
+      1122
+    ],
+    "rowBoundaryOpaqueCounts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Directional idle is one still per heading, not a breathing/blink cycle.",
+    "Two-stride walking is a minimal cycle; frame interpolation and four/eight-stride refinement remain review questions.",
+    "Human art/accessibility approval pending."
+  ],
+  "originalGenerationSource": "content/campaign/art/sources/tansy-wayfinder-motion-v1-original.png",
+  "cleanupPromptFile": "content/campaign/art/tansy-wayfinder-motion-v1.cleanup-prompt.txt",
+  "previewEvidence": [
+    "content/campaign/art/native-motion-content-review.v1.json",
+    "docs/screenshots/campaign/tansy-wayfinder-motion-phaser.png",
+    "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group1.png",
+    "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group2.png",
+    "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group3.png",
+    "docs/screenshots/campaign/tansy-wayfinder-motion-phone-group4.png"
+  ]
+}
