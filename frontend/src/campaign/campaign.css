@@ -536,3 +536,130 @@
   height: 20px;
   flex-shrink: 0;
 }
+
+.campaign-piece-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.campaign-piece-tray button {
+  min-height: 64px;
+  padding: 1rem;
+  border: 2px solid #9c8266;
+  border-radius: 12px;
+  background: #fff9eb;
+  font: inherit;
+  color: #344d38;
+}
+.campaign-piece-tray button[aria-pressed='true'] {
+  outline: 3px solid #466a3c;
+  outline-offset: 2px;
+}
+.campaign-plank {
+  display: block;
+  height: 12px;
+  background: #b07b48;
+  border: 2px solid #705230;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+.campaign-plank-short {
+  width: 60px;
+}
+.campaign-plank-long {
+  width: 120px;
+}
+.bridge-river {
+  background: repeating-linear-gradient(170deg, #c7e8ec, #c7e8ec 20px, #aed8e3 22px, #aed8e3 25px);
+  border-radius: 18px;
+  padding: 1rem;
+  margin-top: 1.5rem;
+}
+.bridge-bank {
+  padding: 0.75rem;
+  background: #e5e8c5;
+  text-align: center;
+  border-radius: 8px;
+}
+.bridge-deck {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  justify-items: center;
+}
+.bridge-gap {
+  width: 65%;
+  border: 2px dashed #537b86;
+  border-radius: 8px;
+}
+.bridge-gap.wide {
+  width: 95%;
+}
+.bridge-gap.fitted {
+  background: #cda979;
+  border: 2px solid #89633d;
+}
+.campaign-project button {
+  cursor: pointer;
+}
+.bridge-gap button {
+  width: 100%;
+  min-height: 56px;
+  padding: 0.7rem;
+  background: #fff9eb;
+  color: #344d38;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+}
+.campaign-project button:disabled {
+  cursor: default;
+}
+.campaign-project button:focus-visible {
+  outline: 3px solid #7654ae;
+  outline-offset: 3px;
+}
+.garden-source {
+  background: #c7e8ec;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 16px;
+  font-weight: 800;
+}
+.garden-beds {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.garden-bed {
+  background: #f4e8d7;
+  border: 2px solid #b69a74;
+  border-radius: 18px;
+  padding: 1rem;
+}
+.garden-bed.watered {
+  background: #e6efd9;
+  border-color: #71975e;
+}
+.garden-channel {
+  height: 10px;
+  background: #c6b297;
+  border-radius: 8px;
+}
+.garden-channel.flowing {
+  background: #548eab;
+}
+.garden-growth {
+  text-align: center;
+  font-size: 2rem;
+}
+.garden-bed .campaign-actions {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 400px) {
+  .garden-beds {
+    grid-template-columns: 1fr;
+  }
+}

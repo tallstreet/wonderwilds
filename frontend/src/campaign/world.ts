@@ -14,6 +14,8 @@ import { PairedPanel, profileLabel } from '../paired/panel.ts';
 import fieldGuide from '../../../content/campaign/field-guide.v1.json';
 import { characterSprite, campaignCharacterArt } from '../character-sprites.ts';
 import './campaign.css';
+import { projectBoard } from './projects.ts';
+import { challengeStory, storySoFar } from './story.ts';
 import {
   beaconFlags,
   companionAffinities,
@@ -63,6 +65,8 @@ export class CampaignWorld {
   private status = '';
   private selected?: string;
   private guided = false;
+  private projectPiece = 'short';
+  private exploring = false;
   private savingAge = false;
   private refreshNeeded = false;
   private pairing?: PairedPanel;
@@ -215,6 +219,13 @@ export class CampaignWorld {
       welcome: { x: 510, y: 390 },
       starter: { x: 430, y: 440 },
       bridge_clue: { x: 510, y: 325, shape: 'stones' },
+      find_branch_1: { x: 290, y: 330, prop: 'plank' },
+      find_branch_2: { x: 620, y: 510, prop: 'plank' },
+      find_branch_3: { x: 780, y: 340, prop: 'plank' },
+      bridge_mounts: { x: 540, y: 325, shape: 'stones' },
+      bridge_planks: { x: 330, y: 370, prop: 'plank' },
+      bloom_beds: { x: 570, y: 330, shape: 'leaf' },
+      water_: { x: 490, y: 410, shape: 'stones' },
       bridge_gather: { x: 310, y: 500, prop: 'plank' },
       bridge_craft: { x: 425, y: 510, prop: 'plank' },
       bridge_build: { x: 550, y: 360, prop: 'plank' },
@@ -325,15 +336,24 @@ export class CampaignWorld {
       this.campaign.legal_actions,
       this.campaign.state.grants,
       this.campaign.state.flags,
+      this.campaign.state.starter,
     );
-    const worldActions = objective ? [objective] : [];
+    const worldActions = this.campaign.legal_actions.filter(
+      (action) =>
+        action.id !== 'bridge_gather' &&
+        (action === objective ||
+          action.id.startsWith('find_branch_') ||
+          action.kind === 'observe' ||
+          action.kind === 'recruit' ||
+          action.puzzle),
+    );
     for (const [index, action] of worldActions.entries()) {
       const key = Object.keys(sites)
         .sort((a, b) => b.length - a.length)
         .find((key) => action.id.startsWith(key));
       if (action.kind === 'recruit' && action.recruit === this.campaign.state.starter) continue;
       const speaker = action.dialogue[0]?.speaker;
-      if (speaker === 'Hazel' && ['observe', 'learn', 'practice'].includes(action.kind)) {
+      if (!key && speaker === 'Hazel' && ['observe', 'learn', 'practice'].includes(action.kind)) {
         const hazel = markers.find((m) => m.id === 'npc:hazel');
         if (hazel && hazel.passive) {
           hazel.id = action.id;
@@ -360,6 +380,7 @@ export class CampaignWorld {
           ? { shape: 'stones' as const }
           : {}),
         ...(action.kind === 'recruit' ? { sprite: action.recruit ?? 'pip' } : {}),
+        ...(action.id === 'bridge_planks' ? { sprite: 'woodcutter' } : {}),
       });
     }
     const laterProps: Record<string, string[]> = {
@@ -447,7 +468,12 @@ export class CampaignWorld {
             { id: 'living-habitat', kind: 'leaf', x: 650, y: 420 },
           ]
         : [];
-    if (location === 'picnic_clearing') return [{ id: 'camp', kind: 'picnic', x: 520, y: 440 }];
+    if (location === 'picnic_clearing')
+      return [
+        { id: 'camp', kind: 'picnic', x: 620, y: 470 },
+        { id: 'old-stump', kind: 'hollow', x: 290, y: 300 },
+        { id: 'fallen-leaves', kind: 'leaf', x: 780, y: 310 },
+      ];
     return flags.includes('world_bridge_restored')
       ? [{ id: 'bridge-beacon', kind: 'lantern', x: 540, y: 325 }]
       : flags.includes('world_bridge_planked')
@@ -532,13 +558,14 @@ export class CampaignWorld {
     set(
       '#mission-status',
       this.campaign.state.encounter
-        ? 'Keeper trial in progress'
+        ? challengeStory(this.campaign.state.encounter.id).title
         : missionBrief(
             flags,
             nextObjective(
               this.campaign.legal_actions,
               this.campaign.state.grants,
               this.campaign.state.flags,
+              this.campaign.state.starter,
             )?.mission,
           ).title,
     );
@@ -548,6 +575,7 @@ export class CampaignWorld {
         this.campaign.legal_actions,
         this.campaign.state.grants,
         this.campaign.state.flags,
+        this.campaign.state.starter,
       )?.label ?? 'Open your mission for the next path',
     );
   }
@@ -563,6 +591,18 @@ export class CampaignWorld {
     );
   }
   handle(button: HTMLButtonElement) {
+    if (button.dataset.projectPiece) {
+      this.projectPiece = button.dataset.projectPiece;
+      this.render();
+      return;
+    }
+    if (button.id === 'campaign-explore') {
+      this.exploring = true;
+      this.hooks.close();
+      document.querySelector<HTMLCanvasElement>('#game canvas')?.focus();
+      return;
+    }
+
     if (button.id === 'campaign-save-age' || button.id === 'campaign-retry-age') {
       void this.saveAge();
       return;
@@ -621,11 +661,25 @@ export class CampaignWorld {
       return;
     }
     if (button.dataset.campaignCommand) {
-      this.showAction(button.dataset.campaignCommand);
+      const marker = this.markers().find((marker) => marker.id === button.dataset.campaignCommand);
+      if (marker && this.game && this.campaign.state.starter) {
+        this.exploring = true;
+        this.hooks.close();
+        this.game.events.emit('visit', marker);
+      } else this.showAction(button.dataset.campaignCommand);
       return;
     }
     if (button.dataset.campaignPayload) {
-      void this.run(JSON.parse(button.dataset.campaignPayload) as CampaignPayload);
+      const payload = JSON.parse(button.dataset.campaignPayload) as CampaignPayload;
+      const path =
+        payload.type === 'travel'
+          ? this.markers().find((marker) => marker.id === `travel:${payload.location_id}`)
+          : undefined;
+      if (path && this.game) {
+        this.exploring = true;
+        this.hooks.close();
+        this.game.events.emit('visit', path);
+      } else void this.run(payload);
       return;
     }
     if (button.dataset.campaignSelect) {
@@ -676,6 +730,11 @@ export class CampaignWorld {
       if (id.startsWith('travel:')) void this.run({ type: 'travel', location_id: id.slice(7) });
       return;
     }
+    if (id.startsWith('find_branch_')) {
+      this.exploring = true;
+      void this.run({ type: 'action', action_id: id });
+      return;
+    }
     const lines =
       openingDialogue(id) ??
       (action.dialogue.length ? action.dialogue : [{ speaker: 'Hazel', text: action.label }]);
@@ -689,7 +748,7 @@ export class CampaignWorld {
         ? `<button id="campaign-read" class="campaign-speaker" aria-label="Read this aloud" title="Read this aloud" data-campaign-read="${escape(line.text)}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></svg></button>`
         : '';
     this.hooks.open(
-      `<section class="campaign-panel"><span class="campaign-eyebrow">${escape(name(action.mission || 'Moonlight trail'))}</span><h2 id="dialog-title" tabindex="-1">${escape(action.label)}</h2><p class="campaign-purpose"><strong>Our goal:</strong> ${escape(brief.goal)}</p><div class="campaign-dialogue">${portrait(speakerId)}<strong>${escape(line.speaker)}</strong><div class="campaign-dialogue-text"><p>${escape(line.text)}</p>${readAloud}</div></div><p class="campaign-note">${index + 1} of ${lines.length}</p>${readAloud ? '' : '<p class="campaign-note">Read aloud is unavailable in this browser. All dialogue is shown as text.</p>'}<p id="campaign-read-status" role="status"></p><div class="campaign-actions">${index > 0 ? `<button class="campaign-secondary" data-campaign-page="${escape(JSON.stringify([id, index - 1]))}">Previous</button>` : ''}${!final ? `<button class="campaign-primary" data-campaign-page="${escape(JSON.stringify([id, index + 1]))}">Next</button>` : this.button(action.learning ? 'Practise together' : action.encounter ? 'Enter the trial' : action.label, { type: 'action', action_id: id }, false, true)}${final && action.recruit ? this.button('Maybe another time', { type: 'action', action_id: `decline:${action.id}` }) : ''}<button class="campaign-secondary" data-campaign-tab="missions">Back to adventure</button></div></section>`,
+      `<section class="campaign-panel"><span class="campaign-eyebrow">${escape(name(action.mission || 'Moonlight trail'))}</span><h2 id="dialog-title" tabindex="-1">${escape(action.label)}</h2><p class="campaign-purpose"><strong>Our goal:</strong> ${escape(brief.goal)}</p><div class="campaign-dialogue">${portrait(speakerId)}<strong>${escape(line.speaker)}</strong><div class="campaign-dialogue-text"><p>${escape(line.text)}</p>${readAloud}</div></div><p class="campaign-note">${index + 1} of ${lines.length}</p>${readAloud ? '' : '<p class="campaign-note">Read aloud is unavailable in this browser. All dialogue is shown as text.</p>'}<p id="campaign-read-status" role="status"></p><div class="campaign-actions">${index > 0 ? `<button class="campaign-secondary" data-campaign-page="${escape(JSON.stringify([id, index - 1]))}">Previous</button>` : ''}${!final ? `<button class="campaign-primary" data-campaign-page="${escape(JSON.stringify([id, index + 1]))}">Next</button>` : this.button(action.learning ? 'Practise together' : action.encounter ? 'Let’s begin' : action.label, { type: 'action', action_id: id }, false, true)}${final && action.recruit ? this.button('Maybe another time', { type: 'action', action_id: `decline:${action.id}` }) : ''}<button class="campaign-secondary" data-campaign-tab="missions">Back to adventure</button></div></section>`,
     );
     document.querySelector<HTMLElement>('#dialog-title')?.focus();
   }
@@ -755,7 +814,7 @@ export class CampaignWorld {
       more: 'Friends & more',
     };
     this.hooks.open(
-      `<section class="campaign-panel"><span class="campaign-eyebrow">The Missing Moonlight</span><nav class="campaign-tabs" aria-label="Adventure pages">${tabs.map(([id, label]) => `<button id="campaign-${id}" data-campaign-tab="${id}" ${this.panel === id ? 'aria-current="page"' : ''}>${label}</button>`).join('')}</nav><h2 id="dialog-title">${this.campaign.state.encounter ? 'Keeper trial' : (titles[this.panel] ?? 'Your mission')}</h2>${this.formPresentation()}${this.confirmedEffect && !this.campaign.state.encounter ? `<div class="campaign-confirmed-effect" role="status">${portrait(this.confirmedEffect.id)}<p>${escape(this.confirmedEffect.text)}</p></div>` : ''}${this.commands.hasPending ? '<div class="campaign-hazard"><strong>Your last move needs confirmation</strong><p>Retry your saved move to continue from the same place.</p><div class="campaign-actions"><button id="campaign-retry">Retry saved move</button></div></div>' : this.commands.needsRefresh || this.refreshNeeded ? '<div class="campaign-hazard"><strong>Your move is saved. Let’s refresh the adventure.</strong><p>Load the latest saved world before choosing another move.</p><div class="campaign-actions"><button id="campaign-refresh">Refresh adventure</button></div></div>' : this.body()}<p class="campaign-status" role="status">${escape(this.status)}</p></section>`,
+      `<section class="campaign-panel"><span class="campaign-eyebrow">The Missing Moonlight</span><nav class="campaign-tabs" aria-label="Adventure pages">${tabs.map(([id, label]) => `<button id="campaign-${id}" data-campaign-tab="${id}" ${this.panel === id ? 'aria-current="page"' : ''}>${label}</button>`).join('')}</nav><h2 id="dialog-title">${this.campaign.state.encounter ? escape(challengeStory(this.campaign.state.encounter.id).title) : (titles[this.panel] ?? 'Your mission')}</h2>${this.formPresentation()}${this.confirmedEffect && !this.campaign.state.encounter ? `<div class="campaign-confirmed-effect" role="status">${portrait(this.confirmedEffect.id)}<p>${escape(this.confirmedEffect.text)}</p></div>` : ''}${this.commands.hasPending ? '<div class="campaign-hazard"><strong>Your last move needs confirmation</strong><p>Retry your saved move to continue from the same place.</p><div class="campaign-actions"><button id="campaign-retry">Retry saved move</button></div></div>' : this.commands.needsRefresh || this.refreshNeeded ? '<div class="campaign-hazard"><strong>Your move is saved. Let’s refresh the adventure.</strong><p>Load the latest saved world before choosing another move.</p><div class="campaign-actions"><button id="campaign-refresh">Refresh adventure</button></div></div>' : this.body()}<p class="campaign-status" role="status">${escape(this.status)}</p></section>`,
     );
     document.querySelector<HTMLElement>('#dialog-title')?.setAttribute('tabindex', '-1');
     document.querySelector<HTMLElement>('#dialog-title')?.focus();
@@ -870,7 +929,7 @@ export class CampaignWorld {
         )
         .join('')}</div>`;
     if (this.panel === 'journal')
-      return `<h3>Your next step</h3><p>${escape(nextObjective(c.legal_actions, s.grants, s.flags)?.label ?? (s.flags.includes('finale_complete') ? (c.companions.length === fieldGuide.friends.length && c.companions.every((friend) => friend.level >= 5) ? 'Every friend has reached their Wayfinder milestone. Explore optional habitat caches or revisit keeper trials together.' : 'Explore your friends’ remaining invitations.') : 'Follow an open path to continue.'))}</p><h3>Keeper seals</h3><div class="campaign-seals">${
+      return `<h3>Your next step</h3><p>${escape(nextObjective(c.legal_actions, s.grants, s.flags, s.starter)?.label ?? (s.flags.includes('finale_complete') ? (c.companions.length === fieldGuide.friends.length && c.companions.every((friend) => friend.level >= 5) ? 'Every friend has reached their Wayfinder milestone. Explore optional habitat caches or revisit keeper trials together.' : 'Explore your friends’ remaining invitations.') : 'Follow an open path to continue.'))}</p><h3>Keeper seals</h3><div class="campaign-seals">${
         ['bridge', 'bloom', 'echo', 'harvest', 'current', 'tide', 'beacon', 'accord']
           .filter((id) => s.flags.includes(id + '_seal'))
           .map(
@@ -890,8 +949,30 @@ export class CampaignWorld {
           `<section class="campaign-hazard" aria-label="${escape(puzzle.title)}"><strong>${escape(puzzle.title)}</strong>${puzzle.settings.map((setting) => `<p>${escape(name(setting.setting))} → ${escape(name(setting.value))}</p>`).join('')}<p>${puzzle.status === 'solved' ? 'Solved: the mechanism is working.' : puzzle.status === 'blocked' ? 'That arrangement is blocked. Adjust the settings and check again.' : 'Settings saved. Check the mechanism when you are ready.'}</p></section>`,
       )
       .join('');
-    const objective = nextObjective(c.legal_actions, s.grants, s.flags);
+    const objective = nextObjective(c.legal_actions, s.grants, s.flags, s.starter);
     const brief = missionBrief(s.flags, objective?.mission);
+    if (
+      objective?.id === 'bridge_gather' ||
+      (s.location === 'picnic_clearing' &&
+        s.flags.includes('bridge_clue_complete') &&
+        !s.flags.includes('bridge_gather_done'))
+    ) {
+      const found = s.flags.filter((flag) => /^find_branch_[123]$/.test(flag)).length;
+      return `<section class="campaign-objective"><h3>Search the clearing for fallen branches</h3><p>The crossing needs three sound branches. Hazel spotted some in the picnic clearing on this side of the river.</p><p><strong>Branches found: ${found} / 3</strong></p><p>Look by the stump, the picnic blanket and the fallen leaves. Walk to a branch and pick it up.</p><div class="campaign-actions"><button id="campaign-explore" class="campaign-primary">Explore this place</button>${
+        s.location === 'bridge_bank'
+          ? this.button('Take the path to Picnic Clearing', {
+              type: 'travel',
+              location_id: 'picnic_clearing',
+            })
+          : this.campaign.legal_actions
+              .filter((action) => action.id.startsWith('find_branch_'))
+              .map(
+                (action) =>
+                  `<button data-campaign-command="${action.id}">Walk to branch ${action.id.at(-1)}</button>`,
+              )
+              .join('')
+      }</div></section>`;
+    }
     const trail = !objective ? nextTrail(s.flags, s.location, c.travel) : undefined;
     const placeName = (id: string) =>
       this.snapshot.locations.find((p) => p.id === id)?.name ?? name(id);
@@ -903,9 +984,10 @@ export class CampaignWorld {
           )
         : [];
     const others = c.legal_actions.filter(
-      (action) => action !== objective && !choices.includes(action),
+      (action) =>
+        action.id !== 'bridge_gather' && action !== objective && !choices.includes(action),
     );
-    return `<section class="campaign-objective" aria-label="Current mission"><span class="campaign-eyebrow">Our mission</span><h3>${escape(brief.title)}</h3><p>${escape(brief.story)}</p><p><strong>What we’re trying to do:</strong> ${escape(brief.goal)}</p><h3>Do this next</h3>${choices.length ? `<p>${objective?.puzzle ? 'Try the controls below, then check your arrangement. You can change it and try again.' : 'Choose how you would like to finish this part of the adventure.'}</p><div class="campaign-actions">${choices.map((action) => `<button data-campaign-command="${escape(action.id)}">${escape(action.label)}</button>`).join('')}</div>` : objective ? `<p>${escape(objective.label)}${objective.learning ? ' — a short activity will help us finish this step. Help is always available.' : '.'}</p><div class="campaign-actions"><button data-campaign-command="${escape(objective.id)}">${escape(objective.label)}</button></div>` : trail ? `<p>Head towards ${escape(placeName(trail.target))}. Take the path to ${escape(placeName(trail.step))} next.</p><div class="campaign-actions">${this.button('Go to ' + placeName(trail.step), { type: 'travel', location_id: trail.step })}</div>` : '<p>Explore the open paths or your friends’ invitations below.</p>'}</section>${waterStatus}${c.travel.length ? '<h3>Where to go</h3><p>These paths take you to another place. Your progress here stays saved.</p>' : ''}<div class="campaign-actions">${c.travel
+    return `${storySoFar(s.flags) ? `<section class="campaign-dialogue" aria-label="Story so far"><strong>The story so far</strong><p>${escape(storySoFar(s.flags)!)}</p></section>` : ''}<section class="campaign-objective" aria-label="Current mission"><span class="campaign-eyebrow">Our mission</span><h3>${escape(brief.title)}</h3><p>${escape(brief.story)}</p><p><strong>What we’re trying to do:</strong> ${escape(brief.goal)}</p><div class="campaign-actions"><button id="campaign-explore" class="campaign-primary">Explore this place</button></div><h3>Where to look next</h3>${choices.length ? `<p>${objective?.puzzle ? 'Try the controls below, then check your arrangement. You can change it and try again.' : 'Choose how you would like to finish this part of the adventure.'}</p><div class="campaign-actions">${choices.map((action) => `<button data-campaign-command="${escape(action.id)}">${escape(action.label)}</button>`).join('')}</div>` : objective ? `<p>${escape(objective.label)}${objective.learning ? ' — a short activity will help us finish this step. Help is always available.' : '.'}</p><div class="campaign-actions"><button data-campaign-command="${escape(objective.id)}">${escape(objective.label)}</button></div>` : trail ? `<p>Head towards ${escape(placeName(trail.target))}. Take the path to ${escape(placeName(trail.step))} next.</p><div class="campaign-actions">${this.button('Go to ' + placeName(trail.step), { type: 'travel', location_id: trail.step })}</div>` : '<p>Explore the open paths or your friends’ invitations below.</p>'}</section>${waterStatus}${c.travel.length ? '<h3>Where to go</h3><p>These paths take you to another place. Your progress here stays saved.</p>' : ''}<div class="campaign-actions">${c.travel
       .filter((id) => id !== trail?.step)
       .map((id) =>
         this.button(
@@ -922,8 +1004,19 @@ export class CampaignWorld {
       e = s.encounter!,
       d = this.campaign.encounter_definition!;
     const phase = encounterPhase(d, e.progress);
+    const story = challengeStory(e.id);
+    const project = projectBoard(e.id, s.flags, this.projectPiece, (label, movement, disabled) =>
+      this.button(
+        label,
+        { type: 'encounter_turn', companion_id: s.team[0]!, movement },
+        disabled,
+        ['bridge_cross', 'garden_check'].includes(movement),
+      ),
+    );
+    if (project)
+      return `${project}<div class="campaign-actions">${this.button('Help with one step', { type: 'encounter_turn', companion_id: s.team[0]!, movement: 'guided' })}${this.button('Return to camp', { type: 'encounter_turn', companion_id: s.team[0]!, movement: 'retreat' })}</div>`;
     const relay = d.relay
-      ? `<div class="campaign-hazard"><strong>Relay round ${1 + Math.min(d.relay.round_targets.length - 1, d.relay.round_targets.filter((target) => e.progress >= target).length)} of ${d.relay.round_targets.length}</strong><p>Round goals: ${d.relay.round_targets.join(' → ')} light. Bring ${d.relay.required_affinities} different affinities.</p><p>Contributed affinities: ${
+      ? `<div class="campaign-hazard"><strong>Relay round ${1 + Math.min(d.relay.round_targets.length - 1, d.relay.round_targets.filter((target) => e.progress >= target).length)} of ${d.relay.round_targets.length}</strong><p>Round goals: ${d.relay.round_targets.join(' → ')} progress. Bring ${d.relay.required_affinities} different affinities.</p><p>Contributed affinities: ${
           s.flags
             .filter((flag) => flag.startsWith(`relay:${e.id}:affinity:`))
             .map((flag) => escape(name(flag.split(':').at(-1)!)))
@@ -940,15 +1033,15 @@ export class CampaignWorld {
       !s.flags.includes(`free_signature_used:${actor}`);
     const signatureEnergy = freeSignature ? 0 : signatureCost(affinity);
     const descriptions: Record<string, string> = {
-      focus: 'Restore light. No energy needed.',
-      guard: 'Block up to 2 pressure from this gust. Uses 1 energy.',
-      rest: 'Recover up to 2 energy. Does not restore light.',
-      signature: `Use ${name(actor)}’s special ${name(affinity)} move to restore light${affinity === phase.affinity ? ' with a matching-light bonus' : ''}. Uses ${signatureEnergy} energy.`,
-      rally: 'Boost another friend’s next light-restoring move. Uses 1 energy. Requires level 2.',
-      tool: `Restore 2 light and block 1 pressure. No energy needed. ${e.tool_charges} charges left.`,
+      focus: 'Make steady progress on the goal. No energy needed.',
+      guard: 'Block up to 2 pressure from this hazard. Uses 1 energy.',
+      rest: 'Recover up to 2 energy. Does not advance the goal.',
+      signature: `Use ${name(actor)}’s special ${name(affinity)} move to advance the goal${affinity === phase.affinity ? ' with a matching-approach bonus' : ''}. Uses ${signatureEnergy} energy.`,
+      rally: 'Boost another friend’s next progress move. Uses 1 energy. Requires level 2.',
+      tool: `Add 2 progress and block 1 pressure. No energy needed. ${e.tool_charges} charges left.`,
       snack: 'Use one snack to recover up to 2 energy.',
-      shelter_patch: 'Use one patch to block up to 2 pressure from this gust.',
-      trail_marker: 'Use one marker to boost the next light-restoring move.',
+      shelter_patch: 'Use one patch to block up to 2 pressure from this hazard.',
+      trail_marker: 'Use one marker to boost the next progress move.',
     };
     const moves = [
       'focus',
@@ -990,7 +1083,7 @@ export class CampaignWorld {
         return `<div class="campaign-move">${button}<p id="move-${movement}-help">${escape(descriptions[movement]!)}${reason ? `<strong>${escape(reason)}</strong>` : ''}</p></div>`;
       })
       .join('');
-    return `<div class="campaign-trial-art" aria-hidden="true">${portrait(this.friendSprite(actor))}<span>✦ · ✦ · ✦</span>${portrait('collector-cart')}${this.confirmedEffect ? `<div class="campaign-effect-bitmap" aria-hidden="true">${portrait(this.confirmedEffect.id)}</div>` : ''}</div>${this.confirmedEffect ? `<p role="status">${escape(this.confirmedEffect.text)}</p>` : ''}${relay}<p>Work together to restore the keeper’s light. You can take your time choosing each move.</p><div class="campaign-stat"><span>Light restored</span><strong>${e.progress} / ${d.target}</strong></div><progress aria-label="Light restored" class="campaign-meter" value="${e.progress}" max="${d.target}">${e.progress} / ${d.target}</progress><div class="campaign-stat"><span>Pressure</span><strong>${e.pressure} / ${d.pressure_limit}</strong></div><div class="campaign-stat"><span>Turns</span><strong>${e.turns} / ${d.turn_limit}</strong></div><div class="campaign-hazard">${portrait('affinity-' + phase.affinity)}<strong>Current light: ${escape(name(phase.affinity))}</strong><p>${phase.next ? `At ${phase.next.threshold} light, the trial changes to ${escape(name(phase.next.affinity))}.` : 'This is the final phase.'}</p><strong>Next hazard: ${d.hazards[e.turns % d.hazards.length] ?? 0} pressure</strong>${s.flags.includes(`encounter_reveal:${e.id}:${e.turns}`) ? `<p>Gleam reveals the following hazard too: ${d.hazards[(e.turns + 1) % d.hazards.length] ?? 0} pressure.</p>` : ''}<p>Each move takes one turn, then the gust adds pressure. Restore the light before pressure or turns run out.</p></div><div class="campaign-actions">${this.button('Return to camp', { type: 'encounter_turn', companion_id: actor, movement: 'retreat' })}${this.button(
+    return `<div class="campaign-trial-art" aria-hidden="true">${portrait(this.friendSprite(actor))}<span>✦ · ✦ · ✦</span>${portrait('collector-cart')}${this.confirmedEffect ? `<div class="campaign-effect-bitmap" aria-hidden="true">${portrait(this.confirmedEffect.id)}</div>` : ''}</div>${this.confirmedEffect ? `<p role="status">${escape(this.confirmedEffect.text)}</p>` : ''}${relay}<p>${escape(story.goal)} You can take your time choosing each move.</p><div class="campaign-stat"><span>${escape(story.progress)}</span><strong>${e.progress} / ${d.target}</strong></div><progress aria-label="${escape(story.progress)}" class="campaign-meter" value="${e.progress}" max="${d.target}">${e.progress} / ${d.target}</progress><div class="campaign-stat"><span>Pressure</span><strong>${e.pressure} / ${d.pressure_limit}</strong></div><div class="campaign-stat"><span>Turns</span><strong>${e.turns} / ${d.turn_limit}</strong></div><div class="campaign-hazard">${portrait('affinity-' + phase.affinity)}<strong>Helpful approach: ${escape(name(phase.affinity))}</strong><p>${phase.next ? `At ${phase.next.threshold} progress, the challenge changes to ${escape(name(phase.next.affinity))}.` : 'This is the final phase.'}</p><strong>Next hazard: ${d.hazards[e.turns % d.hazards.length] ?? 0} pressure</strong>${s.flags.includes(`encounter_reveal:${e.id}:${e.turns}`) ? `<p>Gleam reveals the following hazard too: ${d.hazards[(e.turns + 1) % d.hazards.length] ?? 0} pressure.</p>` : ''}<p>Each move takes one turn, then the next hazard adds pressure. Finish the goal before pressure or turns run out.</p></div><div class="campaign-actions">${this.button('Return to camp', { type: 'encounter_turn', companion_id: actor, movement: 'retreat' })}${this.button(
       'Let’s do this together',
       { type: 'encounter_turn', companion_id: actor, movement: 'guided' },
     )
@@ -998,7 +1091,7 @@ export class CampaignWorld {
       .replace(
         '>Let’s',
         '>' + activityIcon('together').outerHTML + 'Let’s',
-      )}<button class="campaign-secondary campaign-support" id="campaign-guided" aria-pressed="${this.guided}">${activityIcon('hint').outerHTML}${this.guided ? 'Hide trial hints' : 'Let’s plan together'}</button></div>${this.guided ? `<div class="campaign-dialogue"><strong>Plan your next move</strong><p>You have ${e.tool_charges} keeper tool charges left. Focus restores light without spending energy. Guard helps with a strong gust; Rest recovers energy. A signature matching the current light gets a bonus.</p></div>` : ''}<section class="campaign-trial-section"><h3>1. Who will help?</h3><p>Choose the friend who will make your next move. Choosing a friend does not use a turn.</p><div class="campaign-actions campaign-team-choice">${s.team.map((id) => `<button data-campaign-select="${escape(id)}" aria-pressed="${actor === id}">${escape(name(id))} · ${s.energy[id] ?? 0} energy${actor === id ? ' · Selected' : ''}</button>`).join('')}</div></section><section class="campaign-trial-section"><h3>2. Choose a move for ${escape(name(actor))}</h3><p>Choose one action below. For help, “Let’s do this together” chooses and plays one move for you; “Let’s plan together” shows hints without using a turn.</p><div class="campaign-actions campaign-moves">${moves}</div></section>`;
+      )}<button class="campaign-secondary campaign-support" id="campaign-guided" aria-pressed="${this.guided}">${activityIcon('hint').outerHTML}${this.guided ? 'Hide trial hints' : 'Let’s plan together'}</button></div>${this.guided ? `<div class="campaign-dialogue"><strong>Plan your next move</strong><p>You have ${e.tool_charges} keeper tool charges left. Focus makes progress without spending energy. Guard helps with a strong hazard; Rest recovers energy. A signature matching the helpful approach gets a bonus.</p></div>` : ''}<section class="campaign-trial-section"><h3>1. Who will help?</h3><p>Choose the friend who will make your next move. Choosing a friend does not use a turn.</p><div class="campaign-actions campaign-team-choice">${s.team.map((id) => `<button data-campaign-select="${escape(id)}" aria-pressed="${actor === id}">${escape(name(id))} · ${s.energy[id] ?? 0} energy${actor === id ? ' · Selected' : ''}</button>`).join('')}</div></section><section class="campaign-trial-section"><h3>2. Choose a move for ${escape(name(actor))}</h3><p>Choose one action below. For help, “Let’s do this together” chooses and plays one move for you; “Let’s plan together” shows hints without using a turn.</p><div class="campaign-actions campaign-moves">${moves}</div></section>`;
   }
   private async run(payload: CampaignPayload) {
     if (!this.learning.snapshot?.learnerAge) return this.render();
@@ -1044,7 +1137,7 @@ export class CampaignWorld {
           'gleam';
         this.confirmedEffect = {
           id: 'effect-' + affinity,
-          text: `${name(payload.companion_id)} used their ${name(affinity)} signature. The saved trial now has ${after.encounter?.progress ?? 'restored'} light.`,
+          text: `${name(payload.companion_id)} used their ${name(affinity)} signature. ${after.encounter ? `Progress: ${after.encounter.progress}.` : 'The goal is complete.'}`,
         };
       }
       if (
@@ -1054,7 +1147,7 @@ export class CampaignWorld {
       )
         this.confirmedEffect = {
           id: 'effect-celebration',
-          text: 'The keeper trial is complete. Your friends celebrate the restored light!',
+          text: challengeStory(before.encounter.id).outcome,
         };
       if (payload.type === 'encounter_turn' && payload.movement === 'signature')
         this.game?.events.emit('campaign-pose', payload.companion_id, 'signature');
@@ -1076,13 +1169,20 @@ export class CampaignWorld {
         before.encounter && !after.encounter
           ? after.grants.includes(`win:${before.encounter.id}`) &&
             !before.grants.includes(`win:${before.encounter.id}`)
-            ? 'The keeper’s light is restored! Follow the next invitation to light the beacon.'
+            ? challengeStory(before.encounter.id).outcome
             : !after.grants.includes(`win:${before.encounter.id}`) ||
                 after.location !== before.location ||
                 (payload.type === 'encounter_turn' && payload.movement === 'retreat')
               ? 'Back at camp. Rest with your friends and try the trial again.'
               : 'Practice complete. Your discoveries are safely saved.'
           : 'Saved. Your adventure continues.';
+      if (payload.type === 'action' && payload.action_id.startsWith('find_branch_')) {
+        const count = after.flags.filter((flag) => /^find_branch_[123]$/.test(flag)).length;
+        this.status =
+          count === 3
+            ? 'Three fallen branches found! Bring them back to Bridge Bank and meet the woodcutter.'
+            : `Found a fallen branch: ${count} of 3. Keep exploring the clearing.`;
+      }
       if (payload.type === 'care') {
         const friend = fieldGuide.friends.find((friend) => friend.id === payload.companion_id);
         const labels: Record<string, string> = {
@@ -1098,7 +1198,9 @@ export class CampaignWorld {
       if (!writeConfirmed && !this.commands.hasPending) this.pendingAppearance = undefined;
       this.status = this.commands.hasPending
         ? 'We could not confirm that move. Retry the saved move.'
-        : 'That move is not available yet. Try another way or rest at camp.';
+        : payload.type === 'encounter_turn' && payload.movement.startsWith('bridge_')
+          ? 'That piece does not fit yet. Match the plank length to the gap, then brace both banks before crossing.'
+          : 'That move is not available yet. Check the project instructions or ask for help.';
       try {
         if (!this.commands.hasPending) {
           await this.commands.refresh();
@@ -1111,7 +1213,16 @@ export class CampaignWorld {
         this.status = 'Reconnect to load your adventure.';
       }
     }
-    this.render();
+    if (
+      this.exploring &&
+      !this.campaign.state.encounter &&
+      !this.commands.hasPending &&
+      !this.refreshNeeded &&
+      !this.commands.needsRefresh
+    ) {
+      this.hooks.close();
+      this.hooks.toast(this.status);
+    } else this.render();
   }
 
   private async learningCommand(payload: Parameters<MissionLearningSession['choose']>[0]) {
@@ -1180,7 +1291,10 @@ export class CampaignWorld {
               this.refreshNeeded = false;
               this.apply();
               this.confirmFormPresentation();
-              this.missions();
+              if (this.exploring) {
+                this.hooks.close();
+                this.hooks.toast('That step is finished. Explore the next part of the trail.');
+              } else this.missions();
             })
             .catch(() => {
               this.refreshNeeded = true;

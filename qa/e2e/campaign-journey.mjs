@@ -26,14 +26,20 @@ try {
     assert.equal(response.status(), 200);
     return response.json();
   };
+  const ensureMission = async () => {
+    await page.locator('#missions:not([disabled])').waitFor();
+    if (!(await page.locator('#dialog').isVisible())) await page.locator('#missions').click();
+  };
   const clickPayload = async payload => {
+    await ensureMission();
     const button = page.locator(`[data-campaign-payload='${JSON.stringify(payload)}']`);
     await button.waitFor();
     const before = (await snapshot()).revision;
     const saved = page.waitForResponse(r => r.url().endsWith('/campaign/commands') && JSON.stringify(r.request().postDataJSON()?.payload) === JSON.stringify(payload));
     await button.click();
     assert.equal((await saved).status(), 200);
-    await page.locator('.campaign-status').filter({ hasText: /Saved|safely saved/ }).waitFor();
+    await assertEventually(async () => Number(await page.locator('#game').getAttribute('data-campaign-revision')) > before, 'UI reconciles command');
+    await ensureMission();
     assert.ok((await snapshot()).revision > before, 'Command committed');
     return snapshot();
   };
@@ -74,12 +80,28 @@ try {
   await page.locator('#campaign-missions').click();
   const action = async id => {
     console.log(`Campaign ${starter} action ${id}`);
+    await ensureMission();
+    if (id === 'bridge_gather') {
+      await clickPayload({ type: 'travel', location_id: 'picnic_clearing' });
+      for (const branch of ['find_branch_1', 'find_branch_2', 'find_branch_3']) await action(branch);
+      await clickPayload({ type: 'travel', location_id: 'bridge_bank' });
+      return;
+    }
     const initial = await snapshot();
     const before = initial.revision;
     const learning = initial.campaign.legal_actions.find(a => a.id === id)?.learning;
     const actionButton = page.locator(`[data-campaign-command="${id}"]`);
     if (!(await actionButton.isVisible())) await page.locator('.campaign-optional summary').click();
+    if (id.startsWith('find_branch_')) {
+      const collected = page.waitForResponse(r => r.url().endsWith('/campaign/commands') && r.request().postDataJSON()?.payload?.action_id === id);
+      await actionButton.click();
+      assert.equal((await collected).status(), 200);
+      await assertEventually(async () => Number(await page.locator('#game').getAttribute('data-campaign-revision')) > before, 'Found branch saved');
+      await ensureMission();
+      return;
+    }
     await actionButton.click();
+    await page.locator('.campaign-purpose').waitFor();
     while (await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).count()) {
       await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).click();
     }
@@ -94,9 +116,10 @@ try {
       await page.locator('.ww-mission-activity').waitFor({ state: 'hidden', timeout: 30000 });
     } else {
       assert.equal((await saved).status(), 200);
-      await page.locator('.campaign-status').filter({ hasText: /Saved/ }).waitFor();
+      await assertEventually(async () => Number(await page.locator('#game').getAttribute('data-campaign-revision')) > before, 'Action reconciled');
     }
     await assertEventually(async () => (await snapshot()).revision > before, `action ${id}`);
+    await ensureMission();
     await page.locator('#campaign-missions').waitFor();
     if (id === 'water_check' && initial.campaign.state.flags.includes('puzzle:garden_water:near:bypass')) {
       const flags = (await snapshot()).campaign.state.flags;
@@ -112,15 +135,15 @@ try {
       assert.equal((await snapshot()).campaign.state.encounter, null, 'Starter practice completes');
     }
   };
-  for (const id of ['practice_pip', 'practice_tansy', 'practice_nib', 'welcome_supplies', 'welcome_depart', 'bridge_mounts', 'bridge_record', 'bridge_gather', 'bridge_plan', 'bridge_planks', 'bridge_build', 'bridge_trial']) await action(id);
+  for (const id of [`practice_${starter}`, 'welcome_supplies', 'welcome_depart', 'bridge_mounts', 'bridge_record', 'bridge_gather', 'bridge_plan', 'bridge_planks', 'bridge_build', 'bridge_trial']) await action(id);
   assert.ok((await snapshot()).campaign.companions.find(friend => friend.id === starter).level >= 2, 'First-help training reaches level two');
   const turn = movement => clickPayload({ type: 'encounter_turn', companion_id: starter, movement });
-  // Deliberately fail once: recovery must preserve the trial invitation.
-  for (let n = 0; n < 10 && (await snapshot()).campaign.state.encounter; n++) await turn('rest');
+  // Leave once: project recovery must preserve the invitation.
+  await turn('retreat');
   assert.equal((await snapshot()).campaign.state.encounter, null);
   assert.ok((await snapshot()).campaign.legal_actions.some(a => a.id === 'bridge_trial'));
   await action('bridge_trial');
-  await turn('tool');
+  await turn('guided');
   const paused = (await snapshot()).campaign.state.encounter;
   await page.reload();
   await page.locator('#game canvas').waitFor();
@@ -134,7 +157,7 @@ try {
     assert.equal(response.status(), 200);
     await route.abort('failed');
   }, { times: 1 });
-  await page.locator('[data-campaign-move="tool"]').click();
+  await page.locator('[data-campaign-move="guided"]').click();
   await page.locator('#campaign-retry').waitFor();
   const committed = await snapshot();
   const retry = page.waitForRequest(request => request.url().endsWith('/campaign/commands'));
@@ -142,7 +165,7 @@ try {
   assert.equal((await retry).postData(), uncertainBody, 'Uncertain save retries identical command');
   await page.locator('.campaign-status').filter({ hasText: /safely saved/ }).waitFor();
   assert.deepEqual(await snapshot(), committed, 'Retry does not repeat turn or spend energy');
-  await turn('tool');
+  while ((await snapshot()).campaign.state.encounter) await turn('guided');
   await action('bridge_celebrate');
   await page.getByRole('button', { name: 'Close dialog', exact: true }).click();
   await page.screenshot({ path: `/tmp/wonderwilds-campaign-${starter}-bridge-restored.png`, fullPage: true });
@@ -154,10 +177,10 @@ try {
   await assertEventually(async () => Number(await page.locator('#game').getAttribute('data-campaign-player-x')) > 800, 'walk across repaired bridge');
   await page.keyboard.press('Space');
   await assertEventually(async () => (await snapshot()).campaign.state.location === 'flower_garden', 'interact with garden trail sign');
-  await page.locator('#campaign-missions').waitFor();
+  await ensureMission();
   assert.equal(await page.locator('#game').getAttribute('data-campaign-location'), 'flower_garden');
   for (const id of ['bloom_beds', 'bloom_record', 'water_near_bypass', 'water_far_collector', 'water_check', 'water_near_garden', 'water_far_seedlings', 'water_check', 'garden_wild', 'bloom_shelter', 'bloom_prepare', 'bloom_trial']) await action(id);
-  await turn('tool'); await turn('tool'); await turn('tool'); await turn('focus');
+  while ((await snapshot()).campaign.state.encounter) await turn('guided');
   await action('bloom_celebrate');
   const friend = starter === 'pip' ? 'tansy' : 'pip';
   if (friend === 'pip') await clickPayload({ type: 'travel', location_id: 'bridge_bank' });
@@ -176,12 +199,8 @@ try {
   await action('bridge_alcove');
   const grantsBeforeReplay = (await snapshot()).campaign.state.grants;
   await action('bridge_trial');
-  await clickPayload({ type: 'encounter_turn', companion_id: starter, movement: 'rally' });
-  await page.locator(`[data-campaign-select="${friend}"]`).click();
-  await clickPayload({ type: 'encounter_turn', companion_id: friend, movement: 'signature' });
-  assert.ok((await snapshot()).campaign.state.encounter.progress >= 4, 'Partner signature uses the starter’s rally');
-  await clickPayload({ type: 'encounter_turn', companion_id: friend, movement: 'tool' });
-  assert.equal((await snapshot()).campaign.state.encounter, null, 'Paired practice wins');
+  while ((await snapshot()).campaign.state.encounter) await turn('guided');
+  assert.equal((await snapshot()).campaign.state.encounter, null, 'Project replay completes');
   assert.deepEqual((await snapshot()).campaign.state.grants, grantsBeforeReplay, 'Practice replay grants no repeated reward');
   await page.locator('#campaign-more').click();
   await page.locator('#campaign-care').click();
@@ -209,7 +228,7 @@ try {
   await phone.screenshot({ path: `/tmp/wonderwilds-campaign-${starter}-mobile.png`, fullPage: true });
   await phone.close();
   assert.deepEqual(errors, [], 'No uncaught browser errors');
-  console.log(`Campaign ${starter}: Bridge/Bloom, support, loss recovery, trial reload, care, pair, revisit and mobile passed`);
+  console.log(`Campaign ${starter}: Bridge/Bloom, support, retreat recovery, project reload, care, pair, revisit and mobile passed`);
 } catch (error) {
   await page.screenshot({ path: `/tmp/wonderwilds-campaign-${starter}-failure.png`, fullPage: true });
   console.error('Browser state:', (await page.locator('body').innerText()).slice(-6000));

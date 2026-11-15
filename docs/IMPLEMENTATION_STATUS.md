@@ -5,6 +5,52 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Exploration and distinct opening projects — 15 November 2026
+
+The opening now sends the player to Picnic Clearing to find three fallen branches
+at separate world positions. Each find is saved by Rust and cannot be collected
+twice; the third joins the existing three-branch supply grant. The clearing path
+opens after the bridge clue, before the crossing is restored. The player returns
+to the woodcutter at Bridge Bank. Mission navigation walks to people, objects and
+path signs; completed world actions and learning steps return to exploration.
+Keyboard walking/Space and accessible walk-to controls remain available.
+
+The Bridge finale is a construction board: match short/long planks to three gaps,
+brace both banks, then escort the traveller. The Bloom finale is irrigation and
+plant care: route water to two beds, water them, mulch damp soil, then invite Fern
+to inspect. The earlier channel plan initializes the garden routing. These projects
+are untimed and do not use the tactical pressure/energy loop. Rust validates piece
+fit, routing and prerequisites and persists every step. One-step assistance uses
+the same authoritative project rules. Existing tactical commands remain supported
+by the domain; other encounters still use tactics. This is a Bridge/Bloom gameplay
+slice, not a replacement of all later encounters or educator approval.
+
+Checks include domain regressions for invalid placement, premature completion,
+wrong-location/duplicate finds and checkpoint reload, frontend checks/build,
+Clippy and an isolated browser exploration → woodcutter → construction → irrigation
+journey with reload and phone layout coverage. No persistent demo data is reset.
+
+## Story-linked challenges and shorter introduction — 15 November 2026
+
+One completed starter practice now unlocks departure once packing and starter
+selection are complete. The other introductions remain optional, and the main
+objective no longer sends the player through them. This is an explicit domain
+eligibility rule for `welcome_depart`; stored content and saves are preserved.
+The selected starter is preferred for the initial practice.
+
+All 22 authored encounter screens have specific goals, progress labels and
+outcomes tied to the existing campaign treatment. A saved-state recap links clue,
+project and chapter milestones to the next task. This is narrative/pacing work,
+not a new set of minigame mechanics: tactical boards still share turn controls;
+water routing, chime ordering and valve puzzles retain their existing mechanics.
+Narrative and educator reviews remain pending.
+
+Validation: frontend checks/build, domain tests and Clippy; isolated browser
+coverage of one-practice departure and the Bridge goal/outcome, plus the Tansy
+Bridge/Bloom journey, puzzle feedback, loss/reload, care, shared practice and phone
+layout. Existing saves
+are kept; no database reset is needed.
+
 ## Clearer opening and age-based practice — 15 November 2026
 
 The opening asks a grown-up for an age band (4-or-younger through 12-or-older),

@@ -100,6 +100,7 @@ export function nextObjective(
   actions: import('../../../contracts/generated/contracts.ts').CampaignAction[],
   grants: string[],
   flags: string[] = [],
+  starter?: string | null,
 ) {
   const uncompleted = actions.filter(
     (action) =>
@@ -114,7 +115,10 @@ export function nextObjective(
           action.mission,
         ) && action.kind !== 'practice',
     ) ??
-    uncompleted.find((action) => action.mission === 'welcome' && action.kind === 'practice') ??
+    (!flags.some((flag) => /^practised_(pip|tansy|nib)$/.test(flag))
+      ? (uncompleted.find((action) => action.id === `practice_${starter}`) ??
+        uncompleted.find((action) => action.mission === 'welcome' && action.kind === 'practice'))
+      : undefined) ??
     uncompleted.find((action) =>
       ['field-bloom', 'field-resonate', 'field-illuminate'].includes(action.mission),
     ) ??
@@ -252,6 +256,28 @@ export function campaignPages(hasStarter: boolean, inTrial: boolean) {
 
 export function openingDialogue(id: string) {
   const dialogue: Record<string, { speaker: string; text: string }[]> = {
+    bridge_planks: [
+      {
+        speaker: 'Woodcutter',
+        text: 'You found all three fallen branches. I’ll cut two short planks and one long plank. The long one will span the wide middle gap.',
+      },
+      {
+        speaker: 'Woodcutter',
+        text: 'Take these to the crossing. Fit the lengths carefully, then brace both banks before anyone walks over.',
+      },
+    ],
+    bridge_build: [
+      {
+        speaker: 'Hazel',
+        text: 'Let’s carry the cut planks and my braces to the crossing. We have the materials; now we need to fit them together.',
+      },
+    ],
+    bridge_trial: [
+      {
+        speaker: 'Hazel',
+        text: 'The traveller is waiting on this bank. Choose a plank, place it in a matching gap, and brace both ends. When the bridge is secure, invite the traveller across.',
+      },
+    ],
     welcome_meet: [
       {
         speaker: 'Hazel',
@@ -263,7 +289,7 @@ export function openingDialogue(id: string) {
       },
       {
         speaker: 'Hazel',
-        text: 'We will pack for the trip and try each friend’s lantern practice here. Then we will look for clues at the bridge, repair the crossing and bring its light back.',
+        text: 'We will pack for the trip and try one short teamwork practice here. The other practices are optional. Then we will look for clues at the bridge, repair the crossing and bring its light back.',
       },
     ],
     welcome_supplies: [

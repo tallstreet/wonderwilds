@@ -85,7 +85,11 @@ Run `sh scripts/local-demo.sh`, open `http://127.0.0.1:5173/`, and choose
 A grown-up first chooses the player’s age band to estimate a practice starting
 point. Hazel explains the missing lights, then you choose Pip, Tansy or Nib.
 **Your mission** shows the problem, goal and next action; **Friends & more** explains
-the optional tools. Independent answers adjust practice forwards or back towards
+the optional tools. After investigating the bridge, explore Picnic Clearing for
+three fallen branches and return to the woodcutter. Fit planks and braces on the
+bridge construction board; later, route water and tend separate garden beds.
+Mission links walk to people and objects, and completed steps return you to the world.
+Independent answers adjust practice forwards or back towards
 prerequisites, while help always lets the adventure continue.
 Restore eight beacons across three regions, and discover
 twelve companions. Learning support, camp recovery and free keeper tools provide

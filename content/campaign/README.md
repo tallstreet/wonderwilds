@@ -110,7 +110,9 @@ The new regions and sublocations need explicit world bindings and assets.
 
 ## Companion ownership, growth and choice
 
-Pip, Tansy and Nib are the starters. Try a short practice with each before choosing.
+Pip, Tansy and Nib are the starters. The demo prefers one short practice with the
+chosen friend; the other practices are optional. The domain departure rule accepts
+one completed introduction even for retained packs that list all three.
 The choice changes efficient early solutions and personality responses. The player
 avatar is separate. The two unchosen starters remain recruitable. Rowan's companion
 is a distinct individual; his choice never removes a species from your collection.
@@ -164,6 +166,17 @@ label, a particular starter or a high-level companion. A new seal grants the
 relevant field tool as well as licensing the companion ability. Companion use
 adds personality, optional discoveries and convenient routes; it cannot strand a
 player who chose another starter.
+
+## Opening exploration and hands-on projects
+
+The development client now exposes the Bridge and Bloom finales as distinct
+construction and irrigation projects. The domain supplies saved branch discoveries
+in Picnic Clearing, opens its near-bank path after the bridge clue, and joins the
+third discovery to the existing gather reward. Retained content definitions still
+contain the original gather and tactical actions; the primary client flow uses the
+world finds and project controls. `campaign/exploration.rs` defines these explicit
+opening rules; every placement and care dependency is server-checked. See the
+implementation status for actual verification and current scope.
 
 ## Tactical encounters: actual decisions
 

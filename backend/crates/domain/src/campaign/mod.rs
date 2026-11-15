@@ -1,4 +1,6 @@
 //! Version-pinned deterministic campaign authority. Ownership is supplied by the API.
+mod exploration;
+
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -321,7 +323,16 @@ fn legal(s: &CampaignState, a: &ActionDefinition) -> bool {
         && s.encounter.is_none()
         && (s.starter.is_some() || matches!(a.kind.as_str(), "observe" | "practice"))
         && s.location == a.location
-        && has(&s.flags, &a.requires_flags)
+        && a.requires_flags.iter().all(|flag| {
+            // One completed introduction teaches the controls. Other friends remain optional.
+            if a.id == "welcome_depart" && flag.starts_with("practised_") {
+                ["practised_pip", "practised_tansy", "practised_nib"]
+                    .iter()
+                    .any(|practice| s.flags.contains(*practice))
+            } else {
+                s.flags.contains(flag)
+            }
+        })
         && (replay || a.forbids_flags.iter().all(|f| !s.flags.contains(f)))
         && (replay || a.puzzle.is_some() || !s.grants.contains(&format!("action:{}", a.id)))
         && (replay
@@ -387,6 +398,7 @@ pub fn snapshot(
         legal_actions: def
             .actions
             .iter()
+            .chain(exploration::finds(def).iter())
             .filter(|a| {
                 legal(s, a)
                     && a.discovery_for
@@ -423,7 +435,7 @@ pub fn snapshot(
                 .map(|l| {
                     l.routes
                         .iter()
-                        .filter(|r| has(&s.flags, &r.requires_flags))
+                        .filter(|r| exploration::route_open(s, r))
                         .map(|r| r.to.clone())
                         .collect()
                 })
@@ -518,7 +530,7 @@ pub fn apply(
                     .is_some_and(|l| {
                         l.routes
                             .iter()
-                            .any(|r| &r.to == location_id && has(&s.flags, &r.requires_flags))
+                            .any(|r| &r.to == location_id && exploration::route_open(&s, r))
                     })
             {
                 return Err(CampaignError::IllegalAction);
@@ -546,9 +558,11 @@ pub fn apply(
                     grants,
                 });
             }
+            let finds = exploration::finds(def);
             let a = def
                 .actions
                 .iter()
+                .chain(finds.iter())
                 .find(|a| &a.id == action_id)
                 .ok_or(CampaignError::IllegalAction)?;
             if !legal(&s, a)
@@ -633,6 +647,12 @@ pub fn apply(
                         && !f.starts_with(&format!("encounter_action:{id}:"))
                 });
                 s.flags.insert(format!("encounter_action:{id}:{}", a.id));
+                s.flags
+                    .retain(|flag| !flag.starts_with(&format!("project:{id}:")));
+                if id == "trial_bloom" && s.flags.contains("puzzle:garden_water:solved") {
+                    s.flags.insert("project:trial_bloom:north:beds".into());
+                    s.flags.insert("project:trial_bloom:south:beds".into());
+                }
                 s.encounter = Some(EncounterState {
                     id: id.clone(),
                     progress: 0,
@@ -674,6 +694,23 @@ pub fn apply(
             if a.encounter.is_none() {
                 s.flags.extend(a.grants_flags.clone());
                 s.grants.insert(format!("action:{}", a.id));
+            }
+            if a.id.starts_with("find_branch_")
+                && (1..=3).all(|i| s.flags.contains(&format!("find_branch_{i}")))
+            {
+                let location = s.location.clone();
+                s.location = "bridge_bank".into();
+                let mut gathered = apply(
+                    def,
+                    &s,
+                    &CampaignCommand::Action {
+                        action_id: "bridge_gather".into(),
+                    },
+                    owned,
+                    false,
+                )?;
+                gathered.state.location = location;
+                return Ok(gathered);
             }
             if a.encounter.is_none() && !a.grant_id.is_empty() {
                 s.grants.insert(a.grant_id.clone());
@@ -817,6 +854,8 @@ pub fn apply(
             }
             s.flags
                 .retain(|f| !f.starts_with(&format!("relay:{}:", e.id)));
+            s.flags
+                .retain(|flag| !flag.starts_with(&format!("project:{}:", e.id)));
             s.encounter = Some(EncounterState {
                 id: e.id.clone(),
                 progress: 0,
@@ -856,6 +895,7 @@ pub fn apply(
                 .iter()
                 .find(|d| d.id == e.id)
                 .ok_or(CampaignError::IllegalAction)?;
+            let project = exploration::project_move(&mut s, &mut e, board, movement)?;
             let affinity = board
                 .phases
                 .iter()
@@ -874,6 +914,9 @@ pub fn apply(
                 .unwrap_or(maximum(level(owned, companion_id)));
             let (mut cost, mut progress, mut shield) = (0, 0, 0);
             match movement.as_str() {
+                _ if project => {
+                    shield = u32::MAX;
+                }
                 "focus" => progress = 1,
                 "guard" => {
                     cost = 1;
@@ -969,7 +1012,7 @@ pub fn apply(
             if movement != "rest" && movement != "snack" {
                 s.energy.insert(companion_id.clone(), available - cost);
             }
-            if progress > 0 && e.bonus_source.as_ref() != Some(companion_id) {
+            if !project && progress > 0 && e.bonus_source.as_ref() != Some(companion_id) {
                 progress += e.partner_bonus;
                 e.partner_bonus = 0;
                 e.bonus_source = None;
@@ -1093,6 +1136,16 @@ pub fn guided_command(
         .encounter
         .as_ref()
         .ok_or(CampaignError::IllegalAction)?;
+    if let Some(movement) = exploration::project_hint(state) {
+        return Ok(CampaignCommand::EncounterTurn {
+            companion_id: state
+                .team
+                .first()
+                .ok_or(CampaignError::IllegalAction)?
+                .clone(),
+            movement,
+        });
+    }
     let win = format!("win:{}", current.id);
     // Search only combat-relevant state. Historical quests, collection receipts and
     // inventory cannot change these supply-free moves, and cloning them per edge
@@ -1335,6 +1388,170 @@ mod tests {
         validate(&d).unwrap();
         d
     }
+    #[test]
+    fn one_completed_practice_unlocks_departure_but_other_requirements_remain() {
+        let def = definition();
+        let departure = def
+            .actions
+            .iter()
+            .find(|a| a.id == "welcome_depart")
+            .unwrap();
+        for friend in ["pip", "tansy", "nib"] {
+            let mut state = adopt(&def);
+            state.starter = Some(friend.into());
+            state.team = vec![friend.into()];
+            state
+                .flags
+                .extend(["starter_chosen".into(), "welcome_supplies_ready".into()]);
+            assert!(!legal(&state, departure));
+            state.flags.insert(format!("practised:{friend}"));
+            assert!(!legal(&state, departure));
+            state.flags.insert(format!("practised_{friend}"));
+            assert!(legal(&state, departure));
+            let result = apply(
+                &def,
+                &state,
+                &CampaignCommand::Action {
+                    action_id: "welcome_depart".into(),
+                },
+                &owned(friend),
+                false,
+            )
+            .unwrap();
+            assert!(result.state.flags.contains("welcome_complete"));
+            assert!(!legal(&result.state, departure));
+            state.flags.remove("welcome_supplies_ready");
+            assert!(!legal(&state, departure));
+        }
+    }
+    #[test]
+    fn exploration_finds_are_location_bound_and_award_branches_once() {
+        let def = definition();
+        let mut s = adopt(&def);
+        s.starter = Some("pip".into());
+        s.team = vec!["pip".into()];
+        s.flags.insert("bridge_clue_complete".into());
+        let command = |id: &str| CampaignCommand::Action {
+            action_id: id.into(),
+        };
+        assert!(apply(&def, &s, &command("find_branch_1"), &owned("pip"), false).is_err());
+        let view = snapshot(&def, &s, &owned("pip")).unwrap();
+        assert!(view.travel.contains(&"picnic_clearing".into()));
+        s = apply(
+            &def,
+            &s,
+            &CampaignCommand::Travel {
+                location_id: "picnic_clearing".into(),
+            },
+            &owned("pip"),
+            false,
+        )
+        .unwrap()
+        .state;
+        for id in ["find_branch_3", "find_branch_1", "find_branch_2"] {
+            assert!(
+                snapshot(&def, &s, &owned("pip"))
+                    .unwrap()
+                    .legal_actions
+                    .iter()
+                    .any(|a| a.id == id)
+            );
+            s = apply(&def, &s, &command(id), &owned("pip"), false)
+                .unwrap()
+                .state;
+            assert!(apply(&def, &s, &command(id), &owned("pip"), false).is_err());
+        }
+        assert_eq!(s.items.get("quest_branch"), Some(&3));
+        assert_eq!(s.location, "picnic_clearing");
+        assert!(s.flags.contains("bridge_gather_done"));
+        assert!(s.grants.contains("action:bridge_gather"));
+        assert!(
+            !snapshot(&def, &s, &owned("pip"))
+                .unwrap()
+                .legal_actions
+                .iter()
+                .any(|a| a.id.starts_with("find_branch_"))
+        );
+    }
+
+    #[test]
+    fn construction_and_garden_require_their_own_saved_dependencies() {
+        let def = definition();
+        for (board_id, wrong, moves) in [
+            (
+                "trial_bridge",
+                "bridge_fit:middle:short",
+                vec![
+                    "bridge_fit:near:short",
+                    "bridge_fit:middle:long",
+                    "bridge_fit:far:short",
+                    "bridge_brace:near",
+                    "bridge_brace:far",
+                    "bridge_cross",
+                ],
+            ),
+            (
+                "trial_bloom",
+                "garden_water:north",
+                vec![
+                    "garden_route:north:beds",
+                    "garden_water:north",
+                    "garden_mulch:north",
+                    "garden_route:south:beds",
+                    "garden_water:south",
+                    "garden_mulch:south",
+                    "garden_check",
+                ],
+            ),
+        ] {
+            let mut s = adopt(&def);
+            s.starter = Some("pip".into());
+            s.team = vec!["pip".into()];
+            s.energy.insert("pip".into(), 0);
+            s.encounter = Some(EncounterState {
+                id: board_id.into(),
+                progress: 0,
+                pressure: 0,
+                turns: 0,
+                tool_charges: 3,
+                partner_bonus: 3,
+                bonus_source: None,
+                replay: false,
+            });
+            let command = |movement: &str| CampaignCommand::EncounterTurn {
+                companion_id: "pip".into(),
+                movement: movement.into(),
+            };
+            assert!(apply(&def, &s, &command(wrong), &owned("pip"), false).is_err());
+            assert!(
+                apply(
+                    &def,
+                    &s,
+                    &command(if board_id == "trial_bridge" {
+                        "bridge_cross"
+                    } else {
+                        "garden_check"
+                    }),
+                    &owned("pip"),
+                    false
+                )
+                .is_err()
+            );
+            for (i, movement) in moves.iter().enumerate() {
+                let result = apply(&def, &s, &command(movement), &owned("pip"), false).unwrap();
+                s = serde_json::from_str(&serde_json::to_string(&result.state).unwrap()).unwrap();
+                check(&def, &s).unwrap();
+                if i + 1 < moves.len() {
+                    assert!(s.encounter.is_some());
+                    assert_eq!(s.encounter.as_ref().unwrap().pressure, 0);
+                }
+            }
+            assert!(s.encounter.is_none());
+            assert!(s.grants.contains(&format!("win:{board_id}")));
+            assert_eq!(s.energy.get("pip"), Some(&0));
+        }
+    }
+
     fn owned(id: &str) -> Vec<CompanionProjection> {
         vec![CompanionProjection {
             id: id.into(),
