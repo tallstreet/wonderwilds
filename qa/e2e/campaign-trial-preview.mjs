@@ -15,6 +15,8 @@ try {
     const response = await page.request.post(origin + '/api/v1/' + path + '/commands', { headers, data: { schemaVersion: '1.0', commandId: crypto.randomUUID(), expectedRevision: revision, payload } });
     assert.equal(response.status(), 200, await response.text()); return response.json();
   };
+  const setup = await get('mission-learning');
+  await send('mission-learning', setup.revision, { type: 'set_age', age: 8 });
   let state = await get('campaign');
   state = await send('campaign', state.revision, { type: 'adopt' });
   state = await send('campaign', state.revision, { type: 'choose_starter', companion_id: 'pip' });
@@ -30,6 +32,15 @@ try {
   }
   await page.goto(origin); await page.locator('[data-campaign-move="signature"]').waitFor();
   assert.equal(await page.getByRole('progressbar', { name: 'Light restored' }).getAttribute('value'), '0');
+  await page.getByRole('heading', { name: '1. Who will help?' }).waitFor();
+  await page.getByRole('heading', { name: '2. Choose a move for Pip' }).waitFor();
+  assert.ok(await page.locator('[data-campaign-move="signature"]').getAttribute('aria-describedby'));
+  assert.match(await page.locator('#move-snack-help').innerText(), /None in your bag/);
+  assert.match(await page.locator('[data-campaign-move="guided"]').getAttribute('class'), /campaign-secondary/);
+  await page.locator('#campaign-guided').click();
+  await page.getByText('Plan your next move', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('progressbar', { name: 'Light restored' }).getAttribute('value'), '0');
+  await page.locator('#campaign-guided').click();
   await page.screenshot({ path: '/tmp/campaign-trial-board-desktop.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));

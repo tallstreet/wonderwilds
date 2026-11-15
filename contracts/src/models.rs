@@ -89,6 +89,7 @@ pub enum MissionLearningPayload {
     Variant5(MissionLearningPayloadVariant5),
     Variant6(MissionLearningPayloadVariant6),
     Variant7(MissionLearningPayloadVariant7),
+    Variant8(MissionLearningPayloadVariant8),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -242,6 +243,8 @@ pub struct MissionSkillProgress {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionLearningSnapshot {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub learner_age: Option<u64>,
     pub schema_version: MissionLearningSnapshotSchemaVersion,
     pub content_version: String,
     pub policy_version: String,
@@ -1207,14 +1210,21 @@ pub enum GameCommandSchemaVersion {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionLearningPayloadVariant1 {
     pub r#type: MissionLearningPayloadVariant1Type,
-    pub action_id: String,
-    pub story_revision: u64,
+    pub age: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionLearningPayloadVariant2 {
     pub r#type: MissionLearningPayloadVariant2Type,
+    pub action_id: String,
+    pub story_revision: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningPayloadVariant3 {
+    pub r#type: MissionLearningPayloadVariant3Type,
     pub encounter_id: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variant_id: Option<String>,
@@ -1222,14 +1232,14 @@ pub struct MissionLearningPayloadVariant2 {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct MissionLearningPayloadVariant3 {
-    pub r#type: MissionLearningPayloadVariant3Type,
+pub struct MissionLearningPayloadVariant4 {
+    pub r#type: MissionLearningPayloadVariant4Type,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct MissionLearningPayloadVariant4 {
-    pub r#type: MissionLearningPayloadVariant4Type,
+pub struct MissionLearningPayloadVariant5 {
+    pub r#type: MissionLearningPayloadVariant5Type,
     pub encounter_id: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variant_id: Option<String>,
@@ -1238,23 +1248,23 @@ pub struct MissionLearningPayloadVariant4 {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct MissionLearningPayloadVariant5 {
-    pub r#type: MissionLearningPayloadVariant5Type,
-    pub encounter_id: String,
-    pub kind: MissionLearningPayloadVariant5Kind,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionLearningPayloadVariant6 {
     pub r#type: MissionLearningPayloadVariant6Type,
     pub encounter_id: String,
+    pub kind: MissionLearningPayloadVariant6Kind,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MissionLearningPayloadVariant7 {
     pub r#type: MissionLearningPayloadVariant7Type,
+    pub encounter_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MissionLearningPayloadVariant8 {
+    pub r#type: MissionLearningPayloadVariant8Type,
     pub action_id: String,
     pub campaign_revision: u64,
 }
@@ -2589,36 +2599,42 @@ pub enum CommandPayloadVariant8Type {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MissionLearningPayloadVariant1Type {
+    #[serde(rename = "set_age")]
+    SetAge,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MissionLearningPayloadVariant2Type {
     #[serde(rename = "begin_step")]
     BeginStep,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionLearningPayloadVariant2Type {
+pub enum MissionLearningPayloadVariant3Type {
     #[serde(rename = "finish_together")]
     FinishTogether,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionLearningPayloadVariant3Type {
+pub enum MissionLearningPayloadVariant4Type {
     #[serde(rename = "begin")]
     Begin,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionLearningPayloadVariant4Type {
+pub enum MissionLearningPayloadVariant5Type {
     #[serde(rename = "answer")]
     Answer,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionLearningPayloadVariant5Type {
+pub enum MissionLearningPayloadVariant6Type {
     #[serde(rename = "support")]
     Support,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionLearningPayloadVariant5Kind {
+pub enum MissionLearningPayloadVariant6Kind {
     #[serde(rename = "hint")]
     Hint,
     #[serde(rename = "worked_example")]
@@ -2626,13 +2642,13 @@ pub enum MissionLearningPayloadVariant5Kind {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionLearningPayloadVariant6Type {
+pub enum MissionLearningPayloadVariant7Type {
     #[serde(rename = "abandon")]
     Abandon,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MissionLearningPayloadVariant7Type {
+pub enum MissionLearningPayloadVariant8Type {
     #[serde(rename = "begin_campaign_step")]
     BeginCampaignStep,
 }

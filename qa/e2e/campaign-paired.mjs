@@ -1,3 +1,4 @@
+import { openCampaignPage } from './campaign-ui.mjs';
 // Two real synthetic household profiles; only actual authored rewards are offered.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -25,6 +26,8 @@ try {
   const before = {};
   for (const profile of [first, second]) {
     console.log(`Preparing authored Bridge/Rowan reward for ${owned[profile]}`);
+    const setup = await get('mission-learning', profile);
+    await post('mission-learning', profile, setup.revision, { type: 'set_age', age: 8 });
     let state = await get('campaign', profile); assert.equal(state.adopted, false);
     state = await post('campaign', profile, state.revision, { type: 'adopt' });
     state = await post('campaign', profile, state.revision, { type: 'choose_starter', companion_id: owned[profile] });
@@ -49,7 +52,7 @@ try {
   assert.equal(forbidden.status(), 403, 'Bridge rejects a profile not owned by this household');
   let actor = first;
   const open = async () => {
-    await page.locator('#campaign-paired').click();
+    await openCampaignPage(page, 'paired');
     if (await page.locator('#paired-refresh').count()) {
       const response = page.waitForResponse(r => r.url().endsWith('/api/v1/paired') && r.request().method() === 'GET');
       await page.locator('#paired-refresh').click(); assert.equal((await response).status(), 200);
@@ -60,7 +63,7 @@ try {
     if (actor === profile) return;
     await page.locator(`[data-select-profile="${profile}"]`).click();
     await page.waitForURL(url => url.searchParams.get('player') === profile);
-    actor = profile; await page.locator('#campaign-paired').waitFor(); await open();
+    actor = profile; await page.locator('#campaign-more').waitFor(); await open();
   };
   const choose = async payload => {
     const write = page.waitForResponse(r => r.url().endsWith('/paired/commands') && JSON.stringify(r.request().postDataJSON()?.payload) === JSON.stringify(payload));
@@ -70,7 +73,7 @@ try {
     await page.locator('.campaign-status').filter({ hasText: 'Shared expedition saved.' }).waitFor();
     return get('paired', actor);
   };
-  await page.goto(origin); await page.locator('#campaign-paired').waitFor(); await open();
+  await page.goto(origin); await page.locator('#campaign-more').waitFor(); await open();
   let pair = await choose({ type: 'start', partnerProfileId: second });
   assert.equal(pair.navigatorProfileId, first); assert.equal(pair.keeperProfileId, second);
   assert.deepEqual(pair.availableCompanions.map(friend => friend.id), ['pip']);
@@ -80,7 +83,7 @@ try {
   await switchTo(first); pair = await choose({ type: 'start_practice' });
   pair = await choose({ type: 'practice_turn', movement: 'scout' });
   await post('paired', first, pair.revision, { type: 'practice_turn', movement: 'brace' }, 403);
-  await page.reload(); await page.locator('#campaign-paired').waitFor(); await open();
+  await page.reload(); await page.locator('#campaign-more').waitFor(); await open();
   assert.equal((await get('paired', first)).practice.history.length, 1, 'Reload preserves the credited tactical turn');
   for (const [profile, movement] of [[second,'brace'],[first,'scout'],[second,'brace']]) {
     await switchTo(profile); pair = await choose({ type: 'practice_turn', movement });
@@ -120,7 +123,7 @@ try {
   await page.locator(`[data-paired-payload='${JSON.stringify({ type: 'confirm_exchange' })}']`).click();
   await page.locator('#paired-retry').waitFor();
   assert.equal(await page.locator(`[data-select-profile="${first}"]`).isDisabled(), true, 'Uncertain actor command blocks player switches');
-  await page.reload(); await page.locator('#campaign-paired').waitFor(); await page.locator('#campaign-paired').click();
+  await page.reload(); await page.locator('#campaign-more').waitFor(); await openCampaignPage(page, 'paired');
   await page.locator('#paired-retry').waitFor();
   const retry = page.waitForRequest(r => r.url().endsWith('/paired/commands'));
   await page.locator('#paired-retry').click(); assert.equal((await retry).postData(), originalBody, 'Reload preserves exact shared-command actor/body/ID');

@@ -1,3 +1,4 @@
+import { finishLearningSetup, openCampaignPage } from './campaign-ui.mjs';
 // Explicit trusted synthetic level-four fixture; real joined completion drives 4→5.
 // This verifies transient feedback, not a newly completed campaign.
 import assert from 'node:assert/strict';
@@ -20,8 +21,9 @@ try {
   assert.equal(friend(initial).level, 4, 'Trusted fixture must be canonical level four');
   assert.equal(friend(initial).appearance, 'base');
   assert.ok(initial.campaign.legal_actions.some(action => action.id === 'train_pip_wayfinder'));
-  await page.goto(origin); await page.locator('#campaign-missions').waitFor();
+  await page.goto(origin); await finishLearningSetup(page); await page.locator('#campaign-missions').waitFor();
   assert.equal(await page.locator('[data-form-notice]').count(), 0);
+  await page.locator('.campaign-optional summary').click();
   await page.locator('[data-campaign-command="train_pip_wayfinder"]').click();
   while (await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).count()) await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).click();
   await page.getByRole('button', { name: 'Practise together', exact: true }).click();
@@ -49,7 +51,7 @@ try {
   await page.reload(); await page.locator('#campaign-missions').waitFor();
   assert.equal(await page.locator('[data-form-notice]').count(), 0, 'Reload does not replay earned celebration');
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.locator('#campaign-team').click();
+  await openCampaignPage(page, 'team');
   const payload = { type: 'care', companion_id: 'pip', kind: 'appearance_wayfinder' };
   let appearanceBody;
   await page.route('**/api/v1/campaign/commands', async route => {
@@ -77,7 +79,7 @@ try {
   await page.reload(); await page.locator('#campaign-missions').waitFor();
   assert.equal(await page.locator('[data-form-notice]').count(), 0, 'Reload does not replay appearance feedback');
   assert.equal(friend(await get('campaign')).appearance, 'wayfinder');
-  await page.locator('#campaign-team').click();
+  await openCampaignPage(page, 'team');
   const original = { type: 'care', companion_id: 'pip', kind: 'appearance_base' };
   const saved = page.waitForResponse(response => response.url().endsWith('/campaign/commands') && response.request().postDataJSON()?.payload?.kind === 'appearance_base');
   await page.locator(`[data-campaign-payload='${JSON.stringify(original)}']`).click(); assert.equal((await saved).status(), 200);

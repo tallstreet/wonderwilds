@@ -99,9 +99,11 @@ export function canVisitEarlier(
 export function nextObjective(
   actions: import('../../../contracts/generated/contracts.ts').CampaignAction[],
   grants: string[],
+  flags: string[] = [],
 ) {
   const uncompleted = actions.filter(
     (action) =>
+      !(action.puzzle && flags.includes(`puzzle:${action.puzzle.id}:solved`)) &&
       !grants.includes(`action:${action.id}`) &&
       !(action.encounter && grants.includes(`win:${action.encounter}`)),
   );
@@ -111,6 +113,10 @@ export function nextObjective(
         /^(welcome|bridge-|bloom-|echo-|harvest-|current-|tide-|beacon-|accord-|constellation-ending)/.test(
           action.mission,
         ) && action.kind !== 'practice',
+    ) ??
+    uncompleted.find((action) => action.mission === 'welcome' && action.kind === 'practice') ??
+    uncompleted.find((action) =>
+      ['field-bloom', 'field-resonate', 'field-illuminate'].includes(action.mission),
     ) ??
     uncompleted.find(
       (action) =>
@@ -146,4 +152,196 @@ export function changedCompanionAppearance(
     before: (previous.appearance ?? 'base') === 'wayfinder' ? id + '-wayfinder' : id,
     after: (current.appearance ?? 'base') === 'wayfinder' ? id + '-wayfinder' : id,
   };
+}
+
+/** Child-facing context, separate from immutable saved campaign definitions. */
+export function missionBrief(flags: string[], mission = '') {
+  const chapters = [
+    {
+      key: 'welcome',
+      done: 'welcome_complete',
+      title: 'Follow the missing moonlight',
+      story:
+        'The lights that guide our neighbours home are fading. Hazel needs your help to find out why.',
+      goal: 'Meet Hazel, choose a travelling friend and get ready to investigate the bridge.',
+    },
+    {
+      key: 'bridge',
+      done: 'bridge_seal',
+      title: 'Make the bridge safe',
+      story:
+        'The bridge is broken and its guiding light has gone out. A brass cart has left clues beside the empty moonstone mounts.',
+      goal: 'Look for clues, gather wood and rebuild the crossing. Then steady the bridge and light its beacon.',
+    },
+    {
+      key: 'bloom',
+      done: 'bloom_seal',
+      title: 'Bring water back to the garden',
+      story:
+        'The garden is drying out. Something has changed the water channels near the moonlight collector.',
+      goal: 'Follow the water, reconnect the channels and restore the garden’s beacon.',
+    },
+    {
+      key: 'echo',
+      done: 'echo_seal',
+      title: 'Find the watchtower’s warning',
+      story:
+        'Strange echoes lead towards the old watchtower. Its chimes may explain what the collectors are doing.',
+      goal: 'Follow the clues with Flutter, arrange the chimes and restore the watchtower light.',
+    },
+    {
+      key: 'harvest',
+      done: 'harvest_seal',
+      title: 'Get the mill working again',
+      story:
+        'The orchard’s deliveries have stopped. Cleo needs help finding the missing gear and getting the mill turning.',
+      goal: 'Recover the gear, repair the mill and restore its beacon.',
+    },
+    {
+      key: 'current',
+      done: 'current_seal',
+      title: 'Make the river safe',
+      story:
+        'Water is flowing the wrong way. Rowan and his partner need help before anyone can use the river route.',
+      goal: 'Help the stranded friends, open the bypass and restore the landing light.',
+    },
+    {
+      key: 'tide',
+      done: 'tide_seal',
+      title: 'Protect the beach refuge',
+      story:
+        'A mysterious glow has appeared near the refuge. Tracks and pipes can help you discover what is really happening.',
+      goal: 'Investigate the glow and steady the refuge so its animals have a safe home.',
+    },
+    {
+      key: 'beacon',
+      done: 'beacon_seal',
+      title: 'Light the way to the Observatory',
+      story:
+        'The lighthouse needs its missing lens. Sail can help you find a way to bring its guiding beam back.',
+      goal: 'Recover and align the lens, then follow the light towards the Observatory.',
+    },
+    {
+      key: 'accord',
+      done: 'accord_seal',
+      title: 'Bring the moonlight home',
+      story:
+        'The collectors have been storing light instead of returning it. Your clues can help Vell change the machines.',
+      goal: 'Reconnect the beacon lines and return the stored light to every region.',
+    },
+  ];
+  return (
+    chapters.find((chapter) => mission === chapter.key || mission.startsWith(chapter.key + '-')) ??
+    chapters.find((chapter) => !flags.includes(chapter.done)) ?? {
+      title: 'Celebrate with your friends',
+      story: 'The eight beacons can shine together again.',
+      goal: flags.includes('finale_complete')
+        ? 'Explore optional discoveries and your friends’ invitations.'
+        : 'Join your friends for the Moonlight Gathering.',
+    }
+  );
+}
+
+export function campaignPages(hasStarter: boolean, inTrial: boolean) {
+  if (!hasStarter || inTrial) return [['missions', inTrial ? 'Current trial' : 'Your adventure']];
+  return [
+    ['missions', 'Your mission'],
+    ['more', 'Friends & more'],
+  ];
+}
+
+export function openingDialogue(id: string) {
+  const dialogue: Record<string, { speaker: string; text: string }[]> = {
+    welcome_meet: [
+      {
+        speaker: 'Hazel',
+        text: 'Our beacons are the lights that guide everyone home. The bridge light is fading, and I need your help to find out why.',
+      },
+      {
+        speaker: 'Hazel',
+        text: 'First choose one friend: Pip finds hidden clues, Tansy helps plants grow, and Nib builds and steadies things. Any of them can help you finish this adventure.',
+      },
+      {
+        speaker: 'Hazel',
+        text: 'We will pack for the trip and try each friend’s lantern practice here. Then we will look for clues at the bridge, repair the crossing and bring its light back.',
+      },
+    ],
+    welcome_supplies: [
+      {
+        speaker: 'Hazel',
+        text: 'We’re getting ready to investigate the dark bridge. Help me with a short activity before we set off.',
+      },
+      {
+        speaker: 'Hazel',
+        text: 'You can ask for a hint or choose “Let’s do it together”. We will still finish packing and move on with the adventure.',
+      },
+    ],
+    welcome_depart: [
+      {
+        speaker: 'Hazel',
+        text: 'The bridge light has gone out! A brass cart has just left the bank, but we need clues before we decide what happened.',
+      },
+      {
+        speaker: 'Rowan',
+        text: 'Moss and I saw the cart go east. We will meet you along the trail.',
+      },
+      {
+        speaker: 'Hazel',
+        text: 'First inspect the empty moonstone mounts beside the broken bridge. Then we will collect wood, rebuild the crossing and light the beacon.',
+      },
+    ],
+  };
+  return dialogue[id];
+}
+
+/** A direction hint only. The server's current travel list authorizes the move. */
+export function nextTrail(flags: string[], location: string, travel: string[]) {
+  const target = !flags.includes('bridge_seal')
+    ? 'bridge_bank'
+    : !flags.includes('bloom_seal')
+      ? 'flower_garden'
+      : !flags.includes('echo_seal')
+        ? flags.includes('echo_clue_complete')
+          ? 'old_watchtower'
+          : 'echo_hollow'
+        : !flags.includes('current_seal') &&
+            (location === 'courier_pond' || flags.includes('harvest_seal'))
+          ? 'courier_pond'
+          : !flags.includes('harvest_seal')
+            ? 'old_mill'
+            : !flags.includes('tide_seal')
+              ? 'shell_beach'
+              : !flags.includes('beacon_seal')
+                ? 'harbour_lookout'
+                : !flags.includes('finale_complete')
+                  ? 'observatory'
+                  : undefined;
+  if (!target || target === location) return undefined;
+  const links: Record<string, string[]> = {
+    bridge_bank: ['picnic_clearing', 'flower_garden', 'bridge_island'],
+    picnic_clearing: ['bridge_bank', 'flower_garden'],
+    flower_garden: ['bridge_bank', 'picnic_clearing', 'echo_hollow'],
+    echo_hollow: ['flower_garden', 'old_watchtower'],
+    old_watchtower: ['echo_hollow', 'orchard_hub'],
+    orchard_hub: ['old_watchtower', 'old_mill', 'courier_pond'],
+    old_mill: ['orchard_hub', 'garland_ridge'],
+    garland_ridge: ['old_mill', 'courier_pond'],
+    courier_pond: ['orchard_hub', 'garland_ridge', 'cove_hub'],
+    bridge_island: ['bridge_bank'],
+    cove_hub: ['courier_pond', 'shell_beach', 'harbour_lookout'],
+    shell_beach: ['cove_hub', 'hidden_tide_garden'],
+    harbour_lookout: ['cove_hub', 'observatory'],
+    observatory: ['harbour_lookout'],
+    hidden_tide_garden: ['shell_beach', 'star_island'],
+    star_island: ['hidden_tide_garden'],
+  };
+  const queue = travel.map((step) => ({ step, at: step }));
+  const visited = new Set([location]);
+  for (const route of queue) {
+    if (route.at === target) return { step: route.step, target };
+    if (visited.has(route.at)) continue;
+    visited.add(route.at);
+    for (const at of links[route.at] ?? []) queue.push({ step: route.step, at });
+  }
+  return undefined;
 }

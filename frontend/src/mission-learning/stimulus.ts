@@ -31,18 +31,59 @@ export function renderStimulus(document: Document, stimulus: QuestionStimulus): 
       img.style.maxWidth = '100%';
       img.style.maxHeight = '320px';
       if (stimulus.exposureMs) {
+        const status = text('p', 'Loading the picture…');
+        status.setAttribute('role', 'status');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'ww-picture-reveal';
+        button.textContent = 'I’m ready';
+        button.disabled = true;
+        const stage = document.createElement('div');
+        stage.className = 'ww-timed-picture';
+        const placeholder = text('p', 'Ready when you are.');
+        placeholder.className = 'ww-picture-placeholder';
+        img.style.visibility = 'hidden';
+        let showing = false;
+        const ready = () => {
+          button.disabled = false;
+          status.textContent =
+            'Choose “I’m ready” to see the picture briefly. You can show it again.';
+        };
+        img.addEventListener('load', ready, { once: true });
         img.addEventListener(
-          'load',
+          'error',
           () => {
-            document.defaultView?.setTimeout(() => {
-              if (img.isConnected) img.style.visibility = 'hidden';
-            }, stimulus.exposureMs);
+            button.disabled = true;
+            status.textContent =
+              'The picture could not load. Please ask for help or try reopening the activity.';
+            placeholder.textContent = 'Picture unavailable';
           },
           { once: true },
         );
-        root.append(text('p', 'Look at the picture briefly, then answer. You can ask for help.'));
+        if (img.complete && img.naturalWidth > 0) ready();
+        button.addEventListener('click', () => {
+          if (showing || button.disabled) return;
+          showing = true;
+          button.setAttribute('aria-disabled', 'true');
+          placeholder.style.visibility = 'hidden';
+          img.style.visibility = 'visible';
+          status.textContent = 'Look at the picture now.';
+          document.defaultView?.setTimeout(() => {
+            if (!img.isConnected) return;
+            img.style.visibility = 'hidden';
+            placeholder.style.visibility = 'visible';
+            placeholder.textContent = 'Picture hidden. You can show it again.';
+            status.textContent = 'What did you see? Give your answer, or choose “Show again”.';
+            button.textContent = 'Show again';
+            button.removeAttribute('aria-disabled');
+            showing = false;
+          }, stimulus.exposureMs);
+        });
+        stage.append(img, placeholder);
+        root.append(status, button, stage);
+      } else {
+        root.append(img);
       }
-      root.append(img);
       break;
     }
     case 'audio': {

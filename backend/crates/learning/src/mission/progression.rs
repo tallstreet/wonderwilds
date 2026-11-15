@@ -32,7 +32,11 @@ pub fn record(state: &mut MissionState, o: &MissionObservation) {
             if p.struggles == 2 {
                 p.review_after = e.server_sequence;
             }
-        } else if e.result == ResultKind::Correct {
+        } else if e.result == ResultKind::Correct
+            && e.support.hint_count == 0
+            && !e.support.worked_example
+            && !e.support.read_aloud
+        {
             p.struggles = 0;
         }
         if e.result != ResultKind::NotAssessed
@@ -169,6 +173,128 @@ pub fn select(
     })
 }
 
+/// Age places practice in a draft school-year band; it never completes prerequisites.
+/// Three distinct independent successes move scheduling forward, without changing
+/// the ten-item readiness policy or independent-transfer mastery evidence.
+pub fn select_for_age(
+    state: &MissionState,
+    age: Option<u8>,
+    subject: Option<&str>,
+    seed: u64,
+) -> Result<Option<SkillProjection>, MissionError> {
+    let Some(age) = age else {
+        return select(state, subject, seed);
+    };
+    if !(4..=12).contains(&age) {
+        return Err(MissionError::InvalidState);
+    }
+    let graph = CurriculumGraph::active().map_err(|_| MissionError::InvalidState)?;
+    let year = |n: &SkillNode| {
+        n.id.split('-')
+            .nth(1)
+            .and_then(|s| s.parse::<u8>().ok())
+            .unwrap_or(0)
+    };
+    let starting_year = age.saturating_sub(5).min(6);
+    // Keep both subjects in practice, independently of each other's placement.
+    let latest_subject = graph
+        .nodes()
+        .filter_map(|n| {
+            state
+                .practice
+                .get(&n.id)
+                .filter(|p| p.last_completion > 0)
+                .map(|p| (p.last_completion, n.subject.as_str()))
+        })
+        .max_by_key(|(sequence, _)| *sequence)
+        .map(|(_, subject)| subject);
+    let subject = subject.unwrap_or(if latest_subject == Some("maths") {
+        "english"
+    } else {
+        "maths"
+    });
+    let easy = |id: &str| {
+        state.practice.get(id).is_some_and(|p| {
+            let mut checks: Vec<_> = p.checks.values().collect();
+            checks.sort_by_key(|c| std::cmp::Reverse(c.sequence));
+            checks.len() >= 3 && checks.iter().take(3).all(|c| c.correct)
+        })
+    };
+    fn review<'a>(
+        node: &'a SkillNode,
+        graph: &'a CurriculumGraph,
+        state: &MissionState,
+    ) -> &'a SkillNode {
+        if let Some(p) = state.practice.get(&node.id).filter(|p| p.struggles >= 2) {
+            for parent in node.prerequisites.iter().filter_map(|id| graph.get(id)) {
+                let successes = state.practice.get(&parent.id).map_or(0, |v| {
+                    v.checks
+                        .values()
+                        .filter(|c| c.correct && c.sequence > p.review_after)
+                        .count()
+                });
+                if successes < 2 {
+                    return review(parent, graph, state);
+                }
+            }
+        }
+        node
+    }
+    // Most recent difficulty first; recursively step back if the prerequisite is
+    // also too difficult. Supported completions cannot clear this review.
+    if let Some(node) = graph
+        .nodes()
+        .filter(|n| n.subject == subject)
+        .filter(|n| state.practice.get(&n.id).is_some_and(|p| p.struggles >= 2))
+        .max_by_key(|n| state.practice[&n.id].review_after)
+    {
+        return Ok(Some(projection(review(node, graph, state), state)?));
+    }
+    let mut candidates: Vec<_> = graph
+        .nodes()
+        .filter(|n| {
+            n.subject == subject
+                && year(n) >= starting_year
+                && !easy(&n.id)
+                && n.prerequisites.iter().all(|id| {
+                    graph
+                        .get(id)
+                        .is_some_and(|p| year(p) < starting_year || easy(id))
+                })
+        })
+        .collect();
+    if let Some(earliest) = candidates.iter().map(|n| year(n)).min() {
+        candidates.retain(|n| year(n) == earliest);
+    }
+    // Continue a started skill rather than switching after every answer.
+    if let Some(node) = candidates
+        .iter()
+        .filter(|n| state.practice.contains_key(&n.id))
+        .max_by_key(|n| {
+            state.practice[&n.id].last_completion.max(
+                state.practice[&n.id]
+                    .checks
+                    .values()
+                    .map(|c| c.sequence)
+                    .max()
+                    .unwrap_or(0),
+            )
+        })
+    {
+        return Ok(Some(projection(node, state)?));
+    }
+    if let Some(node) = candidates.first() {
+        return Ok(Some(projection(node, state)?));
+    }
+    // At the end of the available graph, keep useful practice available.
+    graph
+        .nodes()
+        .filter(|n| n.subject == subject)
+        .max_by_key(|n| (year(n), &n.id))
+        .map(|n| projection(n, state))
+        .transpose()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -210,6 +336,101 @@ mod tests {
             },
         }
     }
+    #[test]
+    fn age_estimate_moves_practice_without_granting_mastery() {
+        let mut state = MissionState::default();
+        for age in 4..=12 {
+            let chosen = select_for_age(&state, Some(age), Some("maths"), 1)
+                .unwrap()
+                .unwrap();
+            let expected = age.saturating_sub(5).min(6);
+            assert!(chosen.skill_id.starts_with(&format!(
+                "M-{}-",
+                if expected == 0 {
+                    "K".into()
+                } else {
+                    expected.to_string()
+                }
+            )));
+        }
+        assert!(select_for_age(&state, Some(13), None, 1).is_err());
+        assert_eq!(
+            select_for_age(&state, None, None, 1),
+            select(&state, None, 1)
+        );
+        let initial = select_for_age(&state, Some(8), Some("maths"), 1)
+            .unwrap()
+            .unwrap()
+            .skill_id;
+        for seq in 1..=3 {
+            record(&mut state, &event(&initial, seq, true, false));
+        }
+        assert_ne!(
+            select_for_age(&state, Some(8), Some("maths"), 1)
+                .unwrap()
+                .unwrap()
+                .skill_id,
+            initial
+        );
+        assert!(!ready(&state.practice[&initial]));
+        assert!(state.completed_skills.is_empty());
+        let mut supported = MissionState::default();
+        for seq in 1..=10 {
+            record(&mut supported, &event(&initial, seq, true, true));
+        }
+        assert_eq!(
+            select_for_age(&supported, Some(8), Some("maths"), 1)
+                .unwrap()
+                .unwrap()
+                .skill_id,
+            initial
+        );
+    }
+
+    #[test]
+    fn age_overestimate_reviews_prerequisites_and_returns_after_independent_success() {
+        let mut state = MissionState::default();
+        let initial = select_for_age(&state, Some(9), Some("maths"), 1)
+            .unwrap()
+            .unwrap()
+            .skill_id;
+        let graph = CurriculumGraph::active().unwrap();
+        assert!(!graph.get(&initial).unwrap().prerequisites.is_empty());
+        for seq in 1..=2 {
+            record(&mut state, &event(&initial, seq, false, false));
+        }
+        let mut hinted = event(&initial, 3, true, false);
+        hinted.evidence.support.hint_count = 1;
+        record(&mut state, &hinted);
+        assert_eq!(
+            state.practice[&initial].struggles, 2,
+            "Hinted correctness cannot clear difficulty review"
+        );
+        let parent = select_for_age(&state, Some(9), Some("maths"), 1)
+            .unwrap()
+            .unwrap()
+            .skill_id;
+        assert!(graph.get(&initial).unwrap().prerequisites.contains(&parent));
+        record(&mut state, &event(&parent, 3, true, true));
+        assert_eq!(
+            select_for_age(&state, Some(9), Some("maths"), 1)
+                .unwrap()
+                .unwrap()
+                .skill_id,
+            parent
+        );
+        for seq in 4..=5 {
+            record(&mut state, &event(&parent, seq, true, false));
+        }
+        // Review all prerequisites, never fabricate their mastery.
+        let next = select_for_age(&state, Some(9), Some("maths"), 1)
+            .unwrap()
+            .unwrap()
+            .skill_id;
+        assert_ne!(next, parent);
+        assert!(state.completed_skills.is_empty());
+    }
+
     #[test]
     fn replacement_has_every_skill_and_ten_distinct_items() {
         let graph = CurriculumGraph::active().unwrap();

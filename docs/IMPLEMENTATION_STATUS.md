@@ -5,6 +5,47 @@ Six subagents implemented distinct scopes; the integration owner reviewed and
 validated the combined changes. Existing source, guest saves and art are preserved.
 No release, deployment, curriculum approval or learning-efficacy claim is made.
 
+## Clearer opening and age-based practice — 15 November 2026
+
+The opening asks a grown-up for an age band (4-or-younger through 12-or-older),
+introduces the missing beacon light and Hazel’s plan, then presents the starter
+choice. One current world action, contextual NPCs, an explicit mission problem,
+goal and next step replace the crowded opening. Required practice and route-opening
+actions stay in the main flow. Puzzle controls and meaningful choices remain
+visible together; completed puzzles no longer override the next objective.
+Directions suggest an available path towards the next story destination.
+Secondary tools have descriptions under Friends & more; unavailable opening/trial
+pages are hidden. Dialogue retains the mission goal and uses concrete action labels.
+
+`set_age` uses the authenticated, profile-owned mission-learning command stream,
+revision checks and exact retries. It stores the age estimate in the checkpoint,
+not a birth date, and rejects changes during an active activity. It grants no
+learning evidence, progress or rewards. Export and deletion include this setting.
+Ages 4–5 initially probe Foundation; 6–10 probe Years 1–5; 11–12 probe Year 6.
+This is an uncalibrated development heuristic, not a claim about an individual
+child’s ability. Maths and English alternate after completed activities. Three
+recent distinct independent successes advance practice scheduling; repeated first
+check difficulty revisits prerequisites, recursively if needed. Two independent
+prerequisite successes allow return. Supported work keeps the story moving but
+cannot establish this readiness. Existing mastery evidence requirements remain
+separate. Skills requiring adult review/media retain their content limitations.
+
+The operator requested a clean local demo database for this iteration; it was
+recreated, with no demo-progress migration required. Content release/review gates
+remain pending.
+
+Verification: 176 frontend tests plus strict type/lint/format/build, 213 shared
+contract fixtures and generated/type checks, API and learning Rust suites, workspace
+Clippy and formatting, and the complete disposable PostgreSQL suite passed. The
+final learning suite also covers hinted correctness retaining prerequisite review.
+Real browser checks passed the Pip and Nib openings through Bridge/Bloom, supported learning,
+loss/retry/reload, camp/team controls and phone layout. Keyboard/focus, reduced
+motion, speech failures and the ten standard desktop/phone entry cases passed.
+Age setup, mission and world screenshots were inspected. Node 26 was used; the
+existing Vite bundle-size advisory remains. No human calibration of age placement,
+physical-device performance review or full six-case ending matrix was run for
+this iteration.
+
 ## Campaign continuation — content 1.1 and shared-device play
 
 The implementation continues beyond the initial solo baseline below. Content 1.1

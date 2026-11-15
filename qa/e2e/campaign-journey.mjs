@@ -37,9 +37,28 @@ try {
     assert.ok((await snapshot()).revision > before, 'Command committed');
     return snapshot();
   };
+  await page.locator('#campaign-age').waitFor();
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.screenshot({ path: '/tmp/wonderwilds-age-setup-phone.png', fullPage: true });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.locator('#campaign-age').selectOption('8');
+  const ageSaved = page.waitForResponse(r => r.url().endsWith('/mission-learning/commands') && r.request().postDataJSON()?.payload?.type === 'set_age');
+  await page.locator('#campaign-save-age').click();
+  assert.equal((await ageSaved).status(), 200);
+  await page.locator('#campaign-age').waitFor({ state: 'hidden' });
+  assert.match(await page.locator('#dialog').innerText(), /lights.*fading/s);
+  assert.equal(await page.locator('.campaign-tabs button').count(), 1, 'No unavailable pages in onboarding');
+  await page.locator('[data-campaign-command="welcome_meet"]').click();
+  while (await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).count()) {
+    await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).click();
+  }
+  await clickPayload({ type: 'action', action_id: 'welcome_meet' });
   await page.locator('[data-campaign-payload]').first().waitFor();
   const state = await clickPayload({ type: 'choose_starter', companion_id: starter });
   assert.equal(state.campaign.state.starter, starter);
+  await page.locator('.campaign-objective').waitFor();
+  await page.screenshot({ path: '/tmp/wonderwilds-mission-clarity-desktop.png', fullPage: true });
   await page.getByRole('button', { name: 'Close dialog', exact: true }).click();
   await page.screenshot({ path: `/tmp/wonderwilds-campaign-${starter}-world.png`, fullPage: true });
   const startX = Number(await page.locator('#game').getAttribute('data-campaign-player-x'));
@@ -50,6 +69,7 @@ try {
   await page.reload();
   await page.locator('#game canvas').waitFor();
   assert.equal((await snapshot()).campaign.state.starter, starter, 'Starter survives reload');
+  assert.equal(await page.locator('#campaign-age').count(), 0, 'Saved age survives reload');
   await page.locator('#campaign-missions').waitFor();
   await page.locator('#campaign-missions').click();
   const action = async id => {
@@ -57,11 +77,13 @@ try {
     const initial = await snapshot();
     const before = initial.revision;
     const learning = initial.campaign.legal_actions.find(a => a.id === id)?.learning;
-    await page.locator(`[data-campaign-command="${id}"]`).click();
+    const actionButton = page.locator(`[data-campaign-command="${id}"]`);
+    if (!(await actionButton.isVisible())) await page.locator('.campaign-optional summary').click();
+    await actionButton.click();
     while (await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).count()) {
       await page.locator('[data-campaign-page]').filter({ hasText: 'Next' }).click();
     }
-    const control = page.locator('[data-campaign-payload]').filter({ hasText: /Let’s do it|Practise together|Enter the trial/ });
+    const control = page.locator(`[data-campaign-payload='${JSON.stringify({ type: 'action', action_id: id })}']`);
     const saved = learning ? undefined : page.waitForResponse(r => r.url().endsWith('/campaign/commands') && r.request().postDataJSON()?.payload?.action_id === id);
     await control.click();
     if (learning) {
@@ -90,7 +112,7 @@ try {
       assert.equal((await snapshot()).campaign.state.encounter, null, 'Starter practice completes');
     }
   };
-  for (const id of ['welcome_meet', 'practice_pip', 'practice_tansy', 'practice_nib', 'welcome_supplies', 'welcome_depart', 'bridge_mounts', 'bridge_record', 'bridge_gather', 'bridge_plan', 'bridge_planks', 'bridge_build', 'bridge_trial']) await action(id);
+  for (const id of ['practice_pip', 'practice_tansy', 'practice_nib', 'welcome_supplies', 'welcome_depart', 'bridge_mounts', 'bridge_record', 'bridge_gather', 'bridge_plan', 'bridge_planks', 'bridge_build', 'bridge_trial']) await action(id);
   assert.ok((await snapshot()).campaign.companions.find(friend => friend.id === starter).level >= 2, 'First-help training reaches level two');
   const turn = movement => clickPayload({ type: 'encounter_turn', companion_id: starter, movement });
   // Deliberately fail once: recovery must preserve the trial invitation.
@@ -144,8 +166,10 @@ try {
   if (friend === 'pip') await clickPayload({ type: 'travel', location_id: 'flower_garden' });
   await action(`help_${friend}`); await action(`invite_${friend}`);
   await clickPayload({ type: 'travel', location_id: 'bridge_bank' });
+  await page.locator('#campaign-more').click();
   await page.locator('#campaign-team').click();
   await clickPayload({ type: 'set_team', companion_ids: [starter, friend] });
+  await page.locator('#campaign-more').click();
   await page.locator('#campaign-care').click();
   await clickPayload({ type: 'camp' });
   await page.locator('#campaign-missions').click();
@@ -159,6 +183,7 @@ try {
   await clickPayload({ type: 'encounter_turn', companion_id: friend, movement: 'tool' });
   assert.equal((await snapshot()).campaign.state.encounter, null, 'Paired practice wins');
   assert.deepEqual((await snapshot()).campaign.state.grants, grantsBeforeReplay, 'Practice replay grants no repeated reward');
+  await page.locator('#campaign-more').click();
   await page.locator('#campaign-care').click();
   const beforeRecovery = (await snapshot()).revision;
   await page.route('**/api/v1/campaign', route => route.fulfill({ status: 503, json: { code: 'UNAVAILABLE', schemaVersion: '1.0', correlationId: 'synthetic-refresh-failure' } }), { times: 2 });
@@ -177,8 +202,9 @@ try {
   phone.on('pageerror', error => errors.push(error.message));
   await phone.goto(origin);
   await phone.locator('#campaign-missions').waitFor();
+  await phone.locator('#campaign-more').tap();
   await phone.locator('#campaign-journal').tap();
-  assert.ok(await phone.locator('#campaign-journal').isVisible());
+  assert.match(await phone.locator('#dialog-title').innerText(), /Your story so far/);
   assert.ok(await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Mobile page has no horizontal overflow');
   await phone.screenshot({ path: `/tmp/wonderwilds-campaign-${starter}-mobile.png`, fullPage: true });
   await phone.close();

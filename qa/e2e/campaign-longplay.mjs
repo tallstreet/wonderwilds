@@ -1,3 +1,4 @@
+import { openCampaignPage } from './campaign-ui.mjs';
 // Disposable campaign API progression with real supported activity controls in Chromium.
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -44,6 +45,8 @@ try {
     assert.equal(response.status(), 200, `${path} ${JSON.stringify(payload)} ${await response.text()}`);
     return response.json();
   };
+  const setup = await get('mission-learning');
+  await post('mission-learning', setup.revision, { type: 'set_age', age: 8 });
   let state = await get('campaign');
   assert.equal(state.adopted, false, 'Fresh disposable profile');
   state = await post('campaign', state.revision, { type: 'adopt' });
@@ -214,7 +217,7 @@ try {
   await page.locator('#game canvas').waitFor();
   assert.deepEqual(await get('campaign'), beforeRestart, 'Browser reload preserves full save');
   await page.locator('#campaign-missions').waitFor();
-  await page.locator('#campaign-team').click();
+  await openCampaignPage(page, 'team');
   assert.equal(await page.locator('.campaign-card').count(), 12, 'Collection renders all twelve friends');
   const form = { type: 'care', companion_id: starter, kind: 'appearance_wayfinder' };
   const formResponse = page.waitForResponse(r => r.url().endsWith('/campaign/commands') && r.request().postDataJSON()?.payload?.kind === 'appearance_wayfinder');
@@ -224,7 +227,7 @@ try {
   assert.equal((await get('campaign')).campaign.companions.find(f => f.id === starter).appearance, 'wayfinder');
   await page.reload(); await page.locator('#campaign-missions').waitFor();
   assert.equal((await get('campaign')).campaign.companions.find(f => f.id === starter).appearance, 'wayfinder', 'Canonical form survives reload');
-  await page.locator('#campaign-team').click();
+  await openCampaignPage(page, 'team');
   await page.setViewportSize({ width: 1280, height: 800 });
   const overflowingControls = await page.locator('.campaign-card').evaluateAll(cards => cards.flatMap(card => {
     const box = card.getBoundingClientRect();
@@ -236,16 +239,16 @@ try {
   const glimmer = page.locator('.campaign-card').filter({ has: page.getByRole('heading', { name: 'Glimmer', exact: true }) });
   await glimmer.scrollIntoViewIfNeeded();
   await glimmer.screenshot({ path: `${prefix}-glimmer.png` });
-  await page.locator('#campaign-journal').click();
+  await openCampaignPage(page, 'journal');
   await page.screenshot({ path: `${prefix}-journal.png`, fullPage: true });
-  await page.locator('#campaign-guide').click();
+  await openCampaignPage(page, 'guide');
   await page.screenshot({ path: `${prefix}-guide.png`, fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Phone has no horizontal overflow');
   await page.screenshot({ path: `${prefix}-guide-phone.png`, fullPage: true });
-  await page.locator('#campaign-journal').click();
+  await openCampaignPage(page, 'journal');
   await page.screenshot({ path: `${prefix}-journal-phone.png`, fullPage: true });
-  await page.locator('#campaign-team').click();
+  await openCampaignPage(page, 'team');
   await page.screenshot({ path: `${prefix}-team-phone.png`, fullPage: true });
   state = await get('campaign');
   assert.deepEqual(errors, []);

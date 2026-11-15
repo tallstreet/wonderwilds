@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import { MissionLearningClient, MissionLearningSession } from '../mission-learning/client.ts';
+import { activityIcon } from '../mission-learning/icons.ts';
 import { mountMissionActivity } from '../mission-learning/activity.ts';
 import { CampaignClient, CampaignSession, type CampaignPayload } from './client.ts';
 import { createWorld } from '../world.ts';
@@ -23,6 +24,10 @@ import {
   adventureUrl,
   canVisitEarlier,
   nextObjective,
+  missionBrief,
+  nextTrail,
+  openingDialogue,
+  campaignPages,
   newlyEarnedWayfinders,
   changedCompanionAppearance,
 } from './presentation.ts';
@@ -58,6 +63,7 @@ export class CampaignWorld {
   private status = '';
   private selected?: string;
   private guided = false;
+  private savingAge = false;
   private refreshNeeded = false;
   private pairing?: PairedPanel;
   private disposed = false;
@@ -315,19 +321,12 @@ export class CampaignWorld {
         character: 'Trail sign',
         prop: 'arch',
       });
-    const objective = nextObjective(this.campaign.legal_actions, this.campaign.state.grants);
-    const worldActions = [
-      ...(objective ? [objective] : []),
-      ...this.campaign.legal_actions.filter((a) => a !== objective),
-    ]
-      .filter(
-        (a) =>
-          a.kind !== 'practice' &&
-          !this.campaign.state.grants.includes(`action:${a.id}`) &&
-          !(a.encounter && this.campaign.state.grants.includes(`win:${a.encounter}`)) &&
-          !/^(side-|growth-|habitat-|exchange-|field-|postgame)/.test(a.mission),
-      )
-      .slice(0, 3);
+    const objective = nextObjective(
+      this.campaign.legal_actions,
+      this.campaign.state.grants,
+      this.campaign.state.flags,
+    );
+    const worldActions = objective ? [objective] : [];
     for (const [index, action] of worldActions.entries()) {
       const key = Object.keys(sites)
         .sort((a, b) => b.length - a.length)
@@ -408,11 +407,8 @@ export class CampaignWorld {
     return markers.filter(
       (marker) =>
         !(marker.id === 'object:beacon' && !beaconFlags[location]) &&
-        !(
-          ['npc:rowan', 'npc:moss'].includes(marker.id) &&
-          !speakerAction &&
-          !['bridge_bank', 'picnic_clearing'].includes(location)
-        ),
+        !(marker.id === 'npc:hazel' && location !== 'bridge_bank') &&
+        !(['npc:rowan', 'npc:moss'].includes(marker.id) && !speakerAction),
     );
   }
   private decorations(): WorldDecoration[] {
@@ -537,15 +533,22 @@ export class CampaignWorld {
       '#mission-status',
       this.campaign.state.encounter
         ? 'Keeper trial in progress'
-        : name(
-            nextObjective(this.campaign.legal_actions, this.campaign.state.grants)?.mission ||
-              'The Missing Moonlight',
-          ),
+        : missionBrief(
+            flags,
+            nextObjective(
+              this.campaign.legal_actions,
+              this.campaign.state.grants,
+              this.campaign.state.flags,
+            )?.mission,
+          ).title,
     );
     set(
       '#quest-direction',
-      nextObjective(this.campaign.legal_actions, this.campaign.state.grants)?.label ??
-        'Explore the paths with your friends',
+      nextObjective(
+        this.campaign.legal_actions,
+        this.campaign.state.grants,
+        this.campaign.state.flags,
+      )?.label ?? 'Open your mission for the next path',
     );
   }
   private canPair() {
@@ -560,6 +563,10 @@ export class CampaignWorld {
     );
   }
   handle(button: HTMLButtonElement) {
+    if (button.id === 'campaign-save-age' || button.id === 'campaign-retry-age') {
+      void this.saveAge();
+      return;
+    }
     if (this.pairing?.handle(button)) return;
     if (button.id === 'players') {
       this.panel = 'paired';
@@ -657,10 +664,11 @@ export class CampaignWorld {
     this.panel = 'missions';
     this.render();
   }
-  private button(label: string, payload: CampaignPayload, disabled = false) {
-    return `<button ${disabled ? 'disabled' : ''} data-campaign-move="${payload.type === 'encounter_turn' ? payload.movement : ''}" data-campaign-payload="${escape(JSON.stringify(payload))}">${escape(label)}</button>`;
+  private button(label: string, payload: CampaignPayload, disabled = false, primary = false) {
+    return `<button class="${primary ? 'campaign-primary' : 'campaign-secondary'}" ${disabled ? 'disabled' : ''} data-campaign-move="${payload.type === 'encounter_turn' ? payload.movement : ''}" data-campaign-payload="${escape(JSON.stringify(payload))}">${escape(label)}</button>`;
   }
   private showAction(id: string, page = 0) {
+    if (!this.learning.snapshot?.learnerAge) return this.render();
     window.speechSynthesis?.cancel();
     const action = this.campaign.legal_actions.find((a) => a.id === id);
     if (!action) {
@@ -668,15 +676,20 @@ export class CampaignWorld {
       if (id.startsWith('travel:')) void this.run({ type: 'travel', location_id: id.slice(7) });
       return;
     }
-    const lines = action.dialogue.length
-      ? action.dialogue
-      : [{ speaker: 'Hazel', text: action.label }];
+    const lines =
+      openingDialogue(id) ??
+      (action.dialogue.length ? action.dialogue : [{ speaker: 'Hazel', text: action.label }]);
     const index = Math.max(0, Math.min(page, lines.length - 1));
     const line = lines[index]!;
     const speakerId = line.speaker.toLowerCase().split(' ')[0]!;
     const final = index === lines.length - 1;
+    const brief = missionBrief(this.campaign.state.flags, action.mission);
+    const readAloud =
+      typeof window.speechSynthesis !== 'undefined'
+        ? `<button id="campaign-read" class="campaign-speaker" aria-label="Read this aloud" title="Read this aloud" data-campaign-read="${escape(line.text)}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></svg></button>`
+        : '';
     this.hooks.open(
-      `<section class="campaign-panel"><span class="campaign-eyebrow">${escape(name(action.mission || 'Moonlight trail'))}</span><h2 id="dialog-title" tabindex="-1">${escape(action.label)}</h2><div class="campaign-dialogue">${portrait(speakerId)}<strong>${escape(line.speaker)}</strong><p>${escape(line.text)}</p></div><p class="campaign-note">${index + 1} of ${lines.length}</p>${typeof window.speechSynthesis !== 'undefined' ? `<div class="campaign-actions"><button id="campaign-read" data-campaign-read="${escape(line.text)}">Read this aloud</button></div>` : '<p class="campaign-note">Read aloud is unavailable in this browser. All dialogue is shown as text.</p>'}<p id="campaign-read-status" role="status"></p><div class="campaign-actions">${index > 0 ? `<button data-campaign-page="${escape(JSON.stringify([id, index - 1]))}">Previous</button>` : ''}${!final ? `<button data-campaign-page="${escape(JSON.stringify([id, index + 1]))}">Next</button>` : this.button(action.learning ? 'Practise together' : action.encounter ? 'Enter the trial' : 'Let’s do it', { type: 'action', action_id: id })}${final && action.recruit ? this.button('Maybe another time', { type: 'action', action_id: `decline:${action.id}` }) : ''}<button data-campaign-tab="missions">Back to adventure</button></div></section>`,
+      `<section class="campaign-panel"><span class="campaign-eyebrow">${escape(name(action.mission || 'Moonlight trail'))}</span><h2 id="dialog-title" tabindex="-1">${escape(action.label)}</h2><p class="campaign-purpose"><strong>Our goal:</strong> ${escape(brief.goal)}</p><div class="campaign-dialogue">${portrait(speakerId)}<strong>${escape(line.speaker)}</strong><div class="campaign-dialogue-text"><p>${escape(line.text)}</p>${readAloud}</div></div><p class="campaign-note">${index + 1} of ${lines.length}</p>${readAloud ? '' : '<p class="campaign-note">Read aloud is unavailable in this browser. All dialogue is shown as text.</p>'}<p id="campaign-read-status" role="status"></p><div class="campaign-actions">${index > 0 ? `<button class="campaign-secondary" data-campaign-page="${escape(JSON.stringify([id, index - 1]))}">Previous</button>` : ''}${!final ? `<button class="campaign-primary" data-campaign-page="${escape(JSON.stringify([id, index + 1]))}">Next</button>` : this.button(action.learning ? 'Practise together' : action.encounter ? 'Enter the trial' : action.label, { type: 'action', action_id: id }, false, true)}${final && action.recruit ? this.button('Maybe another time', { type: 'action', action_id: `decline:${action.id}` }) : ''}<button class="campaign-secondary" data-campaign-tab="missions">Back to adventure</button></div></section>`,
     );
     document.querySelector<HTMLElement>('#dialog-title')?.focus();
   }
@@ -720,18 +733,73 @@ export class CampaignWorld {
   }
   private render() {
     if (this.disposed) return;
-    const tabs = [
-      ['missions', 'Adventure'],
-      ['team', 'Friends'],
-      ['bag', 'Bag'],
-      ['care', 'Camp'],
-      ['journal', 'Journal'],
-      ['guide', 'Field guide'],
-      ['paired', 'Play together'],
-    ];
-    this.hooks.open(
-      `<section class="campaign-panel"><span class="campaign-eyebrow">The Missing Moonlight</span><nav class="campaign-tabs" aria-label="Adventure pages">${tabs.map(([id, label]) => `<button id="campaign-${id}" data-campaign-tab="${id}" ${this.panel === id ? 'aria-current="page"' : ''}>${label}</button>`).join('')}</nav><h2 id="dialog-title">${this.campaign.state.encounter ? 'Keeper trial' : (tabs.find(([id]) => id === this.panel)?.[1] ?? 'Adventure')}</h2>${this.formPresentation()}${this.confirmedEffect && !this.campaign.state.encounter ? `<div class="campaign-confirmed-effect" role="status">${portrait(this.confirmedEffect.id)}<p>${escape(this.confirmedEffect.text)}</p></div>` : ''}${this.commands.hasPending ? '<div class="campaign-hazard"><strong>Your last move needs confirmation</strong><p>Retry your saved move to continue from the same place.</p><div class="campaign-actions"><button id="campaign-retry">Retry saved move</button></div></div>' : this.commands.needsRefresh || this.refreshNeeded ? '<div class="campaign-hazard"><strong>Your move is saved. Let’s refresh the adventure.</strong><p>Load the latest saved world before choosing another move.</p><div class="campaign-actions"><button id="campaign-refresh">Refresh adventure</button></div></div>' : this.body()}<p class="campaign-status" role="status">${escape(this.status)}</p></section>`,
+    if (
+      !this.learning.snapshot?.activeActivity &&
+      (!this.learning.snapshot?.learnerAge || this.panel === 'settings')
+    ) {
+      this.showAgeSetup();
+      return;
+    }
+    const tabs = campaignPages(
+      Boolean(this.campaign.state.starter),
+      Boolean(this.campaign.state.encounter),
     );
+    if (!this.campaign.state.starter || this.campaign.state.encounter) this.panel = 'missions';
+    const titles: Record<string, string> = {
+      team: 'Your friends',
+      bag: 'Your supplies',
+      care: 'Rest and care',
+      journal: 'Your story so far',
+      guide: 'Discover new friends',
+      paired: 'Play together on this device',
+      more: 'Friends & more',
+    };
+    this.hooks.open(
+      `<section class="campaign-panel"><span class="campaign-eyebrow">The Missing Moonlight</span><nav class="campaign-tabs" aria-label="Adventure pages">${tabs.map(([id, label]) => `<button id="campaign-${id}" data-campaign-tab="${id}" ${this.panel === id ? 'aria-current="page"' : ''}>${label}</button>`).join('')}</nav><h2 id="dialog-title">${this.campaign.state.encounter ? 'Keeper trial' : (titles[this.panel] ?? 'Your mission')}</h2>${this.formPresentation()}${this.confirmedEffect && !this.campaign.state.encounter ? `<div class="campaign-confirmed-effect" role="status">${portrait(this.confirmedEffect.id)}<p>${escape(this.confirmedEffect.text)}</p></div>` : ''}${this.commands.hasPending ? '<div class="campaign-hazard"><strong>Your last move needs confirmation</strong><p>Retry your saved move to continue from the same place.</p><div class="campaign-actions"><button id="campaign-retry">Retry saved move</button></div></div>' : this.commands.needsRefresh || this.refreshNeeded ? '<div class="campaign-hazard"><strong>Your move is saved. Let’s refresh the adventure.</strong><p>Load the latest saved world before choosing another move.</p><div class="campaign-actions"><button id="campaign-refresh">Refresh adventure</button></div></div>' : this.body()}<p class="campaign-status" role="status">${escape(this.status)}</p></section>`,
+    );
+    document.querySelector<HTMLElement>('#dialog-title')?.setAttribute('tabindex', '-1');
+    document.querySelector<HTMLElement>('#dialog-title')?.focus();
+  }
+  private showAgeSetup() {
+    const age = this.learning.snapshot?.learnerAge;
+    this.hooks.open(
+      `<section class="campaign-panel"><span class="campaign-eyebrow">For a grown-up · ${escape(this.playerLabel)}</span><h2 id="dialog-title" tabindex="-1">Find a comfortable starting point</h2><p>How old is the player? We’ll start with skills around that age, try earlier skills if they are tricky, and move ahead when independent answers show they are ready.</p><p>This is a starting guess, not a test result. Help is always available and the adventure keeps moving.</p><label for="campaign-age">Player’s age</label><select id="campaign-age" ${this.savingAge || this.learning.hasPending ? 'disabled' : ''}><option value="">Choose an age</option>${Array.from(
+        { length: 9 },
+        (_, i) => i + 4,
+      )
+        .map(
+          (value) =>
+            `<option value="${value}" ${age === value ? 'selected' : ''}>${value === 4 ? '4 or younger' : value === 12 ? '12 or older' : value + ' years'}</option>`,
+        )
+        .join(
+          '',
+        )}</select><p class="campaign-note">We save only this age band for this player, not a date of birth. The current practice pack covers Kindergarten to Year Six. You can change this in Friends & more → Learning setup.</p><div class="campaign-actions"><button id="${this.learning.hasPending ? 'campaign-retry-age' : 'campaign-save-age'}" ${this.savingAge ? 'disabled' : ''}>${this.savingAge ? 'Saving…' : this.learning.hasPending ? 'Retry saved setup' : 'Save and continue'}</button>${age && !this.learning.hasPending ? '<button data-campaign-tab="missions">Back to my mission</button>' : ''}</div><p class="campaign-status" role="status">${escape(this.status)}</p></section>`,
+    );
+    document.querySelector<HTMLElement>('#dialog-title')?.focus();
+  }
+  private async saveAge() {
+    if (this.savingAge) return;
+    const age = Number(document.querySelector<HTMLSelectElement>('#campaign-age')?.value);
+    if (!this.learning.hasPending && (!Number.isInteger(age) || age < 4 || age > 12)) {
+      this.status = 'Please choose an age to set a starting point.';
+      this.showAgeSetup();
+      return;
+    }
+    this.savingAge = true;
+    this.status = '';
+    this.showAgeSetup();
+    try {
+      if (this.learning.hasPending) await this.learning.retry();
+      else await this.learningCommand({ type: 'set_age', age });
+      await this.learning.refresh();
+      this.panel = 'missions';
+    } catch {
+      this.status =
+        'The starting point could not be confirmed. Try again; your adventure stays saved.';
+    } finally {
+      this.savingAge = false;
+      this.render();
+    }
   }
   private body(): string {
     const c = this.campaign,
@@ -742,8 +810,25 @@ export class CampaignWorld {
         '<p>Shared-device play is unavailable. Your solo adventure stays saved.</p>'
       );
     if (s.encounter) return this.encounter();
-    if (!s.starter)
-      return `<p>Hazel has found a trail of fading moonlight. Choose a friend to follow it together. Every friend can complete the adventure.</p><div class="campaign-actions">${c.legal_actions.map((action) => `<button data-campaign-command="${escape(action.id)}">${escape(action.label)}</button>`).join('')}</div><div class="campaign-grid">${this.snapshot.starters.map((friend) => `<article class="campaign-card">${portrait(friend.id)}<h3>${escape(friend.name)}</h3><p>${escape(friend.affinity)} affinity</p><div class="campaign-actions">${this.button(`Choose ${friend.name}`, { type: 'choose_starter', companion_id: friend.id })}</div></article>`).join('')}</div>`;
+    if (!s.starter) {
+      const brief = missionBrief(s.flags, 'welcome');
+      const meet = c.legal_actions.find((a) => a.id === 'welcome_meet');
+      return `<div class="campaign-objective"><h3>${escape(brief.title)}</h3><p>${escape(brief.story)}</p><p><strong>First:</strong> Meet Hazel, then choose one friend to help you. Together you will investigate the broken bridge.</p></div>${meet ? `<div class="campaign-actions"><button data-campaign-command="welcome_meet">Meet Hazel and hear the plan</button></div>` : `<p>Choose one travelling friend. Every friend can complete the adventure, and you can meet the others later.</p><div class="campaign-grid">${this.snapshot.starters.map((friend) => `<article class="campaign-card">${portrait(friend.id)}<h3>${escape(friend.name)}</h3><p>${escape(({ pip: 'Find hidden clues with a little light.', tansy: 'Help plants grow and make new paths.', nib: 'Build and steady things together.' } as Record<string, string>)[friend.id] ?? friend.affinity)}</p><div class="campaign-actions">${this.button(`Choose ${friend.name}`, { type: 'choose_starter', companion_id: friend.id })}</div></article>`).join('')}</div>`}`;
+    }
+    if (this.panel === 'more') {
+      const pages = [
+        ['team', 'Friends', 'See your companions and choose who travels with you at camp.'],
+        ['bag', 'Bag', 'See the supplies you have collected.'],
+        ['care', 'Camp', 'Rest, make supplies and care for your friends at camp.'],
+        ['journal', 'Journal', 'Remember what happened and which beacons you restored.'],
+        ['guide', 'Field guide', 'Find clues about friends you can meet later.'],
+        ...(this.pairing
+          ? [['paired', 'Play together', 'Take turns with another saved player on this device.']]
+          : []),
+        ['settings', 'Learning setup', 'A grown-up can update the starting age estimate.'],
+      ];
+      return `<p>These are optional tools for your adventure. Your next mission is always under Your mission.</p><div class="campaign-grid">${pages.map(([id, label, description]) => `<article class="campaign-card"><h3>${label}</h3><p>${description}</p><div class="campaign-actions"><button id="campaign-${id}" data-campaign-tab="${id}">Open ${label}</button></div></article>`).join('')}</div>`;
+    }
     if (this.panel === 'guide')
       return `<p>There are twelve friends to discover. Watch quietly, notice what each friend enjoys and choose a respectful way to approach.</p><p>${c.companions.length} of ${fieldGuide.friends.length} friends have joined you.</p><div class="campaign-grid">${fieldGuide.friends
         .map((friend) => {
@@ -785,7 +870,7 @@ export class CampaignWorld {
         )
         .join('')}</div>`;
     if (this.panel === 'journal')
-      return `<h3>Your next step</h3><p>${escape(nextObjective(c.legal_actions, s.grants)?.label ?? (s.flags.includes('finale_complete') ? (c.companions.length === fieldGuide.friends.length && c.companions.every((friend) => friend.level >= 5) ? 'Every friend has reached their Wayfinder milestone. Explore optional habitat caches or revisit keeper trials together.' : 'Explore your friends’ remaining invitations.') : 'Follow an open path to continue.'))}</p><h3>Keeper seals</h3><div class="campaign-seals">${
+      return `<h3>Your next step</h3><p>${escape(nextObjective(c.legal_actions, s.grants, s.flags)?.label ?? (s.flags.includes('finale_complete') ? (c.companions.length === fieldGuide.friends.length && c.companions.every((friend) => friend.level >= 5) ? 'Every friend has reached their Wayfinder milestone. Explore optional habitat caches or revisit keeper trials together.' : 'Explore your friends’ remaining invitations.') : 'Follow an open path to continue.'))}</p><h3>Keeper seals</h3><div class="campaign-seals">${
         ['bridge', 'bloom', 'echo', 'harvest', 'current', 'tide', 'beacon', 'accord']
           .filter((id) => s.flags.includes(id + '_seal'))
           .map(
@@ -805,7 +890,32 @@ export class CampaignWorld {
           `<section class="campaign-hazard" aria-label="${escape(puzzle.title)}"><strong>${escape(puzzle.title)}</strong>${puzzle.settings.map((setting) => `<p>${escape(name(setting.setting))} → ${escape(name(setting.value))}</p>`).join('')}<p>${puzzle.status === 'solved' ? 'Solved: the mechanism is working.' : puzzle.status === 'blocked' ? 'That arrangement is blocked. Adjust the settings and check again.' : 'Settings saved. Check the mechanism when you are ready.'}</p></section>`,
       )
       .join('');
-    return `${s.flags.includes('finale_complete') ? '<div class="campaign-dialogue"><strong>The moonlight has come home</strong><p>Eight beacons shine together. Vell’s machines now return the light, and a sanctuary waits for your friends. Your adventure can keep growing.</p></div>' : ''}${waterStatus}<p>Follow the moonlight trail, help your neighbours and learn what happened to the beacons.</p><div class="campaign-actions">${c.legal_actions.map((action) => `<button data-campaign-command="${escape(action.id)}">${escape(action.label)}</button>`).join('')}</div>${c.travel.length ? '<h3>Take a path</h3>' : ''}<div class="campaign-actions">${c.travel.map((id) => this.button(this.snapshot.locations.find((p) => p.id === id)?.name ?? name(id), { type: 'travel', location_id: id })).join('')}</div>${!c.legal_actions.length && !c.travel.length ? '<p class="campaign-empty">Take a moment with your friends at camp.</p>' : ''}`;
+    const objective = nextObjective(c.legal_actions, s.grants, s.flags);
+    const brief = missionBrief(s.flags, objective?.mission);
+    const trail = !objective ? nextTrail(s.flags, s.location, c.travel) : undefined;
+    const placeName = (id: string) =>
+      this.snapshot.locations.find((p) => p.id === id)?.name ?? name(id);
+    const choices = objective?.puzzle
+      ? c.legal_actions.filter((action) => action.puzzle?.id === objective.puzzle?.id)
+      : objective?.kind === 'choose'
+        ? c.legal_actions.filter(
+            (action) => action.kind === 'choose' && action.mission === objective.mission,
+          )
+        : [];
+    const others = c.legal_actions.filter(
+      (action) => action !== objective && !choices.includes(action),
+    );
+    return `<section class="campaign-objective" aria-label="Current mission"><span class="campaign-eyebrow">Our mission</span><h3>${escape(brief.title)}</h3><p>${escape(brief.story)}</p><p><strong>What we’re trying to do:</strong> ${escape(brief.goal)}</p><h3>Do this next</h3>${choices.length ? `<p>${objective?.puzzle ? 'Try the controls below, then check your arrangement. You can change it and try again.' : 'Choose how you would like to finish this part of the adventure.'}</p><div class="campaign-actions">${choices.map((action) => `<button data-campaign-command="${escape(action.id)}">${escape(action.label)}</button>`).join('')}</div>` : objective ? `<p>${escape(objective.label)}${objective.learning ? ' — a short activity will help us finish this step. Help is always available.' : '.'}</p><div class="campaign-actions"><button data-campaign-command="${escape(objective.id)}">${escape(objective.label)}</button></div>` : trail ? `<p>Head towards ${escape(placeName(trail.target))}. Take the path to ${escape(placeName(trail.step))} next.</p><div class="campaign-actions">${this.button('Go to ' + placeName(trail.step), { type: 'travel', location_id: trail.step })}</div>` : '<p>Explore the open paths or your friends’ invitations below.</p>'}</section>${waterStatus}${c.travel.length ? '<h3>Where to go</h3><p>These paths take you to another place. Your progress here stays saved.</p>' : ''}<div class="campaign-actions">${c.travel
+      .filter((id) => id !== trail?.step)
+      .map((id) =>
+        this.button(
+          'Go to ' + (this.snapshot.locations.find((p) => p.id === id)?.name ?? name(id)),
+          { type: 'travel', location_id: id },
+        ),
+      )
+      .join(
+        '',
+      )}</div>${others.length ? `<details class="campaign-optional"><summary>Other things to try here (${others.length})</summary><p>Extra practice, discoveries and visits. You can come back to these.</p><div class="campaign-actions">${others.map((action) => `<button data-campaign-command="${escape(action.id)}">${escape(action.label)}</button>`).join('')}</div></details>` : ''}`;
   }
   private encounter(): string {
     const s = this.campaign.state,
@@ -821,9 +931,77 @@ export class CampaignWorld {
         }</p></div>`
       : '';
     const actor = s.team.includes(this.selected ?? '') ? this.selected! : s.team[0]!;
-    return `<div class="campaign-trial-art" aria-hidden="true">${portrait(this.friendSprite(actor))}<span>✦ · ✦ · ✦</span>${portrait('collector-cart')}${this.confirmedEffect ? `<div class="campaign-effect-bitmap" aria-hidden="true">${portrait(this.confirmedEffect.id)}</div>` : ''}</div>${this.confirmedEffect ? `<p role="status">${escape(this.confirmedEffect.text)}</p>` : ''}${relay}<p>Work together to restore the keeper’s light. You can take your time choosing each move.</p><div class="campaign-stat"><span>Light restored</span><strong>${e.progress} / ${d.target}</strong></div><progress aria-label="Light restored" class="campaign-meter" value="${e.progress}" max="${d.target}">${e.progress} / ${d.target}</progress><div class="campaign-stat"><span>Pressure</span><strong>${e.pressure} / ${d.pressure_limit}</strong></div><div class="campaign-stat"><span>Turns</span><strong>${e.turns} / ${d.turn_limit}</strong></div><div class="campaign-hazard">${portrait('affinity-' + phase.affinity)}<strong>Current light: ${escape(name(phase.affinity))}</strong><p>${phase.next ? `At ${phase.next.threshold} light, the trial changes to ${escape(name(phase.next.affinity))}.` : 'This is the final phase.'}</p><strong>Next hazard: ${d.hazards[e.turns % d.hazards.length] ?? 0} pressure</strong>${s.flags.includes(`encounter_reveal:${e.id}:${e.turns}`) ? `<p>Gleam reveals the following hazard too: ${d.hazards[(e.turns + 1) % d.hazards.length] ?? 0} pressure.</p>` : ''}Guard before a strong gust. Focus makes steady progress. Rally prepares a stronger move for a partner. Rest restores energy.</div><div class="campaign-actions">${this.button('Return to camp', { type: 'encounter_turn', companion_id: actor, movement: 'retreat' })}${this.button('Let’s do this together', { type: 'encounter_turn', companion_id: actor, movement: 'guided' })}<button id="campaign-guided" aria-pressed="${this.guided}">${this.guided ? 'Hide trial hints' : 'Let’s plan together'}</button></div>${this.guided ? '<div class="campaign-dialogue"><strong>Hazel’s keeper tools</strong><p>You have three free tool charges. Each restores two light and shields against a gust. Focus adds one light without using energy. Rest brings energy back. With two friends, Rally with one, then use the other friend’s signature for a stronger paired turn.</p></div>' : ''}<h3>Who will help?</h3><div class="campaign-actions">${s.team.map((id) => `<button data-campaign-select="${escape(id)}" aria-pressed="${actor === id}">${escape(name(id))} · ${s.energy[id] ?? 0} energy</button>`).join('')}</div><div class="campaign-actions">${['focus', 'guard', 'rest', 'signature', 'rally', 'tool', 'snack', 'shelter_patch', 'trail_marker'].map((m) => this.button(m === 'tool' ? `Keeper tool (${e.tool_charges})` : name(m), { type: 'encounter_turn', companion_id: actor, movement: m }, (m === 'rally' && (this.campaign.companions.find((c) => c.id === actor)?.level ?? 1) < 2) || (m === 'tool' && e.tool_charges === 0) || (['snack', 'shelter_patch', 'trail_marker'].includes(m) && !(s.items[m] ?? 0)) || (['guard', 'rally', 'signature'].includes(m) && !(m === 'signature' && s.flags.includes(`technique:${actor}:free_signature`) && !s.flags.includes(`free_signature_used:${actor}`)) && (s.energy[actor] ?? 0) < (m === 'signature' ? signatureCost(this.campaign.companions.find((c) => c.id === actor)?.affinity ?? companionAffinities[actor] ?? 'gleam') : 1)))).join('')}</div>`;
+    const affinity =
+      this.campaign.companions.find((friend) => friend.id === actor)?.affinity ??
+      companionAffinities[actor] ??
+      'gleam';
+    const freeSignature =
+      s.flags.includes(`technique:${actor}:free_signature`) &&
+      !s.flags.includes(`free_signature_used:${actor}`);
+    const signatureEnergy = freeSignature ? 0 : signatureCost(affinity);
+    const descriptions: Record<string, string> = {
+      focus: 'Restore light. No energy needed.',
+      guard: 'Block up to 2 pressure from this gust. Uses 1 energy.',
+      rest: 'Recover up to 2 energy. Does not restore light.',
+      signature: `Use ${name(actor)}’s special ${name(affinity)} move to restore light${affinity === phase.affinity ? ' with a matching-light bonus' : ''}. Uses ${signatureEnergy} energy.`,
+      rally: 'Boost another friend’s next light-restoring move. Uses 1 energy. Requires level 2.',
+      tool: `Restore 2 light and block 1 pressure. No energy needed. ${e.tool_charges} charges left.`,
+      snack: 'Use one snack to recover up to 2 energy.',
+      shelter_patch: 'Use one patch to block up to 2 pressure from this gust.',
+      trail_marker: 'Use one marker to boost the next light-restoring move.',
+    };
+    const moves = [
+      'focus',
+      'guard',
+      'rest',
+      'signature',
+      'rally',
+      'tool',
+      'snack',
+      'shelter_patch',
+      'trail_marker',
+    ]
+      .map((movement) => {
+        const cost =
+          movement === 'signature'
+            ? signatureEnergy
+            : ['guard', 'rally'].includes(movement)
+              ? 1
+              : 0;
+        const reason =
+          movement === 'rally' &&
+          (this.campaign.companions.find((friend) => friend.id === actor)?.level ?? 1) < 2
+            ? 'Available at level 2.'
+            : movement === 'tool' && e.tool_charges === 0
+              ? 'No charges left.'
+              : ['snack', 'shelter_patch', 'trail_marker'].includes(movement) &&
+                  !(s.items[movement] ?? 0)
+                ? 'None in your bag.'
+                : (s.energy[actor] ?? 0) < cost
+                  ? `Needs ${cost} energy. Try Rest first.`
+                  : '';
+        const label = movement === 'tool' ? `Keeper tool (${e.tool_charges})` : name(movement);
+        const button = this.button(
+          label,
+          { type: 'encounter_turn', companion_id: actor, movement },
+          Boolean(reason),
+          movement === 'focus',
+        ).replace('<button ', `<button aria-describedby="move-${movement}-help" `);
+        return `<div class="campaign-move">${button}<p id="move-${movement}-help">${escape(descriptions[movement]!)}${reason ? `<strong>${escape(reason)}</strong>` : ''}</p></div>`;
+      })
+      .join('');
+    return `<div class="campaign-trial-art" aria-hidden="true">${portrait(this.friendSprite(actor))}<span>✦ · ✦ · ✦</span>${portrait('collector-cart')}${this.confirmedEffect ? `<div class="campaign-effect-bitmap" aria-hidden="true">${portrait(this.confirmedEffect.id)}</div>` : ''}</div>${this.confirmedEffect ? `<p role="status">${escape(this.confirmedEffect.text)}</p>` : ''}${relay}<p>Work together to restore the keeper’s light. You can take your time choosing each move.</p><div class="campaign-stat"><span>Light restored</span><strong>${e.progress} / ${d.target}</strong></div><progress aria-label="Light restored" class="campaign-meter" value="${e.progress}" max="${d.target}">${e.progress} / ${d.target}</progress><div class="campaign-stat"><span>Pressure</span><strong>${e.pressure} / ${d.pressure_limit}</strong></div><div class="campaign-stat"><span>Turns</span><strong>${e.turns} / ${d.turn_limit}</strong></div><div class="campaign-hazard">${portrait('affinity-' + phase.affinity)}<strong>Current light: ${escape(name(phase.affinity))}</strong><p>${phase.next ? `At ${phase.next.threshold} light, the trial changes to ${escape(name(phase.next.affinity))}.` : 'This is the final phase.'}</p><strong>Next hazard: ${d.hazards[e.turns % d.hazards.length] ?? 0} pressure</strong>${s.flags.includes(`encounter_reveal:${e.id}:${e.turns}`) ? `<p>Gleam reveals the following hazard too: ${d.hazards[(e.turns + 1) % d.hazards.length] ?? 0} pressure.</p>` : ''}<p>Each move takes one turn, then the gust adds pressure. Restore the light before pressure or turns run out.</p></div><div class="campaign-actions">${this.button('Return to camp', { type: 'encounter_turn', companion_id: actor, movement: 'retreat' })}${this.button(
+      'Let’s do this together',
+      { type: 'encounter_turn', companion_id: actor, movement: 'guided' },
+    )
+      .replace('campaign-secondary', 'campaign-secondary campaign-support')
+      .replace(
+        '>Let’s',
+        '>' + activityIcon('together').outerHTML + 'Let’s',
+      )}<button class="campaign-secondary campaign-support" id="campaign-guided" aria-pressed="${this.guided}">${activityIcon('hint').outerHTML}${this.guided ? 'Hide trial hints' : 'Let’s plan together'}</button></div>${this.guided ? `<div class="campaign-dialogue"><strong>Plan your next move</strong><p>You have ${e.tool_charges} keeper tool charges left. Focus restores light without spending energy. Guard helps with a strong gust; Rest recovers energy. A signature matching the current light gets a bonus.</p></div>` : ''}<section class="campaign-trial-section"><h3>1. Who will help?</h3><p>Choose the friend who will make your next move. Choosing a friend does not use a turn.</p><div class="campaign-actions campaign-team-choice">${s.team.map((id) => `<button data-campaign-select="${escape(id)}" aria-pressed="${actor === id}">${escape(name(id))} · ${s.energy[id] ?? 0} energy${actor === id ? ' · Selected' : ''}</button>`).join('')}</div></section><section class="campaign-trial-section"><h3>2. Choose a move for ${escape(name(actor))}</h3><p>Choose one action below. For help, “Let’s do this together” chooses and plays one move for you; “Let’s plan together” shows hints without using a turn.</p><div class="campaign-actions campaign-moves">${moves}</div></section>`;
   }
   private async run(payload: CampaignPayload) {
+    if (!this.learning.snapshot?.learnerAge) return this.render();
     if (this.commands.busy || this.commands.hasPending) return;
     if (this.commands.needsRefresh || this.refreshNeeded) {
       this.render();

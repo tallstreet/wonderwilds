@@ -7,6 +7,16 @@ const { chromium } = require('playwright');
 const bank = JSON.parse(
   await readFile(new URL('../../../content/activities/skill-exercises-v1.json', import.meta.url)),
 );
+const nsw = JSON.parse(
+  await readFile(new URL('../../../content/curriculum/nsw/exercises-v1.json', import.meta.url)),
+);
+const findTimedDiagram = (value) => {
+  if (!value || typeof value !== 'object') return undefined;
+  if (value.kind === 'diagram' && value.exposureMs) return value;
+  return Object.values(value).map(findTimedDiagram).find(Boolean);
+};
+const timedDiagram = findTimedDiagram(nsw);
+assert.ok(timedDiagram, 'Real timed dot stimulus exists');
 const examples = [
   ['M05', 'one_more'],
   ['M10', 'features'],
@@ -261,6 +271,67 @@ try {
     });
     assert.equal(await page.locator('audio').count(), 0);
     assert.match(await page.locator('main').textContent(), /grown-up/);
+    await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+    await page.clock.pauseAt(new Date('2026-01-01T00:01:00Z'));
+    const mountStimulus = async (stimulus) =>
+      page.evaluate(async (value) => {
+        const { renderStimulus } = await import('/src/mission-learning/stimulus.ts');
+        document.querySelector('main').replaceChildren(renderStimulus(document, value));
+      }, stimulus);
+    await mountStimulus(timedDiagram);
+    await page.waitForFunction(() => !document.querySelector('.ww-picture-reveal').disabled);
+    const picture = page.locator('.ww-timed-picture img');
+    const visibility = () => picture.evaluate((img) => getComputedStyle(img).visibility);
+    await page.clock.fastForward(5000);
+    assert.equal(await visibility(), 'hidden', 'Loading and waiting never reveal timed dots');
+    const ready = page.getByRole('button', { name: 'I’m ready', exact: true });
+    await ready.focus();
+    await page.keyboard.press('Enter');
+    assert.equal(await visibility(), 'visible', 'Keyboard readiness shows the dots');
+    if (width === 390)
+      await page.screenshot({ path: '/tmp/wonderwilds-dots-visible-phone.png', fullPage: true });
+    await page.clock.fastForward(timedDiagram.exposureMs - 1);
+    assert.equal(await visibility(), 'visible', 'Full exposure begins only after readiness');
+    await page.clock.fastForward(1);
+    assert.equal(await visibility(), 'hidden');
+    const again = page.getByRole('button', { name: 'Show again', exact: true });
+    assert.equal(await again.isEnabled(), true);
+    assert.equal(
+      await again.evaluate((button) => button.type),
+      'button',
+      'Reveal never submits an answer form',
+    );
+    assert.match(await page.locator('.ww-picture-placeholder').innerText(), /Picture hidden/);
+    if (width === 390)
+      await page.screenshot({ path: '/tmp/wonderwilds-dots-show-again-phone.png', fullPage: true });
+    await again.tap();
+    assert.equal(await visibility(), 'visible', 'Touch replay reveals the same picture');
+    await again.tap({ force: true }); // Repeated activation cannot schedule another timer.
+    await page.clock.fastForward(timedDiagram.exposureMs);
+    assert.equal(await visibility(), 'hidden');
+    assert.equal(await again.getAttribute('aria-disabled'), null);
+    const untimed = { ...timedDiagram };
+    delete untimed.exposureMs;
+    await mountStimulus(untimed);
+    await page.locator('main img').waitFor();
+    await page.clock.fastForward(10000);
+    assert.equal(
+      await page.locator('main img').isVisible(),
+      true,
+      'Ordinary counting diagrams stay visible',
+    );
+    assert.equal(
+      await page.locator('.ww-picture-reveal').count(),
+      0,
+      'Untimed counting needs no readiness button',
+    );
+    // A timer belonging to a removed question cannot hide a replacement picture.
+    await mountStimulus(timedDiagram);
+    await page.waitForFunction(() => !document.querySelector('.ww-picture-reveal').disabled);
+    await page.getByRole('button', { name: 'I’m ready', exact: true }).click();
+    await mountStimulus(untimed);
+    await page.clock.fastForward(10000);
+    assert.equal(await page.locator('main img').isVisible(), true);
     assert.deepEqual(errors, []);
     await context.close();
     console.log(`Current mission controls and ${seen.size} stimulus types passed at ${width}px`);

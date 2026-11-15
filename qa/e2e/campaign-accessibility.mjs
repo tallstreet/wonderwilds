@@ -1,3 +1,4 @@
+import { finishLearningSetup } from './campaign-ui.mjs';
 // Technical M6 checks against the real saved campaign. Not a human accessibility audit.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -21,8 +22,9 @@ try {
       } });
     }, mode);
     await page.goto(origin);
-    await page.locator('#campaign-start, #campaign-missions').first().waitFor();
+    await page.locator('#campaign-start, #campaign-missions, #campaign-age').first().waitFor();
     if (await page.locator('#campaign-start').count()) await page.locator('#campaign-start').click();
+    await finishLearningSetup(page);
     await page.locator('#campaign-missions').waitFor();
     if (await page.getByRole('button', { name: 'Choose Pip', exact: true }).count()) {
       await page.getByRole('button', { name: 'Choose Pip', exact: true }).click();
@@ -53,7 +55,12 @@ try {
       assert.equal(await page.locator('#campaign-read').count(), 0);
       await page.getByText('Read aloud is unavailable in this browser. All dialogue is shown as text.').waitFor();
     } else {
-      await page.locator('#campaign-read').click();
+      const speaker = page.getByRole('button', { name: 'Read this aloud', exact: true });
+      assert.equal((await speaker.innerText()).trim(), '', 'Read-aloud is an icon with an accessible name');
+      const speakerBounds = await speaker.boundingBox();
+      assert.ok(speakerBounds.width >= 44 && speakerBounds.width <= 48 && speakerBounds.height >= 44, 'Compact speaker keeps a touch-sized target');
+      assert.equal(await page.locator('.campaign-dialogue-text #campaign-read').count(), 1, 'Speaker sits beside the dialogue text');
+      await speaker.click();
       await page.locator('#campaign-read-status').filter({ hasText: 'Read aloud is unavailable' }).waitFor();
       assert.ok((await page.locator('.campaign-dialogue p').innerText()).length > 10);
     }
@@ -61,6 +68,20 @@ try {
     if (await next.count()) {
       await next.focus(); await page.keyboard.press('Enter');
       assert.equal(await page.evaluate(() => document.activeElement?.id), 'dialog-title', 'Next page restores heading focus');
+      const background = locator => locator.evaluate(node => getComputedStyle(node).backgroundColor);
+      const primary = page.locator('.campaign-actions .campaign-primary');
+      assert.equal(await primary.count(), 1, 'Exactly one primary dialogue action');
+      const previous = page.getByRole('button', { name: 'Previous', exact: true });
+      const back = page.getByRole('button', { name: 'Back to adventure', exact: true });
+      assert.notEqual(await background(primary), await background(previous), 'Primary action stands out from Previous');
+      assert.equal(await background(previous), await background(back), 'Back and Previous share secondary styling');
+      if (mode === 'service_error') {
+        await page.screenshot({ path: '/tmp/wonderwilds-dialogue-buttons-desktop.png', fullPage: true });
+        await page.setViewportSize({ width: 390, height: 844 });
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        await page.screenshot({ path: '/tmp/wonderwilds-dialogue-buttons-phone.png', fullPage: true });
+        await page.setViewportSize({ width: 1280, height: 800 });
+      }
     }
     await page.keyboard.press('Escape');
     await page.locator('dialog[open]').waitFor({ state: 'hidden' });

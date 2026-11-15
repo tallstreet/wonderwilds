@@ -3,7 +3,7 @@
 mod catalogue;
 mod exercises;
 mod progression;
-pub use progression::{frontier, select};
+pub use progression::{frontier, select, select_for_age};
 
 use std::collections::{BTreeMap, BTreeSet};
 

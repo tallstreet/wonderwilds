@@ -9,6 +9,13 @@ workshops provide a local draft/rubric and Finish activity via supported complet
 `stimulus.ts` renders educational SVG/DOM diagrams; `icons.ts` imports a fixed
 Lucide allowlist. Nothing in these components marks correctness.
 
+Timed diagram stimuli wait for **I’m ready** after the image has loaded. Each
+**Show again** activation repeats the authored exposure duration; the hidden state
+has an explicit message and retains its space. These buttons only control the
+picture and never submit an answer. Diagrams without `exposureMs`, and ordinary
+counting collections, remain visible. The question browser suite checks keyboard
+and touch replay, timing from readiness, and replacement-question isolation.
+
 The current shell matches the approved activity playground: direct choice cards,
 explicit Check answer, labelled input, optional hints, undo and tap/keyboard
 alternatives to dragging. Wrong answers show the server explanation before a local

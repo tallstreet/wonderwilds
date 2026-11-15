@@ -82,7 +82,12 @@ and limitations.
 
 Run `sh scripts/local-demo.sh`, open `http://127.0.0.1:5173/`, and choose
 **Begin The Missing Moonlight**. The authored campaign needs no model credentials.
-Choose Pip, Tansy or Nib, restore eight beacons across three regions, and discover
+A grown-up first chooses the player’s age band to estimate a practice starting
+point. Hazel explains the missing lights, then you choose Pip, Tansy or Nib.
+**Your mission** shows the problem, goal and next action; **Friends & more** explains
+the optional tools. Independent answers adjust practice forwards or back towards
+prerequisites, while help always lets the adventure continue.
+Restore eight beacons across three regions, and discover
 twelve companions. Learning support, camp recovery and free keeper tools provide
 routes through the adventure for every starter. Progress, rewards and chosen
 companion appearances are saved by the backend.

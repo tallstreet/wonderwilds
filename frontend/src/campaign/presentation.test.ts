@@ -103,6 +103,13 @@ test('tracker prioritises active story over starter replays and offers travel af
     main = task('bridge_gather', 'bridge-project', 'gather');
   assert.equal(nextObjective([replay, side, main], ['win:practice_pip'])?.id, 'bridge_gather');
   assert.equal(nextObjective([replay, side], ['win:practice_pip']), undefined);
+  const puzzle = {
+    ...task('water_check', 'bloom-project', 'puzzle'),
+    puzzle: { id: 'garden_water', operation: 'check', value: null, goal: {} },
+  };
+  const path = task('field_bloom_tool', 'field-bloom', 'field');
+  assert.equal(nextObjective([puzzle, path], [], ['puzzle:garden_water:solved'])?.id, path.id);
+  assert.equal(nextObjective([puzzle, path], [])?.id, puzzle.id);
 });
 
 test('Wayfinder milestones are shown only for a confirmed crossing with a known baseline, never on reload', async () => {
@@ -129,4 +136,29 @@ test('Wayfinder milestones are shown only for a confirmed crossing with a known 
     before: 'pip-wayfinder',
     after: 'pip',
   });
+});
+
+test('mission context explains the problem and goal without exposing future answers', async () => {
+  const { missionBrief, campaignPages, openingDialogue } = await import('./presentation.ts');
+  assert.match(missionBrief([]).story, /lights.*fading/);
+  assert.match(missionBrief(['welcome_complete'], 'bridge-project').goal, /rebuild the crossing/);
+  assert.match(missionBrief(['welcome_complete', 'bridge_seal']).title, /garden/);
+  assert.match(missionBrief(['welcome_complete'], 'current-clue').title, /river/);
+  assert.equal(campaignPages(false, false).length, 1);
+  assert.deepEqual(campaignPages(true, true), [['missions', 'Current trial']]);
+  assert.equal(campaignPages(true, false).length, 2);
+  assert.match(openingDialogue('welcome_depart')!.at(-1)!.text, /First inspect/);
+});
+
+test('directions use an available path towards the next story destination', async () => {
+  const { nextTrail } = await import('./presentation.ts');
+  assert.deepEqual(
+    nextTrail(['bridge_seal'], 'bridge_bank', ['picnic_clearing', 'flower_garden']),
+    { step: 'flower_garden', target: 'flower_garden' },
+  );
+  assert.deepEqual(
+    nextTrail(['bridge_seal', 'bloom_seal'], 'bridge_bank', ['picnic_clearing', 'flower_garden']),
+    { step: 'flower_garden', target: 'echo_hollow' },
+  );
+  assert.equal(nextTrail([], 'bridge_bank', []), undefined);
 });

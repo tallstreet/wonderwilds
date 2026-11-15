@@ -14211,5 +14211,75 @@
       "movement": "award_xp"
     }
   }
-}
+},
+  {
+    "name": "age-starting-point",
+    "contract": "MissionLearningCommand",
+    "valid": true,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "age-starting-point",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "set_age",
+        "age": 8
+      }
+    }
+  },
+  {
+    "name": "age-too-young",
+    "contract": "MissionLearningCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "age-too-young",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "set_age",
+        "age": 3
+      }
+    }
+  },
+  {
+    "name": "age-too-old",
+    "contract": "MissionLearningCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "age-too-old",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "set_age",
+        "age": 13
+      }
+    }
+  },
+  {
+    "name": "age-fraction",
+    "contract": "MissionLearningCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "age-fraction",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "set_age",
+        "age": 6.5
+      }
+    }
+  },
+  {
+    "name": "age-string",
+    "contract": "MissionLearningCommand",
+    "valid": false,
+    "value": {
+      "schemaVersion": "1.0",
+      "commandId": "age-string",
+      "expectedRevision": 0,
+      "payload": {
+        "type": "set_age",
+        "age": "8"
+      }
+    }
+  }
 ]

@@ -677,6 +677,7 @@ fn postgres_mission_learning_atomicity_retry_ownership_export_and_delete() {
     );
     assert_eq!(repo.execute(&identity_a, &begin_request).unwrap(), begun);
 
+    exercise_age_setup(&mut admin, &restricted, parent, other_parent);
     exercise_inline_steps(&mut admin, &restricted, parent);
     exercise_project_steps(&mut admin, &restricted, parent);
 
@@ -1078,4 +1079,111 @@ fn exercise_project_steps(admin: &mut Client, restricted: &str, parent: &str) {
         );
         assert_eq!(story.verify_history(&identity).unwrap(), after);
     }
+}
+
+fn exercise_age_setup(admin: &mut Client, restricted: &str, parent: &str, other_parent: &str) {
+    let profile = "72000000-0000-0000-0000-000000000009";
+    admin.execute("INSERT INTO wonderwilds.profiles(id,parent_id,ability_band) VALUES($1::text::uuid,$2::text::uuid,'beginning')", &[&profile,&parent]).unwrap();
+    let identity = Identity {
+        parent_id: parent.into(),
+        profile_id: profile.into(),
+        session_id: "age-setup-session".into(),
+    };
+    let foreign = Identity {
+        parent_id: other_parent.into(),
+        ..identity.clone()
+    };
+    let repo = PostgresRepository::new(restricted.into());
+    let initial = repo.read(&identity).unwrap();
+    assert!(initial["learnerAge"].is_null());
+    let request = command("set-starting-age", 0, json!({"type":"set_age","age":8}));
+    assert!(repo.execute(&foreign, &request).is_err());
+    let mut failing = repo.clone();
+    failing.fail_before_commit = true;
+    assert!(failing.execute(&identity, &request).is_err());
+    assert_eq!(repo.read(&identity).unwrap(), initial);
+    let saved = repo.execute(&identity, &request).unwrap();
+    assert_eq!(saved["learnerAge"], 8);
+    assert!(
+        saved["frontierSkillId"]
+            .as_str()
+            .unwrap()
+            .starts_with("M-3-")
+    );
+    assert_eq!(repo.execute(&identity, &request).unwrap(), saved);
+    assert_eq!(
+        PostgresRepository::new(restricted.into())
+            .read(&identity)
+            .unwrap(),
+        saved
+    );
+    assert_eq!(row_count(admin, "mission_learning_events", profile), 0);
+    let story = StoryRepository::new(restricted.into());
+    let initial_story = story.read(&identity).unwrap();
+    story
+        .execute(
+            &identity,
+            &story_action(&initial_story, "accept_mission", None),
+        )
+        .unwrap();
+    let (_, begun) = begin(&repo, &identity, &saved, "age-first-practice");
+    assert!(
+        begun["activeActivity"]["skillId"]
+            .as_str()
+            .unwrap()
+            .starts_with("M-3-")
+    );
+    assert!(
+        repo.execute(
+            &identity,
+            &command(
+                "change-age-during-practice",
+                2,
+                json!({"type":"set_age","age":6})
+            )
+        )
+        .is_err()
+    );
+    assert_eq!(repo.read(&identity).unwrap()["learnerAge"], 8);
+    let abandoned = repo
+        .execute(
+            &identity,
+            &command(
+                "age-put-aside",
+                2,
+                json!({"type":"abandon","encounterId":begun["activeActivity"]["id"]}),
+            ),
+        )
+        .unwrap();
+    let changed = repo
+        .execute(
+            &identity,
+            &command(
+                "change-age-after-practice",
+                abandoned["revision"].as_u64().unwrap(),
+                json!({"type":"set_age","age":6}),
+            ),
+        )
+        .unwrap();
+    assert_eq!(changed["learnerAge"], 6);
+    assert_eq!(
+        repo.execute(&identity, &request).unwrap(),
+        saved,
+        "Old exact retry cannot overwrite newer age"
+    );
+    assert_eq!(repo.read(&identity).unwrap()["learnerAge"], 6);
+    let verified = VerifiedContext {
+        parent_id: parent.into(),
+        profile_id: profile.into(),
+        reauthenticated_at: 10,
+    };
+    let mut lifecycle = PostgresIdentity::new(Client::connect(restricted, NoTls).unwrap());
+    let export = lifecycle.export_profile(&verified, 11).unwrap();
+    assert!(
+        export["missionLearningProgress"]
+            .to_string()
+            .contains("learnerAge")
+    );
+    lifecycle.delete_profile(&verified, 11).unwrap();
+    assert_eq!(row_count(admin, "mission_learning_progress", profile), 0);
 }

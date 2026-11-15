@@ -64,6 +64,9 @@ struct ActiveActivity {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct LearningState {
+    /// Grown-up supplied starting estimate, never evidence or a mastery grant.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    learner_age: Option<u8>,
     revision: u64,
     content_version: String,
     policy: MissionState,
@@ -76,6 +79,7 @@ struct LearningState {
 impl Default for LearningState {
     fn default() -> Self {
         Self {
+            learner_age: None,
             revision: 0,
             content_version: mission::CONTENT_VERSION.to_owned(),
             policy: MissionState::default(),
@@ -415,13 +419,32 @@ impl PostgresRepository {
             skills.push(json!({"skillId":&node.skill_id,"objective":node.objective,"prerequisites":node.prerequisites,"learningResources":node.learning_resources,"status":status,"supportedByMission":node.supported_by_mission,"activityCompleted":mission::activity_completed(&node.skill_id, &state.policy),"eligibleChecks":eligible,"correctChecks":correct,"distinctVariants":variants,"distinctContexts":contexts,"distinctRepresentations":representations,"distinctSessions":sessions,"blockers":blockers,"nextStep":next_step}));
         }
         let seed = state.revision.saturating_add(1);
-        let frontier_skill_id = mission::select(&state.policy, None, seed)
-            .map_err(|_| Error::Unavailable)?
-            .map(|s| s.skill_id);
+        let frontier_skill_id =
+            mission::select_for_age(&state.policy, state.learner_age, None, seed)
+                .map_err(|_| Error::Unavailable)?
+                .map(|s| s.skill_id);
         let active_invite =
             activity_context.and_then(|a| invitation(&a.mission_id, &a.location_id));
         let can_begin = current_context.is_some() && frontier_skill_id.is_some();
         let mut value = json!({"schemaVersion":"1.0","contentVersion":mission::CONTENT_VERSION,"policyVersion":mission::POLICY_VERSION,"policyExplanation":POLICY_EXPLANATION,"revision":state.revision,"available":can_begin || activity_context.is_some(),"skills":skills});
+        if let Some(age) = state.learner_age {
+            value["learnerAge"] = json!(age);
+            value["policyExplanation"] = json!(
+                "Age is a starting estimate, not mastery. Three distinct independent successes move practice forward. Repeated difficulty revisits prerequisites. Supported completion keeps the story moving without establishing independent ability."
+            );
+            if let Some(skill) = skills
+                .iter_mut()
+                .find(|s| Some(s["skillId"].as_str().unwrap_or("")) == frontier_skill_id.as_deref())
+                && skill["status"] == "locked"
+            {
+                skill["status"] = json!("available");
+                skill["blockers"] =
+                    json!(["Available as a placement probe, not proof of prerequisite mastery."]);
+                skill["nextStep"] =
+                    json!("Try this activity; practice will adjust from independent answers.");
+            }
+            value["skills"] = json!(skills);
+        }
         if let Some(id) = mission_id {
             value["missionId"] = json!(id);
         }
@@ -596,6 +619,12 @@ impl Repository for PostgresRepository {
         let payload = &request["payload"];
         let mut event: Option<(u64, String, Value)> = None;
         match payload["type"].as_str().ok_or(Error::InvalidInput)? {
+            "set_age" => {
+                if state.active.is_some() {
+                    return Err(Error::RevisionConflict);
+                }
+                state.learner_age = Some(payload["age"].as_u64().ok_or(Error::InvalidInput)? as u8);
+            }
             "begin" | "begin_step" | "begin_campaign_step" => {
                 if state.active.is_some() {
                     return Err(Error::RevisionConflict);
@@ -642,10 +671,14 @@ impl Repository for PostgresRepository {
                 if step.is_none() && campaign_step.is_none() {
                     invitation(&context.mission_id, &context.location_id).ok_or(Error::NotFound)?;
                 }
-                let selected =
-                    mission::select(&state.policy, None, state.revision.saturating_add(1))
-                        .map_err(|_| Error::Unavailable)?
-                        .ok_or(Error::NotFound)?;
+                let selected = mission::select_for_age(
+                    &state.policy,
+                    state.learner_age,
+                    None,
+                    state.revision.saturating_add(1),
+                )
+                .map_err(|_| Error::Unavailable)?
+                .ok_or(Error::NotFound)?;
                 let issued = state
                     .issued_by_skill
                     .entry(selected.skill_id.clone())
