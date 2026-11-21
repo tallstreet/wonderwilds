@@ -67,6 +67,35 @@ try {
   assert.equal((await ready()).locationId, 'workshop');
   const places = ['cove', 'fern_hollow', 'mossy_clearing', 'owl_grove', 'acorn_trail'];
   const friends = ['marina', 'fern', 'moss', 'orla', 'hazel'];
+  const travelTo = async destination => {
+    let current = places.indexOf((await snapshot()).locationId);
+    const target = places.indexOf(destination);
+    assert.ok(current >= 0 && target >= 0);
+    while (current !== target) {
+      current += current < target ? 1 : -1;
+      await travel(places[current]);
+    }
+  };
+  const playStep = async character => {
+    let state = await snapshot();
+    const mission = state.sceneInput.neighbourMissions.find(q => q.characterId === character);
+    const index = mission.stepIndex ?? 0;
+    await travelTo(mission.generatedStory.steps[index].locationId ?? mission.locationId);
+    state = await snapshot();
+    const project = mission.generatedStory.steps.some(step => step.mechanic && step.mechanic !== 'inspect');
+    const id = `neighbour_${character}_${project ? `g${mission.generation}_` : ''}${index}`;
+    const action = state.sceneInput.availableActions.find(({ action }) =>
+      [action.sourceId, action.objectId, action.choiceId].includes(id))?.action;
+    assert.ok(action, `missing saved step ${id}`);
+    await visit(`${action.sourceId ? 'resource' : 'object'}:${id}`);
+    if (action.type === 'choose') {
+      await page.locator('[data-story-action="choose"]').first().click();
+      await page.waitForFunction(revision => Number(document.querySelector('#game')?.dataset.storyRevision) > revision, state.revision);
+      await ready();
+    } else await choose(action.type);
+    const updated = (await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === character);
+    assert.equal(updated.stepIndex, index + 1);
+  };
   let lostBody;
   for (let i = 0; i < places.length; i++) {
     await travel(places[i]);
@@ -95,19 +124,13 @@ try {
       await page.waitForFunction(() => !document.querySelector('dialog[open]'));
       await ready();
     } else await choose('talk');
-    const taskCount = generated ? (await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === friends[i]).generatedStory.steps.length : 1;
-    const travelTo = async destination => {
-      let current = places.indexOf((await snapshot()).locationId);
-      const target = places.indexOf(destination);
-      while (current !== target) {
-        current += current < target ? 1 : -1;
-        await travel(places[current]);
-      }
-    };
+    // Leave the final generated step unfinished so every mission exercises the open-slot cap.
+    const taskCount = generated ? (await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === friends[i]).generatedStory.steps.length - 1 : 1;
     for (let task = 0; task < taskCount; task++) {
-      const mission = (await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === friends[i]);
-      await travelTo(mission.generatedStory?.steps[task]?.locationId ?? places[i]);
-      await visit(`object:neighbour_${friends[i]}${generated ? `_${task}` : ''}`); await choose('inspect');
+      if (generated) await playStep(friends[i]);
+      else {
+        await visit(`object:neighbour_${friends[i]}`); await choose('inspect');
+      }
     }
     await travelTo(places[i]);
     const state = await snapshot();
@@ -125,16 +148,28 @@ try {
     await travel(place);
   }
   await visit('npc:marina'); await choose('talk');
+  if (generated) {
+    let mission = (await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === 'marina');
+    assert.equal(mission.status, 'open');
+    while (!mission.inspected) {
+      await playStep('marina');
+      mission = (await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === 'marina');
+    }
+    if (!mission.generatedStory.completeOnLastStep) {
+      await travelTo('cove'); await visit('npc:marina'); await choose('talk');
+    }
+    assert.equal((await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === 'marina').status, 'completed');
+  }
   state = await snapshot();
   assert.equal(state.sceneInput.neighbourMissions.at(-1).inspected, true);
-  await visit('npc:marina'); await choose('talk');
+  if (!generated) { await visit('npc:marina'); await choose('talk'); }
   assert.equal((await snapshot()).sceneInput.neighbourMissions.at(-1).status, 'completed');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('#missions').click();
   await page.screenshot({ path: '/tmp/wonderwilds-exploration-phone.png', fullPage: true });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   assert.ok(await page.locator('dialog').evaluate(node => node.scrollWidth <= node.clientWidth), 'mission text must wrap inside the phone dialog');
-  await travel('workshop');
+  await travelTo('cove'); await travel('workshop');
   if (generated) {
     await travel('cove');
     const mission = (await snapshot()).sceneInput.neighbourMissions.find(q => q.characterId === 'marina');
