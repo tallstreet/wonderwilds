@@ -108,6 +108,7 @@ node --import ./frontend/node_modules/tsx/dist/loader.mjs qa/fixtures/legacy/bas
   formatting rather than mass-formatting unrelated files.
 - For browser changes, start Vite, then run `(cd qa/e2e && npm test)` and, for
   activity controls, `node frontend/src/learning/activity.browser.mjs`.
+  Run `node qa/e2e/campaign-portrait.mjs` for campaign dialogue portrait loading.
   Set `CHROMIUM_PATH` when Chromium is not at `/usr/bin/chromium`.
 - For backend-world changes, follow the root README's fresh QA database and
   separate-port setup for `qa/e2e/backend-demo.mjs`; do not run it on demo progress.

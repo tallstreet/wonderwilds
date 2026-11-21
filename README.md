@@ -186,6 +186,7 @@ this helper. With Vite running, run:
 ```sh
 (cd qa/e2e && npm test)
 node frontend/src/learning/activity.browser.mjs
+node qa/e2e/campaign-portrait.mjs
 ```
 
 The prepared machine has Chromium at `/usr/bin/chromium`. Browser and network
