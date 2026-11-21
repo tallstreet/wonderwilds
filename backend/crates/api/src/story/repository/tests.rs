@@ -298,10 +298,39 @@ fn postgres_story_atomicity_retry_ownership_export_and_delete() {
     assert_eq!(repo.recover_current(&identity).unwrap(), current);
     assert_eq!(repo.read(&identity).unwrap(), current);
     assert_eq!(repo.execute(&identity, &accept).unwrap(), first);
-    admin.execute("UPDATE wonderwilds.command_windows SET window_minute=floor(extract(epoch FROM clock_timestamp())/60)::bigint,commands=4096 WHERE profile_id=$1::text::uuid AND kind='story'", &[&profile]).unwrap();
-    let limited = choose(&current, "limited", "travel", None);
-    assert_eq!(repo.execute(&identity, &limited), Err(Error::RateLimited));
+    let mut rate_limited = false;
+    for attempt in 0..3 {
+        let minute: i64 = admin.query_one("UPDATE wonderwilds.command_windows SET window_minute=floor(extract(epoch FROM clock_timestamp())/60)::bigint,commands=4096 WHERE profile_id=$1::text::uuid AND kind='story' RETURNING window_minute", &[&profile]).unwrap().get(0);
+        let limited = choose(&current, &format!("limited-{attempt}"), "travel", None);
+        match repo.execute(&identity, &limited) {
+            Err(Error::RateLimited) => {
+                rate_limited = true;
+                break;
+            }
+            Ok(next) => {
+                let window = admin.query_one("SELECT window_minute,commands FROM wonderwilds.command_windows WHERE profile_id=$1::text::uuid AND kind='story'", &[&profile]).unwrap();
+                assert!(
+                    window.get::<_, i64>(0) > minute,
+                    "Only a new minute may renew the budget"
+                );
+                assert_eq!(window.get::<_, i32>(1), 1);
+                current = next;
+            }
+            Err(error) => panic!("Expected rate limit, got {error:?}"),
+        }
+    }
+    assert!(rate_limited, "No same-minute rate-limit check completed");
     assert_eq!(repo.execute(&identity, &accept).unwrap(), first);
+    assert_eq!(admin.execute("UPDATE wonderwilds.command_windows SET window_minute=floor(extract(epoch FROM clock_timestamp())/60)::bigint-1,commands=4096 WHERE profile_id=$1::text::uuid AND kind='story'", &[&profile]).unwrap(), 1);
+    let renewed = choose(&current, "renewed", "travel", None);
+    let next = repo.execute(&identity, &renewed).unwrap();
+    assert_eq!(
+        next["revision"].as_u64().unwrap(),
+        current["revision"].as_u64().unwrap() + 1
+    );
+    current = next;
+    assert_eq!(repo.execute(&identity, &renewed).unwrap(), current);
+    assert_eq!(admin.query_one("SELECT commands FROM wonderwilds.command_windows WHERE profile_id=$1::text::uuid AND kind='story'", &[&profile]).unwrap().get::<_, i32>(0), 1);
     let archived:Value=admin.query_one("SELECT domain_command FROM wonderwilds.story_command_receipts WHERE profile_id=$1::text::uuid AND revision=200", &[&profile]).unwrap().get(0);
     admin.execute("UPDATE wonderwilds.story_command_receipts SET domain_command='{}' WHERE profile_id=$1::text::uuid AND revision=200", &[&profile]).unwrap();
     assert_eq!(repo.verify_history(&identity), Err(Error::Unavailable));
