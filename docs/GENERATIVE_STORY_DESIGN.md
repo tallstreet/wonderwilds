@@ -385,8 +385,8 @@ Relevant current sources:
 - [Map definitions](../frontend/src/maps.ts) and
   [encounter placements](../frontend/src/world-placements.ts) provide browser
   geography. Placements explicitly do not establish server eligibility.
-- [Backend world view persistence](../frontend/src/backend-world.ts) saves map,
-  position and trail preferences locally. The existing
+- The older assessed-world coordinator and its local view persistence were
+  removed. The retained
   [exploration trail](../frontend/src/exploration-quest.ts) combines local acceptance/
   return state with server activity completion; it is not this new mission runtime.
 
