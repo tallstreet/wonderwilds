@@ -146,6 +146,7 @@ jobs:
           node frontend/src/learning/activity.browser.mjs
           node frontend/src/mission-learning/activity.browser.mjs
           node qa/e2e/activity-review.mjs
+          node qa/e2e/campaign-portrait.mjs
           node frontend/src/mission-learning/questions.browser.mjs
       - name: Check default authored world with real API and disposable PostgreSQL
         if: matrix.suite == 'browser'
