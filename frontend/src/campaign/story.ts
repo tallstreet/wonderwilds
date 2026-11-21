@@ -1,28 +1,22 @@
 /** Story presentation follows confirmed campaign state; it never grants progress. */
 const challenges: Record<
   string,
-  { title: string; goal: string; progress: string; outcome: string }
+  { title: string; goal: string; progress: string; outcome?: string }
 > = {
   practice_pip_board: {
     title: 'Find the cart’s trail with Pip',
     progress: 'Trail revealed',
     goal: 'Practise Pip’s revealing light on the chalk marks. We will need a sharp eye to follow the brass cart.',
-    outcome:
-      'You and Pip can spot a hidden trail. Pack with Hazel, then investigate the real marks at the bridge. Trying the other friends is optional.',
   },
   practice_tansy_board: {
     title: 'Make room for a seedling',
     progress: 'Seedling supported',
     goal: 'Help Tansy weave the loose stems around a practice hoop without crowding the shoot. Growing things will need our help along the trail.',
-    outcome:
-      'The little shoot has room to grow. Pack with Hazel, then follow the cart’s trail. Trying the other friends is optional.',
   },
   practice_nib_board: {
     title: 'Steady Nib’s wobbly stool',
     progress: 'Stool steadied',
     goal: 'Help Nib place a practice brace. We will need a steady crossing before we can follow the cart.',
-    outcome:
-      'The stool is steady. Pack with Hazel, then put your teamwork to use at the broken bridge. Trying the other friends is optional.',
   },
   trial_bridge: {
     title: 'Help the last traveller cross',
@@ -102,7 +96,31 @@ const challenges: Record<
       'Both friends helped finish the relay. Rowan’s new plan gives everyone a part to play.',
   },
 };
-export function challengeStory(id: string) {
+/** Welcome practices can be tried before or after packing, and again after leaving the bank. */
+const welcomePractice: Record<string, { lead: string; next: string }> = {
+  practice_pip_board: {
+    lead: 'You and Pip can spot a hidden trail.',
+    next: 'investigate the real marks at the bridge',
+  },
+  practice_tansy_board: {
+    lead: 'The little shoot has room to grow.',
+    next: 'follow the cart’s trail',
+  },
+  practice_nib_board: {
+    lead: 'The stool is steady.',
+    next: 'put your teamwork to use at the broken bridge',
+  },
+};
+function practiceOutcome(id: string, flags: string[]) {
+  const practice = welcomePractice[id];
+  if (!practice) return undefined;
+  if (flags.includes('welcome_complete'))
+    return `${practice.lead} Extra practice complete. Your adventure continues where you left it.`;
+  if (flags.includes('welcome_supplies_ready'))
+    return `${practice.lead} Your bag is already packed with Hazel, so ${practice.next}. Trying the other friends is optional.`;
+  return `${practice.lead} Pack with Hazel, then ${practice.next}. Trying the other friends is optional.`;
+}
+export function challengeStory(id: string, flags: string[] = []) {
   const base = challenges[id.replace(/^postgame_/, 'trial_')];
   if (base && id.startsWith('postgame_'))
     return {
@@ -111,14 +129,14 @@ export function challengeStory(id: string) {
       goal: 'An optional return challenge. Try a different team or plan. ' + base.goal,
       outcome: 'Return challenge complete. Your original story discoveries remain saved.',
     };
-  return (
-    base ?? {
-      title: 'A challenge together',
-      goal: 'Choose a friend and work together to finish this challenge.',
-      progress: 'Progress',
-      outcome: 'Challenge complete. Check your mission for the next step.',
-    }
-  );
+  const fallback = 'Challenge complete. Check your mission for the next step.';
+  if (base) return { ...base, outcome: practiceOutcome(id, flags) ?? base.outcome ?? fallback };
+  return {
+    title: 'A challenge together',
+    goal: 'Choose a friend and work together to finish this challenge.',
+    progress: 'Progress',
+    outcome: fallback,
+  };
 }
 const discoveries = [
   [

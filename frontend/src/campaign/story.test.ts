@@ -40,3 +40,17 @@ test('only one tutorial is promoted; remaining introductions are optional', () =
     'welcome_depart',
   );
 });
+test('welcome practice aftermath only asks to pack with Hazel before packing', () => {
+  for (const id of ['practice_pip_board', 'practice_tansy_board', 'practice_nib_board']) {
+    assert.match(challengeStory(id, ['met_starters']).outcome, /Pack with Hazel/, id);
+    const packed = challengeStory(id, ['met_starters', 'welcome_supplies_ready']).outcome;
+    assert.doesNotMatch(packed, /Pack with Hazel/, id);
+    assert.match(packed, /already packed/, id);
+    const departed = challengeStory(id, [
+      'welcome_supplies_ready',
+      'welcome_complete',
+      'moonlight_missing',
+    ]).outcome;
+    assert.doesNotMatch(departed, /Pack with Hazel|already packed|Trying the other friends/, id);
+  }
+});
