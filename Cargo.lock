@@ -2081,7 +2081,6 @@ name = "wonderwilds-content"
 version = "0.1.0"
 dependencies = [
  "serde_json",
- "wonderwilds-contracts",
  "wonderwilds-domain",
 ]
 
@@ -2100,7 +2099,6 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
- "wonderwilds-content",
  "wonderwilds-contracts",
  "wonderwilds-domain",
  "wonderwilds-learning",
