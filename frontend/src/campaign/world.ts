@@ -1147,7 +1147,7 @@ export class CampaignWorld {
       )
         this.confirmedEffect = {
           id: 'effect-celebration',
-          text: challengeStory(before.encounter.id).outcome,
+          text: challengeStory(before.encounter.id, after.flags).outcome,
         };
       if (payload.type === 'encounter_turn' && payload.movement === 'signature')
         this.game?.events.emit('campaign-pose', payload.companion_id, 'signature');
@@ -1169,7 +1169,7 @@ export class CampaignWorld {
         before.encounter && !after.encounter
           ? after.grants.includes(`win:${before.encounter.id}`) &&
             !before.grants.includes(`win:${before.encounter.id}`)
-            ? challengeStory(before.encounter.id).outcome
+            ? challengeStory(before.encounter.id, after.flags).outcome
             : !after.grants.includes(`win:${before.encounter.id}`) ||
                 after.location !== before.location ||
                 (payload.type === 'encounter_turn' && payload.movement === 'retreat')
