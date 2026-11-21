@@ -91,19 +91,6 @@ export function preloadFacing(scene: Phaser.Scene) {
   scene.load.image('hero-back-atlas', BACK_ATLAS);
 }
 
-/** Regular-grid utility retained for tools; rendered frames use inspected rects. */
-export function directionalFrameRect(index: number, width: number, height: number): Rect {
-  const col = index % 4,
-    row = Math.floor(index / 4);
-  const left = Math.round((col * width) / 4),
-    top = Math.round((row * height) / 2);
-  return [
-    left,
-    top,
-    Math.round(((col + 1) * width) / 4) - left,
-    Math.round(((row + 1) * height) / 2) - top,
-  ];
-}
 export function registerFacing(scene: Phaser.Scene) {
   for (const key of ['hero-side-atlas', 'hero-back-atlas']) {
     if (!scene.textures.exists(key)) continue;

@@ -232,16 +232,6 @@ itinerary.forEach((id, i) => {
   maps[id].west = itinerary[(i + itinerary.length - 1) % itinerary.length];
   maps[id].east = itinerary[(i + 1) % itinerary.length];
 });
-export function mapObstacles(region: string) {
-  const map = maps[region];
-  if (map?.biome === undefined) return [];
-  const v = map.variant ?? 0;
-  return [
-    { x: 370 + v * 48, y: 245, radius: 30 },
-    { x: 740 - v * 38, y: 535, radius: 34 },
-    { x: 890 - v * 65, y: 170, radius: 28 },
-  ];
-}
 export type MapSide = 'west' | 'east';
 export function isMapId(value: unknown): value is MapId {
   return typeof value === 'string' && Object.hasOwn(maps, value);
