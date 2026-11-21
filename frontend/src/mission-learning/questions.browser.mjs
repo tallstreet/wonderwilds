@@ -330,6 +330,7 @@ try {
     await page.waitForFunction(() => !document.querySelector('.ww-picture-reveal').disabled);
     await page.getByRole('button', { name: 'I’m ready', exact: true }).click();
     await mountStimulus(untimed);
+    await page.locator('main img').waitFor({ state: 'visible' });
     await page.clock.fastForward(10000);
     assert.equal(await page.locator('main img').isVisible(), true);
     assert.deepEqual(errors, []);
