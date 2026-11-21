@@ -463,6 +463,55 @@ test('walking exits require a legal edge route and all new neighbourhood markers
   }
 });
 
+test('authored neighbour tasks render reachable legal markers without generated content', () => {
+  const places = ['cove', 'fern_hollow', 'mossy_clearing', 'owl_grove', 'acorn_trail'] as const;
+  const friends = ['marina', 'fern', 'moss', 'orla', 'hazel'] as const;
+  for (const [index, place] of places.entries()) {
+    const value = snapshot(place);
+    value.sceneInput!.here.characters = [];
+    const quest: NonNullable<StorySceneInput['neighbourMissions']>[number] = {
+      characterId: friends[index],
+      locationId: place,
+      title: 'A neighbour’s discovery',
+      task: 'Explore the hollow',
+      payoff: 'A shared discovery',
+      status: 'open',
+      inspected: false,
+    };
+    value.sceneInput!.neighbourMissions = [quest];
+    value.sceneInput!.availableActions = [
+      {
+        id: 'inspect',
+        description: quest.task,
+        action: { type: 'inspect', objectId: `neighbour_${friends[index]}` },
+      },
+    ];
+    const [marker] = storyMarkers(value);
+    assert.equal(marker.id, `object:neighbour_${friends[index]}`);
+    assert.equal(marker.short, quest.task);
+    assert.equal(marker.shape, 'hollow');
+    const route = findRoute(
+      storyPlaces[place].spawn,
+      marker,
+      true,
+      storyPlaces[place].region,
+      storyBounds(place),
+    );
+    assert.ok(route.length);
+    assert.ok(Math.hypot(route.at(-1)!.x - marker.x, route.at(-1)!.y - marker.y) < 100);
+    quest.status = 'archived';
+    assert.deepEqual(storyMarkers(value), []);
+    quest.status = 'open';
+    quest.inspected = true;
+    assert.deepEqual(storyMarkers(value), []);
+    quest.inspected = false;
+    value.sceneInput!.availableActions = [];
+    assert.deepEqual(storyMarkers(value), []);
+    value.sceneInput!.neighbourMissions = [];
+    assert.deepEqual(storyMarkers(value), []);
+  }
+});
+
 test('generated people and sequential tasks use saved names, art and distinct reachable positions', () => {
   const value = snapshot('cove');
   value.sceneInput!.here.characters = [

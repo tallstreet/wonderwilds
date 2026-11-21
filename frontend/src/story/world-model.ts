@@ -198,10 +198,14 @@ export function storyMarkers(snapshot: StorySnapshot): WorldEncounter[] {
       );
   }
   const actions = snapshot.sceneInput?.availableActions ?? [];
-  for (const { action } of actions) {
+  for (const { action, description } of actions) {
     const id = actionTarget(action);
     if (markers.some((marker) => marker.id === id)) continue;
     const neighbour = neighbourForAction(snapshot, action);
+    if (neighbour && !neighbour.generatedStory) {
+      add(id, description, { x: 780, y: 460 }, { shape: 'hollow' });
+      continue;
+    }
     if (neighbour?.generatedStory) {
       const index = neighbour.stepIndex ?? 0;
       const step = neighbour.generatedStory.steps[index];
