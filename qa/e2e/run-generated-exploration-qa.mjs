@@ -16,13 +16,22 @@ const server = createServer(async (req, res) => {
   assert.equal(Object.hasOwn(input, 'profileId'), false);
   assert.equal(Object.hasOwn(input, 'sessionId'), false);
   requests++;
-  const locationId = input.allowedLocations.find(place => place.name === input.area).id;
+  const brief = input.storyBrief;
+  assert.equal(brief.route.length, brief.stepCount);
+  assert.equal(brief.mechanics.length, brief.stepCount);
   const content = requests === 5 ? { invalid: true } : {
     name: `Visitor ${requests}`, personality: 'A curious neighbour who enjoys quiet discoveries.',
     sprite: 'glimmer', greeting: `Hello! Let us listen for little sounds in ${input.area}.`,
-    title: `The little sounds of ${input.area}`, premise: 'Investigate two places and return to share your discoveries.',
-    steps: [{ label: 'Listen beside the hollow branch.', shape: 'hollow', locationId, discovery: 'A soft breeze whistles through the branch.', learningBridge: 'Help organise our discovery markers so we can keep track of the sounds.' }, { label: 'Look closely at the rustling leaves.', shape: 'leaf', locationId, discovery: 'The leaves rustle in answer to the breeze.', learningBridge: 'Organise our discovery markers to compare these sounds.' }],
-    payoff: 'You shared the sounds of the woodland with your new friend.'
+    title: `Visitor ${requests}: ${brief.kind}`, premise: `Visitor ${requests} needs help: ${brief.characterWish}.`,
+    steps: brief.route.map((locationId, index) => ({
+      label: `Help Visitor ${requests}: ${brief.mechanics[index].replaceAll('_', ' ')} (${index + 1}).`,
+      shape: index === 0 ? brief.openingShape : 'leaf',
+      locationId, mechanic: brief.mechanics[index],
+      discovery: `Visitor ${requests} and you finished step ${index + 1} together.`,
+      learningBridge: 'Let’s prepare to keep track of our next step.'
+    })),
+    completeOnLastStep: brief.completeOnLastStep,
+    payoff: `You helped Visitor ${requests} with their woodland plan.`
   };
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }));
