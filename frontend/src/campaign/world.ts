@@ -12,7 +12,7 @@ import type {
 import { PairedClient } from '../paired/client.ts';
 import { PairedPanel, profileLabel } from '../paired/panel.ts';
 import fieldGuide from '../../../content/campaign/field-guide.v1.json';
-import { characterSprite, campaignCharacterArt } from '../character-sprites.ts';
+import { characterSprite, campaignCharacterArt, characterFrame } from '../character-sprites.ts';
 import './campaign.css';
 import { projectBoard } from './projects.ts';
 import { challengeStory, storySoFar } from './story.ts';
@@ -741,6 +741,9 @@ export class CampaignWorld {
     const index = Math.max(0, Math.min(page, lines.length - 1));
     const line = lines[index]!;
     const speakerId = line.speaker.toLowerCase().split(' ')[0]!;
+    const art = campaignCharacterArt(speakerId);
+    const sprite = characterSprite(speakerId);
+    const hasPortrait = Boolean(art || sprite);
     const final = index === lines.length - 1;
     const brief = missionBrief(this.campaign.state.flags, action.mission);
     const readAloud =
@@ -748,9 +751,37 @@ export class CampaignWorld {
         ? `<button id="campaign-read" class="campaign-speaker" aria-label="Read this aloud" title="Read this aloud" data-campaign-read="${escape(line.text)}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></svg></button>`
         : '';
     this.hooks.open(
-      `<section class="campaign-panel"><span class="campaign-eyebrow">${escape(name(action.mission || 'Moonlight trail'))}</span><h2 id="dialog-title" tabindex="-1">${escape(action.label)}</h2><p class="campaign-purpose"><strong>Our goal:</strong> ${escape(brief.goal)}</p><div class="campaign-dialogue">${portrait(speakerId)}<strong>${escape(line.speaker)}</strong><div class="campaign-dialogue-text"><p>${escape(line.text)}</p>${readAloud}</div></div><p class="campaign-note">${index + 1} of ${lines.length}</p>${readAloud ? '' : '<p class="campaign-note">Read aloud is unavailable in this browser. All dialogue is shown as text.</p>'}<p id="campaign-read-status" role="status"></p><div class="campaign-actions">${index > 0 ? `<button class="campaign-secondary" data-campaign-page="${escape(JSON.stringify([id, index - 1]))}">Previous</button>` : ''}${!final ? `<button class="campaign-primary" data-campaign-page="${escape(JSON.stringify([id, index + 1]))}">Next</button>` : this.button(action.learning ? 'Practise together' : action.encounter ? 'Let’s begin' : action.label, { type: 'action', action_id: id }, false, true)}${final && action.recruit ? this.button('Maybe another time', { type: 'action', action_id: `decline:${action.id}` }) : ''}<button class="campaign-secondary" data-campaign-tab="missions">Back to adventure</button></div></section>`,
+      `<section class="campaign-panel"><span class="campaign-eyebrow">${escape(name(action.mission || 'Moonlight trail'))}</span><h2 id="dialog-title" tabindex="-1">${escape(action.label)}</h2><p class="campaign-purpose"><strong>Our goal:</strong> ${escape(brief.goal)}</p><div class="campaign-dialogue"><div id="campaign-dialogue-portrait">${hasPortrait ? `<p role="status">Loading ${escape(line.speaker)}’s portrait…</p>` : ''}</div><strong>${escape(line.speaker)}</strong><div class="campaign-dialogue-text"><p>${escape(line.text)}</p>${readAloud}</div></div><p class="campaign-note">${index + 1} of ${lines.length}</p>${readAloud ? '' : '<p class="campaign-note">Read aloud is unavailable in this browser. All dialogue is shown as text.</p>'}<p id="campaign-read-status" role="status"></p><div class="campaign-actions">${index > 0 ? `<button class="campaign-secondary" data-campaign-page="${escape(JSON.stringify([id, index - 1]))}">Previous</button>` : ''}${!final ? `<button class="campaign-primary" data-campaign-page="${escape(JSON.stringify([id, index + 1]))}">Next</button>` : this.button(action.learning ? 'Practise together' : action.encounter ? 'Let’s begin' : action.label, { type: 'action', action_id: id }, false, true)}${final && action.recruit ? this.button('Maybe another time', { type: 'action', action_id: `decline:${action.id}` }) : ''}<button class="campaign-secondary" data-campaign-tab="missions">Back to adventure</button></div></section>`,
     );
     document.querySelector<HTMLElement>('#dialog-title')?.focus();
+    const slot = document.querySelector<HTMLElement>('#campaign-dialogue-portrait');
+    if (!hasPortrait || !slot) return;
+    const image = new Image();
+    image.src = art?.url ?? `/assets/characters/${sprite!.texture.replace('friends-', '')}.png`;
+    void image.decode().then(
+      () => {
+        const [x, y, width, height] =
+          art?.frame ??
+          characterFrame(
+            sprite!.index,
+            image.naturalWidth,
+            image.naturalHeight,
+            sprite!.texture.replace('friends-', ''),
+          );
+        const frame = document.createElement('div');
+        frame.className = 'campaign-portrait';
+        frame.setAttribute('role', 'img');
+        frame.setAttribute('aria-label', name(speakerId));
+        frame.style.cssText = 'position:relative;overflow:hidden';
+        image.alt = '';
+        image.style.cssText = `position:absolute;max-width:none;max-height:none;width:${(image.naturalWidth / width) * 100}%;height:${(image.naturalHeight / height) * 100}%;left:${(-x / width) * 100}%;top:${(-y / height) * 100}%`;
+        frame.append(image);
+        slot.replaceChildren(frame);
+      },
+      () => {
+        slot.textContent = `${line.speaker}’s portrait is unavailable.`;
+      },
+    );
   }
 
   private confirmFormPresentation() {
