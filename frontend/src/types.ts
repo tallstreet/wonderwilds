@@ -77,17 +77,6 @@ export interface Attempt {
   hints: number;
   assisted: boolean;
 }
-interface ActivityBase extends Attempt {
-  finished: boolean;
-  feedback: string;
-  hintText: string;
-}
-export type Activity = ActivityBase &
-  (
-    | { kind: 'share'; encounter: Extract<Encounter, { type: 'share' }>; value: number[] }
-    | { kind: 'missing'; encounter: Extract<Encounter, { type: 'missing' }>; value: number }
-    | { kind: 'pattern'; encounter: Extract<Encounter, { type: 'pattern' }>; value: number }
-  );
 export type Actor = Phaser.GameObjects.Container & {
   art: Phaser.GameObjects.Image;
   shadow: Phaser.GameObjects.Ellipse;
