@@ -1033,14 +1033,6 @@ pub fn record(
     Ok(())
 }
 
-pub fn mark_introduced(state: &mut MissionState, skill_id: &str) -> Result<(), MissionError> {
-    if state.policy_version != POLICY_VERSION || !supported_skill(skill_id) {
-        return Err(MissionError::UnsupportedSkill);
-    }
-    state.introduced_skills.insert(skill_id.to_owned());
-    Ok(())
-}
-
 /// Replay the immutable API evidence journal into the bounded policy checkpoint.
 /// This verifies server sequence, event uniqueness, first-check flags and support monotonicity.
 pub fn replay(history: &[MissionObservation]) -> Result<MissionState, MissionError> {
