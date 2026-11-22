@@ -1,5 +1,5 @@
 import type { GameSnapshot } from '../../contracts/generated/contracts.ts';
-import type { Progress, WorldEncounter } from './types.ts';
+import type { Progress } from './types.ts';
 import { maps } from './maps.ts';
 import { heroes, heroPortrait } from './art.ts';
 import { companionDetails } from './companions.ts';
@@ -55,100 +55,4 @@ export function journalView(snapshot: GameSnapshot, state: Pick<Progress, 'hero'
     .join(
       '',
     )}</div>${snapshot.explorerProgression ? `<p class="explorer-level">Explorer level ${snapshot.explorerProgression.level} · ${snapshot.explorerProgression.xp} adventure XP</p>` : ''}<h3>Your Meadow friends</h3><p>Team: ${snapshot.selectedCompanions?.length ?? 0} / ${snapshot.teamCapacity ?? 1} companions. Let a friend rest to make room.</p><p><a href="/characters.html">Meet all twelve Wonderwilds friends</a></p><div class="journal-entries">${cards}</div><h3>Collected treasures</h3><p>${snapshot.inventory.map((i) => `${escape(i.itemId)} × ${i.quantity}`).join(' · ') || 'Help your neighbours to collect rewards.'}</p><p class="tiny-note">Your companion, character progress and shared memories are saved on the server.</p>`;
-}
-
-export function bindTrainingActions(host: HTMLElement, start: (id: string) => void) {
-  host.querySelectorAll<HTMLButtonElement>('[data-server-training]').forEach((button) => {
-    button.onclick = () => start(button.dataset.serverTraining!);
-  });
-}
-export function bindMissionsActions(
-  host: HTMLElement,
-  actions: {
-    training(): void;
-    resume(): void;
-    refresh(): void;
-    visit(quest: WorldEncounter): void;
-  },
-) {
-  host.querySelector('#server-training-clearing')?.addEventListener('click', actions.training);
-  host.querySelector('#server-resume')?.addEventListener('click', actions.resume);
-  host.querySelector('#server-refresh')?.addEventListener('click', actions.refresh);
-  host.querySelectorAll<HTMLButtonElement>('[data-server-visit]').forEach((button) => {
-    button.onclick = () => {
-      const quest = worldQuests.find((q) => q.id === button.dataset.serverVisit);
-      if (quest) actions.visit(quest);
-    };
-  });
-}
-type FriendshipCommand = Extract<
-  import('../../contracts/generated/contracts.ts').CommandPayload,
-  { type: 'help_friend' | 'transform_companion' }
->;
-export function bindJournalActions(
-  host: HTMLElement,
-  actions: {
-    companion(id: string): void;
-    friendship(payload: FriendshipCommand, source: HTMLButtonElement): void;
-  },
-) {
-  host.querySelectorAll<HTMLButtonElement>('[data-server-companion]').forEach((button) => {
-    button.onclick = () => actions.companion(button.dataset.serverCompanion!);
-  });
-  host.querySelectorAll<HTMLButtonElement>('[data-server-help-friend]').forEach((button) => {
-    button.onclick = () =>
-      actions.friendship(
-        {
-          type: 'help_friend',
-          creatureId: button.dataset.serverHelpFriend!,
-          completedQuestId: button.dataset.completedQuest!,
-        },
-        button,
-      );
-  });
-  host.querySelectorAll<HTMLButtonElement>('[data-server-transform]').forEach((button) => {
-    button.onclick = () =>
-      actions.friendship(
-        {
-          type: 'transform_companion',
-          creatureId: button.dataset.serverTransform!,
-          enabled: button.dataset.transformEnabled === 'true',
-        },
-        button,
-      );
-  });
-}
-export function captureJournalFocus(host: HTMLElement, source: HTMLButtonElement) {
-  return {
-    expanded: new Set(
-      Array.from(host.querySelectorAll<HTMLDetailsElement>('.companion-details[open]')).map(
-        (details) => details.dataset.companionId,
-      ),
-    ),
-    creatureId: source.closest<HTMLElement>('[data-companion-id]')?.dataset.companionId,
-    transform: source.dataset.serverTransform,
-    helping: source.dataset.serverHelpFriend,
-    quest: source.dataset.completedQuest,
-  };
-}
-export function restoreJournalFocus(
-  host: HTMLElement,
-  focus: ReturnType<typeof captureJournalFocus>,
-) {
-  let fallback: HTMLElement | null = null;
-  host.querySelectorAll<HTMLDetailsElement>('.companion-details').forEach((details) => {
-    details.open = focus.expanded.has(details.dataset.companionId);
-    if (details.dataset.companionId === focus.creatureId)
-      fallback = details.querySelector('summary');
-  });
-  const action = Array.from(
-    host.querySelectorAll<HTMLButtonElement>('[data-server-help-friend], [data-server-transform]'),
-  ).find((button) =>
-    focus.transform
-      ? button.dataset.serverTransform === focus.transform
-      : button.dataset.serverHelpFriend === focus.helping &&
-        button.dataset.completedQuest === focus.quest,
-  );
-  // A remembered action disappears after acknowledgement; its creature's summary persists.
-  (action ?? fallback)?.focus();
 }

@@ -686,8 +686,10 @@ sections below describe their original delivery scope.
 The app now always opens the Phaser story world at `/`. Guest and older
 assessed-adventure boot paths and mode-switch links have been removed from the
 entry point. Legacy `?guest=1` / `?story=1` parameters have no effect; the old demo
-and inspector HTML pages redirect to `/`. Supporting API/domain modules remain
-for assessment and internal regression coverage, not separate playable modes.
+and inspector HTML pages redirect to `/`. The older assessed-world coordinator
+and its exclusive event/focus bindings and stylesheets have since been removed.
+Supporting API/domain modules and tested view/model helpers remain for assessment
+and internal regression coverage, not separate playable modes.
 
 No Modal credentials selects authored scenes and missions. Both proxy credentials
 select generated scenes, mission planning and repeatable neighbourhood stories

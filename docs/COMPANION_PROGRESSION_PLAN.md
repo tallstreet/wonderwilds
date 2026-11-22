@@ -49,7 +49,7 @@ is an accessible world entry point, not a claim of server-verified coordinates.
 The second team slot keeps its existing Orchard story prerequisite; its API and
 rendering support do not unlock Orchard travel or grant the slot early.
 
-Primary integration files: `backend/crates/domain/src/engine.rs`, `backend/crates/api/src/game/mod.rs`, `backend/crates/api/src/game/repository.rs`, `contracts/schemas/v1.json`, `content/creatures/friends.v1.json`, `content/story/progression.v1.json`, `frontend/src/backend-world.ts`, `frontend/src/backend-world-model.ts` and `frontend/src/world.ts`.
+Primary integration files: `backend/crates/domain/src/engine.rs`, `backend/crates/api/src/game/mod.rs`, `backend/crates/api/src/game/repository.rs`, `contracts/schemas/v1.json`, `content/creatures/friends.v1.json`, `content/story/progression.v1.json`, `frontend/src/backend-world-model.ts` and `frontend/src/world.ts`. The older assessed-world coordinator was removed; its tested model/view helpers remain.
 
 ## Progression design
 
@@ -91,7 +91,7 @@ Acceptance: old saves load, new saves reload, duplicate and concurrent requests 
 
 ## Phase 3 Collection and character presentation
 
-Expand the journal in `frontend/src/backend-world.ts`; extract collection/detail modules as needed instead of growing one controller indefinitely. Show owned characters, undiscovered silhouettes, habitat clues, personality, level, XP, friendship and the next unlock. Provide training, team and appearance controls with keyboard/touch access and clear focus restoration.
+The older assessed-world journal coordinator was removed; this phase records its original design. Show owned characters, undiscovered silhouettes, habitat clues, personality, level, XP, friendship and the next unlock. Provide training, team and appearance controls with keyboard/touch access and clear focus restoration.
 
 Add a compact explorer-level display and short recruitment/level-up celebrations with reduced-motion alternatives. Replace provisional hero substitutions in `frontend/src/backend-world-model.ts` with distinct friend portraits and sprites, using the existing asset manifest and tests. Do not expose developer revision or schema details as game rewards.
 

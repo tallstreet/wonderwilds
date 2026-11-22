@@ -23,7 +23,7 @@ The current repository is `/Users/gary/Documents/Development/wonderwilds`, under
 | Existing material | Current baseline | Next work |
 | --- | --- | --- |
 | `frontend/src/world.ts` and movement modules | Playable Meadow, server-driven world changes, one follower | Team followers and regional integration |
-| `frontend/src/backend-world.ts` and `backend-world-model.ts` | Server activities, journal, companion selection and summaries | Character progression, training and collection UI |
+| `frontend/src/backend-world-model.ts` | Retained assessment regression helpers; the older coordinator was removed | Character progression, training and collection UI |
 | `backend/crates/domain/src/engine.rs` | Explorer XP, friendship, teams, discovery and cosmetic transformations | Individual XP, training grants and integration |
 | `backend/crates/api/src/game/` | Authenticated transactions, retries, encounter support and abandonment | Expanded commands/snapshots, training and regional eligibility |
 | `contracts/` | Schemas, generated Rust/TS and shared fixtures | Compatible extensions and migration fixtures |

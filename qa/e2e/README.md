@@ -336,9 +336,9 @@ include the active NSW question bank, and it distinguishes task completion from
 ten-item skill readiness and an eligible unsuccessful first check from an
 independent correct check. It exposed and verifies the fixed recovery of a
 resolved task after a definitive conflict while whole-skill readiness is false.
-Retained tests for the already-retired inspector/assessed interfaces, such as
-`story-browser.mjs` and `backend-world.mjs`, are historical; the earlier-reader
-entry helper does not revive those interfaces or establish that those scripts pass.
+Browser journeys exclusive to the removed assessed-world coordinator were deleted.
+The retained `story-browser.mjs` inspector test is historical; the earlier-reader
+entry helper does not revive that interface or establish that the script passes.
 
 For technical accessibility checks, run:
 

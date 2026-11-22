@@ -17,7 +17,7 @@
 - `frontend/`: strict TypeScript, Phaser 3, Vite, and accessible HTML activity UI.
   `src/world.ts` renders the world; `src/main.ts` handles guest UI;
   `src/progress.ts` validates guest saves and evidence; `src/navigation.ts` handles
-  pathfinding. `src/backend-world.ts` integrates backend play, `src/api/` owns the
+  pathfinding. The older assessed-world coordinator was removed; `src/api/` owns the
   typed client/import preparation, and `src/learning/` owns activity controls.
 - `contracts/`: versioned JSON Schema and OpenAPI, generated Rust/TypeScript wire
   models, and shared positive/negative fixtures.

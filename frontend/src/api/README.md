@@ -15,10 +15,9 @@ keeps that command available, while a successful explicit refresh adopts the
 server snapshot. It has no DOM or local-storage dependency. Create one session per
 selected profile and discard it with that profile's rendered state.
 
-World journal, missions and training markup and container-scoped event bindings
-live in `backend-world-views.ts`; `BackendWorld` owns the activity lifecycle and
-command effects. Expanded companion details and focus restore by creature ID,
-independently of display wording. `world-placements.ts` checks authored encounter
+The older assessed-world coordinator and its exclusive event/focus bindings were
+removed. Journal, missions and training markup remains in `backend-world-views.ts`
+for regression coverage. `world-placements.ts` checks authored encounter
 coverage, maps and coordinate bounds; route tests cover approachable placements.
 These browser positions do not establish server eligibility.
 
