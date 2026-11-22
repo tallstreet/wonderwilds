@@ -78,9 +78,6 @@ const artwork = new Map<string, string>();
 export function itemTexture(id: string) {
   return `item:${id}`;
 }
-export function itemImage(id: string) {
-  return artwork.get(id);
-}
 export function rememberItemImage(id: string, url: string) {
   if (Object.hasOwn(items, id)) artwork.set(id, url);
 }
